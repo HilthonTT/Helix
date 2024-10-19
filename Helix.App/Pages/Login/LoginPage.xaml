@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:login="clr-namespace:Helix.App.Pages.Login"
+             x:Class="Helix.App.Pages.Login.LoginPage"
+             x:DataType="login:LoginViewModel"
+             Title=""
+             Shell.NavBarIsVisible="False">
+
+    <!-- Left Side for Logo, Title, and Login Form -->
+    <!-- Right Side for Image Illustration -->
+    <Grid ColumnDefinitions="3*, 3*">
+        <StackLayout Grid.Column="0"
+                     Padding="20"
+                     VerticalOptions="Center"
+                     HorizontalOptions="FillAndExpand">
+
+            <Image Source="logo.png" 
+                   WidthRequest="100" 
+                   Aspect="AspectFit" 
+                   HeightRequest="100"
+                   HorizontalOptions="Center" 
+                   Margin="0,0,0,20"/>
+
+            <!-- Title -->
+            <Label Text="Welcome back to Krello!" 
+                   HorizontalOptions="Center" 
+                   Style="{StaticResource LargeTitle}"/>
+
+            <!-- Username Entry -->
+            <Border HeightRequest="48"
+                    HorizontalOptions="FillAndExpand"
+                    Background="{StaticResource DarkBg1Brush}"
+                    Stroke="{StaticResource SecondaryBrush}"
+                    StrokeThickness="1">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8"/>
+                </Border.StrokeShape>
+
+                <Entry Background="Transparent"
+                       Placeholder="Username"
+                       Text="{Binding Username}"
+                       PlaceholderColor="{StaticResource TextSecondary}"
+                       TextColor="White"
+                       HorizontalOptions="StartAndExpand"
+                       MinimumWidthRequest="900"
+                       Margin="8,0"
+                       FontSize="14"
+                       IsEnabled="{Binding IsNotBusy}" />
+            </Border>
+
+            <!-- Password Entry -->
+            <Border HeightRequest="48"
+                    HorizontalOptions="FillAndExpand"
+                    Background="{StaticResource DarkBg1Brush}"
+                    Stroke="{StaticResource SecondaryBrush}"
+                    StrokeThickness="1">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8"/>
+                </Border.StrokeShape>
+
+                <Grid>
+                    <Entry Background="Transparent"
+                           Placeholder="Password"
+                           IsPassword="{Binding HidePassword}"
+                           Text="{Binding Password}"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="StartAndExpand"
+                           MinimumWidthRequest="900"
+                           Margin="0,0,50,0"
+                           FontSize="14"
+                           IsEnabled="{Binding IsNotBusy}" />
+
+                    <ImageButton Source="eye.png"
+                                 HorizontalOptions="End" 
+                                 VerticalOptions="Center"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="24"
+                                 WidthRequest="24"
+                                 Margin="0,0,10,0" 
+                                 Command="{Binding ToggleHidePasswordCommand}"
+                                 Opacity="{Binding HidePassword, Converter={StaticResource BoolToOpacityConverter}}"
+                                 BorderColor="Transparent"/>
+                </Grid>
+
+            </Border>
+
+            <!-- Login Button -->
+            <Button Text="Login" 
+                    Margin="0,24,0,24" 
+                    Command="{Binding LoginCommand}"
+                    HorizontalOptions="FillAndExpand"
+                    IsEnabled="{Binding IsNotBusy}"/>
+
+            <!-- "Don't have an account?" Button -->
+            <Button Text="Don't have an account?"
+                    FontSize="14"
+                    BackgroundColor="Transparent"
+                    Margin="12,-20,0,0"
+                    Command="{Binding GoToRegisterCommand}" 
+                    IsEnabled="{Binding IsNotBusy}"/>
+        </StackLayout>
+
+        <!-- Right Side Content (Illustration Image) -->
+        <Image Source="illustration1.png" 
+                Grid.Column="1"
+                Aspect="AspectFill"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"/>
+    </Grid>
+
+</ContentPage>

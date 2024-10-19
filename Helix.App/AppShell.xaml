@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Helix.App.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:register="clr-namespace:Helix.App.Pages.Register"
+    xmlns:login="clr-namespace:Helix.App.Pages.Login"
+    xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
+    xmlns:local="clr-namespace:Helix.App"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.FlyoutWidth="104">
+    
+    <Shell.Resources>
+        <Color x:Key="IconTintColor">White</Color>
+
+        <ControlTemplate x:Key="MenuItemTemplate">
+            <Grid RowDefinitions="Auto">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CheckedStates">
+                            <VisualState x:Name="Checked">
+                                <VisualState.Setters>
+                                    <Setter TargetName="OuterBorder" Property="Background" Value="{StaticResource DarkBg1Brush}" />
+                                    <Setter TargetName="OuterBorder" Property="Border.StrokeThickness" Value="1" />
+                                    <Setter TargetName="InnerBorder" Property="Background" Value="Transparent" />
+                                    <Setter TargetName="InnerBorder" Property="Border.StrokeThickness" Value="1" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Unchecked">
+                                <VisualState.Setters>
+                                    <Setter TargetName="OuterBorder" Property="Background" Value="Transparent" />
+                                    <Setter TargetName="OuterBorder" Property="Border.StrokeThickness" Value="0" />
+                                    <Setter TargetName="InnerBorder" Property="Background" Value="Transparent" />
+                                    <Setter TargetName="InnerBorder" Property="Border.StrokeThickness" Value="0" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+
+                <Border x:Name="OuterBorder" 
+                     Background="Transparent"
+                     Stroke="{StaticResource DarkBg1Brush}" 
+                     StrokeThickness="0"
+                     HorizontalOptions="Fill"
+                     HeightRequest="70"
+                     Margin="15,0,0,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12,0,12,0" />
+                    </Border.StrokeShape>
+                </Border>
+
+                <Border x:Name="InnerBorder" 
+                     Background="Transparent"
+                     Margin="20" 
+                     HorizontalOptions="Center" 
+                     VerticalOptions="Center"
+                     Stroke="{StaticResource PrimaryBrush}" 
+                     StrokeThickness="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8" />
+                    </Border.StrokeShape>
+                </Border>
+
+                <ContentPresenter x:Name="CP"/>
+            </Grid>
+        </ControlTemplate>
+    </Shell.Resources>
+
+    <Shell.FlyoutContentTemplate>
+        <DataTemplate>
+            <Grid Background="{StaticResource DarkBg2Brush}"
+               RowDefinitions="*,*,*,*,*"
+               RadioButtonGroup.GroupName="Menu"
+               RadioButtonGroup.SelectedValue="{Binding SelectedRoute}">
+                <Grid.Resources>
+                    <Style TargetType="RadioButton">
+                        <Setter Property="ControlTemplate" Value="{StaticResource MenuItemTemplate}"/>
+                    </Style>
+                </Grid.Resources>
+
+                <Image Source="logo.png" 
+                    Grid.Row="0" 
+                    Margin="10,15,0,15" 
+                    Aspect="Fill" 
+                    WidthRequest="50"
+                    HeightRequest="50"/>
+
+                <RadioButton Value="dashboard" 
+                          Grid.Row="1"
+                          ToolTipProperties.Text="Dashboard"
+                          behaviors:CursorBehavior.AttachBehavior="True"
+                          CheckedChanged="OnMenuItemChanged"
+                          IsChecked="True">
+                    <RadioButton.Content>
+                        <Image Source="dashboard.png" Aspect="Fill" WidthRequest="40" HeightRequest="40" />
+                    </RadioButton.Content>
+                </RadioButton>
+
+                <RadioButton Value="auditlogs" 
+                          Grid.Row="2"
+                          ToolTipProperties.Text="Auditlogs"
+                          behaviors:CursorBehavior.AttachBehavior="True"
+                          CheckedChanged="OnMenuItemChanged">
+                    <RadioButton.Content>
+                        <Image Source="auditlogs.png" Aspect="Fill" WidthRequest="40" HeightRequest="40" />
+                    </RadioButton.Content>
+                </RadioButton>
+
+                <RadioButton Value="settings" 
+                          Grid.Row="3"
+                          ToolTipProperties.Text="Settings"
+                          behaviors:CursorBehavior.AttachBehavior="True"
+                          CheckedChanged="OnMenuItemChanged">
+                    <RadioButton.Content>
+                        <Image Source="settings.png" Aspect="Fill" WidthRequest="40" HeightRequest="40" />
+                    </RadioButton.Content>
+                </RadioButton>
+
+                <ImageButton
+                    Clicked="OnLogout"
+                    Source="logout.png"
+                    ToolTipProperties.Text="Logout"
+                    Margin="10,15,0,15" 
+                    Grid.Row="4" 
+                    Aspect="Fill" 
+                    WidthRequest="40" 
+                    HeightRequest="40" 
+                    Background="Transparent"
+                    BorderColor="Transparent"/>
+
+            </Grid>
+        </DataTemplate>
+    </Shell.FlyoutContentTemplate>
+
+    <FlyoutItem Title="Login" Route="login">
+        <ShellContent ContentTemplate="{DataTemplate login:LoginPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Register" Route="register">
+        <ShellContent ContentTemplate="{DataTemplate register:RegisterPage}"/>
+    </FlyoutItem>
+
+</Shell>
