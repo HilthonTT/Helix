@@ -1,10 +1,12 @@
 ﻿using CommunityToolkit.Maui;
 using Helix.Application;
 using Helix.Infrastructure;
+using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using Windows.Graphics;
 
 namespace Helix.App;
@@ -18,6 +20,8 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
+            .UseSkiaSharp()
+            .UseMicrocharts()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
