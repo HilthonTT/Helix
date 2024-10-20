@@ -5,6 +5,7 @@
              xmlns:views="clr-namespace:Helix.App.Views"
              xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:createDrive="clr-namespace:Helix.App.Modals.Drives.Create"
              x:Class="Helix.App.Pages.Home.HomePage"
              x:DataType="home:HomeViewModel"
              Title="">
@@ -15,7 +16,7 @@
         </MenuBarItem>
 
         <MenuBarItem Text="Drives">
-            <MenuFlyoutItem Text="Add Drive">
+            <MenuFlyoutItem Text="Add Drive" Command="{Binding OpenCreateDriveModalCommand}">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="A" Modifiers="Cmd,Shift" />
                     <KeyboardAccelerator Key="A" Modifiers="Ctrl" />
@@ -219,10 +220,7 @@
             </Grid>
         </ScrollView>
 
-        <Grid Grid.Column="1"
-      Grid.RowSpan="2"
-      Margin="24">
-
+        <Grid Grid.Column="1" Grid.RowSpan="2" Margin="24">
             <Border Grid.Row="1"  Style="{StaticResource DarkBorderView}">
                 <Grid Margin="24" RowDefinitions="50,1,*" RowSpacing="20">
                     <Label Grid.Row="0" 
@@ -292,6 +290,30 @@
             </Border>
 
         </Grid>
+
+        <BoxView Color="Black"
+                 Opacity="0"
+                 Grid.RowSpan="3"
+                 Grid.ColumnSpan="2"
+                 HorizontalOptions="Fill"
+                 VerticalOptions="Fill"
+                 Margin="-24"
+                 InputTransparent="True"
+                 x:Name="BlockScreen" />
+
+        <AbsoluteLayout x:Name="CreateDriveLayout"
+                        Grid.RowSpan="3" 
+                        Grid.ColumnSpan="2"
+                        IsVisible="False"
+                        HorizontalOptions="FillAndExpand"
+                        VerticalOptions="FillAndExpand">
+            
+            <createDrive:CreateDriveModal x:Name="CreateDriveView" 
+                                          BackgroundColor="White"
+                                          MaximumHeightRequest="400"
+                                          AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
+                                          AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
 
     </Grid>
     

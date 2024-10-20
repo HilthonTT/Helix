@@ -15,4 +15,8 @@ public static class AuthenticationErrors
     public static readonly Error UsernameNotUnique = Error.Problem(
         "Authentication.UsernameNotUnique",
         "The specified username is not unique.");
+
+    public static readonly Error InvalidPermissions = Error.Problem(
+        "Authentication.InvalidPermissions",
+        "You lack the permission to create a drive.");
 }

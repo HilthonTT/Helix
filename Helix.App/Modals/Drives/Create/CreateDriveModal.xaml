@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:modals="clr-namespace:Helix.App.Modals.Drives.Create"
+             x:DataType="modals:CreateDriveViewModel"
+             x:Class="Helix.App.Modals.Drives.Create.CreateDriveModal"
+             Background="{StaticResource DarkBg2Brush}">
+    
+    <ContentView.Resources>
+        <Style TargetType="RadioButton">
+            <Setter Property="ControlTemplate" Value="{StaticResource ButtonRadioTemplate}" />
+        </Style>
+    </ContentView.Resources>
+
+    <Grid RowDefinitions="*, 108"
+         ColumnDefinitions="*,*"
+         ColumnSpacing="0">
+        <ScrollView Grid.ColumnSpan="2">
+            <VerticalStackLayout Spacing="20" Margin="24">
+                <Label Text="Add a Drive" Style="{StaticResource Title1}" />
+                <BoxView Style="{StaticResource HRule}"/>
+
+
+                <Label Text="Letter" />
+                <Border HeightRequest="48"
+                        HorizontalOptions="Fill"
+                        Background="{StaticResource DarkBg1Brush}"
+                        Stroke="{StaticResource SecondaryBrush}"
+                        StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+
+                    <Entry Background="Transparent"
+                           Placeholder="Add network's drive letter"
+                           Text="{Binding Form.Letter}"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="Start"
+                           MinimumWidthRequest="800"
+                           Margin="8,0"
+                           FontSize="14" 
+                           IsEnabled="{Binding IsNotBusy}"/>
+                </Border>
+
+                <Label Text="NAS IP Address" />
+                <Border HeightRequest="48"
+                        HorizontalOptions="Fill"
+                        Background="{StaticResource DarkBg1Brush}"
+                        Stroke="{StaticResource SecondaryBrush}"
+                        StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+
+                    <Entry Background="Transparent"
+                           Placeholder="Add your NAS' IP Address"
+                           Text="{Binding Form.IpAddress}"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="Start"
+                           MinimumWidthRequest="800"
+                           IsPassword="True"
+                           Margin="8,0"
+                           FontSize="14" 
+                           IsEnabled="{Binding IsNotBusy}"/>
+                </Border>
+
+                <Label Text="Drive's name" />
+                <Border HeightRequest="48"
+                        HorizontalOptions="Fill"
+                        Background="{StaticResource DarkBg1Brush}"
+                        Stroke="{StaticResource SecondaryBrush}"
+                        StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+
+                    <Entry Background="Transparent"
+                           Placeholder="Add your drive's name"
+                           Text="{Binding Form.Name}"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="Start"
+                           MinimumWidthRequest="800"
+                           Margin="8,0"
+                           FontSize="14"
+                           IsEnabled="{Binding IsNotBusy}"/>
+                </Border>
+
+                <Label Text="NAS Username" />
+                <Border HeightRequest="48"
+                        HorizontalOptions="Fill"
+                        Background="{StaticResource DarkBg1Brush}"
+                        Stroke="{StaticResource SecondaryBrush}"
+                        StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+
+                    <Entry Background="Transparent"
+                           Placeholder="Add your NAS' username"
+                           Text="{Binding Form.Username}"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="Start"
+                           IsPassword="True"
+                           MinimumWidthRequest="800"
+                           Margin="8,0"
+                           FontSize="14" 
+                           IsEnabled="{Binding IsNotBusy}"/>
+                </Border>
+
+                <Label Text="NAS Password" />
+                <Border HeightRequest="48"
+                        HorizontalOptions="Fill"
+                        Background="{StaticResource DarkBg1Brush}"
+                        Stroke="{StaticResource SecondaryBrush}"
+                        StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+
+                    <Entry Background="Transparent"
+                           Placeholder="Add your NAS' password"
+                           Text="{Binding Form.Password}"
+                           IsPassword="True"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="Start"
+                           MinimumWidthRequest="800"
+                           Margin="8,0"
+                           FontSize="14" 
+                           IsEnabled="{Binding IsNotBusy}"/>
+
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Button Grid.Row="1"
+                Grid.Column="0"
+                Margin="24,24,12,24"
+                Style="{StaticResource SecondaryButtonOutline}"
+                HorizontalOptions="Fill"
+                Text="Close"
+                Command="{Binding CloseCommand}" 
+                IsEnabled="{Binding IsNotBusy}"/>
+
+        <Button Grid.Row="1"
+                Grid.Column="1"
+                Margin="12,24,24,24"
+                Command="{Binding SaveCommand}"
+                HorizontalOptions="Fill"
+                Text="Save" 
+                IsEnabled="{Binding IsNotBusy}"/>
+    </Grid>
+
+
+</ContentView>

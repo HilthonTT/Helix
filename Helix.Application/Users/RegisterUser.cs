@@ -51,21 +51,10 @@ public sealed class RegisterUser(IDbContext context, IPasswordHasher passwordHas
 
     private static Result Validate(Request request)
     {
-        if (string.IsNullOrWhiteSpace(request.Username))
-        {
-            return Result.Failure(Error.NullValue);
-        }
+        string[] properties = [request.Username, request.Password, request.ConfirmedPassword];
 
-        if (string.IsNullOrWhiteSpace(request.Password))
-        {
-            return Result.Failure(Error.NullValue);
-        }
-
-        if (string.IsNullOrWhiteSpace(request.ConfirmedPassword))
-        {
-            return Result.Failure(Error.NullValue);
-        }
-
-        return Result.Success();
+        return properties.Any(string.IsNullOrWhiteSpace)
+             ? Result.Failure(Error.NullValue)
+             : Result.Success();
     }
 }

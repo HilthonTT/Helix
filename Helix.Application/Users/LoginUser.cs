@@ -38,16 +38,10 @@ public sealed class LoginUser(IDbContext context, IPasswordHasher passwordHasher
 
     private static Result Validate(Request request)
     {
-        if (string.IsNullOrWhiteSpace(request.Username))
-        {
-            return Result.Failure(Error.NullValue);
-        }
+        string[] properties = [request.Username, request.Password];
 
-        if (string.IsNullOrWhiteSpace(request.Password))
-        {
-            return Result.Failure(Error.NullValue);
-        }
-
-        return Result.Success();
+        return properties.Any(string.IsNullOrWhiteSpace)
+            ? Result.Failure(Error.NullValue)
+            : Result.Success();
     }
 }
