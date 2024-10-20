@@ -3,16 +3,297 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:home="clr-namespace:Helix.App.Pages.Home"
              xmlns:views="clr-namespace:Helix.App.Views"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
              x:Class="Helix.App.Pages.Home.HomePage"
              x:DataType="home:HomeViewModel"
-             Title="HomePage">
-    <VerticalStackLayout>
+             Title="">
 
-        <views:ChartView x:Name="chartView" 
-                         HeightRequest="300"
-                         WidthRequest="300" />
+    <ContentPage.MenuBarItems>
+        <MenuBarItem Text="File">
+            <MenuFlyoutItem Text="Preferences"/>
+        </MenuBarItem>
 
-        <Label Text="Home" />
+        <MenuBarItem Text="Drives">
+            <MenuFlyoutItem Text="Add Drive">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="A" Modifiers="Cmd,Shift" />
+                    <KeyboardAccelerator Key="A" Modifiers="Ctrl" />
+                </MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem.IconImageSource>
+                    <FontImageSource 
+                             Glyph="&#xECDC;"
+                             Size="12" 
+                             Color="Black"
+                             FontFamily="Fabric" />
+                </MenuFlyoutItem.IconImageSource>
+            </MenuFlyoutItem>
 
-    </VerticalStackLayout>
+            <MenuFlyoutItem Text="Export Drives">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="E" Modifiers="Cmd,Shift" />
+                    <KeyboardAccelerator Key="E" Modifiers="Ctrl" />
+                </MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem.IconImageSource>
+                    <FontImageSource 
+                         Glyph="&#xE898;"  
+                         Size="12" 
+                         Color="Black"
+                         FontFamily="Fabric" />
+                </MenuFlyoutItem.IconImageSource>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutItem Text="Import Drives">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="I" Modifiers="Cmd,Shift" />
+                    <KeyboardAccelerator Key="I" Modifiers="Ctrl" />
+                </MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem.IconImageSource>
+                    <FontImageSource 
+                        Glyph="&#xE8B5;" 
+                        Size="12" 
+                        Color="Black"
+                        FontFamily="Fabric" />
+                </MenuFlyoutItem.IconImageSource>
+            </MenuFlyoutItem>
+
+        </MenuBarItem>
+
+    </ContentPage.MenuBarItems>
+
+    <Grid RowDefinitions="100, *"
+          ColumnDefinitions="*, 400"
+          RowSpacing="24"
+          Margin="24, 0, 0, 0">
+
+        <VerticalStackLayout Margin="0,24,0,0">
+            <Label Text="Home" Style="{StaticResource LargeTitle}"/>
+            <Label Text="{Binding Source={x:Static system:DateTime.Now}, StringFormat='{0:dddd, MMMM dd yyyy}'}"/>
+            <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1" Margin="0, 24, 0, 24">
+            <Grid RowDefinitions="150, *"
+                  RowSpacing="24"
+                  ColumnDefinitions="*,*,*"
+                  ColumnSpacing="24">
+
+                <Grid.Resources>
+                    <Style TargetType="Label" Class="Percent">
+                        <Setter Property="TextColor" Value="#50D1AA"/>
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="VerticalTextAlignment" Value="Center"/>
+                    </Style>
+
+                    <Style TargetType="Label" Class="Up">
+                        <Setter Property="TextColor" Value="#50D1AA"/>
+                    </Style>
+
+                    <Style TargetType="Label" Class="Down">
+                        <Setter Property="TextColor" Value="#FF7CA3"/>
+                    </Style>
+
+                    <Style TargetType="Label" Class="Data">
+                        <Setter Property="TextColor" Value="#ffffff"/>
+                        <Setter Property="FontSize" Value="20"/>
+                        <Setter Property="VerticalTextAlignment" Value="Center"/>
+                    </Style>
+
+                    <Style TargetType="Label" Class="Label">
+                        <Setter Property="TextColor" Value="#ABBBC2"/>
+                        <Setter Property="FontSize" Value="13"/>
+                        <Setter Property="VerticalTextAlignment" Value="Center"/>
+                    </Style>
+
+                    <Style TargetType="Image">
+                        <Setter Property="VerticalOptions" Value="Center"/>
+                    </Style>
+                </Grid.Resources>
+
+                <!--3 widgets horizontal-->
+
+                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource DarkBorderView}">
+                    <Grid RowDefinitions="45,*,24" Margin="16" IsClippedToBounds="False">
+                        <HorizontalStackLayout Spacing="12">
+                            <Border WidthRequest="38" HeightRequest="38" 
+                                VerticalOptions="Center"
+                                Style="{StaticResource LightBorderView}">
+                                <Image Source="database.png" HorizontalOptions="Center"/>
+                            </Border>
+                            <Label Text="Storage Usage" class="Percent,Down"/>
+                        </HorizontalStackLayout>
+                        <Label Text=""  Grid.Row="1" class="Data"/>
+                        <Label Text="Total storage" Grid.Row="2" class="Label"/>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="0" Grid.Column="1" 
+                        Style="{StaticResource DarkBorderView}">
+                    <Grid RowDefinitions="45,*,24" Margin="16" IsClippedToBounds="False">
+                        <HorizontalStackLayout Spacing="12">
+                            <Border WidthRequest="38" HeightRequest="38"
+                                VerticalOptions="Center"
+                                Style="{StaticResource LightBorderView}">
+                                <Image Source="plug.png" HorizontalOptions="Center"/>
+                            </Border>
+                            <Label Text="Uptime" class="Percent,Down" TextColor="Azure"/>
+                        </HorizontalStackLayout>
+                        <Label Text="" Grid.Row="1" class="Data"/>
+                        <Label Text="Total runtime" Grid.Row="2" class="Label"/>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="0" Grid.Column="2"
+                        Style="{StaticResource DarkBorderView}">
+                    <Grid RowDefinitions="45,*,24" Margin="16" IsClippedToBounds="False">
+                        <HorizontalStackLayout Spacing="12">
+                            <Border WidthRequest="38" HeightRequest="38"
+                                VerticalOptions="Center"
+                                Style="{StaticResource LightBorderView}">
+                                <Image Source="clock.png" HorizontalOptions="Center"/>
+                            </Border>
+                            <Label Text="Connected" class="Percent,Up"/>
+                        </HorizontalStackLayout>
+                        <Label Text="" Grid.Row="1" class="Data"/>
+                        <Label Text="Total Connected Drives" Grid.Row="2" class="Label"/>
+                    </Grid>
+                </Border>
+
+                <!-- Drive list -->
+
+                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                        Style="{StaticResource DarkBorderView}">
+                    <Grid Margin="24" RowDefinitions="80,*">
+                        <Label Text="Your drives" Style="{StaticResource Title1}" />
+                        <Border Stroke="{StaticResource SecondaryBrush}"
+                                StrokeThickness="1"
+                                Background="Transparent"
+                                Grid.Row="0"
+                                HorizontalOptions="End"
+                                VerticalOptions="Start"
+                                SemanticProperties.Description="Button that opens a filter dialog">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <HorizontalStackLayout Margin="14,12" Spacing="12">
+                                <Image Source="filter.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
+                                <Label Text="Filter" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer />
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                        <ScrollView Grid.Row="1">
+                            <VerticalStackLayout Spacing="16">
+                                <!-- heading -->
+                                <Grid ColumnDefinitions="100,*,180,150, 70">
+                                    <Label Text="Letter" Style="{StaticResource Headline}"/>
+                                    <Label Text="Name" Grid.Column="1" Style="{StaticResource Headline}"/>
+                                    <Label Text="Storage Usage" Grid.Column="2" Style="{StaticResource Headline}"/>
+                                    <Label Text="Status" Grid.Column="3" Style="{StaticResource Headline}"/>
+                                </Grid>
+
+                                <BoxView Style="{StaticResource HRule}"/>
+
+                                <VerticalStackLayout Spacing="16">
+
+                                    <!-- Drive Information Rows -->
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate>
+
+                                            
+
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+
+                        </ScrollView>
+
+                    </Grid>
+                </Border>
+
+            </Grid>
+        </ScrollView>
+
+        <Grid Grid.Column="1"
+      Grid.RowSpan="2"
+      Margin="24">
+
+            <Border Grid.Row="1"  Style="{StaticResource DarkBorderView}">
+                <Grid Margin="24" RowDefinitions="50,1,*" RowSpacing="20">
+                    <Label Grid.Row="0" 
+                           VerticalOptions="Center" 
+                           Text="Connectivity" 
+                           Style="{StaticResource Title2}"/>
+
+                    <Border Stroke="{StaticResource SecondaryBrush}" 
+                            StrokeThickness="1" 
+                            Background="Transparent" 
+                            Grid.Row="0" 
+                            HorizontalOptions="End">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer />
+                        </Border.GestureRecognizers>
+                        <HorizontalStackLayout Margin="14,12" Spacing="12">
+                            <Label Text="{x:Static icons:IconFont.ChevronDown}" 
+                                   FontFamily="FontAwesome" 
+                                   VerticalOptions="Center"/>
+                            <Label Text="Today" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </Border>
+                    <BoxView Style="{StaticResource HRule}" Grid.Row="1"/>
+
+                    <views:ChartView
+                          x:Name="chart"
+                          Grid.Row="2"
+                          MinimumHeightRequest="300"
+                          HorizontalOptions="Fill"
+                          VerticalOptions="Fill"/>
+
+                    <!-- Legend Section -->
+                    <Grid Grid.Row="3" 
+                          ColumnDefinitions="Auto,Auto" 
+                          RowDefinitions="Auto,Auto,Auto,Auto"
+                          Margin="0,10,0,0"
+                          VerticalOptions="End" 
+                          ColumnSpacing="24"
+                          RowSpacing="8">
+
+
+                        <!-- First Row -->
+                        <StackLayout Orientation="Horizontal" Spacing="4" Grid.Row="0" Grid.Column="0">
+                            <Frame BackgroundColor="#EA7C69"
+                                   BorderColor="Transparent" 
+                                   CornerRadius="10" 
+                                   WidthRequest="20" 
+                                   HeightRequest="20"
+                                   HasShadow="False"/>
+                            <Label Text="Disconnected" VerticalOptions="Center"/>
+                        </StackLayout>
+
+                        <StackLayout Orientation="Horizontal" Spacing="4" Grid.Row="0" Grid.Column="1">
+                            <Frame BackgroundColor="#50D1AA"
+                                   BorderColor="Transparent" 
+                                   CornerRadius="10" 
+                                   WidthRequest="20" 
+                                   HeightRequest="20"
+                                   HasShadow="False"/>
+                            <Label Text="Connected" VerticalOptions="Center"/>
+                        </StackLayout>
+                    </Grid>
+                </Grid>
+            </Border>
+
+        </Grid>
+
+    </Grid>
+    
 </ContentPage>
+    

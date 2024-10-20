@@ -1,5 +1,4 @@
 using Microcharts;
-using SkiaSharp;
 using SkiaSharp.Views.Maui;
 
 namespace Helix.App.Pages.Home;
@@ -19,27 +18,17 @@ public sealed partial class HomePage : ContentPage
 	{
         ChartEntry[] entries =
         [
-            new ChartEntry(212)
-			{
-				Label = "Windows",
-				ValueLabel = "112",
-				Color = SKColor.Parse("#2c3e50"),
-			},
-            new ChartEntry(248)
-            {
-                Label = "Android",
-                ValueLabel = "646",
-                Color = SKColor.Parse("#77d065"),
-            },
-            new ChartEntry(212)
-            {
-                Label = ".NET Maui",
-                ValueLabel = "214",
-                Color = SKColor.Parse("#3498db"),
-            },
+           new ChartEntry(3)
+           { 
+               Color = Color.FromArgb("#50D1AA").ToSKColor(),
+           },
+           new ChartEntry(2) 
+           { 
+               Color = Color.FromArgb("#EA7C69").ToSKColor(), 
+           },
         ];
 
-        chartView.Chart = new RadialGaugeChart
+        chart.Chart = new DonutChart
         {
             Entries = entries,
             IsAnimated = true,
