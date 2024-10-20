@@ -1,11 +1,21 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Helix.App.Constants;
+using Helix.Application.Users;
+using Helix.Domain.Users;
+using SharedKernel;
 
 namespace Helix.App.Pages.Register;
 
 internal sealed partial class RegisterViewModel : BaseViewModel
 {
+    private readonly RegisterUser _registerUser;
+
+    public RegisterViewModel()
+    {
+        _registerUser = App.ServiceProvider.GetRequiredService<RegisterUser>();
+    }
+
     [ObservableProperty]
     private string _username = string.Empty;
 
@@ -33,7 +43,18 @@ internal sealed partial class RegisterViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            await Task.Delay(TimeSpan.FromSeconds(2));
+            var request = new RegisterUser.Request(Username, Password, ConfirmedPassword);
+
+            Result<User> result = await _registerUser.Handle(request);
+            if (result.IsFailure)
+            {
+                await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+                return;
+            }
+
+            await Shell.Current.GoToAsync($"//{PageNames.HomePage}", true);
+
+            Clear();
         }
         finally
         {
@@ -57,5 +78,12 @@ internal sealed partial class RegisterViewModel : BaseViewModel
     private void ToggleConfirmedPasswordHidden()
     {
         HideConfirmedPassword = !HideConfirmedPassword;
+    }
+
+    private void Clear()
+    {
+        Username = string.Empty;
+        Password = string.Empty;
+        ConfirmedPassword = string.Empty;
     }
 }

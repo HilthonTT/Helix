@@ -14,6 +14,8 @@ public static class DependencyInjection
     private static IServiceCollection AddUserEndpoints(this IServiceCollection services)
     {
         services.AddScoped<RegisterUser>();
+        services.AddScoped<LoginUser>();
+        services.AddScoped<LogoutUser>();
 
         return services;
     }

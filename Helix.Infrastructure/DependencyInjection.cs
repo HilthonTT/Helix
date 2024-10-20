@@ -1,5 +1,7 @@
-﻿using Helix.Application.Abstractions.Cryptography;
+﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
+using Helix.Infrastructure.Authentication;
 using Helix.Infrastructure.Cryptography;
 using Helix.Infrastructure.Database;
 using Helix.Persistence.Interceptors;
@@ -23,6 +25,8 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         services.AddScoped<IDbContext, AppDbContext>();
+
+        services.AddScoped<ILoggedInUser, LoggedInUser>();
 
         return services;
     }

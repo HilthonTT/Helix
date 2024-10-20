@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:register="clr-namespace:Helix.App.Pages.Register"
     xmlns:login="clr-namespace:Helix.App.Pages.Login"
+    xmlns:home="clr-namespace:Helix.App.Pages.Home"
     xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
     xmlns:local="clr-namespace:Helix.App"
     Shell.FlyoutBehavior="Disabled"
@@ -88,32 +89,32 @@
                     WidthRequest="50"
                     HeightRequest="50"/>
 
-                <RadioButton Value="dashboard" 
-                          Grid.Row="1"
-                          ToolTipProperties.Text="Dashboard"
-                          behaviors:CursorBehavior.AttachBehavior="True"
-                          CheckedChanged="OnMenuItemChanged"
-                          IsChecked="True">
+                <RadioButton Value="home" 
+                             Grid.Row="1"
+                             ToolTipProperties.Text="Home"
+                             behaviors:CursorBehavior.AttachBehavior="True"
+                             CheckedChanged="OnMenuItemChanged"
+                             IsChecked="True">
                     <RadioButton.Content>
                         <Image Source="dashboard.png" Aspect="Fill" WidthRequest="40" HeightRequest="40" />
                     </RadioButton.Content>
                 </RadioButton>
 
                 <RadioButton Value="auditlogs" 
-                          Grid.Row="2"
-                          ToolTipProperties.Text="Auditlogs"
-                          behaviors:CursorBehavior.AttachBehavior="True"
-                          CheckedChanged="OnMenuItemChanged">
+                             Grid.Row="2"
+                             ToolTipProperties.Text="Auditlogs"
+                             behaviors:CursorBehavior.AttachBehavior="True"
+                             CheckedChanged="OnMenuItemChanged">
                     <RadioButton.Content>
                         <Image Source="auditlogs.png" Aspect="Fill" WidthRequest="40" HeightRequest="40" />
                     </RadioButton.Content>
                 </RadioButton>
 
                 <RadioButton Value="settings" 
-                          Grid.Row="3"
-                          ToolTipProperties.Text="Settings"
-                          behaviors:CursorBehavior.AttachBehavior="True"
-                          CheckedChanged="OnMenuItemChanged">
+                             Grid.Row="3"
+                             ToolTipProperties.Text="Settings"
+                             behaviors:CursorBehavior.AttachBehavior="True"
+                             CheckedChanged="OnMenuItemChanged">
                     <RadioButton.Content>
                         <Image Source="settings.png" Aspect="Fill" WidthRequest="40" HeightRequest="40" />
                     </RadioButton.Content>
@@ -141,6 +142,10 @@
 
     <FlyoutItem Title="Register" Route="register">
         <ShellContent ContentTemplate="{DataTemplate register:RegisterPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Home" Route="home">
+        <ShellContent ContentTemplate="{DataTemplate home:HomePage}"/>
     </FlyoutItem>
 
 </Shell>

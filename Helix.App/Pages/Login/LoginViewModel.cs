@@ -1,11 +1,21 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Helix.App.Constants;
+using Helix.Application.Users;
+using Helix.Domain.Users;
+using SharedKernel;
 
 namespace Helix.App.Pages.Login;
 
 internal sealed partial class LoginViewModel : BaseViewModel
 {
+    private readonly LoginUser _loginUser;
+
+    public LoginViewModel()
+    {
+        _loginUser = App.ServiceProvider.GetRequiredService<LoginUser>();
+    }
+
     [ObservableProperty]
     private string _username = string.Empty;
 
@@ -27,16 +37,22 @@ internal sealed partial class LoginViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            // Simulate API call with a 2-second delay
-            await Task.Delay(TimeSpan.FromSeconds(2));
+            var request = new LoginUser.Request(Username, Password);
 
-            // Here, you can add logic for actual login validation
-            // Example: Check username and password or call an authentication service.
+            Result<User> result = await _loginUser.Handle(request);
+            if (result.IsFailure)
+            {
+                await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+                return;
+            }
+
+            await Shell.Current.GoToAsync($"//{PageNames.HomePage}", true);
+
+            Clear();
         }
         finally
         {
             IsBusy = false;
-            Clear();
         }
     }
 

@@ -1,6 +1,9 @@
 ﻿using Helix.App.Constants;
+using Helix.App.Pages.Home;
 using Helix.App.Pages.Login;
 using Helix.App.Pages.Register;
+using Helix.Application.Users;
+using SharedKernel;
 
 namespace Helix.App;
 
@@ -37,9 +40,18 @@ public sealed partial class AppShell : Shell
         }
     }
 
-    private void OnLogout(object? sender, EventArgs e)
-    { 
+    private async void OnLogout(object? sender, EventArgs e)
+    {
+        LogoutUser logoutUser = App.ServiceProvider.GetRequiredService<LogoutUser>();
 
+        Result result = logoutUser.Handle();
+        if (result.IsFailure)
+        {
+            await Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+            return;
+        }
+
+        await Current.GoToAsync($"//{PageNames.LoginPage}");
     }
 
      private void OnNavigated(object? sender, ShellNavigatedEventArgs e)
@@ -67,5 +79,6 @@ public sealed partial class AppShell : Shell
     {
         Routing.RegisterRoute(PageNames.LoginPage, typeof(LoginPage));
         Routing.RegisterRoute(PageNames.RegisterPage, typeof(RegisterPage));
+        Routing.RegisterRoute(PageNames.HomePage, typeof(HomePage));
     }
 }

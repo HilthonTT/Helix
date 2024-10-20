@@ -6,7 +6,7 @@ public static class PageNames
 
     public const string RegisterPage = "register";
 
-    public const string DashboardPage = "dashboard";
+    public const string HomePage = "home";
 
     public const string SettingsPage = "settings";
 
