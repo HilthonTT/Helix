@@ -6,6 +6,8 @@
              xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:createDrive="clr-namespace:Helix.App.Modals.Drives.Create"
+             xmlns:driveTemplates="clr-namespace:Helix.App.Views.Drives"
+             xmlns:models="clr-namespace:Helix.App.Models"
              x:Class="Helix.App.Pages.Home.HomePage"
              x:DataType="home:HomeViewModel"
              Title="">
@@ -68,7 +70,7 @@
           Margin="24, 0, 0, 0">
 
         <VerticalStackLayout Margin="0,24,0,0">
-            <Label Text="Home" Style="{StaticResource LargeTitle}"/>
+            <Label Text="Dashboard" Style="{StaticResource LargeTitle}"/>
             <Label Text="{Binding Source={x:Static system:DateTime.Now}, StringFormat='{0:dddd, MMMM dd yyyy}'}"/>
             <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
         </VerticalStackLayout>
@@ -198,13 +200,13 @@
 
                                 <BoxView Style="{StaticResource HRule}"/>
 
-                                <VerticalStackLayout Spacing="16">
+                                <VerticalStackLayout Spacing="16" BindableLayout.ItemsSource="{Binding Drives}">
 
                                     <!-- Drive Information Rows -->
                                     <BindableLayout.ItemTemplate>
-                                        <DataTemplate>
+                                        <DataTemplate x:DataType="models:DriveDisplay">
 
-                                            
+                                            <driveTemplates:DriveTemplate BindingContext="{Binding .}" />
 
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>

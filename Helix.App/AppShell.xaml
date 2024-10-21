@@ -89,9 +89,9 @@
                     WidthRequest="50"
                     HeightRequest="50"/>
 
-                <RadioButton Value="home" 
+                <RadioButton Value="dashboard" 
                              Grid.Row="1"
-                             ToolTipProperties.Text="Home"
+                             ToolTipProperties.Text="Dashboard"
                              behaviors:CursorBehavior.AttachBehavior="True"
                              CheckedChanged="OnMenuItemChanged"
                              IsChecked="True">
@@ -144,7 +144,7 @@
         <ShellContent ContentTemplate="{DataTemplate register:RegisterPage}"/>
     </FlyoutItem>
 
-    <FlyoutItem Title="Home" Route="home">
+    <FlyoutItem Title="Dashboard" Route="dashboard">
         <ShellContent ContentTemplate="{DataTemplate home:HomePage}"/>
     </FlyoutItem>
 

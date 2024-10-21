@@ -12,10 +12,7 @@ internal sealed partial class DriveDisplay : ObservableObject
     private string _name = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ActualButtonColor))]
-    private string _buttonColor = Colors.Red.ToString();
-
-    private Color ActualButtonColor => Color.FromArgb(ButtonColor);
+    public string _buttonColor = "#ff0000";
 
     [ObservableProperty]
     private bool _connected;
@@ -24,5 +21,6 @@ internal sealed partial class DriveDisplay : ObservableObject
     {
         Letter = drive.Letter;
         Name = drive.Name;
+        ButtonColor = "#ff0000";
     }
 }

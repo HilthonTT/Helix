@@ -21,7 +21,7 @@
                Margin="0,0,0,20"/>
 
             <!-- Title -->
-            <Label Text="Welcome to Krello!" 
+            <Label Text="Register to Helix!" 
                HorizontalOptions="Center" 
                Style="{StaticResource LargeTitle}"/>
 

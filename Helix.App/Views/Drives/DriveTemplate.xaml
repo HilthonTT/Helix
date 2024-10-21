@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             x:Class="Helix.App.Views.Drives.DriveTemplate"
+             x:DataType="models:DriveDisplay"
+             BindingContext="{Binding .}">
+    
+    <Grid ColumnDefinitions="100,*,180,150,70">
+        <Label x:Name="Letter" Text="{Binding Letter}"/>
+        <Label x:Name="Name" Text="{Binding Name}" Grid.Column="1" />
+
+        <!-- Show storage usage -->
+        <Label Text="19.2TB" Grid.Column="2" />
+
+        <!-- Check if the drive is connected and display the status -->
+        <Button x:Name="StatusButton"
+                Grid.Column="3"
+                BackgroundColor="{Binding ButtonColor}"
+                WidthRequest="30"
+                HeightRequest="30"
+                CornerRadius="10"
+                Clicked="ToggleConnect" />
+
+        <Grid Grid.Column="4" ColumnDefinitions="*,*" ColumnSpacing="10">
+            <!-- Add Edit button (pencil icon) -->
+            <Border 
+                Grid.Column="0"
+                Stroke="{StaticResource SecondaryBrush}" 
+                StrokeThickness="1" 
+                Background="Transparent"
+                HorizontalOptions="Center">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="HandleUpdate" />
+                </Border.GestureRecognizers>
+                <HorizontalStackLayout Padding="5">
+                    <Label Text="{x:Static icons:IconFont.PencilAlt}" 
+                       FontFamily="FontAwesome" 
+                       VerticalOptions="Center" />
+
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- Add Delete button (trash icon) -->
+            <Border 
+                Grid.Column="1"
+                Stroke="{StaticResource SecondaryBrush}" 
+                StrokeThickness="1" 
+                Background="Transparent"
+                HorizontalOptions="Center">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="HandleDelete" />
+                </Border.GestureRecognizers>
+                <HorizontalStackLayout Padding="5">
+                    <Label Text="{x:Static icons:IconFont.Trash}" 
+                       FontFamily="FontAwesome"
+                       VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+        </Grid>
+
+    </Grid>
+</ContentView>

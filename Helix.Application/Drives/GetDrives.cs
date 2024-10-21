@@ -17,6 +17,7 @@ public sealed class GetDrives(IDbContext context, ILoggedInUser loggedInUser)
         }
 
         List<Drive> drives = await context.Drives
+            .AsNoTracking()
             .Where(d => d.UserId == loggedInUser.UserId)
             .ToListAsync(cancellationToken);
 
