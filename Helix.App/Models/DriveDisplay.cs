@@ -17,6 +17,12 @@ internal sealed partial class DriveDisplay : ObservableObject
     [ObservableProperty]
     private bool _connected;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNotBusy))]
+    private bool _isBusy = false;
+
+    public bool IsNotBusy => !IsBusy;
+
     public DriveDisplay(Drive drive)
     {
         Letter = drive.Letter;

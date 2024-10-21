@@ -21,7 +21,8 @@
                 WidthRequest="30"
                 HeightRequest="30"
                 CornerRadius="10"
-                Clicked="ToggleConnect" />
+                Clicked="ToggleConnect" 
+                IsEnabled="{Binding IsNotBusy}" />
 
         <Grid Grid.Column="4" ColumnDefinitions="*,*" ColumnSpacing="10">
             <!-- Add Edit button (pencil icon) -->

@@ -28,6 +28,9 @@ public static class DependencyInjection
         services.AddScoped<CreateDrive>();
         services.AddScoped<GetDrives>();
 
+        services.AddScoped<ConnectDrive>();
+        services.AddScoped<DisconnectDrive>();
+
         return services;
     }
 }
