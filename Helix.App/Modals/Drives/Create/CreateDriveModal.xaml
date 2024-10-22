@@ -6,12 +6,6 @@
              x:Class="Helix.App.Modals.Drives.Create.CreateDriveModal"
              Background="{StaticResource DarkBg2Brush}">
     
-    <ContentView.Resources>
-        <Style TargetType="RadioButton">
-            <Setter Property="ControlTemplate" Value="{StaticResource ButtonRadioTemplate}" />
-        </Style>
-    </ContentView.Resources>
-
     <Grid RowDefinitions="*, 108"
          ColumnDefinitions="*,*"
          ColumnSpacing="0">

@@ -6,6 +6,9 @@ namespace Helix.App.Models;
 internal sealed partial class DriveDisplay : ObservableObject
 {
     [ObservableProperty]
+    private Guid _id;
+
+    [ObservableProperty]
     private string _letter = string.Empty;
 
     [ObservableProperty]
@@ -25,8 +28,16 @@ internal sealed partial class DriveDisplay : ObservableObject
 
     public DriveDisplay(Drive drive)
     {
+        Id = drive.Id;
         Letter = drive.Letter;
         Name = drive.Name;
         ButtonColor = "#ff0000";
+    }
+
+    public DriveDisplay()
+    {
+        Id = Guid.Empty;
+        Letter = string.Empty;
+        Name = string.Empty;
     }
 }

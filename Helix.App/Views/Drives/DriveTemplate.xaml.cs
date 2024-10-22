@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Helpers;
 using Helix.App.Messages;
+using Helix.App.Modals.Drives.Delete;
 using Helix.App.Models;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Drives;
@@ -115,6 +116,11 @@ public sealed partial class DriveTemplate : ContentView
 
     private void HandleDelete(object? sender, TappedEventArgs e)
     {
-        // Handle delete logic here
+        if (BindingContext is not DriveDisplay drive)
+        {
+            return;
+        }
+
+        WeakReferenceMessenger.Default.Send(new DeleteDriveMessage(true, drive));
     }
 }

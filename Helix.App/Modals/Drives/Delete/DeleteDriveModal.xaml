@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:modals="clr-namespace:Helix.App.Modals.Drives.Delete"
+             x:DataType="modals:DeleteDriveViewModel"
+             x:Class="Helix.App.Modals.Drives.Delete.DeleteDriveModal"
+             Background="{StaticResource DarkBg2Brush}">
+    <Grid RowDefinitions="*, 108"
+          ColumnDefinitions="*,*"
+          ColumnSpacing="0">
+        <ScrollView Grid.ColumnSpan="2">
+            <VerticalStackLayout Spacing="20" Margin="24">
+                <Label Text="Delete the Drive" Style="{StaticResource Title1}" />
+                <BoxView Style="{StaticResource HRule}"/>
+
+                <Label Text="{Binding Description}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Button Grid.Row="1"
+                Grid.Column="0"
+                Margin="24,24,12,24"
+                Style="{StaticResource SecondaryButtonOutline}"
+                HorizontalOptions="Fill"
+                Text="Close"
+                Command="{Binding CloseCommand}" 
+                IsEnabled="{Binding IsNotBusy}"/>
+
+        <Button Grid.Row="1"
+                Grid.Column="1"
+                Margin="12,24,24,24"
+                Command="{Binding DeleteCommand}"
+                HorizontalOptions="Fill"
+                Text="Delete" 
+                IsEnabled="{Binding IsNotBusy}"/>
+    </Grid>
+</ContentView>

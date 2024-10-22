@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Helpers;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Create;
+using Helix.App.Modals.Drives.Delete;
 using Helix.App.Models;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Drives;
@@ -44,7 +45,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
     {
         WeakReferenceMessenger.Default.Send(new CreateDriveMessage(true));
     }
-
 
     private void FetchDrives()
     {
@@ -89,6 +89,18 @@ internal sealed partial class HomeViewModel : BaseViewModel
         {
             TotalStorage = ValidateTotalStorage();
             TotalConnected = ValidateTotalConnected();
+        });
+
+        WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, (r, m) =>
+        {
+            DriveDisplay? existingDrive = Drives.FirstOrDefault(d => d.Id == m.DriveId);
+            if (existingDrive is not null)
+            {
+                Drives.Remove(existingDrive);
+
+                TotalStorage = ValidateTotalStorage();
+                TotalConnected = ValidateTotalConnected();
+            }
         });
     }
 }

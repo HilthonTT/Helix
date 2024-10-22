@@ -22,7 +22,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>Helix.App</ApplicationTitle>
+		<ApplicationTitle>Helix</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.helix.app</ApplicationId>
@@ -110,6 +110,9 @@
 
 	<ItemGroup>
 	  <MauiXaml Update="Modals\Drives\Create\CreateDriveModal.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Modals\Drives\Delete\DeleteDriveModal.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\Home\HomePage.xaml">

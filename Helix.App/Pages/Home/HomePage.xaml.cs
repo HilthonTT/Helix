@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Create;
+using Helix.App.Modals.Drives.Delete;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Drives;
 using Helix.Domain.Drives;
@@ -12,6 +13,7 @@ namespace Helix.App.Pages.Home;
 
 public sealed partial class HomePage : ContentPage
 {
+    private static bool _deleteDriveModalOpen = false;
     private static bool _createDriveModalOpen = false;
 
     private readonly GetDrives _getDrives;
@@ -34,8 +36,42 @@ public sealed partial class HomePage : ContentPage
         await InitializeChartAsync();
     }
 
+    private async Task OpenDeleteDriveModalAsync(bool show)
+    {
+        if (_createDriveModalOpen)
+        {
+            await OpenCreateDriveModalAsync(false);
+        }
+
+        if (show)
+        {
+            DeleteDriveLayout.IsVisible = true;
+            DeleteDriveView.Opacity = 0;
+            _ = DeleteDriveView.FadeTo(1, 800, Easing.CubicIn);
+            _ = BlockScreen.FadeTo(0.8, 800, Easing.CubicOut);
+
+            BlockScreen.InputTransparent = false;
+            _deleteDriveModalOpen = true;
+        }
+        else
+        {
+            _ = DeleteDriveView.FadeTo(0, 800, Easing.CubicOut);
+            _ = BlockScreen.FadeTo(0, 800, Easing.CubicOut);
+            BlockScreen.InputTransparent = true;
+
+            await Task.Delay(800);
+            DeleteDriveLayout.IsVisible = false;
+            _deleteDriveModalOpen = false;
+        }
+    }
+
     private async Task OpenCreateDriveModalAsync(bool show)
     {
+        if (_deleteDriveModalOpen)
+        {
+            await OpenDeleteDriveModalAsync(false);
+        }
+
         if (show)
         {
             CreateDriveLayout.IsVisible = true;
@@ -101,6 +137,17 @@ public sealed partial class HomePage : ContentPage
             }
 
             await OpenCreateDriveModalAsync(m.Value);
+        });
+
+        WeakReferenceMessenger.Default.Register<DeleteDriveMessage>(this, async (r, m) =>
+        {
+            bool isAlreadyOpen = _deleteDriveModalOpen && m.Value;
+            if (isAlreadyOpen)
+            {
+                return;
+            }
+
+            await OpenDeleteDriveModalAsync(m.Value);
         });
 
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(this, async (r, m) =>
