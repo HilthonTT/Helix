@@ -1,3 +1,6 @@
+using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Helpers;
+using Helix.App.Messages;
 using Helix.App.Models;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Drives;
@@ -28,8 +31,14 @@ public sealed partial class DriveTemplate : ContentView
         if (BindingContext is DriveDisplay drive)
         {
             UpdateDriveDetails(drive);
+            UpdateStorageUsage(drive);
             UpdateStatusButtonColor(drive.Letter);
         }
+    }
+
+    private void UpdateStorageUsage(DriveDisplay drive)
+    {
+        StorageUsage.Text = StorageUsageHelper.GetStorageUsage(drive.Letter);
     }
 
     private void UpdateDriveDetails(DriveDisplay drive)
@@ -69,6 +78,9 @@ public sealed partial class DriveTemplate : ContentView
             if (result.IsSuccess)
             {
                 UpdateStatusButtonColor(drive.Letter);
+                UpdateStorageUsage(drive);
+
+                WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
             }
             else
             {

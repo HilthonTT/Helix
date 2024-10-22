@@ -7,12 +7,12 @@
              x:DataType="models:DriveDisplay"
              BindingContext="{Binding .}">
     
-    <Grid ColumnDefinitions="100,*,180,150,70">
+    <Grid ColumnDefinitions="100,*, *, 100, 70" ColumnSpacing="5">
         <Label x:Name="Letter" Text="{Binding Letter}"/>
         <Label x:Name="Name" Text="{Binding Name}" Grid.Column="1" />
 
         <!-- Show storage usage -->
-        <Label Text="19.2TB" Grid.Column="2" />
+        <Label x:Name="StorageUsage" Grid.Column="2" FontSize="Body" HorizontalOptions="Start" />
 
         <!-- Check if the drive is connected and display the status -->
         <Button x:Name="StatusButton"

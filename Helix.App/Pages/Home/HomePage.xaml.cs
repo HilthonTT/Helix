@@ -1,6 +1,11 @@
 using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messages;
 using Helix.App.Modals.Drives.Create;
+using Helix.Application.Abstractions.Connector;
+using Helix.Application.Drives;
+using Helix.Domain.Drives;
 using Microcharts;
+using SharedKernel;
 using SkiaSharp.Views.Maui;
 
 namespace Helix.App.Pages.Home;
@@ -9,14 +14,24 @@ public sealed partial class HomePage : ContentPage
 {
     private static bool _createDriveModalOpen = false;
 
+    private readonly GetDrives _getDrives;
+    private readonly INasConnector _nasConnector;
+
     public HomePage()
 	{
 		InitializeComponent();
 
 		BindingContext = new HomeViewModel();
 
-        InitializeChart();
+        _getDrives = App.ServiceProvider.GetRequiredService<GetDrives>();
+        _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
+
         RegisterMessages();
+    }
+
+    protected async override void OnAppearing()
+    {
+        await InitializeChartAsync();
     }
 
     private async Task OpenCreateDriveModalAsync(bool show)
@@ -43,15 +58,24 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-	private void InitializeChart()
+	private async Task InitializeChartAsync()
 	{
+        Result<List<Drive>> result = await _getDrives.Handle();
+        if (result.IsFailure)
+        {
+            return;
+        }
+
+        IEnumerable<Drive> connected = result.Value.Where(d => _nasConnector.IsConnected(d.Letter));
+        IEnumerable<Drive> disconnected = result.Value.Where(d => !_nasConnector.IsConnected(d.Letter));
+
         ChartEntry[] entries =
         [
-           new ChartEntry(3)
+           new ChartEntry(connected.Count())
            { 
                Color = Color.FromArgb("#50D1AA").ToSKColor(),
            },
-           new ChartEntry(2) 
+           new ChartEntry(disconnected.Count()) 
            { 
                Color = Color.FromArgb("#EA7C69").ToSKColor(), 
            },
@@ -77,6 +101,11 @@ public sealed partial class HomePage : ContentPage
             }
 
             await OpenCreateDriveModalAsync(m.Value);
+        });
+
+        WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(this, async (r, m) =>
+        {
+            await InitializeChartAsync();
         });
     }
 }

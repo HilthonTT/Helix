@@ -125,8 +125,8 @@
                             </Border>
                             <Label Text="Storage Usage" class="Percent,Down"/>
                         </HorizontalStackLayout>
-                        <Label Text=""  Grid.Row="1" class="Data"/>
-                        <Label Text="Total storage" Grid.Row="2" class="Label"/>
+                        <Label Text="{Binding TotalStorage}" FontSize="Micro"  Grid.Row="1" class="Data"/>
+                        <Label Text="Total storage of NAS" Grid.Row="2" class="Label"/>
                     </Grid>
                 </Border>
 
@@ -139,10 +139,10 @@
                                 Style="{StaticResource LightBorderView}">
                                 <Image Source="plug.png" HorizontalOptions="Center"/>
                             </Border>
-                            <Label Text="Uptime" class="Percent,Down" TextColor="Azure"/>
+                            <Label Text="Connection" class="Percent,Down" TextColor="Azure"/>
                         </HorizontalStackLayout>
-                        <Label Text="" Grid.Row="1" class="Data"/>
-                        <Label Text="Total runtime" Grid.Row="2" class="Label"/>
+                        <Label Text="{Binding TotalConnected}" FontSize="Micro"  Grid.Row="1" class="Data"/>
+                        <Label Text="Total Connected Drives" Grid.Row="2" class="Label"/>
                     </Grid>
                 </Border>
 
@@ -155,10 +155,10 @@
                                 Style="{StaticResource LightBorderView}">
                                 <Image Source="clock.png" HorizontalOptions="Center"/>
                             </Border>
-                            <Label Text="Connected" class="Percent,Up"/>
+                            <Label Text="Timer" class="Percent,Up"/>
                         </HorizontalStackLayout>
-                        <Label Text="" Grid.Row="1" class="Data"/>
-                        <Label Text="Total Connected Drives" Grid.Row="2" class="Label"/>
+                        <Label Text="20 seconds" FontSize="Micro"  Grid.Row="1" class="Data"/>
+                        <Label Text="Time before minimize" Grid.Row="2" class="Label"/>
                     </Grid>
                 </Border>
 
@@ -191,7 +191,7 @@
                         <ScrollView Grid.Row="1">
                             <VerticalStackLayout Spacing="16">
                                 <!-- heading -->
-                                <Grid ColumnDefinitions="100,*,180,150, 70">
+                                <Grid ColumnDefinitions="100,*,*,120, 70">
                                     <Label Text="Letter" Style="{StaticResource Headline}"/>
                                     <Label Text="Name" Grid.Column="1" Style="{StaticResource Headline}"/>
                                     <Label Text="Storage Usage" Grid.Column="2" Style="{StaticResource Headline}"/>
