@@ -102,5 +102,14 @@ internal sealed partial class HomeViewModel : BaseViewModel
                 TotalConnected = ValidateTotalConnected();
             }
         });
+
+        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(this, (r, m) =>
+        {
+            var driveDisplay = new DriveDisplay(m.Drive);
+            Drives.Add(driveDisplay);
+
+            TotalStorage = ValidateTotalStorage();
+            TotalConnected = ValidateTotalConnected();
+        });
     }
 }

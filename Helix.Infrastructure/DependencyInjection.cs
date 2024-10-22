@@ -7,6 +7,8 @@ using Helix.Infrastructure.Cryptography;
 using Helix.Infrastructure.Database;
 using Helix.Infrastructure.Connector;
 using Helix.Persistence.Interceptors;
+using SharedKernel;
+using Helix.Infrastructure.Time;
 
 namespace Helix.Infrastructure;
 
@@ -23,6 +25,8 @@ public static class DependencyInjection
                 sp.GetRequiredService<UpdateAuditableInterceptor>(),
                 sp.GetRequiredService<InsertAuditLogsInterceptor>());
         });
+
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 

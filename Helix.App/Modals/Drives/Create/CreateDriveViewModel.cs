@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messages;
 using Helix.App.Models;
 using Helix.App.Pages;
 using Helix.Application.Drives;
@@ -41,6 +42,9 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
                 return;
             }
+
+            WeakReferenceMessenger.Default.Send(new DriveCreatedMessage(result.Value));
+            WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
             Close();
         }

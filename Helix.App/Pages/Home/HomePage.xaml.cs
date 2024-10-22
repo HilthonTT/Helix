@@ -36,6 +36,26 @@ public sealed partial class HomePage : ContentPage
         await InitializeChartAsync();
     }
 
+    private void OpenModalInternal(AbsoluteLayout absoluteLayout, ContentView contentView)
+    {
+        absoluteLayout.IsVisible = true;
+        contentView.Opacity = 0;
+        _ = contentView.FadeTo(1, 800, Easing.CubicIn);
+        _ = BlockScreen.FadeTo(0.8, 800, Easing.CubicOut);
+
+        BlockScreen.InputTransparent = false;
+    }
+
+    private async Task CloseModalInternal(AbsoluteLayout absoluteLayout, ContentView contentView)
+    {
+        _ = contentView.FadeTo(0, 800, Easing.CubicOut);
+        _ = BlockScreen.FadeTo(0, 800, Easing.CubicOut);
+        BlockScreen.InputTransparent = true;
+
+        await Task.Delay(800);
+        absoluteLayout.IsVisible = false;
+    }
+
     private async Task OpenDeleteDriveModalAsync(bool show)
     {
         if (_createDriveModalOpen)
@@ -45,22 +65,12 @@ public sealed partial class HomePage : ContentPage
 
         if (show)
         {
-            DeleteDriveLayout.IsVisible = true;
-            DeleteDriveView.Opacity = 0;
-            _ = DeleteDriveView.FadeTo(1, 800, Easing.CubicIn);
-            _ = BlockScreen.FadeTo(0.8, 800, Easing.CubicOut);
-
-            BlockScreen.InputTransparent = false;
+            OpenModalInternal(DeleteDriveLayout, DeleteDriveView);
             _deleteDriveModalOpen = true;
         }
         else
         {
-            _ = DeleteDriveView.FadeTo(0, 800, Easing.CubicOut);
-            _ = BlockScreen.FadeTo(0, 800, Easing.CubicOut);
-            BlockScreen.InputTransparent = true;
-
-            await Task.Delay(800);
-            DeleteDriveLayout.IsVisible = false;
+            await CloseModalInternal(DeleteDriveLayout, DeleteDriveView);
             _deleteDriveModalOpen = false;
         }
     }
@@ -74,50 +84,71 @@ public sealed partial class HomePage : ContentPage
 
         if (show)
         {
-            CreateDriveLayout.IsVisible = true;
-            CreateDriveView.Opacity = 0;
-            _ = CreateDriveView.FadeTo(1, 800, Easing.CubicIn);
-            _ = BlockScreen.FadeTo(0.8, 800, Easing.CubicOut);
-
-            BlockScreen.InputTransparent = false;
+            OpenModalInternal(CreateDriveLayout, CreateDriveView);
             _createDriveModalOpen = true;
         }
         else
         {
-            _ = CreateDriveView.FadeTo(0, 800, Easing.CubicOut);
-            _ = BlockScreen.FadeTo(0, 800, Easing.CubicOut);
-            BlockScreen.InputTransparent = true;
-
-            await Task.Delay(800);
-            CreateDriveLayout.IsVisible = false;
+            await CloseModalInternal(CreateDriveLayout, CreateDriveView);
             _createDriveModalOpen = false;
         }
     }
 
-	private async Task InitializeChartAsync()
-	{
+    private async Task InitializeChartAsync()
+    {
         Result<List<Drive>> result = await _getDrives.Handle();
         if (result.IsFailure)
         {
             return;
         }
 
-        IEnumerable<Drive> connected = result.Value.Where(d => _nasConnector.IsConnected(d.Letter));
-        IEnumerable<Drive> disconnected = result.Value.Where(d => !_nasConnector.IsConnected(d.Letter));
+        List<Drive> drives = result.Value;
+        ChartEntry[] entries = GenerateChartEntries(drives);
 
-        ChartEntry[] entries =
+        chart.Chart = CreateDonutChart(entries);
+    }
+
+    private ChartEntry[] GenerateChartEntries(List<Drive> drives)
+    {
+        if (drives.Count == 0)
+        {
+            return CreateDisconnectedEntries();
+        }
+
+        int connected = drives.Where(d => _nasConnector.IsConnected(d.Letter)).Count();
+        int disconnected = drives.Count - connected;
+
+        return
         [
-           new ChartEntry(connected.Count())
-           { 
-               Color = Color.FromArgb("#50D1AA").ToSKColor(),
-           },
-           new ChartEntry(disconnected.Count()) 
-           { 
-               Color = Color.FromArgb("#EA7C69").ToSKColor(), 
-           },
+            new ChartEntry(connected)
+            {
+                Color = Color.FromArgb("#50D1AA").ToSKColor(),
+            },
+            new ChartEntry(disconnected)
+            {
+                Color = Color.FromArgb("#EA7C69").ToSKColor(),
+            }
         ];
+    }
 
-        chart.Chart = new DonutChart
+    private static ChartEntry[] CreateDisconnectedEntries()
+    {
+        return
+        [
+            new ChartEntry(0) // 0 connected
+            {
+                Color = Color.FromArgb("#50D1AA").ToSKColor(),
+            },
+            new ChartEntry(1) // 1 disconnected (represents all)
+            {
+                Color = Color.FromArgb("#EA7C69").ToSKColor(),
+            }
+        ];
+    }
+
+    private static DonutChart CreateDonutChart(ChartEntry[] entries)
+    {
+        return new DonutChart
         {
             Entries = entries,
             IsAnimated = true,
