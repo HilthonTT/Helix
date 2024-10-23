@@ -82,7 +82,7 @@ public sealed class Drive : Entity, IAuditable
         var drive = new Drive(
             Guid.NewGuid(),
             userId,
-            letter,
+            letter.ToUpper(),
             ipAddress,
             name,
             username,
@@ -91,11 +91,12 @@ public sealed class Drive : Entity, IAuditable
         return drive;
     }
 
-    public void Update(string letter, string ipAddress, string username, string password)
+    public void Update(string letter, string ipAddress, string name, string username, string password)
     {
         Letter = letter;
         IpAddress = ipAddress;
-        Name = username;
+        Name = name;
+        Username = username;
         Password = password;
     }
 }

@@ -5,6 +5,7 @@
              x:DataType="modals:DeleteDriveViewModel"
              x:Class="Helix.App.Modals.Drives.Delete.DeleteDriveModal"
              Background="{StaticResource DarkBg2Brush}">
+    
     <Grid RowDefinitions="*, 108"
           ColumnDefinitions="*,*"
           ColumnSpacing="0">

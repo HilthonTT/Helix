@@ -1,7 +1,8 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Extensions;
 using Helix.Domain.Drives;
-using Microsoft.EntityFrameworkCore;
+using Helix.Domain.Users;
 using SharedKernel;
 
 namespace Helix.Application.Drives;
@@ -18,16 +19,18 @@ public sealed class CreateDrive(IDbContext context, ILoggedInUser loggedInUser)
             return Result.Failure<Drive>(validationResult.Error);
         }
 
-        Drive? existingDrive = await context
-            .Drives
-            .FirstOrDefaultAsync(d => d.Letter == request.Letter && d.UserId == loggedInUser.UserId, cancellationToken);
-        if (existingDrive is not null)
+        if (!loggedInUser.IsLoggedIn)
+        {
+            return Result.Failure<Drive>(AuthenticationErrors.InvalidPermissions);
+        }
+
+        if (await context.Drives.ExistsWithLetterAsync(request.Letter, cancellationToken))
         {
             return Result.Failure<Drive>(DriveErrors.LetterNotUnique(request.Letter));
         }
 
         var drive = Drive.Create(
-            loggedInUser.UserId, 
+            loggedInUser.UserId,
             request.Letter, 
             request.IpAddress, 
             request.Name, 

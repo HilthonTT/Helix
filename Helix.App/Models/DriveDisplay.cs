@@ -34,6 +34,13 @@ internal sealed partial class DriveDisplay : ObservableObject
         ButtonColor = "#ff0000";
     }
 
+    public DriveDisplay(UpdateDriveModel updateDrive)
+    {
+        Id = updateDrive.Id;
+        Letter = updateDrive.Letter;
+        Name = updateDrive.Name;
+    }
+
     public DriveDisplay()
     {
         Id = Guid.Empty;

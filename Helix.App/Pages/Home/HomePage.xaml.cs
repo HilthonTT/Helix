@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Create;
 using Helix.App.Modals.Drives.Delete;
+using Helix.App.Modals.Drives.Update;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Drives;
 using Helix.Domain.Drives;
@@ -15,6 +16,7 @@ public sealed partial class HomePage : ContentPage
 {
     private static bool _deleteDriveModalOpen = false;
     private static bool _createDriveModalOpen = false;
+    private static bool _updateDriveModalOpen = false;
 
     private readonly GetDrives _getDrives;
     private readonly INasConnector _nasConnector;
@@ -56,11 +58,40 @@ public sealed partial class HomePage : ContentPage
         absoluteLayout.IsVisible = false;
     }
 
+    private async Task OpenUpdateDriveModalAsync(bool show)
+    {
+        if (_createDriveModalOpen)
+        {
+            await OpenCreateDriveModalAsync(false);
+        }
+
+        if (_deleteDriveModalOpen)
+        {
+            await OpenDeleteDriveModalAsync(false);
+        }
+
+        if (show)
+        {
+            OpenModalInternal(UpdateDriveLayout, UpdateDriveView);
+            _updateDriveModalOpen = true;
+        }
+        else
+        {
+            await CloseModalInternal(UpdateDriveLayout, UpdateDriveView);
+            _updateDriveModalOpen = false;
+        }
+    }
+
     private async Task OpenDeleteDriveModalAsync(bool show)
     {
         if (_createDriveModalOpen)
         {
             await OpenCreateDriveModalAsync(false);
+        }
+
+        if (_updateDriveModalOpen)
+        {
+            await OpenUpdateDriveModalAsync(false);
         }
 
         if (show)
@@ -80,6 +111,11 @@ public sealed partial class HomePage : ContentPage
         if (_deleteDriveModalOpen)
         {
             await OpenDeleteDriveModalAsync(false);
+        }
+
+        if (_updateDriveModalOpen)
+        {
+            await OpenUpdateDriveModalAsync(false);
         }
 
         if (show)
@@ -179,6 +215,17 @@ public sealed partial class HomePage : ContentPage
             }
 
             await OpenDeleteDriveModalAsync(m.Value);
+        });
+
+        WeakReferenceMessenger.Default.Register<UpdateDriveMessage>(this, async (r, m) =>
+        {
+            bool isAlreadyOpen = _updateDriveModalOpen && m.Value;
+            if (isAlreadyOpen)
+            {
+                return;
+            }
+
+            await OpenUpdateDriveModalAsync(m.Value);
         });
 
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(this, async (r, m) =>

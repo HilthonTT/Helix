@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Helpers;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Delete;
+using Helix.App.Modals.Drives.Update;
 using Helix.App.Models;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Drives;
@@ -34,6 +35,8 @@ public sealed partial class DriveTemplate : ContentView
             UpdateDriveDetails(drive);
             UpdateStorageUsage(drive);
             UpdateStatusButtonColor(drive.Letter);
+
+            RegisterMessages();
         }
     }
 
@@ -72,8 +75,8 @@ public sealed partial class DriveTemplate : ContentView
             drive.IsBusy = true;
 
             object request = _nasConnector.IsConnected(drive.Letter)
-                ? new DisconnectDrive.Request(drive.Letter)
-                : new ConnectDrive.Request(drive.Letter);
+                ? new DisconnectDrive.Request(drive.Id)
+                : new ConnectDrive.Request(drive.Id);
 
             Result result = await HandleDriveConnection(request);
             if (result.IsSuccess)
@@ -111,7 +114,12 @@ public sealed partial class DriveTemplate : ContentView
 
     private void HandleUpdate(object? sender, TappedEventArgs e)
     {
-        // Handle update logic here
+        if (BindingContext is not DriveDisplay drive)
+        {
+            return;
+        }
+
+        WeakReferenceMessenger.Default.Send(new UpdateDriveMessage(true, drive.Id));
     }
 
     private void HandleDelete(object? sender, TappedEventArgs e)
@@ -122,5 +130,29 @@ public sealed partial class DriveTemplate : ContentView
         }
 
         WeakReferenceMessenger.Default.Send(new DeleteDriveMessage(true, drive));
+    }
+
+    private void RegisterMessages()
+    {
+        WeakReferenceMessenger.Default.Unregister<DriveUpdatedMessage>(this);
+
+        WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) =>
+        {
+            if (BindingContext is not DriveDisplay drive)
+            {
+                return;
+            }
+
+            if (drive.Id != m.UpdatedDrive.Id)
+            {
+                return;
+            }
+
+            UpdateDriveDetails(m.UpdatedDrive);
+            UpdateStorageUsage(m.UpdatedDrive);
+            UpdateStatusButtonColor(m.UpdatedDrive.Letter);
+
+            OnPropertyChanged();
+        });
     }
 }

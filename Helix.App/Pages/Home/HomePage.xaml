@@ -6,9 +6,10 @@
              xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:createDrive="clr-namespace:Helix.App.Modals.Drives.Create"
+             xmlns:deleteDrive="clr-namespace:Helix.App.Modals.Drives.Delete"
+             xmlns:updateDrive="clr-namespace:Helix.App.Modals.Drives.Update"
              xmlns:driveTemplates="clr-namespace:Helix.App.Views.Drives"
              xmlns:models="clr-namespace:Helix.App.Models"
-             xmlns:deleteDrive="clr-namespace:Helix.App.Modals.Drives.Delete"
              x:Class="Helix.App.Pages.Home.HomePage"
              x:DataType="home:HomeViewModel"
              Title="">
@@ -330,6 +331,20 @@
                                    MaximumHeightRequest="400"
                                    AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
                                    AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="UpdateDriveLayout"
+                         Grid.RowSpan="3" 
+                         Grid.ColumnSpan="2"
+                         IsVisible="False"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="FillAndExpand">
+
+            <updateDrive:UpdateDriveModal x:Name="UpdateDriveView" 
+                                          BackgroundColor="White"
+                                          MaximumHeightRequest="400"
+                                          AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
+                                          AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
     </Grid>

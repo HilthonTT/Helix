@@ -58,7 +58,7 @@ internal sealed partial class DeleteDriveViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Close()
+    private static void Close()
     {
         WeakReferenceMessenger.Default.Send(new DeleteDriveMessage(false, null));
     }
