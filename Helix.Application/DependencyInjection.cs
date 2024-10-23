@@ -30,6 +30,8 @@ public static class DependencyInjection
         services.AddScoped<DeleteDrive>();
         services.AddScoped<UpdateDrive>();
         services.AddScoped<GetDriveById>();
+        
+        services.AddScoped<ExportDrives>();
 
         services.AddScoped<ConnectDrive>();
         services.AddScoped<DisconnectDrive>();

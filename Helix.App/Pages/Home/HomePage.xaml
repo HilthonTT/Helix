@@ -34,7 +34,7 @@
                 </MenuFlyoutItem.IconImageSource>
             </MenuFlyoutItem>
 
-            <MenuFlyoutItem Text="Export Drives">
+            <MenuFlyoutItem Text="Export Drives" Command="{Binding ExportDrivesCommand}">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="E" Modifiers="Cmd,Shift" />
                     <KeyboardAccelerator Key="E" Modifiers="Ctrl" />

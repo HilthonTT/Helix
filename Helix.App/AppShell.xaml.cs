@@ -1,7 +1,9 @@
 ﻿using Helix.App.Constants;
+using Helix.App.Pages.Auditlogs;
 using Helix.App.Pages.Home;
 using Helix.App.Pages.Login;
 using Helix.App.Pages.Register;
+using Helix.App.Pages.Settings;
 using Helix.Application.Users;
 using SharedKernel;
 
@@ -80,5 +82,7 @@ public sealed partial class AppShell : Shell
         Routing.RegisterRoute(PageNames.LoginPage, typeof(LoginPage));
         Routing.RegisterRoute(PageNames.RegisterPage, typeof(RegisterPage));
         Routing.RegisterRoute(PageNames.HomePage, typeof(HomePage));
+        Routing.RegisterRoute(PageNames.SettingsPage, typeof(SettingsPage));
+        Routing.RegisterRoute(PageNames.AuditlogsPage, typeof(AuditlogsPage));
     }
 }

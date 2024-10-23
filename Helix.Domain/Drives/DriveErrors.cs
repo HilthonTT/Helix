@@ -23,4 +23,8 @@ public static class DriveErrors
     public static readonly Error NotALetter = Error.Problem(
         "Drive.NotALetter",
         "The 'letter' you've provided is not a single character.");
+
+    public static readonly Error NoDrivesFound = Error.NotFound(
+        "Drive.NoDrivesFound",
+        "No drives have been found, please create some first.");
 }

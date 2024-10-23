@@ -18,11 +18,13 @@ internal sealed partial class HomeViewModel : BaseViewModel
 {
     private readonly INasConnector _nasConnector;
     private readonly GetDrives _getDrives;
+    private readonly ExportDrives _exportDrives;
 
     public HomeViewModel()
     {
-        _getDrives = App.ServiceProvider.GetRequiredService<GetDrives>();
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
+        _getDrives = App.ServiceProvider.GetRequiredService<GetDrives>();
+        _exportDrives = App.ServiceProvider.GetRequiredService<ExportDrives>();
 
         RegisterMessages();
         FetchDrives();
@@ -44,6 +46,19 @@ internal sealed partial class HomeViewModel : BaseViewModel
     private static void OpenCreateDriveModal()
     {
         WeakReferenceMessenger.Default.Send(new CreateDriveMessage(true));
+    }
+
+    [RelayCommand]
+    private async Task ExportDrivesAsync()
+    {
+        Result result = await _exportDrives.Handle();
+        if (result.IsFailure)
+        {
+            await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+            return;
+        }
+
+        await Shell.Current.DisplayAlert("Success!", "You've exported your drives!", "Ok");
     }
 
     private void FetchDrives()

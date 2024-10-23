@@ -12,11 +12,17 @@ public sealed class Drive : Entity, IAuditable
         string ipAddress,
         string name,
         string username,
-        string password)
+        string password,
+        bool validateUserId = true)
         : base(id)
     {
         Ensure.NotNullOrEmpty(id, nameof(id));
-        Ensure.NotNullOrEmpty(userId, nameof(userId));
+
+        if (validateUserId)
+        {
+            Ensure.NotNullOrEmpty(userId, nameof(userId));
+        }
+
         Ensure.NotNullOrEmpty(letter, nameof(letter));
         Ensure.MustBeOneChar(letter, nameof(letter));
         Ensure.NotNullOrEmpty(ipAddress, nameof(ipAddress));
@@ -98,6 +104,21 @@ public sealed class Drive : Entity, IAuditable
             password);
 
         return drive;
+    }
+
+    public static Drive MapWithoutUserId(Drive drive)
+    {
+        var driveWithoutUserId = new Drive(
+            drive.Id,
+            Guid.Empty,
+            drive.Letter,
+            drive.IpAddress,
+            drive.Name,
+            drive.Username,
+            drive.Password,
+            validateUserId: false);
+
+        return driveWithoutUserId;
     }
 
     public void Update(string letter, string ipAddress, string name, string username, string password)

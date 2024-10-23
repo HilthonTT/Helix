@@ -1,7 +1,7 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
-using Helix.Application.Extensions;
+using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;

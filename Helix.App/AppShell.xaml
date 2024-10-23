@@ -6,6 +6,8 @@
     xmlns:register="clr-namespace:Helix.App.Pages.Register"
     xmlns:login="clr-namespace:Helix.App.Pages.Login"
     xmlns:home="clr-namespace:Helix.App.Pages.Home"
+    xmlns:settings="clr-namespace:Helix.App.Pages.Settings"
+    xmlns:auditlogs="clr-namespace:Helix.App.Pages.Auditlogs"
     xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
     xmlns:local="clr-namespace:Helix.App"
     Shell.FlyoutBehavior="Disabled"
@@ -146,6 +148,14 @@
 
     <FlyoutItem Title="Dashboard" Route="dashboard">
         <ShellContent ContentTemplate="{DataTemplate home:HomePage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Auditlogs" Route="auditlogs">
+        <ShellContent ContentTemplate="{DataTemplate auditlogs:AuditlogsPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Settings" Route="settings">
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}"/>
     </FlyoutItem>
 
 </Shell>
