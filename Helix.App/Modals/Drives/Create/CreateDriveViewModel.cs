@@ -39,7 +39,7 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
             Result<Drive> result = await _createDrive.Handle(request);
             if (result.IsFailure)
             {
-                await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+                await DisplayErrorAsync(result.Error);
                 return;
             }
 

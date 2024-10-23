@@ -48,7 +48,7 @@
                 </MenuFlyoutItem.IconImageSource>
             </MenuFlyoutItem>
 
-            <MenuFlyoutItem Text="Import Drives">
+            <MenuFlyoutItem Text="Import Drives" Command="{Binding ImportDrivesCommand}">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="I" Modifiers="Cmd,Shift" />
                     <KeyboardAccelerator Key="I" Modifiers="Ctrl" />

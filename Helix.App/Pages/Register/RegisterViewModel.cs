@@ -48,7 +48,7 @@ internal sealed partial class RegisterViewModel : BaseViewModel
             Result<User> result = await _registerUser.Handle(request);
             if (result.IsFailure)
             {
-                await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+                await DisplayErrorAsync(result.Error);
                 return;
             }
 

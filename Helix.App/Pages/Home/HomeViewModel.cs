@@ -19,12 +19,14 @@ internal sealed partial class HomeViewModel : BaseViewModel
     private readonly INasConnector _nasConnector;
     private readonly GetDrives _getDrives;
     private readonly ExportDrives _exportDrives;
+    private readonly ImportDrives _importDrives;
 
     public HomeViewModel()
     {
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
         _getDrives = App.ServiceProvider.GetRequiredService<GetDrives>();
         _exportDrives = App.ServiceProvider.GetRequiredService<ExportDrives>();
+        _importDrives = App.ServiceProvider.GetRequiredService<ImportDrives>();
 
         RegisterMessages();
         FetchDrives();
@@ -54,11 +56,29 @@ internal sealed partial class HomeViewModel : BaseViewModel
         Result result = await _exportDrives.Handle();
         if (result.IsFailure)
         {
-            await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+            await DisplayErrorAsync(result.Error);
             return;
         }
 
-        await Shell.Current.DisplayAlert("Success!", "You've exported your drives!", "Ok");
+        await DisplaySuccessAsync("You've exported your drives!");
+    }
+
+    [RelayCommand]
+    private async Task ImportDrivesAsync()
+    {
+        Result<List<Drive>> result = await _importDrives.Handle();
+        if (result.IsFailure)
+        {
+            await DisplayErrorAsync(result.Error);
+            return;
+        }
+
+        await DisplaySuccessAsync("You've imported your drives!");
+
+        foreach (Drive drive in result.Value)
+        {
+            Drives.Add(new DriveDisplay(drive));
+        }
     }
 
     private void FetchDrives()

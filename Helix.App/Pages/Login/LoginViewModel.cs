@@ -42,7 +42,7 @@ internal sealed partial class LoginViewModel : BaseViewModel
             Result<User> result = await _loginUser.Handle(request);
             if (result.IsFailure)
             {
-                await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+                await DisplayErrorAsync(result.Error);
                 return;
             }
 

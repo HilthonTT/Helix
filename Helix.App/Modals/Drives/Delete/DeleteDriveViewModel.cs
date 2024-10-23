@@ -44,7 +44,7 @@ internal sealed partial class DeleteDriveViewModel : BaseViewModel
             Result result = await _deleteDrive.Handle(request);
             if (result.IsFailure)
             {
-                await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+                await DisplayErrorAsync(result.Error);
                 return;
             }
 
