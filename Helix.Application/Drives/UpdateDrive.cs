@@ -3,7 +3,6 @@ using Helix.Application.Abstractions.Data;
 using Helix.Application.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Helix.Application.Drives;
@@ -51,6 +50,11 @@ public sealed class UpdateDrive(IDbContext context, ILoggedInUser loggedInUser)
 
     private static Result Validate(Request request)
     {
+        if (request.Letter.Length > 1)
+        {
+            return Result.Failure(DriveErrors.NotALetter);
+        }
+
         string[] properties = [request.Letter, request.IpAddress, request.Name, request.Username, request.Password];
 
         return properties.Any(string.IsNullOrWhiteSpace)

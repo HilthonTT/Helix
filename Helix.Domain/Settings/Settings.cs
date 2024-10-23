@@ -16,6 +16,14 @@ public sealed class Settings : Entity
         Language language) 
         : base(id)
     {
+        Ensure.NotNullOrEmpty(id, nameof(id));
+        Ensure.NotNullOrEmpty(userId, nameof(userId));
+        Ensure.NotNull(autoConnect, nameof(autoConnect));
+        Ensure.NotNull(autoMinimize, nameof(autoMinimize));
+        Ensure.NotNull(setOnStartup, nameof(setOnStartup));
+        Ensure.MustBePositive(timerCount, nameof(timerCount));
+        Ensure.NotNull(language, nameof(language));
+
         UserId = userId;
         AutoConnect = autoConnect;
         AutoMinimize = autoMinimize;

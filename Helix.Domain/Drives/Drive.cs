@@ -15,6 +15,15 @@ public sealed class Drive : Entity, IAuditable
         string password)
         : base(id)
     {
+        Ensure.NotNullOrEmpty(id, nameof(id));
+        Ensure.NotNullOrEmpty(userId, nameof(userId));
+        Ensure.NotNullOrEmpty(letter, nameof(letter));
+        Ensure.MustBeOneChar(letter, nameof(letter));
+        Ensure.NotNullOrEmpty(ipAddress, nameof(ipAddress));
+        Ensure.NotNullOrEmpty(name, nameof(name));
+        Ensure.NotNullOrEmpty(username, nameof(username));
+        Ensure.NotNullOrEmpty(password, nameof(password));
+
         UserId = userId;
         Letter = letter;
         IpAddress = ipAddress;

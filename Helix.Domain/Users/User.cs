@@ -7,6 +7,10 @@ public sealed class User : Entity, IAuditable
     private User(Guid id, string username, string passwordHash)
         : base(id)
     {
+        Ensure.NotNullOrEmpty(id, nameof(id));
+        Ensure.NotNullOrEmpty(username, nameof(username));
+        Ensure.NotNullOrEmpty(passwordHash, nameof(passwordHash));
+
         Username = username;
         PasswordHash = passwordHash;
     }

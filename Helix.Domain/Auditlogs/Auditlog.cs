@@ -7,6 +7,9 @@ public sealed class Auditlog : Entity, IAuditable
     private Auditlog(Guid id, Guid userId, string message) 
         : base(id)
     {
+        Ensure.NotNull(id, nameof(id));
+        Ensure.NotNull(userId, nameof(userId));
+
         UserId = userId;
         Message = message;
     }

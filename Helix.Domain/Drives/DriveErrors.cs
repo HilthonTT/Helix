@@ -19,4 +19,8 @@ public static class DriveErrors
     public static Error LetterNotFound(string letter) => Error.NotFound(
         "Drive.LetterNotFound",
         $"The drive with the letter = '{letter}' was not found.");
+
+    public static readonly Error NotALetter = Error.Problem(
+        "Drive.NotALetter",
+        "The 'letter' you've provided is not a single character.");
 }

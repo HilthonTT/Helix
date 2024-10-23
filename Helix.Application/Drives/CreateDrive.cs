@@ -46,6 +46,11 @@ public sealed class CreateDrive(IDbContext context, ILoggedInUser loggedInUser)
 
     private static Result Validate(Request request)
     {
+        if (request.Letter.Length > 1)
+        {
+            return Result.Failure(DriveErrors.NotALetter);
+        }
+
         string[] properties = [request.Letter, request.IpAddress, request.Name, request.Username, request.Password];
 
         return properties.Any(string.IsNullOrWhiteSpace)
