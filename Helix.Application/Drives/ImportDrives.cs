@@ -1,4 +1,5 @@
 ﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Core.Errors;
 using Helix.Domain.Drives;
@@ -9,7 +10,7 @@ using System.Text.Json;
 
 namespace Helix.Application.Drives;
 
-public sealed class ImportDrives(IDbContext context, ILoggedInUser loggedInUser)
+public sealed class ImportDrives(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService)
 {
     private const string FileType = ".json";
 
@@ -71,6 +72,8 @@ public sealed class ImportDrives(IDbContext context, ILoggedInUser loggedInUser)
         context.Drives.AddRange(newDrives);
 
         await context.SaveChangesAsync(cancellationToken);
+
+        await cacheService.RemoveAsync(CacheKeys.Drives.All, cancellationToken);
 
         return newDrives;
     }

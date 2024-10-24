@@ -46,7 +46,7 @@ public sealed partial class AppShell : Shell
     {
         LogoutUser logoutUser = App.ServiceProvider.GetRequiredService<LogoutUser>();
 
-        Result result = logoutUser.Handle();
+        Result result = await logoutUser.Handle();
         if (result.IsFailure)
         {
             await Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");

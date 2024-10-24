@@ -9,12 +9,25 @@ using Helix.Infrastructure.Connector;
 using Helix.Persistence.Interceptors;
 using SharedKernel;
 using Helix.Infrastructure.Time;
+using Helix.Application.Abstractions.Caching;
+using Helix.Infrastructure.Caching;
 
 namespace Helix.Infrastructure;
 
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    {
+        services
+            .AddServices()
+            .AddDatabase()
+            .AddCaching()
+            .AddAuthenticationInternal();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDatabase(this IServiceCollection services)
     {
         services.AddSingleton<UpdateAuditableInterceptor>();
         services.AddSingleton<InsertAuditLogsInterceptor>();
@@ -26,15 +39,33 @@ public static class DependencyInjection
                 sp.GetRequiredService<InsertAuditLogsInterceptor>());
         });
 
-        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
-
-        services.AddScoped<INasConnector, NasConnector>();
-
         services.AddScoped<IDbContext, AppDbContext>();
 
+        return services;
+    }
+
+    private static IServiceCollection AddServices(this IServiceCollection services)
+    {
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddScoped<INasConnector, NasConnector>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddAuthenticationInternal(this IServiceCollection services)
+    {
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+
         services.AddScoped<ILoggedInUser, LoggedInUser>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddCaching(this IServiceCollection services)
+    {
+        services.AddDistributedMemoryCache();
+
+        services.AddSingleton<ICacheService, CacheService>();
 
         return services;
     }

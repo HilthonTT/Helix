@@ -1,4 +1,5 @@
 ﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
@@ -7,7 +8,7 @@ using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class UpdateDrive(IDbContext context, ILoggedInUser loggedInUser)
+public sealed class UpdateDrive(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService)
 {
     public sealed record Request(Guid DriveId, string Letter, string IpAddress, string Name, string Username, string Password);
 
@@ -44,6 +45,10 @@ public sealed class UpdateDrive(IDbContext context, ILoggedInUser loggedInUser)
         drive.Update(request.Letter, request.IpAddress, request.Name, request.Username, request.Password);
 
         await context.SaveChangesAsync(cancellationToken);
+
+        await cacheService.RemoveAsync(CacheKeys.Drives.All, cancellationToken);
+
+        await cacheService.RemoveAsync(CacheKeys.Drives.GetById(request.DriveId), cancellationToken);
 
         return Result.Success();
     }

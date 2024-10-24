@@ -1,15 +1,16 @@
 ﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class DeleteDrive(IDbContext context, ILoggedInUser loggedInUser)
+public sealed class DeleteDrive(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService)
 {
-    public sealed record Request(Guid Id);
+    public sealed record Request(Guid DriveId);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -19,10 +20,10 @@ public sealed class DeleteDrive(IDbContext context, ILoggedInUser loggedInUser)
             return Result.Failure(validationResult.Error);
         }
 
-        Drive? drive = await context.Drives.FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+        Drive? drive = await context.Drives.GetByIdAsync(request.DriveId, cancellationToken);
         if (drive is null)
         {
-            return Result.Failure(DriveErrors.NotFound(request.Id));
+            return Result.Failure(DriveErrors.NotFound(request.DriveId));
         }
 
         if (drive.UserId != loggedInUser.UserId)
@@ -34,12 +35,16 @@ public sealed class DeleteDrive(IDbContext context, ILoggedInUser loggedInUser)
 
         await context.SaveChangesAsync(cancellationToken);
 
+        await cacheService.RemoveAsync(CacheKeys.Drives.All, cancellationToken);
+
+        await cacheService.RemoveAsync(CacheKeys.Drives.GetById(request.DriveId), cancellationToken);
+
         return Result.Success();
     }
 
     private static Result Validate(Request request)
     {
-        if (request.Id == Guid.Empty)
+        if (request.DriveId == Guid.Empty)
         {
             return Result.Failure(Error.NullValue);
         }

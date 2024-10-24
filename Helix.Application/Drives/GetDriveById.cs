@@ -1,4 +1,5 @@
 ﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
@@ -7,7 +8,7 @@ using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class GetDriveById(IDbContext context, ILoggedInUser loggedInUser)
+public sealed class GetDriveById(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService)
 {
     public sealed record Request(Guid DriveId);
 
@@ -24,15 +25,29 @@ public sealed class GetDriveById(IDbContext context, ILoggedInUser loggedInUser)
             return Result.Failure<Drive>(AuthenticationErrors.InvalidPermissions);
         }
 
-        Drive? drive = await context.Drives.GetByIdAsNoTrackingAsync(request.DriveId, cancellationToken);
-        if (drive is null)
+        string cacheKey = CacheKeys.Drives.GetById(request.DriveId);
+        Drive? drive = await GetCachedOrDbDriveAsync(request.DriveId, cacheKey, cancellationToken);
+
+        return drive switch
         {
-            return Result.Failure<Drive>(DriveErrors.NotFound(request.DriveId));
+            null => Result.Failure<Drive>(DriveErrors.NotFound(request.DriveId)),
+            _ when drive.UserId != loggedInUser.UserId => Result.Failure<Drive>(AuthenticationErrors.InvalidPermissions),
+            _ => Result.Success(drive)
+        };
+    }
+
+    private async Task<Drive?> GetCachedOrDbDriveAsync(Guid driveId, string cacheKey, CancellationToken cancellationToken)
+    {
+        Drive? drive = await cacheService.GetAsync<Drive>(cacheKey, cancellationToken);
+        if (drive is not null)
+        {
+            return drive;
         }
 
-        if (drive.UserId != loggedInUser.UserId)
+        drive = await context.Drives.GetByIdAsNoTrackingAsync(driveId, cancellationToken);
+        if (drive is not null)
         {
-            return Result.Failure<Drive>(AuthenticationErrors.InvalidPermissions);
+            await cacheService.SetAsync(cacheKey, drive, cancellationToken: cancellationToken);
         }
 
         return drive;
