@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Constants;
 using Helix.App.Helpers;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Create;
@@ -79,6 +80,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
         {
             Drives.Add(new DriveDisplay(drive));
         }
+    }
+
+    [RelayCommand]
+    private static Task GoToSettingsAsync()
+    {
+        return Shell.Current.GoToAsync($"//{PageNames.SettingsPage}");
     }
 
     private void FetchDrives()

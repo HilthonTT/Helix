@@ -144,4 +144,8 @@
 	  </MauiXaml>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Pages\Settings\Views\" />
+	</ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
 ﻿using Helix.Application.Drives;
+using Helix.Application.Settings;
 using Helix.Application.Users;
 
 namespace Helix.Application;
@@ -9,7 +10,8 @@ public static class DependencyInjection
     {
         services
             .AddUserEndpoints()
-            .AddDriveEndpoints();
+            .AddDriveEndpoints()
+            .AddSettingsEndpoint();
 
         return services;
     }
@@ -36,6 +38,13 @@ public static class DependencyInjection
 
         services.AddScoped<ConnectDrive>();
         services.AddScoped<DisconnectDrive>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddSettingsEndpoint(this IServiceCollection services)
+    {
+        services.AddScoped<GetSettings>();
 
         return services;
     }

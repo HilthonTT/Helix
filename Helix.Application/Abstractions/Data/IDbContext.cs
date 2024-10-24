@@ -1,8 +1,8 @@
 ﻿using Helix.Domain.Auditlogs;
 using Helix.Domain.Drives;
-using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using Microsoft.EntityFrameworkCore;
+using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.Application.Abstractions.Data;
 
@@ -12,7 +12,7 @@ public interface IDbContext
 
     public DbSet<Drive> Drives { get; init; }
 
-    public DbSet<Settings> Settings { get; init; }
+    public DbSet<SettingsModel> Settings { get; init; }
 
     public DbSet<Auditlog> AuditLogs { get; init; }
 

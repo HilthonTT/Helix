@@ -16,7 +16,7 @@
 
     <ContentPage.MenuBarItems>
         <MenuBarItem Text="File">
-            <MenuFlyoutItem Text="Preferences"/>
+            <MenuFlyoutItem Text="Preferences" Command="{Binding GoToSettingsCommand}"/>
         </MenuBarItem>
 
         <MenuBarItem Text="Drives">

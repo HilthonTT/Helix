@@ -1,8 +1,346 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:settings="clr-namespace:Helix.App.Pages.Settings"
              x:Class="Helix.App.Pages.Settings.SettingsPage"
+             x:DataType="settings:SettingsViewModel"
              Title=""
              Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <ControlTemplate x:Key="MenuItemTemplate">
+            <Grid RowDefinitions="Auto">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CheckedStates">
+                            <VisualState x:Name="Checked">
+                                <VisualState.Setters>
+                                    <Setter TargetName="OuterBorder" Property="Background" Value="{StaticResource DarkBg1Brush}" />
+                                    <Setter TargetName="OuterBorder" Property="Border.StrokeThickness" Value="1" />
+                                    <Setter TargetName="InnerBorder" Property="Background" Value="Transparent" />
+                                    <Setter TargetName="InnerBorder" Property="Border.StrokeThickness" Value="1" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Unchecked">
+                                <VisualState.Setters>
+                                    <Setter TargetName="OuterBorder" Property="Background" Value="Transparent" />
+                                    <Setter TargetName="OuterBorder" Property="Border.StrokeThickness" Value="0" />
+                                    <Setter TargetName="InnerBorder" Property="Background" Value="Transparent" />
+                                    <Setter TargetName="InnerBorder" Property="Border.StrokeThickness" Value="0" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+
+                <Border x:Name="OuterBorder" 
+                    Background="Transparent"
+                    Stroke="{StaticResource DarkBg1Brush}" 
+                    StrokeThickness="0"
+                    HorizontalOptions="Fill"
+                    HeightRequest="70"
+                    Margin="15,0,0,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12,0,12,0" />
+                    </Border.StrokeShape>
+                </Border>
+
+                <Border x:Name="InnerBorder" 
+                    Background="Transparent"
+                    Margin="20" 
+                    HorizontalOptions="Center" 
+                    VerticalOptions="Center"
+                    Stroke="{StaticResource PrimaryBrush}" 
+                    StrokeThickness="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8" />
+                    </Border.StrokeShape>
+                </Border>
+
+                <ContentPresenter x:Name="CP"/>
+            </Grid>
+        </ControlTemplate>
+    </ContentPage.Resources>
+
+    <VisualStateManager.VisualStateGroups>
+        <VisualStateGroupList>
+            <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Hidden">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter
+                        TargetName="MainGrid"
+                        Property="Grid.ColumnDefinitions"
+                        Value="0,*" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Shown">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1250" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter
+                        TargetName="MainGrid"
+                        Property="Grid.ColumnDefinitions"
+                        Value="275,*" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateGroupList>
+    </VisualStateManager.VisualStateGroups>
+
+    <Grid>
+        <ScrollView>
+            <Grid x:Name="MainGrid"
+                  RowDefinitions="Auto,*,Auto"
+                  ColumnDefinitions="325,*"
+                  ColumnSpacing="24"
+                  Padding="24">
+
+                <!-- Row 1: First Border for Account Settings -->
+                <Border Background="{StaticResource DarkBg2Brush}"
+                        Stroke="{StaticResource DarkBg2Brush}"
+                        StrokeThickness="1"
+                        Grid.Row="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12"/>
+                    </Border.StrokeShape>
+
+                    <VerticalStackLayout Padding="0,12" 
+                                         RadioButtonGroup.GroupName="Sections" 
+                                         RadioButtonGroup.SelectedValue="{Binding CurrentSection, Mode=TwoWay}">
+
+                        <VerticalStackLayout.Resources>
+                            <Style TargetType="RadioButton">
+                                <Setter Property="ControlTemplate" Value="{StaticResource MenuItemTemplate}"/>
+                            </Style>
+                        </VerticalStackLayout.Resources>
+
+                        <RadioButton x:Name="AccountRadioButton"
+                                     Value="account"
+                                     ToolTipProperties.Text="Account information"
+                                     behaviors:CursorBehavior.AttachBehavior="True"
+                                     IsChecked="True">
+                            <RadioButton.Content>
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8"
+                                      RowDefinitions="Auto, Auto" RowSpacing="4"
+                                      Padding="26">
+                                    <Image Source="info.png" WidthRequest="20" HeightRequest="20" Aspect="AspectFit" />
+                                    <Label Text="Account Information" Grid.Column="1" Style="{StaticResource Headline}" />
+                                    <Label Text="Change your account info." 
+                                           Grid.Column="1" Grid.Row="1" 
+                                           Style="{StaticResource Subhead}" />
+                                </Grid>
+                            </RadioButton.Content>
+                        </RadioButton>
+
+                        <RadioButton x:Name="SettingsRadioButton"
+                                     Value="settings" 
+                                     ToolTipProperties.Text="Settings"
+                                     behaviors:CursorBehavior.AttachBehavior="True">
+                            <RadioButton.Content>
+                                <Grid ColumnDefinitions="20,Auto" 
+                                      ColumnSpacing="8"
+                                      RowDefinitions="Auto, Auto"
+                                      RowSpacing="4"
+                                      Padding="26">
+                                    <Image Source="cog.png" WidthRequest="20" HeightRequest="20" Aspect="AspectFit"/>
+                                    <Label Text="Settings" Grid.Column="1" Style="{StaticResource Headline}" />
+                                    <Label Text="Manage your preferences." 
+                                           Grid.Column="1" Grid.Row="1" 
+                                           Style="{StaticResource Subhead}" />
+                                </Grid>
+                            </RadioButton.Content>
+                        </RadioButton>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Row 2: Second Border for Username and Password fields -->
+                <Border Background="{StaticResource DarkBg2Brush}"
+                        Stroke="{StaticResource DarkBg2Brush}"
+                        StrokeThickness="1"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        IsVisible="False">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" 
+                                     Binding="{Binding CurrentSection}" 
+                                     Value="account">
+                            <Setter Property="IsVisible" Value="True" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border"
+                                     Binding="{Binding CurrentSection}" 
+                                     Value="{x:Static system:String.Empty}">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12"/>
+                    </Border.StrokeShape>
+
+                    <VerticalStackLayout Spacing="16">
+                        <!-- User Information Grid -->
+                        <Grid Margin="24" RowDefinitions="Auto,Auto,Auto" RowSpacing="18">
+                            <VerticalStackLayout Margin="0,24,0,0" Grid.Row="0">
+                                <Label Text="Account Information" Style="{StaticResource LargeTitle}"/>
+                                <Label Text="{Binding Source={x:Static system:DateTime.Now}, StringFormat='{0:dddd, MMMM dd yyyy}'}"/>
+                                <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
+                            </VerticalStackLayout>
+
+                            <Grid ColumnDefinitions="*,Auto" Grid.Row="1">
+
+
+                                <Label>
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Username: " FontSize="Title" TextColor="LightGray" FontFamily="{StaticResource SpaceMonoBold}"/>
+                                            <Span Text="{Binding Username}" FontSize="Title" FontFamily="{StaticResource SpaceMonoRegular}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <ImageButton Grid.Column="1" Source="pencil.png"
+                                             Aspect="Fill" 
+                                             WidthRequest="40" 
+                                             HeightRequest="40" 
+                                             Background="Transparent"
+                                             BorderColor="Transparent"
+                                             Command="{Binding EditUsernameCommand}"
+                                             IsEnabled="{Binding IsNotBusy}"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,Auto" Grid.Row="2">
+                                <Label>
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Password: " FontSize="Title" TextColor="LightGray" FontFamily="{StaticResource SpaceMonoBold}"/>
+                                            <Span Text="-------"  FontSize="Title" FontFamily="{StaticResource SpaceMonoRegular}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <ImageButton Grid.Column="1" Source="pencil.png"
+                                             Aspect="Fill" 
+                                             WidthRequest="40" 
+                                             HeightRequest="40" 
+                                             Background="Transparent"
+                                             BorderColor="Transparent"
+                                             Command="{Binding EditPasswordCommand}" 
+                                             IsEnabled="{Binding IsNotBusy}"/>
+                            </Grid>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+
+                <!-- Row 2: Settings, preferences -->
+                <Border Background="{StaticResource DarkBg2Brush}"
+                        Stroke="{StaticResource DarkBg2Brush}"
+                        StrokeThickness="1"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        IsVisible="False">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" 
+                                     Binding="{Binding CurrentSection}" 
+                                     Value="settings">
+                            <Setter Property="IsVisible" Value="True" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border"
+                                     Binding="{Binding CurrentSection}" 
+                                     Value="{x:Static system:String.Empty}">
+                            <Setter Property="IsVisible" Value="False" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12"/>
+                    </Border.StrokeShape>
+
+                    <VerticalStackLayout Spacing="16">
+                        <!-- User Information Grid -->
+                        <Grid Margin="24" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="18">
+                            <VerticalStackLayout Margin="0,24,0,0" Grid.Row="0">
+                                <Label Text="Settings" Style="{StaticResource LargeTitle}"/>
+                                <Label Text="{Binding Source={x:Static system:DateTime.Now}, StringFormat='{0:dddd, MMMM dd yyyy}'}"/>
+                                <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
+                            </VerticalStackLayout>
+
+                            <Grid ColumnDefinitions="*,Auto" Grid.Row="1">
+                                <Label Text="Auto connect credentials on launch"/>
+                                <Switch HorizontalOptions="End" 
+                                        OnColor="Green" 
+                                        ThumbColor="White" 
+                                        IsToggled="{Binding Settings.AutoConnect}"
+                                        IsEnabled="{Binding IsNotBusy}"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,Auto" Grid.Row="2">
+                                <Label Text="Auto minimize app"/>
+                                <Switch HorizontalOptions="End"
+                                        OnColor="Green" 
+                                        ThumbColor="White" 
+                                        IsToggled="{Binding Settings.AutoMinimize}"
+                                        IsEnabled="{Binding IsNotBusy}"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,Auto" Grid.Row="3">
+                                <Label Text="Set on startup"/>
+                                <Switch HorizontalOptions="End" 
+                                        OnColor="Green"
+                                        ThumbColor="White"
+                                        IsToggled="{Binding Settings.SetOnStartup}" 
+                                        IsEnabled="{Binding IsNotBusy}"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Grid.Row="4">
+                                <Label Text="Timer Count in seconds" Grid.Column="0"/>
+                                <Border Grid.Column="1"
+                                        HeightRequest="48"
+                                        HorizontalOptions="FillAndExpand"
+                                        Background="{StaticResource DarkBg1Brush}"
+                                        Stroke="{StaticResource SecondaryBrush}"
+                                        StrokeThickness="1">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8"/>
+                                    </Border.StrokeShape>
+
+
+                                    <Grid>
+                                        <Entry Background="Transparent"
+                                               Placeholder="e.g. 20"
+                                               Keyboard="Numeric"
+                                               Text="{Binding Settings.TimerCount}"
+                                               PlaceholderColor="{StaticResource TextSecondary}"
+                                               TextColor="White"
+                                               HorizontalOptions="Fill"
+                                               MinimumWidthRequest="0"
+                                               Margin="0,0,50,0"
+                                               FontSize="14"
+                                               IsEnabled="{Binding IsNotBusy}" />
+
+                                        <ImageButton Source="check.png"
+                                                     HorizontalOptions="End" 
+                                                     VerticalOptions="Center"
+                                                     BackgroundColor="Transparent"
+                                                     HeightRequest="24"
+                                                     WidthRequest="24"
+                                                     Margin="0,0,10,0" 
+                                                     BorderColor="Transparent"
+                                                     Command="{Binding SaveTimerCountCommand}" 
+                                                     IsEnabled="{Binding IsNotBusy}" />
+                                    </Grid>
+
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+            </Grid>
+        </ScrollView>
+    </Grid>
 
 </ContentPage>
