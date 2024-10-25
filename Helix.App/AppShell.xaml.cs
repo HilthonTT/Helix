@@ -1,4 +1,6 @@
-﻿using Helix.App.Constants;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Constants;
+using Helix.App.Messages;
 using Helix.App.Pages.Auditlogs;
 using Helix.App.Pages.Home;
 using Helix.App.Pages.Login;
@@ -20,6 +22,7 @@ public sealed partial class AppShell : Shell
         FlyoutBehavior = FlyoutBehavior.Disabled;
 
         InitRoutes();
+        RegisterMessages();
     }
 
     private string? _selectedRoute;
@@ -84,5 +87,13 @@ public sealed partial class AppShell : Shell
         Routing.RegisterRoute(PageNames.HomePage, typeof(HomePage));
         Routing.RegisterRoute(PageNames.SettingsPage, typeof(SettingsPage));
         Routing.RegisterRoute(PageNames.AuditlogsPage, typeof(AuditlogsPage));
+    }
+
+    private void RegisterMessages()
+    {
+        WeakReferenceMessenger.Default.Register<PageChangedMessage>(this, (r, m) =>
+        {
+            SelectedRoute = m.PageName;
+        });
     }
 }

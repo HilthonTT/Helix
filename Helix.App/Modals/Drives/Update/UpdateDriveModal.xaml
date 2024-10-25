@@ -135,7 +135,7 @@
                 Margin="24,24,12,24"
                 Style="{StaticResource SecondaryButtonOutline}"
                 HorizontalOptions="Fill"
-                Text="Cancel"
+                Text="Close"
                 Command="{Binding CloseCommand}"
                 IsEnabled="{Binding IsNotBusy}"/>
 

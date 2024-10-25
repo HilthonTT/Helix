@@ -16,11 +16,11 @@
 
     <ContentPage.MenuBarItems>
         <MenuBarItem Text="File">
-            <MenuFlyoutItem Text="Preferences" Command="{Binding GoToSettingsCommand}"/>
+            <MenuFlyoutItem Text="Preferences" Clicked="Preferences_Clicked" />
         </MenuBarItem>
 
         <MenuBarItem Text="Drives">
-            <MenuFlyoutItem Text="Add Drive" Command="{Binding OpenCreateDriveModalCommand}">
+            <MenuFlyoutItem Text="Add Drive" Clicked="AddDrive_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="A" Modifiers="Cmd,Shift" />
                     <KeyboardAccelerator Key="A" Modifiers="Ctrl" />
@@ -34,7 +34,7 @@
                 </MenuFlyoutItem.IconImageSource>
             </MenuFlyoutItem>
 
-            <MenuFlyoutItem Text="Export Drives" Command="{Binding ExportDrivesCommand}">
+            <MenuFlyoutItem Text="Export Drives" Clicked="ExportDrives_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="E" Modifiers="Cmd,Shift" />
                     <KeyboardAccelerator Key="E" Modifiers="Ctrl" />
@@ -48,7 +48,7 @@
                 </MenuFlyoutItem.IconImageSource>
             </MenuFlyoutItem>
 
-            <MenuFlyoutItem Text="Import Drives" Command="{Binding ImportDrivesCommand}">
+            <MenuFlyoutItem Text="Import Drives" Clicked="ImportDrives_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="I" Modifiers="Cmd,Shift" />
                     <KeyboardAccelerator Key="I" Modifiers="Ctrl" />

@@ -83,9 +83,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private static Task GoToSettingsAsync()
+    private async static Task GoToSettingsAsync()
     {
-        return Shell.Current.GoToAsync($"//{PageNames.SettingsPage}");
+        await Shell.Current.GoToAsync($"//{PageNames.SettingsPage}");
+
+        WeakReferenceMessenger.Default.Send(new PageChangedMessage(PageNames.SettingsPage));
     }
 
     private void FetchDrives()

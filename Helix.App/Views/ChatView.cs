@@ -58,7 +58,7 @@ internal sealed class ChartView : SKCanvasView
 
         if (view._chart is not null)
         {
-            view._handler = view._chart.ObserveInvalidate(view, (v) => v.InvalidateSurface());
+            view._handler = view?._chart.ObserveInvalidate(view, (v) => v?.InvalidateSurface());
         }
     }
 

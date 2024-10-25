@@ -233,4 +233,56 @@ public sealed partial class HomePage : ContentPage
             await InitializeChartAsync();
         });
     }
+
+    private async void Preferences_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is not HomeViewModel viewModel)
+        {
+            return;
+        }
+
+        if (viewModel.GoToSettingsCommand.CanExecute(null))
+        {
+            await viewModel.GoToSettingsCommand.ExecuteAsync(null);
+        }
+    }
+
+    private void AddDrive_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is not HomeViewModel viewModel)
+        {
+            return;
+        }
+
+        if (viewModel.OpenCreateDriveModalCommand.CanExecute(null))
+        {
+            viewModel.OpenCreateDriveModalCommand.Execute(null);
+        }
+    }
+
+    private void ExportDrives_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is not HomeViewModel viewModel)
+        {
+            return;
+        }
+
+        if (viewModel.ExportDrivesCommand.CanExecute(null))
+        {
+            viewModel.ExportDrivesCommand.Execute(null);
+        }
+    }
+
+    private void ImportDrives_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is not HomeViewModel viewModel)
+        {
+            return;
+        }
+
+        if (viewModel.ImportDrivesCommand.CanExecute(null))
+        {
+            viewModel.ImportDrivesCommand.Execute(null);
+        }
+    }
 }
