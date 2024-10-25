@@ -1,6 +1,7 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Core.Extensions;
 using Helix.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
@@ -24,7 +25,7 @@ public sealed class RegisterUser(IDbContext context, IPasswordHasher passwordHas
             return Result.Failure<User>(AuthenticationErrors.PasswordsDoNotMatch);
         }
 
-        if (await context.Users.AnyAsync(u => u.Username == request.Username, cancellationToken))
+        if (!await context.Users.IsUsernameUniqueAsync(request.Username, cancellationToken))
         {
             return Result.Failure<User>(AuthenticationErrors.UsernameNotUnique);
         }

@@ -11,9 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helix.Application", "Helix.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helix.Domain", "Helix.Domain\Helix.Domain.csproj", "{9A1D9E3A-5CC3-45BE-840A-8881B050D8F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedKernel", "SharedKernel\SharedKernel.csproj", "{917413F1-9034-406B-9A30-E53A6F17AE90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedKernel", "SharedKernel\SharedKernel.csproj", "{917413F1-9034-406B-9A30-E53A6F17AE90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helix.Infrastructure", "Helix.Infrastructure\Helix.Infrastructure.csproj", "{7CF6FAA2-5EA6-41ED-8A19-7E86C52CEA6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helix.Infrastructure", "Helix.Infrastructure\Helix.Infrastructure.csproj", "{7CF6FAA2-5EA6-41ED-8A19-7E86C52CEA6E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E28629AF-FBD2-484E-9EF3-2013CB42C0A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.UnitTests", "Application.UnitTests\Application.UnitTests.csproj", "{287AD325-0426-4318-81D0-446137378350}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +47,10 @@ Global
 		{7CF6FAA2-5EA6-41ED-8A19-7E86C52CEA6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CF6FAA2-5EA6-41ED-8A19-7E86C52CEA6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CF6FAA2-5EA6-41ED-8A19-7E86C52CEA6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{287AD325-0426-4318-81D0-446137378350}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{287AD325-0426-4318-81D0-446137378350}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{287AD325-0426-4318-81D0-446137378350}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{287AD325-0426-4318-81D0-446137378350}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +61,7 @@ Global
 		{9A1D9E3A-5CC3-45BE-840A-8881B050D8F6} = {66941166-329C-4800-912E-E38988FBE096}
 		{917413F1-9034-406B-9A30-E53A6F17AE90} = {66941166-329C-4800-912E-E38988FBE096}
 		{7CF6FAA2-5EA6-41ED-8A19-7E86C52CEA6E} = {66941166-329C-4800-912E-E38988FBE096}
+		{287AD325-0426-4318-81D0-446137378350} = {E28629AF-FBD2-484E-9EF3-2013CB42C0A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {284E3129-1CDF-49FC-8882-6981434D9288}

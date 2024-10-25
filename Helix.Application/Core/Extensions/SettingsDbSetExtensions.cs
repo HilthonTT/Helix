@@ -15,6 +15,15 @@ public static class SettingsDbSetExtensions
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
+    public static Task<SettingsModel?> GetByUserIdAsAsync(
+        this DbSet<SettingsModel> settings,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return settings
+            .FirstOrDefaultAsync(s => s.UserId == userId, cancellationToken);
+    }
+
     public static Task<SettingsModel?> GetByUserIdAsNoTrackingAsync(
         this DbSet<SettingsModel> settings,
         Guid userId, 

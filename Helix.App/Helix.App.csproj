@@ -118,6 +118,12 @@
 	  <MauiXaml Update="Modals\Drives\Update\UpdateDriveModal.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Modals\Users\UpdatePassword\UpdatePassword.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Modals\Users\UpdateUsername\UpdateUsernameModal.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\Auditlogs\AuditlogsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

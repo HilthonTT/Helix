@@ -45,6 +45,7 @@ public static class DependencyInjection
     private static IServiceCollection AddSettingsEndpoint(this IServiceCollection services)
     {
         services.AddScoped<GetSettings>();
+        services.AddScoped<UpdateSettings>();
 
         return services;
     }

@@ -48,12 +48,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
     }
 
-    [RelayCommand]
-    private void SaveTimerCount()
-    {
-
-    }
-
     private void LoadSettings()
     {
         Task.Run(async () =>

@@ -275,7 +275,7 @@
                                         OnColor="Green" 
                                         ThumbColor="White" 
                                         IsToggled="{Binding Settings.AutoConnect}"
-                                        IsEnabled="{Binding IsNotBusy}"/>
+                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
 
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="2">
@@ -284,7 +284,7 @@
                                         OnColor="Green" 
                                         ThumbColor="White" 
                                         IsToggled="{Binding Settings.AutoMinimize}"
-                                        IsEnabled="{Binding IsNotBusy}"/>
+                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
 
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="3">
@@ -293,7 +293,7 @@
                                         OnColor="Green"
                                         ThumbColor="White"
                                         IsToggled="{Binding Settings.SetOnStartup}" 
-                                        IsEnabled="{Binding IsNotBusy}"/>
+                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="4">
                                 <Label Text="Timer Count in seconds" Grid.Column="0"/>
@@ -319,9 +319,9 @@
                                                MinimumWidthRequest="0"
                                                Margin="0,0,50,0"
                                                FontSize="14"
-                                               IsEnabled="{Binding IsNotBusy}" />
+                                               IsEnabled="{Binding Settings.IsNotBusy}" />
 
-                                        <ImageButton Source="check.png"
+                                        <!--<ImageButton Source="check.png"
                                                      HorizontalOptions="End" 
                                                      VerticalOptions="Center"
                                                      BackgroundColor="Transparent"
@@ -330,7 +330,7 @@
                                                      Margin="0,0,10,0" 
                                                      BorderColor="Transparent"
                                                      Command="{Binding SaveTimerCountCommand}" 
-                                                     IsEnabled="{Binding IsNotBusy}" />
+                                                     IsEnabled="{Binding IsNotBusy}" />-->
                                     </Grid>
 
                                 </Border>
