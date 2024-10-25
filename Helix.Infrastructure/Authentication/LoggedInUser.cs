@@ -32,4 +32,9 @@ internal sealed partial class LoggedInUser : ObservableObject, ILoggedInUser
 
         OnPropertyChanged(nameof(IsLoggedIn));
     }
+
+    public void Update(string username)
+    {
+        Username = username;
+    }
 }

@@ -12,4 +12,12 @@ public static class UserDbSetExtensions
     {
         return !await users.AnyAsync(u => u.Username == username, cancellationToken);
     }
+
+    public static Task<User?> GetByIdAsync(
+        this DbSet<User> users,
+        Guid userId, 
+        CancellationToken cancellationToken = default)
+    {
+        return users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+    }
 }

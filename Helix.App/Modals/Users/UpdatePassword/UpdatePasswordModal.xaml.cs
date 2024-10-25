@@ -1,8 +1,8 @@
 namespace Helix.App.Modals.Users.UpdatePassword;
 
-public sealed partial class UpdatePassword : ContentView
+public sealed partial class UpdatePasswordModal : ContentView
 {
-	public UpdatePassword()
+	public UpdatePasswordModal()
 	{
 		InitializeComponent();
 

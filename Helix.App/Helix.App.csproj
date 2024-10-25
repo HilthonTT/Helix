@@ -118,7 +118,7 @@
 	  <MauiXaml Update="Modals\Drives\Update\UpdateDriveModal.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Modals\Users\UpdatePassword\UpdatePassword.xaml">
+	  <MauiXaml Update="Modals\Users\UpdatePassword\UpdatePasswordModal.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Modals\Users\UpdateUsername\UpdateUsernameModal.xaml">
@@ -152,6 +152,12 @@
 
 	<ItemGroup>
 	  <Folder Include="Pages\Settings\Views\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Modals\Users\UpdatePassword\UpdatePasswordModal.xaml.cs">
+	    <DependentUpon>UpdatePasswordModal.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 </Project>

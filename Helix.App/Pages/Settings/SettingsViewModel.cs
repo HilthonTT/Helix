@@ -1,5 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Modals.Users.UpdatePassword;
+using Helix.App.Modals.Users.UpdateUsername;
 using Helix.App.Models;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Settings;
@@ -24,6 +27,7 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         Username = _loggedInUser.Username;
 
         LoadSettings();
+        RegisterMessages();
     }
 
     [ObservableProperty]
@@ -39,13 +43,13 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     [RelayCommand]
     private void EditUsername()
     {
-
+        WeakReferenceMessenger.Default.Send(new UpdateUsernameMessage(true, _loggedInUser.Username));
     }
 
     [RelayCommand]  
-    private void EditPassword()
+    private static void EditPassword()
     {
-
+        WeakReferenceMessenger.Default.Send(new UpdatePasswordMessage(true));
     }
 
     private void LoadSettings()
@@ -61,6 +65,14 @@ internal sealed partial class SettingsViewModel : BaseViewModel
             {
                 Settings = new SettingsDisplay(result.Value);
             }
+        });
+    }
+
+    private void RegisterMessages()
+    {
+        WeakReferenceMessenger.Default.Register<UsernameUpdatedMessage>(this, (r, m) =>
+        {
+            Username = m.NewUsername;
         });
     }
 }

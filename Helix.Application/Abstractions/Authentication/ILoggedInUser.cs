@@ -10,5 +10,7 @@ public interface ILoggedInUser
 
     void Login(Guid userId, string username);
 
+    void Update(string username);
+
     void Logout();
 }

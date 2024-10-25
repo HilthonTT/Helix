@@ -19,4 +19,8 @@ public static class AuthenticationErrors
     public static readonly Error InvalidPermissions = Error.Problem(
         "Authentication.InvalidPermissions",
         "You lack the permission to create a drive.");
+
+    public static readonly Error NewPasswordsDoNotMatch = Error.Problem(
+        "Authentication.NewPasswordsDoNotMatch",
+        "Your new specified passwords do not match.");
 }

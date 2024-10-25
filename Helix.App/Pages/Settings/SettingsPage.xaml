@@ -4,6 +4,8 @@
              xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
              xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:settings="clr-namespace:Helix.App.Pages.Settings"
+             xmlns:updateUsename="clr-namespace:Helix.App.Modals.Users.UpdateUsername"
+             xmlns:updatePassword="clr-namespace:Helix.App.Modals.Users.UpdatePassword"
              x:Class="Helix.App.Pages.Settings.SettingsPage"
              x:DataType="settings:SettingsViewModel"
              Title=""
@@ -321,16 +323,6 @@
                                                FontSize="14"
                                                IsEnabled="{Binding Settings.IsNotBusy}" />
 
-                                        <!--<ImageButton Source="check.png"
-                                                     HorizontalOptions="End" 
-                                                     VerticalOptions="Center"
-                                                     BackgroundColor="Transparent"
-                                                     HeightRequest="24"
-                                                     WidthRequest="24"
-                                                     Margin="0,0,10,0" 
-                                                     BorderColor="Transparent"
-                                                     Command="{Binding SaveTimerCountCommand}" 
-                                                     IsEnabled="{Binding IsNotBusy}" />-->
                                     </Grid>
 
                                 </Border>
@@ -341,6 +333,40 @@
 
             </Grid>
         </ScrollView>
+
+        <BoxView Color="Black"
+                 Opacity="0"
+                 Grid.RowSpan="3"
+                 Grid.ColumnSpan="2"
+                 HorizontalOptions="Fill"
+                 VerticalOptions="Fill"
+                 Margin="-24"
+                 InputTransparent="True"
+                 x:Name="BlockScreen" />
+
+        <AbsoluteLayout x:Name="UpdateUsernameLayout"
+                        IsVisible="False"
+                        HorizontalOptions="FillAndExpand"
+                        VerticalOptions="FillAndExpand">
+            <updateUsename:UpdateUsernameModal x:Name="UpdateUsernameView"
+                                               BackgroundColor="White"
+                                               MaximumHeightRequest="400"
+                                               AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
+                                               AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="UpdatePasswordLayout"
+                IsVisible="False"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand">
+            <updatePassword:UpdatePasswordModal x:Name="UpdatePasswordView"
+                                                BackgroundColor="White"
+                                                MaximumHeightRequest="400"
+                                                AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
+                                                AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+
     </Grid>
 
 </ContentPage>

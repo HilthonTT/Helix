@@ -21,6 +21,8 @@ public static class DependencyInjection
         services.AddScoped<RegisterUser>();
         services.AddScoped<LoginUser>();
         services.AddScoped<LogoutUser>();
+        services.AddScoped<UpdateUser>();
+        services.AddScoped<ChangeUserPassword>();
 
         return services;
     }

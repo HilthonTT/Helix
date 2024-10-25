@@ -32,4 +32,9 @@ public class Result
 
     public static Result FirstFailureOrSuccess(params Result[] results) =>
         results.FirstOrDefault(result => result.IsFailure) ?? Success();
+
+    public static Result Failure(object userErrors)
+    {
+        throw new NotImplementedException();
+    }
 }

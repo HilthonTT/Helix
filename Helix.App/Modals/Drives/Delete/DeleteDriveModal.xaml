@@ -11,7 +11,7 @@
           ColumnSpacing="0">
         <ScrollView Grid.ColumnSpan="2">
             <VerticalStackLayout Spacing="20" Margin="24">
-                <Label Text="Delete the Drive" Style="{StaticResource Title1}" />
+                <Label Text="Delete Drive" Style="{StaticResource Title1}" />
                 <BoxView Style="{StaticResource HRule}"/>
 
                 <Label Text="{Binding Description}" />
