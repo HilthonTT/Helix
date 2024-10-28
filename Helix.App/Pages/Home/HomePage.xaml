@@ -148,19 +148,72 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="0" Grid.Column="2"
-                        Style="{StaticResource DarkBorderView}">
+                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource DarkBorderView}">
                     <Grid RowDefinitions="45,*,24" Margin="16" IsClippedToBounds="False">
+                        <!-- Top section with the icon and title -->
                         <HorizontalStackLayout Spacing="12">
                             <Border WidthRequest="38" HeightRequest="38"
-                                VerticalOptions="Center"
-                                Style="{StaticResource LightBorderView}">
+                                    VerticalOptions="Center"
+                                    Style="{StaticResource LightBorderView}">
                                 <Image Source="clock.png" HorizontalOptions="Center"/>
                             </Border>
                             <Label Text="Timer" class="Percent,Up"/>
                         </HorizontalStackLayout>
-                        <Label Text="20 seconds" FontSize="Micro"  Grid.Row="1" class="Data"/>
-                        <Label Text="Time before minimize" Grid.Row="2" class="Label"/>
+
+                        <!-- Middle section with TimerCount label and X button -->
+                        <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
+                            <!-- Timer count label on the left -->
+                            <Label Text="{Binding TimerCount}" 
+                                   FontSize="Micro" 
+                                   class="Data" 
+                                   VerticalOptions="Center" />
+
+                            <!-- X button aligned to the end -->
+                            <Button Text="{x:Static icons:FabIconFont.Cancel}" 
+                                     IsVisible="{Binding TimerCancelled, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}" 
+                                     Command="{Binding CancelTimerCommand}"
+                                     FontFamily="Fabric"
+                                     BackgroundColor="Transparent" 
+                                     TextColor="Red"
+                                     FontAttributes="Bold"
+                                     VerticalOptions="Center"
+                                     HorizontalOptions="End"
+                                     Padding="0"
+                                     WidthRequest="24" 
+                                     HeightRequest="24" />
+
+                            <!-- Restart button aligned to the end -->
+                            <Button Text="{x:Static icons:IconFont.RotateRight}" 
+                                     IsVisible="{Binding TimerCancelled}"
+                                     Command="{Binding ResumeTimerCommand}"
+                                     FontFamily="FontAwesome"
+                                     BackgroundColor="Transparent" 
+                                     FontAttributes="Bold"
+                                     VerticalOptions="Center"
+                                     HorizontalOptions="End"
+                                     Padding="0"
+                                     WidthRequest="24" 
+                                     HeightRequest="24" />
+
+                            <!-- Redo timer button aligned to the end -->
+                            <Button Text="{x:Static icons:IconFont.RotateRight}" 
+                                     IsVisible="{Binding ShowRedoButton}"
+                                     Command="{Binding StartTimerCommand}"
+                                     FontFamily="FontAwesome"
+                                     BackgroundColor="Transparent" 
+                                     FontAttributes="Bold"
+                                     VerticalOptions="Center"
+                                     HorizontalOptions="End"
+                                     Padding="0"
+                                     WidthRequest="24" 
+                                     HeightRequest="24" />
+
+                        </Grid>
+
+                        <!-- Bottom section with description label -->
+                        <Label Text="Time before minimize" 
+                               Grid.Row="2" 
+                               class="Label" />
                     </Grid>
                 </Border>
 

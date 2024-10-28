@@ -11,6 +11,7 @@ using SharedKernel;
 using Helix.Infrastructure.Time;
 using Helix.Application.Abstractions.Caching;
 using Helix.Infrastructure.Caching;
+using Helix.Application.Abstractions.Time;
 
 namespace Helix.Infrastructure;
 
@@ -47,6 +48,8 @@ public static class DependencyInjection
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddSingleton<ICountdownService, CountdownService>();
+
         services.AddScoped<INasConnector, NasConnector>();
 
         return services;

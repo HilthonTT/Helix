@@ -8,29 +8,40 @@ using Helix.App.Modals.Drives.Create;
 using Helix.App.Modals.Drives.Delete;
 using Helix.App.Models;
 using Helix.Application.Abstractions.Connector;
+using Helix.Application.Abstractions.Time;
 using Helix.Application.Drives;
+using Helix.Application.Settings;
 using Helix.Domain.Drives;
 using SharedKernel;
 using System.Collections.ObjectModel;
+using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.App.Pages.Home;
 
 internal sealed partial class HomeViewModel : BaseViewModel
 {
     private readonly INasConnector _nasConnector;
+    private readonly ICountdownService _countdownService;
+
     private readonly GetDrives _getDrives;
+    private readonly GetSettings _getSettings;
     private readonly ExportDrives _exportDrives;
     private readonly ImportDrives _importDrives;
 
     public HomeViewModel()
     {
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
+        _countdownService = App.ServiceProvider.GetRequiredService<ICountdownService>();
+
         _getDrives = App.ServiceProvider.GetRequiredService<GetDrives>();
         _exportDrives = App.ServiceProvider.GetRequiredService<ExportDrives>();
         _importDrives = App.ServiceProvider.GetRequiredService<ImportDrives>();
+        _getSettings = App.ServiceProvider.GetRequiredService<GetSettings>();
 
         RegisterMessages();
         FetchDrives();
+
+        InitializeCountdownEvents();
     }
 
     [ObservableProperty]
@@ -42,8 +53,18 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [ObservableProperty]
     private string _totalConnected = string.Empty;
 
+
     [ObservableProperty]
-    private string _timerCount = string.Empty;
+    [NotifyPropertyChangedFor(nameof(TimerCount))]
+    private int _secondsRemaining = 0;
+
+    public string TimerCount => $"{SecondsRemaining} seconds";
+
+    [ObservableProperty]
+    private bool _timerCancelled;
+
+    [ObservableProperty]
+    private bool _showRedoButton;
 
     [RelayCommand]
     private static void OpenCreateDriveModal()
@@ -88,6 +109,37 @@ internal sealed partial class HomeViewModel : BaseViewModel
         await Shell.Current.GoToAsync($"//{PageNames.SettingsPage}");
 
         WeakReferenceMessenger.Default.Send(new PageChangedMessage(PageNames.SettingsPage));
+    }
+
+    [RelayCommand]
+    private void ResumeTimer()
+    {
+        _countdownService.Resume();
+        TimerCancelled = false;
+    }
+
+    [RelayCommand]
+    private void CancelTimer()
+    {
+        _countdownService.Stop();
+
+        TimerCancelled = true;
+    }
+
+    [RelayCommand]
+    private async Task StartTimerAsync()
+    {
+        Result<SettingsModel> result = await _getSettings.Handle();
+        if (result.IsSuccess)
+        {
+            SettingsModel settings = result.Value;
+            if (settings.AutoMinimize)
+            {
+                _countdownService.Start(settings.TimerCount);
+
+                ShowRedoButton = false;
+            }
+        }
     }
 
     private void FetchDrives()
@@ -155,5 +207,35 @@ internal sealed partial class HomeViewModel : BaseViewModel
             TotalStorage = ValidateTotalStorage();
             TotalConnected = ValidateTotalConnected();
         });
+    }
+
+    private void InitializeCountdownEvents()
+    {
+        Task.Run(async () =>
+        {
+            Result<SettingsModel> result = await _getSettings.Handle();
+            if (result.IsSuccess)
+            {
+                SettingsModel settings = result.Value;
+                if (settings.AutoMinimize)
+                {
+                    _countdownService.Start(settings.TimerCount);
+                }
+            }
+        });
+
+        _countdownService.CountdownTick += (sender, remaining) =>
+        {
+            // Update the view model property for binding
+            SecondsRemaining = remaining; 
+        };
+
+        _countdownService.CountdownFinished += async (sender, args) =>
+        {
+            // Perform action when timer reaches 0
+            ShowRedoButton = true;
+            TimerCancelled = true;
+            MinimizeApp();
+        };
     }
 }

@@ -6,5 +6,6 @@
     x:Class="Helix.App.Resources.Styles.Converters">
 
     <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
+    <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
 
 </ResourceDictionary>

@@ -917,4 +917,5 @@ public static class IconFont
     public const string XRay = "\uf497";
     public const string YenSign = "\uf157";
     public const string YinYang = "\uf6ad";
+    public const string RotateRight = "\uf01e";
 }
