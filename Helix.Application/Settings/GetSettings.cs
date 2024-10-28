@@ -5,10 +5,11 @@ using SharedKernel;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Settings;
 using SettingsModel = Helix.Domain.Settings.Settings;
+using Helix.Application.Abstractions.Handlers;
 
 namespace Helix.Application.Settings;
 
-public sealed class GetSettings(IDbContext context, ILoggedInUser loggedInUser)
+public sealed class GetSettings(IDbContext context, ILoggedInUser loggedInUser) : IHandler
 {
     public async Task<Result<SettingsModel>> Handle(CancellationToken cancellationToken = default)
     {

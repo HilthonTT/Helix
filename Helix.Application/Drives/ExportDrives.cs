@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui.Storage;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
@@ -10,7 +11,7 @@ using System.Text.Json;
 
 namespace Helix.Application.Drives;
 
-public sealed class ExportDrives(IDbContext context, ILoggedInUser loggedInUser)
+public sealed class ExportDrives(IDbContext context, ILoggedInUser loggedInUser) : IHandler
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {

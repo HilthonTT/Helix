@@ -1,6 +1,7 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
@@ -10,7 +11,7 @@ using System.Text.Json;
 
 namespace Helix.Application.Drives;
 
-public sealed class ImportDrives(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService)
+public sealed class ImportDrives(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService) : IHandler
 {
     private const string FileType = ".json";
 

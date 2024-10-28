@@ -1,6 +1,5 @@
-﻿using Helix.Application.Drives;
-using Helix.Application.Settings;
-using Helix.Application.Users;
+﻿using Helix.Application.Abstractions.Handlers;
+using System.Reflection;
 
 namespace Helix.Application;
 
@@ -8,46 +7,31 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services
-            .AddUserEndpoints()
-            .AddDriveEndpoints()
-            .AddSettingsEndpoint();
+        services.AddHandlers();
 
         return services;
     }
 
-    private static IServiceCollection AddUserEndpoints(this IServiceCollection services)
+    /// <summary>
+    /// Scans the current assembly for all non-abstract classes that implement the <see cref="IHandler"/> interface 
+    /// and registers them as scoped services in the specified <paramref name="services"/> collection.
+    /// </summary>
+    /// <param name="services">The service collection to which the handler services will be added.</param>
+    /// <returns>The updated <see cref="IServiceCollection"/> instance, enabling method chaining.</returns>
+    private static IServiceCollection AddHandlers(this IServiceCollection services)
     {
-        services.AddScoped<RegisterUser>();
-        services.AddScoped<LoginUser>();
-        services.AddScoped<LogoutUser>();
-        services.AddScoped<UpdateUser>();
-        services.AddScoped<ChangeUserPassword>();
+        Assembly assembly = typeof(DependencyInjection).Assembly;
 
-        return services;
-    }
+        TypeInfo[] handlerTypes = assembly
+            .DefinedTypes
+            .Where(type => type is { IsAbstract: false, IsInterface: false } &&
+                           type.IsAssignableTo(typeof(IHandler)))
+            .ToArray();
 
-    private static IServiceCollection AddDriveEndpoints(this IServiceCollection services)
-    {
-        services.AddScoped<CreateDrive>();
-        services.AddScoped<GetDrives>();
-        services.AddScoped<DeleteDrive>();
-        services.AddScoped<UpdateDrive>();
-        services.AddScoped<GetDriveById>();
-        
-        services.AddScoped<ExportDrives>();
-        services.AddScoped<ImportDrives>();
-
-        services.AddScoped<ConnectDrive>();
-        services.AddScoped<DisconnectDrive>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddSettingsEndpoint(this IServiceCollection services)
-    {
-        services.AddScoped<GetSettings>();
-        services.AddScoped<UpdateSettings>();
+        foreach (TypeInfo handlerType in handlerTypes)
+        {
+            services.AddScoped(handlerType);
+        }
 
         return services;
     }

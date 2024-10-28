@@ -1,5 +1,6 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Settings;
 using SharedKernel;
@@ -7,7 +8,7 @@ using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.Application.Settings;
 
-public sealed class UpdateSettings(IDbContext context, ILoggedInUser loggedInUser)
+public sealed class UpdateSettings(IDbContext context, ILoggedInUser loggedInUser) : IHandler
 {
     public sealed record Request(bool AutoConnect, bool AutoMinimize, bool SetOnStartup, int TimerCount, Language Language)
     {

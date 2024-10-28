@@ -1,12 +1,13 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Users;
 using SharedKernel;
 
 namespace Helix.Application.Users;
 
-public sealed class UpdateUser(IDbContext context, ILoggedInUser loggedInUser)
+public sealed class UpdateUser(IDbContext context, ILoggedInUser loggedInUser) : IHandler
 {
     public sealed record Request(string Username);
 

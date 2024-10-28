@@ -1,13 +1,14 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Abstractions.Handlers;
 using Helix.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Helix.Application.Users;
 
-public sealed class LoginUser(IDbContext context, IPasswordHasher passwordHasher, ILoggedInUser loggedInUser)
+public sealed class LoginUser(IDbContext context, IPasswordHasher passwordHasher, ILoggedInUser loggedInUser) : IHandler
 {
     public sealed record Request(string Username, string Password);
 
