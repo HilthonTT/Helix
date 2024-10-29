@@ -1,17 +1,74 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Helix.Application.Abstractions.Time;
+using Helix.Application.Settings;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using SharedKernel;
+using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.App.Pages;
 
 public abstract partial class BaseViewModel : ObservableObject
 {
+    private readonly ICountdownService _countdownService;
+    private readonly GetSettings _getSettings;
+
+    protected BaseViewModel()
+    {
+        _getSettings = App.ServiceProvider.GetRequiredService<GetSettings>();
+        _countdownService = App.ServiceProvider.GetRequiredService<ICountdownService>();
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]
     private bool _isBusy;
 
     public bool IsNotBusy => !IsBusy;
+
+    [ObservableProperty]
+    private bool _timerCancelled;
+
+    [ObservableProperty]
+    private bool _showRedoButton;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TimerCount))]
+    private int _secondsRemaining = 0;
+
+    public string TimerCount => $"{SecondsRemaining} seconds";
+
+
+    [RelayCommand]
+    public async Task StartTimerAsync()
+    {
+        Result<SettingsModel> result = await _getSettings.Handle();
+        if (result.IsSuccess)
+        {
+            SettingsModel settings = result.Value;
+            if (settings.AutoMinimize)
+            {
+                _countdownService.Start(settings.TimerCount);
+
+                ShowRedoButton = false;
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ResumeTimer()
+    {
+        _countdownService.Resume();
+        TimerCancelled = false;
+    }
+
+    [RelayCommand]
+    private void CancelTimer()
+    {
+        _countdownService.Stop();
+
+        TimerCancelled = true;
+    }
 
     public static Task DisplayErrorAsync(Error error)
     {
@@ -48,5 +105,35 @@ public abstract partial class BaseViewModel : ObservableObject
                 }
             }
         });
+    }
+
+    public void InitializeCountdownEvents()
+    {
+        Task.Run(async () =>
+        {
+            Result<SettingsModel> result = await _getSettings.Handle();
+            if (result.IsSuccess)
+            {
+                SettingsModel settings = result.Value;
+                if (settings.AutoMinimize)
+                {
+                    _countdownService.Start(settings.TimerCount);
+                }
+            }
+        });
+
+        _countdownService.CountdownTick += (sender, remaining) =>
+        {
+            // Update the view model property for binding
+            SecondsRemaining = remaining;
+        };
+
+        _countdownService.CountdownFinished += (sender, args) =>
+        {
+            // Perform action when timer reaches 0
+            ShowRedoButton = true;
+            TimerCancelled = true;
+            MinimizeApp();
+        };
     }
 }

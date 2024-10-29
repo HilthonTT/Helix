@@ -12,6 +12,8 @@ using Helix.Infrastructure.Time;
 using Helix.Application.Abstractions.Caching;
 using Helix.Infrastructure.Caching;
 using Helix.Application.Abstractions.Time;
+using Helix.Application.Abstractions.Startup;
+using Helix.Infrastructure.Startup;
 
 namespace Helix.Infrastructure;
 
@@ -51,6 +53,7 @@ public static class DependencyInjection
         services.AddSingleton<ICountdownService, CountdownService>();
 
         services.AddScoped<INasConnector, NasConnector>();
+        services.AddScoped<IStartupService, StartupService>();
 
         return services;
     }

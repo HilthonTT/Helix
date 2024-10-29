@@ -1,4 +1,5 @@
 ﻿using SharedKernel;
+using System.Text.Json.Serialization;
 
 namespace Helix.Domain.Settings;
 
@@ -6,6 +7,7 @@ public sealed class Settings : Entity
 {
     public const int DefaultTimerCount = 15;
 
+    [JsonConstructor]
     private Settings(
         Guid id,
         Guid userId,

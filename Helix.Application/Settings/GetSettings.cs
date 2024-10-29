@@ -6,10 +6,14 @@ using Helix.Application.Core.Extensions;
 using Helix.Domain.Settings;
 using SettingsModel = Helix.Domain.Settings.Settings;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Abstractions.Caching;
 
 namespace Helix.Application.Settings;
 
-public sealed class GetSettings(IDbContext context, ILoggedInUser loggedInUser) : IHandler
+public sealed class GetSettings(
+    IDbContext context, 
+    ILoggedInUser loggedInUser, 
+    ICacheService cacheService) : IHandler
 {
     public async Task<Result<SettingsModel>> Handle(CancellationToken cancellationToken = default)
     {
@@ -18,11 +22,21 @@ public sealed class GetSettings(IDbContext context, ILoggedInUser loggedInUser) 
             return Result.Failure<SettingsModel>(AuthenticationErrors.InvalidPermissions);
         }
 
-        SettingsModel? settings = await GetOrCreateSettingsAsync(cancellationToken);
+        string cacheKey = CacheKeys.Settings.GetByUserId(loggedInUser.UserId);
+
+        SettingsModel? settings = await cacheService.GetAsync<SettingsModel>(cacheKey, cancellationToken);
+        if (settings is not null)
+        {
+            return settings;
+        }
+
+        settings = await GetOrCreateSettingsAsync(cancellationToken);
         if (settings is null)
         {
             return Result.Failure<SettingsModel>(Error.NullValue);
         }
+
+        await cacheService.SetAsync(cacheKey, settings, cancellationToken: cancellationToken); 
 
         return settings;
     }

@@ -14,6 +14,8 @@ namespace Helix.App.Pages.Home;
 
 public sealed partial class HomePage : ContentPage
 {
+    private static bool _isFirstView = true;
+
     private static bool _deleteDriveModalOpen = false;
     private static bool _createDriveModalOpen = false;
     private static bool _updateDriveModalOpen = false;
@@ -36,6 +38,23 @@ public sealed partial class HomePage : ContentPage
     protected async override void OnAppearing()
     {
         await InitializeChartAsync();
+
+        await HandleConnectDrivesOnStartupAsync();
+    }
+
+    private async Task HandleConnectDrivesOnStartupAsync()
+    {
+        if (BindingContext is not HomeViewModel viewModel || !_isFirstView)
+        {
+            return;
+        }
+
+        if (viewModel.ConnectDrivesOnStartupCommand.CanExecute(null))
+        {
+            await viewModel.ConnectDrivesOnStartupCommand.ExecuteAsync(null);
+
+            _isFirstView = true;
+        }
     }
 
     private void OpenModalInternal(AbsoluteLayout absoluteLayout, ContentView contentView)

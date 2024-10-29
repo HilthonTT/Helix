@@ -1,6 +1,8 @@
 ﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Abstractions.Startup;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Settings;
 using SharedKernel;
@@ -8,7 +10,11 @@ using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.Application.Settings;
 
-public sealed class UpdateSettings(IDbContext context, ILoggedInUser loggedInUser) : IHandler
+public sealed class UpdateSettings(
+    IDbContext context, 
+    ILoggedInUser loggedInUser, 
+    IStartupService startupService,
+    ICacheService cacheService) : IHandler
 {
     public sealed record Request(bool AutoConnect, bool AutoMinimize, bool SetOnStartup, int TimerCount, Language Language)
     {
@@ -52,9 +58,15 @@ public sealed class UpdateSettings(IDbContext context, ILoggedInUser loggedInUse
             return Result.Failure(SettingsError.NotFound);
         }
 
-        settings.Update(request.AutoMinimize, request.AutoMinimize, request.SetOnStartup, request.TimerCount, request.Language);
+        settings.Update(request.AutoConnect, request.AutoMinimize, request.SetOnStartup, request.TimerCount, request.Language);
 
+        startupService.ToggleStartup(settings.SetOnStartup);
+        
         await context.SaveChangesAsync(cancellationToken);
+
+        string cacheKey = CacheKeys.Settings.GetByUserId(loggedInUser.UserId);
+
+        await cacheService.RemoveAsync(cacheKey, cancellationToken);
 
         return Result.Success();
     }

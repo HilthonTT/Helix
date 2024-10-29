@@ -223,25 +223,43 @@
                         Style="{StaticResource DarkBorderView}">
                     <Grid Margin="24" RowDefinitions="80,*">
                         <Label Text="Your drives" Style="{StaticResource Title1}" />
-                        <Border Stroke="{StaticResource SecondaryBrush}"
-                                StrokeThickness="1"
-                                Background="Transparent"
-                                Grid.Row="0"
-                                HorizontalOptions="End"
-                                VerticalOptions="Start"
-                                SemanticProperties.Description="Button that opens a filter dialog">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="8"/>
-                            </Border.StrokeShape>
-                            <HorizontalStackLayout Margin="14,12" Spacing="12">
-                                <Image Source="filter.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
-                                <Label Text="Filter" VerticalOptions="Center" />
-                            </HorizontalStackLayout>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer />
-                            </Border.GestureRecognizers>
-                        </Border>
+
+                        <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" VerticalOptions="Start" Spacing="8">
+                            <Border Stroke="{StaticResource SecondaryBrush}"
+                                    StrokeThickness="1"
+                                    Background="Transparent"
+                                    SemanticProperties.Description="Button that toggles the connectivity of all drives">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <HorizontalStackLayout Margin="14,12" Spacing="12">
+                                    <Image Source="wifi.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
+                                    <Label Text="Toggle Connect" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleConnectDrivesCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+
+                            <Border Stroke="{StaticResource SecondaryBrush}"
+                                    StrokeThickness="1"
+                                    Background="Transparent"
+                                    SemanticProperties.Description="Button that opens a filter dialog">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8"/>
+                                </Border.StrokeShape>
+                                <HorizontalStackLayout Margin="14,12" Spacing="12">
+                                    <Image Source="filter.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
+                                    <Label Text="Filter" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </HorizontalStackLayout>
 
                         <ScrollView Grid.Row="1">
                             <VerticalStackLayout Spacing="16">

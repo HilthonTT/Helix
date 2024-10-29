@@ -8,7 +8,6 @@ using Helix.App.Modals.Drives.Create;
 using Helix.App.Modals.Drives.Delete;
 using Helix.App.Models;
 using Helix.Application.Abstractions.Connector;
-using Helix.Application.Abstractions.Time;
 using Helix.Application.Drives;
 using Helix.Application.Settings;
 using Helix.Domain.Drives;
@@ -21,23 +20,19 @@ namespace Helix.App.Pages.Home;
 internal sealed partial class HomeViewModel : BaseViewModel
 {
     private readonly INasConnector _nasConnector;
-    private readonly ICountdownService _countdownService;
-
-    private readonly GetDrives _getDrives;
     private readonly GetSettings _getSettings;
+    private readonly GetDrives _getDrives;
     private readonly ExportDrives _exportDrives;
     private readonly ImportDrives _importDrives;
 
     public HomeViewModel()
     {
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
-        _countdownService = App.ServiceProvider.GetRequiredService<ICountdownService>();
-
+        _getSettings = App.ServiceProvider.GetRequiredService<GetSettings>();
         _getDrives = App.ServiceProvider.GetRequiredService<GetDrives>();
         _exportDrives = App.ServiceProvider.GetRequiredService<ExportDrives>();
         _importDrives = App.ServiceProvider.GetRequiredService<ImportDrives>();
-        _getSettings = App.ServiceProvider.GetRequiredService<GetSettings>();
-
+        
         RegisterMessages();
         FetchDrives();
 
@@ -52,19 +47,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     [ObservableProperty]
     private string _totalConnected = string.Empty;
-
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TimerCount))]
-    private int _secondsRemaining = 0;
-
-    public string TimerCount => $"{SecondsRemaining} seconds";
-
-    [ObservableProperty]
-    private bool _timerCancelled;
-
-    [ObservableProperty]
-    private bool _showRedoButton;
 
     [RelayCommand]
     private static void OpenCreateDriveModal()
@@ -112,33 +94,36 @@ internal sealed partial class HomeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void ResumeTimer()
+    private void ToggleConnectDrives()
     {
-        _countdownService.Resume();
-        TimerCancelled = false;
+        foreach (DriveDisplay drive in Drives)
+        {
+            WeakReferenceMessenger.Default.Send(new ToggleConnectDriveMessage(drive.Id));
+        }
     }
 
     [RelayCommand]
-    private void CancelTimer()
-    {
-        _countdownService.Stop();
-
-        TimerCancelled = true;
-    }
-
-    [RelayCommand]
-    private async Task StartTimerAsync()
+    private async Task ConnectDrivesOnStartupAsync()
     {
         Result<SettingsModel> result = await _getSettings.Handle();
-        if (result.IsSuccess)
+        if (result.IsFailure)
         {
-            SettingsModel settings = result.Value;
-            if (settings.AutoMinimize)
-            {
-                _countdownService.Start(settings.TimerCount);
+            return;
+        }
 
-                ShowRedoButton = false;
-            }
+        SettingsModel settings = result.Value;
+        if (!settings.AutoConnect)
+        {
+            return;
+        }
+
+        List<DriveDisplay> disconnectedDrives = Drives
+            .Where(d => !_nasConnector.IsConnected(d.Letter))
+            .ToList();
+
+        foreach (DriveDisplay disconnectedDrive in disconnectedDrives)
+        {
+            WeakReferenceMessenger.Default.Send(new ToggleConnectDriveMessage(disconnectedDrive.Id));
         }
     }
 
@@ -207,35 +192,5 @@ internal sealed partial class HomeViewModel : BaseViewModel
             TotalStorage = ValidateTotalStorage();
             TotalConnected = ValidateTotalConnected();
         });
-    }
-
-    private void InitializeCountdownEvents()
-    {
-        Task.Run(async () =>
-        {
-            Result<SettingsModel> result = await _getSettings.Handle();
-            if (result.IsSuccess)
-            {
-                SettingsModel settings = result.Value;
-                if (settings.AutoMinimize)
-                {
-                    _countdownService.Start(settings.TimerCount);
-                }
-            }
-        });
-
-        _countdownService.CountdownTick += (sender, remaining) =>
-        {
-            // Update the view model property for binding
-            SecondsRemaining = remaining; 
-        };
-
-        _countdownService.CountdownFinished += async (sender, args) =>
-        {
-            // Perform action when timer reaches 0
-            ShowRedoButton = true;
-            TimerCancelled = true;
-            MinimizeApp();
-        };
     }
 }

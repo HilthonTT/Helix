@@ -87,6 +87,7 @@
 	  <None Remove="Resources\Images\plug.png" />
 	  <None Remove="Resources\Images\settings.svg" />
 	  <None Remove="Resources\Images\software.png" />
+	  <None Remove="Resources\Images\wifi.svg" />
 	</ItemGroup>
 
 	<ItemGroup>

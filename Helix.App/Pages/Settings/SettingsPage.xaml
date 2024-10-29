@@ -272,7 +272,7 @@
                             </VerticalStackLayout>
 
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="1">
-                                <Label Text="Auto connect credentials on launch"/>
+                                <Label Text="Auto connect drives on launch"/>
                                 <Switch HorizontalOptions="End" 
                                         OnColor="Green" 
                                         ThumbColor="White" 

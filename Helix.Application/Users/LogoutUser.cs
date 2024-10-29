@@ -15,6 +15,8 @@ public sealed class LogoutUser(ILoggedInUser loggedInUser, ICacheService cacheSe
 
         await cacheService.RemoveByPrefixAsync(CacheKeys.Drives.MainPrefix, cancellationToken);
 
+        await cacheService.RemoveAsync(CacheKeys.Settings.GetByUserId(loggedInUser.UserId), cancellationToken);
+
         return Result.Success();
     }
 }

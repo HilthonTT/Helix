@@ -60,6 +60,11 @@ public sealed partial class DriveTemplate : ContentView
 
     private async void ToggleConnect(object? sender, EventArgs e)
     {
+        await ToggleConnectInternalAsync();
+    }
+
+    private async Task ToggleConnectInternalAsync()
+    {
         if (BindingContext is not DriveDisplay drive)
         {
             return;
@@ -138,12 +143,7 @@ public sealed partial class DriveTemplate : ContentView
 
         WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) =>
         {
-            if (BindingContext is not DriveDisplay drive)
-            {
-                return;
-            }
-
-            if (drive.Id != m.UpdatedDrive.Id)
+            if (BindingContext is not DriveDisplay drive || drive.Id != m.UpdatedDrive.Id)
             {
                 return;
             }
@@ -153,6 +153,18 @@ public sealed partial class DriveTemplate : ContentView
             UpdateStatusButtonColor(m.UpdatedDrive.Letter);
 
             OnPropertyChanged();
+        });
+
+        WeakReferenceMessenger.Default.Unregister<ToggleConnectDriveMessage>(this);
+
+        WeakReferenceMessenger.Default.Register<ToggleConnectDriveMessage>(this, async (r, m) =>
+        {
+            if (BindingContext is not DriveDisplay drive || drive.Id != m.DriveId)
+            {
+                return;
+            }
+
+            await ToggleConnectInternalAsync();
         });
     }
 }
