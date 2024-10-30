@@ -41,7 +41,7 @@ public sealed class RegisterUser(IDbContext context, IPasswordHasher passwordHas
         {
             await context.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException ex)
+        catch (DbUpdateException)
         {
             return Result.Failure<User>(AuthenticationErrors.UsernameNotUnique);
         }

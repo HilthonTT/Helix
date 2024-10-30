@@ -6,6 +6,7 @@
              xmlns:settings="clr-namespace:Helix.App.Pages.Settings"
              xmlns:updateUsename="clr-namespace:Helix.App.Modals.Users.UpdateUsername"
              xmlns:updatePassword="clr-namespace:Helix.App.Modals.Users.UpdatePassword"
+             xmlns:local="clr-namespace:Helix.App"
              x:Class="Helix.App.Pages.Settings.SettingsPage"
              x:DataType="settings:SettingsViewModel"
              Title=""
@@ -196,8 +197,6 @@
                             </VerticalStackLayout>
 
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="1">
-
-
                                 <Label>
                                     <Label.FormattedText>
                                         <FormattedString>
@@ -264,9 +263,9 @@
 
                     <VerticalStackLayout Spacing="16">
                         <!-- User Information Grid -->
-                        <Grid Margin="24" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="18">
+                        <Grid Margin="24" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="18">
                             <VerticalStackLayout Margin="0,24,0,0" Grid.Row="0">
-                                <Label Text="Settings" Style="{StaticResource LargeTitle}"/>
+                                <Label Text="{local:Translate Settings}" Style="{StaticResource LargeTitle}"/>
                                 <Label Text="{Binding Source={x:Static system:DateTime.Now}, StringFormat='{0:dddd, MMMM dd yyyy}'}"/>
                                 <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
                             </VerticalStackLayout>
@@ -297,7 +296,17 @@
                                         IsToggled="{Binding Settings.SetOnStartup}" 
                                         IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
+
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="4">
+                                <Label Text="Languages"/>
+                                <Picker HorizontalOptions="End" 
+                                        WidthRequest="230"
+                                        IsEnabled="{Binding Settings.IsNotBusy}"
+                                        ItemsSource="{Binding Languages}"
+                                        SelectedItem="{Binding SelectedLanguage}"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,Auto" Grid.Row="5">
                                 <Label Text="Timer Count in seconds" Grid.Column="0"/>
                                 <Border Grid.Column="1"
                                         HeightRequest="48"
@@ -308,7 +317,6 @@
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="8"/>
                                     </Border.StrokeShape>
-
 
                                     <Grid>
                                         <Entry Background="Transparent"
