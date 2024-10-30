@@ -16,8 +16,10 @@ internal sealed class DriveConfiguration : IEntityTypeConfiguration<Drive>
 
         builder.HasOne<User>()
             .WithMany()
-            .HasForeignKey(c => c.UserId)
+            .HasForeignKey(d => d.UserId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(d => new { d.Name, d.Letter });
     }
 }

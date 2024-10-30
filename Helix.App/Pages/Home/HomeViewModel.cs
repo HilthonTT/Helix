@@ -6,6 +6,7 @@ using Helix.App.Helpers;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Create;
 using Helix.App.Modals.Drives.Delete;
+using Helix.App.Modals.Drives.Search;
 using Helix.App.Models;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Drives;
@@ -52,6 +53,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
     private static void OpenCreateDriveModal()
     {
         WeakReferenceMessenger.Default.Send(new CreateDriveMessage(true));
+    }
+
+    [RelayCommand]
+    private static void OpenSearchDrivesModal()
+    {
+        WeakReferenceMessenger.Default.Send(new SearchDrivesMessage(true));
     }
 
     [RelayCommand]
@@ -191,6 +198,13 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
             TotalStorage = ValidateTotalStorage();
             TotalConnected = ValidateTotalConnected();
+        });
+
+        WeakReferenceMessenger.Default.Register<DriveSearchedMessage>(this, (r, m) =>
+        {
+            IEnumerable<DriveDisplay> drives = m.SearchedDrives.Select(d => new DriveDisplay(d));
+
+            Drives = new(drives);
         });
     }
 }

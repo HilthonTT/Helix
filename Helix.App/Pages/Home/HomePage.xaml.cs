@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Create;
 using Helix.App.Modals.Drives.Delete;
+using Helix.App.Modals.Drives.Search;
 using Helix.App.Modals.Drives.Update;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Drives;
@@ -16,6 +17,7 @@ public sealed partial class HomePage : ContentPage
 {
     private static bool _isFirstView = true;
 
+    private static bool _searchDrivesModalOpen = false;
     private static bool _deleteDriveModalOpen = false;
     private static bool _createDriveModalOpen = false;
     private static bool _updateDriveModalOpen = false;
@@ -77,6 +79,35 @@ public sealed partial class HomePage : ContentPage
         absoluteLayout.IsVisible = false;
     }
 
+    private async Task OpenSearchDrivesModalAsync(bool show) 
+    {
+        if (_createDriveModalOpen)
+        {
+            await OpenCreateDriveModalAsync(false);
+        }
+
+        if (_deleteDriveModalOpen)
+        {
+            await OpenDeleteDriveModalAsync(false);
+        }
+
+        if (_updateDriveModalOpen)
+        {
+            await OpenUpdateDriveModalAsync(false);
+        }
+
+        if (show)
+        {
+            OpenModalInternal(SearchDrivesLayout, SearchDrivesView);
+            _searchDrivesModalOpen = true;
+        }
+        else
+        {
+            await CloseModalInternal(SearchDrivesLayout, SearchDrivesView);
+            _searchDrivesModalOpen = false;
+        }
+    }
+
     private async Task OpenUpdateDriveModalAsync(bool show)
     {
         if (_createDriveModalOpen)
@@ -87,6 +118,11 @@ public sealed partial class HomePage : ContentPage
         if (_deleteDriveModalOpen)
         {
             await OpenDeleteDriveModalAsync(false);
+        }
+
+        if (_searchDrivesModalOpen)
+        {
+            await OpenSearchDrivesModalAsync(false);
         }
 
         if (show)
@@ -113,6 +149,11 @@ public sealed partial class HomePage : ContentPage
             await OpenUpdateDriveModalAsync(false);
         }
 
+        if (_searchDrivesModalOpen)
+        {
+            await OpenSearchDrivesModalAsync(false);
+        }
+
         if (show)
         {
             OpenModalInternal(DeleteDriveLayout, DeleteDriveView);
@@ -135,6 +176,11 @@ public sealed partial class HomePage : ContentPage
         if (_updateDriveModalOpen)
         {
             await OpenUpdateDriveModalAsync(false);
+        }
+
+        if (_searchDrivesModalOpen)
+        {
+            await OpenSearchDrivesModalAsync(false);
         }
 
         if (show)
@@ -245,6 +291,17 @@ public sealed partial class HomePage : ContentPage
             }
 
             await OpenUpdateDriveModalAsync(m.Value);
+        });
+
+        WeakReferenceMessenger.Default.Register<SearchDrivesMessage>(this, async (r, m) =>
+        {
+            bool isAlreadyOpen = _searchDrivesModalOpen && m.Value;
+            if (isAlreadyOpen)
+            {
+                return;
+            }
+
+            await OpenSearchDrivesModalAsync(m.Value);
         });
 
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(this, async (r, m) =>

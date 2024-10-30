@@ -9,7 +9,10 @@ using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class GetDrives(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService) : IHandler
+public sealed class GetDrives(
+    IDbContext context, 
+    ILoggedInUser loggedInUser,
+    ICacheService cacheService) : IHandler
 {
     public async Task<Result<List<Drive>>> Handle(CancellationToken cancellationToken = default)
     {

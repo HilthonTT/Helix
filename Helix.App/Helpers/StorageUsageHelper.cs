@@ -2,20 +2,45 @@
 
 public static class StorageUsageHelper
 {
-    public static string GetStorageUsage(string letter, string notReadyText = "Drive not ready")
-    {
-        var driveInfo = new DriveInfo(letter);
-        if (driveInfo.IsReady)
-        {
-            double totalSizeInTB = driveInfo.TotalSize / (1024.0 * 1024.0 * 1024.0 * 1024.0);
-            double freeSizeInTB = driveInfo.AvailableFreeSpace / (1024.0 * 1024.0 * 1024.0 * 1024.0);
-            double usedSizeInTB = totalSizeInTB - freeSizeInTB;
+    private const double BytesToTB = 1.0 / (1024.0 * 1024.0 * 1024.0 * 1024.0);
 
-            return $"{usedSizeInTB:F1}TB used of {totalSizeInTB:F1}TB";
-        }
-        else
+    public static string GetStorageUsage(
+        string driveLetter, 
+        string driveNotReadyMessage = "Drive not ready",
+        string invalidDriveMessage = "Invalid drive letter")
+    {
+        try
         {
-            return notReadyText;
+            var driveInfo = new DriveInfo(driveLetter);
+
+            if (!driveInfo.IsReady)
+            {
+                return driveNotReadyMessage;
+            }
+
+            if (driveInfo.TotalSize == 0)
+            {
+                return "Drive size is zero.";
+            }
+
+            double totalSizeInTB = driveInfo.TotalSize * BytesToTB;
+            double availableSpaceInTB = driveInfo.AvailableFreeSpace * BytesToTB;
+            double usedSpaceInTB = totalSizeInTB - availableSpaceInTB;
+
+            if (usedSpaceInTB < 0)
+            {
+                usedSpaceInTB = 0;
+            }
+
+            return $"{usedSpaceInTB:F1}TB used of {totalSizeInTB:F1}TB";
+        }
+        catch (IOException)
+        {
+            return invalidDriveMessage;
+        }
+        catch (Exception ex)
+        {
+            return $"Error: {ex.Message}";
         }
     }
 }

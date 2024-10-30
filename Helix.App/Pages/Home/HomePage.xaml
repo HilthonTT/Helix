@@ -8,6 +8,7 @@
              xmlns:createDrive="clr-namespace:Helix.App.Modals.Drives.Create"
              xmlns:deleteDrive="clr-namespace:Helix.App.Modals.Drives.Delete"
              xmlns:updateDrive="clr-namespace:Helix.App.Modals.Drives.Update"
+             xmlns:searchDrives="clr-namespace:Helix.App.Modals.Drives.Search"
              xmlns:driveTemplates="clr-namespace:Helix.App.Views.Drives"
              xmlns:models="clr-namespace:Helix.App.Models"
              x:Class="Helix.App.Pages.Home.HomePage"
@@ -256,7 +257,7 @@
                                 </HorizontalStackLayout>
 
                                 <Border.GestureRecognizers>
-                                    <TapGestureRecognizer />
+                                    <TapGestureRecognizer Command="{Binding OpenSearchDrivesModalCommand}" />
                                 </Border.GestureRecognizers>
                             </Border>
                         </HorizontalStackLayout>
@@ -416,6 +417,20 @@
                                           MaximumHeightRequest="400"
                                           AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
                                           AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="SearchDrivesLayout"
+                 Grid.RowSpan="3" 
+                 Grid.ColumnSpan="2"
+                 IsVisible="False"
+                 HorizontalOptions="FillAndExpand"
+                 VerticalOptions="FillAndExpand">
+
+            <searchDrives:SearchDrivesModal x:Name="SearchDrivesView" 
+                                  BackgroundColor="White"
+                                  MaximumHeightRequest="400"
+                                  AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
+                                  AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
     </Grid>
