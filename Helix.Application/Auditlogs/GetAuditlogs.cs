@@ -18,9 +18,10 @@ public sealed class GetAuditlogs(IDbContext context, ILoggedInUser loggedInUser)
         }
 
         List<Auditlog> auditLogs = await context
-            .AuditLogs
-            .Where(a => a.UserId == loggedInUser.UserId)
-            .ToListAsync(cancellationToken);
+           .AuditLogs
+           .Where(a => a.UserId == loggedInUser.UserId)
+           .OrderByDescending(a => a.CreatedOnUtc)
+           .ToListAsync(cancellationToken);
 
         return auditLogs;
     }

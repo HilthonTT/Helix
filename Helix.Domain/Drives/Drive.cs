@@ -36,6 +36,11 @@ public sealed class Drive : Entity, IAuditable
         Name = name;
         Username = username;
         Password = password;
+
+        DateTime utcNow = DateTime.UtcNow;
+
+        CreatedOnUtc = utcNow;
+        ModifiedOnUtc = utcNow;
     }
 
     /// <summary>

@@ -39,6 +39,14 @@ public sealed partial class HomePage : ContentPage
 
     protected async override void OnAppearing()
     {
+        if (BindingContext is HomeViewModel viewModel)
+        {
+            if (viewModel.FetchDrivesCommand.CanExecute(null) && _isFirstView)
+            {
+                await viewModel.FetchDrivesCommand.ExecuteAsync(null);
+            }
+        }
+
         await InitializeChartAsync();
 
         await HandleConnectDrivesOnStartupAsync();

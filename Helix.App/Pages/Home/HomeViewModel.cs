@@ -35,8 +35,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
         _importDrives = App.ServiceProvider.GetRequiredService<ImportDrives>();
         
         RegisterMessages();
-        FetchDrives();
-
         InitializeCountdownEvents();
     }
 
@@ -134,9 +132,10 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
     }
 
-    private void FetchDrives()
+    [RelayCommand]
+    private async Task FetchDrivesAsync()
     {
-        Result<List<Drive>> result = _getDrives.Handle().GetAwaiter().GetResult();
+        Result<List<Drive>> result = await _getDrives.Handle();
         if (result.IsFailure)
         {
             return;

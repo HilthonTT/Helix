@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Helix.App.Models;
 using Helix.Application.Auditlogs;
 using Helix.Domain.Auditlogs;
@@ -15,24 +16,20 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
     public AuditlogsViewModel()
     {
         _getAuditlogs = App.ServiceProvider.GetRequiredService<GetAuditlogs>();
-
-        GetAuditlogs();
     }
 
     [ObservableProperty]
     private ObservableCollection<AuditlogDisplay> _auditlogs = [];
 
-    private void GetAuditlogs()
+    [RelayCommand]
+    private async Task GetAuditlogsAsync()
     {
-        Task.Run(async () =>
+        Result<List<Auditlog>> result = await _getAuditlogs.Handle();
+        if (result.IsSuccess)
         {
-            Result<List<Auditlog>> result = await _getAuditlogs.Handle();
-            if (result.IsSuccess)
-            {
-                List<Auditlog> auditlogs = result.Value;
+            List<Auditlog> auditlogs = result.Value;
 
-                Auditlogs = auditlogs.Select(a => new AuditlogDisplay(a)).ToObservableCollection();
-            }
-        });
+            Auditlogs = auditlogs.Select(a => new AuditlogDisplay(a)).ToObservableCollection();
+        }
     }
 }

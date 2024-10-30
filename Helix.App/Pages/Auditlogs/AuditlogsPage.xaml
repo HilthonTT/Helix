@@ -1,8 +1,79 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:auditlogTemplates="clr-namespace:Helix.App.Views.Auditlogs"
+             xmlns:auditlogs="clr-namespace:Helix.App.Pages.Auditlogs"
              x:Class="Helix.App.Pages.Auditlogs.AuditlogsPage"
+             x:DataType="auditlogs:AuditlogsViewModel"
              Title=""
              Shell.NavBarIsVisible="False">
 
+    <Grid RowDefinitions="100, *"
+          ColumnDefinitions="*, 400"
+          RowSpacing="24"
+          Margin="24">
+
+        <VerticalStackLayout Margin="0,24,0,0">
+            <Label Text="Dashboard" Style="{StaticResource LargeTitle}"/>
+            <Label Text="{Binding Source={x:Static system:DateTime.Now}, StringFormat='{0:dddd, MMMM dd yyyy}'}"/>
+            <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
+        </VerticalStackLayout>
+
+        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource DarkBorderView}">
+            <Grid Margin="24" RowDefinitions="80,*">
+                <Label Text="Your auditlogs" Style="{StaticResource Title1}" />
+
+                <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" VerticalOptions="Start" Spacing="8">
+
+                    <Border Stroke="{StaticResource SecondaryBrush}"
+                            StrokeThickness="1"
+                            Background="Transparent"
+                            SemanticProperties.Description="Button that opens a filter dialog">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <HorizontalStackLayout Margin="14,12" Spacing="12">
+                            <Image Source="filter.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
+                            <Label Text="Filter" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer  />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </HorizontalStackLayout>
+
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Spacing="16">
+                        <!-- heading -->
+                        <Grid ColumnDefinitions="*,250" Margin="0,0,0,10">
+                            <Label Text="Message" Style="{StaticResource Headline}"/>
+                            <Label Text="Date" Grid.Column="1" Style="{StaticResource Headline}"/>
+                        </Grid>
+
+                        <BoxView Style="{StaticResource HRule}"/>
+
+                        <VerticalStackLayout Spacing="16" BindableLayout.ItemsSource="{Binding Auditlogs}">
+
+                            <!-- Drive Information Rows -->
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:AuditlogDisplay">
+
+                                    <auditlogTemplates:AuditlogTemplate BindingContext="{Binding .}" />
+
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
+                </ScrollView>
+
+            </Grid>
+        </Border>
+
+    </Grid>
+    
 </ContentPage>

@@ -32,14 +32,11 @@ public static class DependencyInjection
 
     private static IServiceCollection AddDatabase(this IServiceCollection services)
     {
-        services.AddSingleton<UpdateAuditableInterceptor>();
         services.AddSingleton<InsertAuditLogsInterceptor>();
 
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
-            options.AddInterceptors(
-                sp.GetRequiredService<UpdateAuditableInterceptor>(),
-                sp.GetRequiredService<InsertAuditLogsInterceptor>());
+            options.AddInterceptors(sp.GetRequiredService<InsertAuditLogsInterceptor>());
         });
 
         services.AddScoped<IDbContext, AppDbContext>();

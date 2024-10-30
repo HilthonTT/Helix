@@ -220,8 +220,7 @@
 
                 <!-- Drive list -->
 
-                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                        Style="{StaticResource DarkBorderView}">
+                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource DarkBorderView}">
                     <Grid Margin="24" RowDefinitions="80,*">
                         <Label Text="Your drives" Style="{StaticResource Title1}" />
 

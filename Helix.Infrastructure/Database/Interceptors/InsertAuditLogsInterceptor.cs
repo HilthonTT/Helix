@@ -1,6 +1,5 @@
 ﻿using Helix.Domain.Auditlogs;
 using Helix.Domain.Drives;
-using Helix.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using SharedKernel;
@@ -24,42 +23,37 @@ internal sealed class InsertAuditLogsInterceptor : SaveChangesInterceptor
 
     private static void InsertAuditLogs(DbContext context)
     {
-        List<Auditlog> auditLogs = GetCredentialAuditLogs(context)
-            .Concat(GetUserAuditLogs(context))
-            .ToList();
+        List<Auditlog> auditLogs = GetCredentialAuditLogs(context).ToList();
 
         context.Set<Auditlog>().AddRange(auditLogs);
     }
 
     private static IEnumerable<Auditlog> GetCredentialAuditLogs(DbContext context)
     {
-        // Filter credentials that are added or modified
+        DateTime utcNow = DateTime.UtcNow;
+
         return context.ChangeTracker
             .Entries<Entity>()
             .Where(entry => entry.Entity is Drive &&
-                            (entry.State == EntityState.Added || entry.State == EntityState.Modified))
+                            (entry.State == EntityState.Added || 
+                             entry.State == EntityState.Modified ||
+                             entry.State == EntityState.Deleted))
             .Select(entry =>
             {
-                var drive = (Drive)entry.Entity;
-                var action = entry.State == EntityState.Added ? "created" : "updated";
-                return Auditlog.Create(
-                    userId: drive.UserId,
-                    message: $"Drive for user {drive.UserId} was {action}.");
-            });
-    }
+                Drive drive = (Drive)entry.Entity;
 
-    private static IEnumerable<Auditlog> GetUserAuditLogs(DbContext context)
-    {
-        // Filter user updates only (no creation or deletion)
-        return context.ChangeTracker
-            .Entries<Entity>()
-            .Where(entry => entry.Entity is User && entry.State == EntityState.Modified)
-            .Select(entry =>
-            {
-                var user = (User)entry.Entity;
+                string action = entry.State switch
+                {
+                    EntityState.Added => "created",
+                    EntityState.Modified => "updated",
+                    EntityState.Deleted => "deleted",
+                    _ => "modified"
+                };
+
                 return Auditlog.Create(
-                    userId: user.Id,
-                    message: $"User {user.Id} was updated.");
-            });
+                    drive.UserId,
+                    $"Drive '{drive.Name}' (ID: {drive.Id}) has been {action}."
+            );
+        });
     }
 }

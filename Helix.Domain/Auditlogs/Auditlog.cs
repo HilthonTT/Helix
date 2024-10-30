@@ -12,6 +12,11 @@ public sealed class Auditlog : Entity, IAuditable
 
         UserId = userId;
         Message = message;
+
+        DateTime utcNow = DateTime.UtcNow;
+
+        CreatedOnUtc = utcNow;
+        ModifiedOnUtc = utcNow;
     }
 
     /// <summary>
