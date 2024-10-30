@@ -110,6 +110,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Modals\Auditlogs\Search\SearchAuditlogsModal.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Modals\Drives\Create\CreateDriveModal.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -165,6 +168,12 @@
 	  <Compile Update="Modals\Users\UpdatePassword\UpdatePasswordModal.xaml.cs">
 	    <DependentUpon>UpdatePasswordModal.xaml</DependentUpon>
 	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Views\Auditlogs\AuditlogTemplate.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </None>
 	</ItemGroup>
 
 </Project>

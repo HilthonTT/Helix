@@ -3,6 +3,7 @@ using Helix.Application;
 using Helix.Infrastructure;
 using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Handlers;
 using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
@@ -71,7 +72,7 @@ public static class MauiProgram
 
     private static void ModifyEntry()
     {
-        Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoMoreBorders", (handler, view) =>
+        EntryHandler.Mapper.AppendToMapping("NoMoreBorders", (handler, view) =>
         {
             handler.PlatformView.FontWeight = Microsoft.UI.Text.FontWeights.Thin;
             handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);

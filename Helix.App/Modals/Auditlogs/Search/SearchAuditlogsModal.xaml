@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:modals="clr-namespace:Helix.App.Modals.Auditlogs.Search"
+             xmlns:layouts="clr-namespace:Helix.App.Layouts"
+             x:DataType="modals:SearchAuditlogsViewModel"
+             x:Class="Helix.App.Modals.Auditlogs.Search.SearchAuditlogsModal"
+             Background="{StaticResource DarkBg2Brush}">
+
+    <ContentView.Resources>
+        <Style TargetType="RadioButton">
+            <Setter Property="ControlTemplate" Value="{StaticResource ButtonRadioTemplate}" />
+        </Style>
+    </ContentView.Resources>
+
+    <Grid RowDefinitions="*,108" ColumnDefinitions="*,*"  ColumnSpacing="0">
+        <ScrollView Grid.ColumnSpan="2">
+            <VerticalStackLayout Spacing="20" Margin="24">
+                <Label Text="Search Drives" Style="{StaticResource Title1}" />
+                <BoxView Style="{StaticResource HRule}" />
+
+                <Border HeightRequest="48"
+                        HorizontalOptions="Fill"
+                        Background="{StaticResource DarkBg1Brush}"
+                        Stroke="{StaticResource SecondaryBrush}"
+                        StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+
+                    <Entry Background="Transparent"
+                           Placeholder="Enter your search term (optional)"
+                           Text="{Binding SearchTerm}"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="Start"
+                           MinimumWidthRequest="800"
+                           Margin="8,0"
+                           FontSize="14"
+                           IsEnabled="{Binding IsNotBusy}"/>
+                </Border>
+
+                <Label Text="Your sort order" />
+
+                <layouts:HorizontalWrapLayout Spacing="8"
+                        RadioButtonGroup.GroupName="SortOrder"
+                        RadioButtonGroup.SelectedValue="{Binding SortOrderString}">
+                    <BindableLayout.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Ascending</x:String>
+                            <x:String>Descending</x:String>
+                        </x:Array>
+                    </BindableLayout.ItemsSource>
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton Content="{Binding .}" Value="{Binding .}" IsEnabled="{Binding IsNotBusy}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </layouts:HorizontalWrapLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Button Grid.Row="1"
+                Grid.Column="0"
+                Margin="24,24,12,24"
+                Style="{StaticResource SecondaryButtonOutline}"
+                HorizontalOptions="Fill"
+                Text="Cancel"
+                Command="{Binding CloseCommand}" 
+                IsEnabled="{Binding IsNotBusy}"/>
+
+        <Button Grid.Row="1"
+                Grid.Column="1"
+                Margin="12,24,24,24"
+                Command="{Binding SearchCommand}"
+                HorizontalOptions="Fill"
+                Text="Search" 
+                IsEnabled="{Binding IsNotBusy}"/>
+    </Grid>
+
+</ContentView>
