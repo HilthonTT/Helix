@@ -340,8 +340,7 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File
-        ///.
+        ///   Looks up a localized string similar to File.
         /// </summary>
         internal static string File {
             get {
@@ -382,6 +381,15 @@ namespace Helix.App.Resources.Languages {
         internal static string Letter {
             get {
                 return ResourceManager.GetString("Letter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Login.
+        /// </summary>
+        internal static string Login {
+            get {
+                return ResourceManager.GetString("Login", resourceCulture);
             }
         }
         

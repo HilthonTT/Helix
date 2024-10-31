@@ -118,58 +118,58 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Settings" xml:space="preserve">
-    <value>Settings</value>
+    <value>Einstellungen</value>
   </data>
   <data name="File" xml:space="preserve">
-    <value>File</value>
+    <value>Datei</value>
   </data>
   <data name="Preferences" xml:space="preserve">
-    <value>Preferences</value>
+    <value>Einstellungen</value>
   </data>
   <data name="AddDrive" xml:space="preserve">
-    <value>Add Drive</value>
+    <value>Hinzufügen eines Laufwerks</value>
   </data>
   <data name="ExportDrives" xml:space="preserve">
-    <value>Export Drives</value>
+    <value>Exportieren von Laufwerken</value>
   </data>
   <data name="ImportDrives" xml:space="preserve">
-    <value>Import Drives</value>
+    <value>Importieren von Laufwerken</value>
   </data>
   <data name="Dashboard" xml:space="preserve">
-    <value>Dashboard</value>
+    <value>Instrumententafel</value>
   </data>
   <data name="Drives" xml:space="preserve">
-    <value>Drives</value>
+    <value>Laufwerken</value>
   </data>
   <data name="StorageUsage" xml:space="preserve">
-    <value>Storage Usage</value>
+    <value>Speichernutzung</value>
   </data>
   <data name="TotalStorageOfNas" xml:space="preserve">
-    <value>Total Storage of NAS</value>
+    <value>Gesamter Speicher des NAS</value>
   </data>
   <data name="Connection" xml:space="preserve">
-    <value>Connection</value>
+    <value>Verbindung</value>
   </data>
   <data name="TotalConnectedDrives" xml:space="preserve">
-    <value>Total Connected Drives</value>
+    <value>Vernetzte Laufwerke insgesamt</value>
   </data>
   <data name="Timer" xml:space="preserve">
-    <value>Timer</value>
+    <value>Zeitschaltuhr</value>
   </data>
   <data name="TimeBeforeMinimize" xml:space="preserve">
-    <value>Time before minimize</value>
+    <value>Zeit vor der Minimierung</value>
   </data>
   <data name="YourDrives" xml:space="preserve">
-    <value>Your drives</value>
+    <value>Ihre Laufwerkes</value>
   </data>
   <data name="ToggleConnect" xml:space="preserve">
-    <value>Toggle Connect</value>
+    <value>Verbinden umschalten</value>
   </data>
   <data name="Filter" xml:space="preserve">
     <value>Filter</value>
   </data>
   <data name="Letter" xml:space="preserve">
-    <value>Letter</value>
+    <value>Buchstabe</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
@@ -178,174 +178,174 @@
     <value>Status</value>
   </data>
   <data name="Connectivity" xml:space="preserve">
-    <value>Connectivity</value>
+    <value>Konnektivität</value>
   </data>
   <data name="Today" xml:space="preserve">
-    <value>Today</value>
+    <value>Heute</value>
   </data>
   <data name="WelcomeMessage" xml:space="preserve">
-    <value>Welcome back to Helix!</value>
+    <value>Willkommen zurück bei Helix!</value>
   </data>
   <data name="Username" xml:space="preserve">
-    <value>Username</value>
+    <value>Nutzername</value>
   </data>
   <data name="Password" xml:space="preserve">
-    <value>Password</value>
+    <value>Passwort</value>
   </data>
   <data name="DontHaveAnAccount" xml:space="preserve">
-    <value>Don't have an account?</value>
+    <value>Sie haben noch kein Konto?</value>
   </data>
   <data name="RegisterMessage" xml:space="preserve">
-    <value>Register to Helix!</value>
+    <value>Registrieren Sie sich bei Helix!</value>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
-    <value>Confirm Password</value>
+    <value>Passwort bestätigen</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Register</value>
+    <value>Registrieren</value>
   </data>
   <data name="AlreadyHaveAnAccount" xml:space="preserve">
-    <value>Already have an account?</value>
+    <value>Haben Sie bereits ein Konto?</value>
   </data>
   <data name="AccountInformation" xml:space="preserve">
-    <value>Account Information</value>
+    <value>Kontoinformationen</value>
   </data>
   <data name="ChangeYourAccountInfo" xml:space="preserve">
-    <value>Change your account info.</value>
+    <value>Ändern Sie Ihre Kontoinformationen.</value>
   </data>
   <data name="ManageYourPreferences" xml:space="preserve">
-    <value>Manage your preferences.</value>
+    <value>Verwalten Sie Ihre Einstellungen.</value>
   </data>
   <data name="UsernameField" xml:space="preserve">
-    <value>Username: </value>
+    <value>Nutzername: </value>
   </data>
   <data name="PasswordField" xml:space="preserve">
-    <value>Password: </value>
+    <value>Passwort: </value>
   </data>
   <data name="AutoConnectDrivesOnLaunch" xml:space="preserve">
-    <value>Auto connect drives on launch</value>
+    <value>Laufwerke beim Start automatisch verbinden</value>
   </data>
   <data name="AutoMinimizeApp" xml:space="preserve">
-    <value>Auto minimize app</value>
+    <value>App automatisch minimieren</value>
   </data>
   <data name="SetOnStartup" xml:space="preserve">
-    <value>Set on startup</value>
+    <value>Beim Start festlegen</value>
   </data>
   <data name="Languages" xml:space="preserve">
-    <value>Languages</value>
+    <value>Sprachen</value>
   </data>
   <data name="TimerCountInSeconds" xml:space="preserve">
-    <value>Timer count in seconds</value>
+    <value>Timer-Zählung in Sekunden</value>
   </data>
   <data name="Auditlogs" xml:space="preserve">
     <value>Auditlogs</value>
   </data>
   <data name="YourAuditlogs" xml:space="preserve">
-    <value>Your auditlogs</value>
+    <value>Ihre Auditlogs</value>
   </data>
   <data name="Message" xml:space="preserve">
-    <value>Message</value>
+    <value>Nachricht</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Date</value>
+    <value>Datum</value>
   </data>
   <data name="SearchDrives" xml:space="preserve">
-    <value>Search Drives</value>
+    <value>Laufwerke durchsuchen</value>
   </data>
   <data name="SearchTermPlaceholder" xml:space="preserve">
-    <value>Enter your search term (optional)</value>
+    <value>Geben Sie Ihren Suchbegriff ein (optional)</value>
   </data>
   <data name="YourSortOrder" xml:space="preserve">
-    <value>Your sort order</value>
+    <value>Ihre Sortierreihenfolge</value>
   </data>
   <data name="Close" xml:space="preserve">
-    <value>Close</value>
+    <value>Schließen</value>
   </data>
   <data name="Search" xml:space="preserve">
-    <value>Search</value>
+    <value>Suchen</value>
   </data>
   <data name="Ascending" xml:space="preserve">
-    <value>Ascending</value>
+    <value>Aufsteigend</value>
   </data>
   <data name="Descending" xml:space="preserve">
-    <value>Descending</value>
+    <value>Absteigend</value>
   </data>
   <data name="SearchAuditlogs" xml:space="preserve">
-    <value>Search auditlogs</value>
+    <value>Auditlogs durchsuchen</value>
   </data>
   <data name="AddNetworkDriveLetterPlaceholder" xml:space="preserve">
-    <value>Add network's drive letter</value>
+    <value>Hinzufügen des Laufwerksbuchstabens des Netzwerks</value>
   </data>
   <data name="NasIpAddress" xml:space="preserve">
-    <value>NAS IP Address</value>
+    <value>NAS-IP-Adresse</value>
   </data>
   <data name="AddNasIpAddressPlaceholder" xml:space="preserve">
-    <value>Add your NAS' IP Address</value>
+    <value>Fügen Sie die IP-Adresse Ihres NAS hinzu</value>
   </data>
   <data name="DriveName" xml:space="preserve">
-    <value>Drive's name</value>
+    <value>Name des Laufwerks</value>
   </data>
   <data name="AddDriveNamePlaceholder" xml:space="preserve">
-    <value>Add your drive's name</value>
+    <value>Fügen Sie den Namen Ihres Laufwerks hinzu</value>
   </data>
   <data name="NasUsername" xml:space="preserve">
-    <value>NAS Username</value>
+    <value>NAS-Benutzername</value>
   </data>
   <data name="AddNasUsernamePlaceholder" xml:space="preserve">
-    <value>Add your NAS' username</value>
+    <value>Fügen Sie den Benutzernamen Ihres NAS hinzu</value>
   </data>
   <data name="NasPassword" xml:space="preserve">
-    <value>NAS Password</value>
+    <value>NAS-Passwort</value>
   </data>
   <data name="AddNasPasswordPlaceholder" xml:space="preserve">
-    <value>Add your NAS' password</value>
+    <value>Fügen Sie das Passwort Ihres NAS hinzu</value>
   </data>
   <data name="DeleteDrive" xml:space="preserve">
-    <value>Delete Drive</value>
+    <value>Laufwerk löschen</value>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>Delete</value>
+    <value>Löschen</value>
   </data>
   <data name="UpdateDrive" xml:space="preserve">
-    <value>Update Drive</value>
+    <value>Laufwerk aktualisieren</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Save</value>
+    <value>Retten</value>
   </data>
   <data name="UpdatePassword" xml:space="preserve">
-    <value>Update your password</value>
+    <value>Aktualisieren Sie Ihr Passwort</value>
   </data>
   <data name="YourCurrentPassword" xml:space="preserve">
-    <value>Your current password</value>
+    <value>Ihr aktuelles Passwort</value>
   </data>
   <data name="AddCurrentPasswordPlaceholder" xml:space="preserve">
-    <value>Please enter your current password</value>
+    <value>Bitte geben Sie Ihr aktuelles Passwort ein</value>
   </data>
   <data name="YourNewPassword" xml:space="preserve">
-    <value>Your new password</value>
+    <value>Ihr neues Passwort</value>
   </data>
   <data name="AddNewPasswordPlaceholder" xml:space="preserve">
-    <value>Please enter your new password</value>
+    <value>Bitte geben Sie Ihr neues Passwort ein</value>
   </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
-    <value>Confirm your new password</value>
+    <value>Bestätigen Sie Ihr neues Passwort</value>
   </data>
   <data name="AddConfirmNewPasswordPlaceholder" xml:space="preserve">
-    <value>Please re-enter your new password</value>
+    <value>Bitte geben Sie Ihr neues Passwort erneut ein</value>
   </data>
   <data name="UpdateYourUsername" xml:space="preserve">
-    <value>Update your username</value>
+    <value>Aktualisieren Sie Ihren Benutzernamen</value>
   </data>
   <data name="YourUsername" xml:space="preserve">
-    <value>Your username</value>
+    <value>Ihr Benutzername</value>
   </data>
   <data name="AddNewUsernamePlaceholder" xml:space="preserve">
-    <value>Please enter your new username</value>
+    <value>Bitte geben Sie Ihren neuen Benutzernamen ein</value>
   </data>
   <data name="Logout" xml:space="preserve">
-    <value>Logout</value>
+    <value>Abmeldung</value>
   </data>
   <data name="Login" xml:space="preserve">
-    <value>Login</value>
+    <value>Einloggen</value>
   </data>
 </root>

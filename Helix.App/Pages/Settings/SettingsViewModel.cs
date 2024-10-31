@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Maui.Core.Extensions;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Helpers;
@@ -82,11 +81,11 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         return languageString switch
         {
             "English" => Language.English,
-            "French" => Language.French,
-            "German" => Language.German,
-            "Indonesian" => Language.Indonesian,
-            "Japanese" => Language.Japanese,
-            "Dutch" => Language.Dutch,
+            "Français" => Language.French,
+            "Deutsch" => Language.German,
+            "Bahasa Indonesia" => Language.Indonesian,
+            "日本語" => Language.Japanese,
+            "Nederlands" => Language.Dutch,
             _ => throw new ArgumentException($"Unknown language: {languageString}")
         };
     }
@@ -96,11 +95,11 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         return language switch
         {
             Language.English => "English",
-            Language.French => "French",
-            Language.German => "German",
-            Language.Indonesian => "Indonesian",
-            Language.Japanese => "Japanese",
-            Language.Dutch => "Dutch",
+            Language.French => "Français",
+            Language.German => "Deutsch",
+            Language.Indonesian => "Bahasa Indonesia",
+            Language.Japanese => "日本語",
+            Language.Dutch => "Nederlands",
             _ => "Unknown Language"
         };
     }
@@ -124,7 +123,9 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
     private void LoadLanguages()
     {
-        Languages = Enum.GetNames(typeof(Language)).ToObservableCollection();
+        string[] languages = ["English", "Français", "Deutsch", "Bahasa Indonesia", "日本語", "Nederlands"];
+
+        Languages = new(languages);
     }
 
     private void RegisterMessages()

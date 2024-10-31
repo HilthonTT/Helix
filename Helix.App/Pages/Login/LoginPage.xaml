@@ -88,7 +88,7 @@
             </Border>
 
             <!-- Login Button -->
-            <Button Text="Login" 
+            <Button Text="{local:Translate Login}" 
                     Margin="0,24,0,24" 
                     Command="{Binding LoginCommand}"
                     HorizontalOptions="FillAndExpand"

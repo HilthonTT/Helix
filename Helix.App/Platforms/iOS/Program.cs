@@ -2,7 +2,8 @@
 using UIKit;
 
 namespace Helix.App;
-public class Program
+
+public sealed class Program
 {
     // This is the main entry point of the application.
     static void Main(string[] args)

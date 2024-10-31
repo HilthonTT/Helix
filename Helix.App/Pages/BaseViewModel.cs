@@ -38,7 +38,6 @@ public abstract partial class BaseViewModel : ObservableObject
 
     public string TimerCount => $"{SecondsRemaining} seconds";
 
-
     [RelayCommand]
     public async Task StartTimerAsync()
     {

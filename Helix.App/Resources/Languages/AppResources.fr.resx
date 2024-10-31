@@ -345,4 +345,7 @@
   <data name="Logout" xml:space="preserve">
     <value>Déconnexion</value>
   </data>
+  <data name="Login" xml:space="preserve">
+    <value>Connectez-vous</value>
+  </data>
 </root>

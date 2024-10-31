@@ -118,229 +118,229 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Settings" xml:space="preserve">
-    <value>Settings</value>
+    <value>Pengaturan</value>
   </data>
   <data name="File" xml:space="preserve">
-    <value>File</value>
+    <value>Arsip</value>
   </data>
   <data name="Preferences" xml:space="preserve">
-    <value>Preferences</value>
+    <value>Preferensi</value>
   </data>
   <data name="AddDrive" xml:space="preserve">
-    <value>Add Drive</value>
+    <value>Menambahkan drive</value>
   </data>
   <data name="ExportDrives" xml:space="preserve">
-    <value>Export Drives</value>
+    <value>Ekspor Drive</value>
   </data>
   <data name="ImportDrives" xml:space="preserve">
-    <value>Import Drives</value>
+    <value>Impor Drive</value>
   </data>
   <data name="Dashboard" xml:space="preserve">
     <value>Dashboard</value>
   </data>
   <data name="Drives" xml:space="preserve">
-    <value>Drives</value>
+    <value>Drive</value>
   </data>
   <data name="StorageUsage" xml:space="preserve">
-    <value>Storage Usage</value>
+    <value>Penggunaan Penyimpanan</value>
   </data>
   <data name="TotalStorageOfNas" xml:space="preserve">
-    <value>Total Storage of NAS</value>
+    <value>Total Penyimpanan NAS</value>
   </data>
   <data name="Connection" xml:space="preserve">
-    <value>Connection</value>
+    <value>Sambungan</value>
   </data>
   <data name="TotalConnectedDrives" xml:space="preserve">
-    <value>Total Connected Drives</value>
+    <value>Total Drive yang Terhubung</value>
   </data>
   <data name="Timer" xml:space="preserve">
     <value>Timer</value>
   </data>
   <data name="TimeBeforeMinimize" xml:space="preserve">
-    <value>Time before minimize</value>
+    <value>Waktu sebelum meminimalkan</value>
   </data>
   <data name="YourDrives" xml:space="preserve">
-    <value>Your drives</value>
+    <value>Drive Anda</value>
   </data>
   <data name="ToggleConnect" xml:space="preserve">
-    <value>Toggle Connect</value>
+    <value>Beralih Hubungkan</value>
   </data>
   <data name="Filter" xml:space="preserve">
-    <value>Filter</value>
+    <value>Saringan</value>
   </data>
   <data name="Letter" xml:space="preserve">
-    <value>Letter</value>
+    <value>huruf</value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nama</value>
   </data>
   <data name="Status" xml:space="preserve">
-    <value>Status</value>
+    <value>Keadaan</value>
   </data>
   <data name="Connectivity" xml:space="preserve">
-    <value>Connectivity</value>
+    <value>Konektivitas</value>
   </data>
   <data name="Today" xml:space="preserve">
-    <value>Today</value>
+    <value>Hari Ini</value>
   </data>
   <data name="WelcomeMessage" xml:space="preserve">
-    <value>Welcome back to Helix!</value>
+    <value>Selamat datang kembali di Helix!</value>
   </data>
   <data name="Username" xml:space="preserve">
-    <value>Username</value>
+    <value>Nama pengguna</value>
   </data>
   <data name="Password" xml:space="preserve">
-    <value>Password</value>
+    <value>Kata sandi</value>
   </data>
   <data name="DontHaveAnAccount" xml:space="preserve">
-    <value>Don't have an account?</value>
+    <value>Tidak punya akun?</value>
   </data>
   <data name="RegisterMessage" xml:space="preserve">
-    <value>Register to Helix!</value>
+    <value>Daftar ke Helix!</value>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
-    <value>Confirm Password</value>
+    <value>Konfirmasi Kata Sandi</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Register</value>
+    <value>Daftar</value>
   </data>
   <data name="AlreadyHaveAnAccount" xml:space="preserve">
-    <value>Already have an account?</value>
+    <value>Sudah memiliki akun?</value>
   </data>
   <data name="AccountInformation" xml:space="preserve">
-    <value>Account Information</value>
+    <value>Informasi Akun</value>
   </data>
   <data name="ChangeYourAccountInfo" xml:space="preserve">
-    <value>Change your account info.</value>
+    <value>Mengubah info akun Anda.</value>
   </data>
   <data name="ManageYourPreferences" xml:space="preserve">
-    <value>Manage your preferences.</value>
+    <value>Kelola preferensi Anda.</value>
   </data>
   <data name="UsernameField" xml:space="preserve">
-    <value>Username: </value>
+    <value>Nama pengguna: </value>
   </data>
   <data name="PasswordField" xml:space="preserve">
-    <value>Password: </value>
+    <value>Kata sandi: </value>
   </data>
   <data name="AutoConnectDrivesOnLaunch" xml:space="preserve">
-    <value>Auto connect drives on launch</value>
+    <value>Sambungkan drive otomatis saat diluncurkan</value>
   </data>
   <data name="AutoMinimizeApp" xml:space="preserve">
-    <value>Auto minimize app</value>
+    <value>Minimalkan aplikasi otomatis</value>
   </data>
   <data name="SetOnStartup" xml:space="preserve">
-    <value>Set on startup</value>
+    <value>Atur saat startup</value>
   </data>
   <data name="Languages" xml:space="preserve">
-    <value>Languages</value>
+    <value>Bahasa</value>
   </data>
   <data name="TimerCountInSeconds" xml:space="preserve">
-    <value>Timer count in seconds</value>
+    <value>Jumlah pengatur waktu dalam detik</value>
   </data>
   <data name="Auditlogs" xml:space="preserve">
-    <value>Auditlogs</value>
+    <value>Log audit</value>
   </data>
   <data name="YourAuditlogs" xml:space="preserve">
-    <value>Your auditlogs</value>
+    <value>Log audit Anda</value>
   </data>
   <data name="Message" xml:space="preserve">
-    <value>Message</value>
+    <value>Pesan</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Date</value>
+    <value>Tanggal</value>
   </data>
   <data name="SearchDrives" xml:space="preserve">
-    <value>Search Drives</value>
+    <value>Cari Drive</value>
   </data>
   <data name="SearchTermPlaceholder" xml:space="preserve">
-    <value>Enter your search term (optional)</value>
+    <value>Masukkan istilah penelusuran Anda (opsional)</value>
   </data>
   <data name="YourSortOrder" xml:space="preserve">
-    <value>Your sort order</value>
+    <value>Urutan pengurutan Anda</value>
   </data>
   <data name="Close" xml:space="preserve">
-    <value>Close</value>
+    <value>Tutup</value>
   </data>
   <data name="Search" xml:space="preserve">
-    <value>Search</value>
+    <value>Mencari</value>
   </data>
   <data name="Ascending" xml:space="preserve">
-    <value>Ascending</value>
+    <value>Naik</value>
   </data>
   <data name="Descending" xml:space="preserve">
-    <value>Descending</value>
+    <value>Turun</value>
   </data>
   <data name="SearchAuditlogs" xml:space="preserve">
-    <value>Search auditlogs</value>
+    <value>Menelusuri log audit</value>
   </data>
   <data name="AddNetworkDriveLetterPlaceholder" xml:space="preserve">
-    <value>Add network's drive letter</value>
+    <value>Menambahkan huruf drive jaringan</value>
   </data>
   <data name="NasIpAddress" xml:space="preserve">
-    <value>NAS IP Address</value>
+    <value>Alamat IP NAS</value>
   </data>
   <data name="AddNasIpAddressPlaceholder" xml:space="preserve">
-    <value>Add your NAS' IP Address</value>
+    <value>Tambahkan Alamat IP NAS Anda</value>
   </data>
   <data name="DriveName" xml:space="preserve">
-    <value>Drive's name</value>
+    <value>Nama drive</value>
   </data>
   <data name="AddDriveNamePlaceholder" xml:space="preserve">
-    <value>Add your drive's name</value>
+    <value>Menambahkan nama drive Anda</value>
   </data>
   <data name="NasUsername" xml:space="preserve">
     <value>NAS Username</value>
   </data>
   <data name="AddNasUsernamePlaceholder" xml:space="preserve">
-    <value>Add your NAS' username</value>
+    <value>Tambahkan nama pengguna NAS Anda</value>
   </data>
   <data name="NasPassword" xml:space="preserve">
-    <value>NAS Password</value>
+    <value>Kata Sandi NAS</value>
   </data>
   <data name="AddNasPasswordPlaceholder" xml:space="preserve">
-    <value>Add your NAS' password</value>
+    <value>Tambahkan kata sandi NAS Anda</value>
   </data>
   <data name="DeleteDrive" xml:space="preserve">
-    <value>Delete Drive</value>
+    <value>Hapus Drive</value>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>Delete</value>
+    <value>Menghapus</value>
   </data>
   <data name="UpdateDrive" xml:space="preserve">
-    <value>Update Drive</value>
+    <value>Perbarui Drive</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Save</value>
+    <value>Simpan</value>
   </data>
   <data name="UpdatePassword" xml:space="preserve">
-    <value>Update your password</value>
+    <value>Perbarui kata sandi Anda</value>
   </data>
   <data name="YourCurrentPassword" xml:space="preserve">
-    <value>Your current password</value>
+    <value>Kata sandi Anda saat ini</value>
   </data>
   <data name="AddCurrentPasswordPlaceholder" xml:space="preserve">
-    <value>Please enter your current password</value>
+    <value>Silakan masukkan kata sandi Anda saat ini</value>
   </data>
   <data name="YourNewPassword" xml:space="preserve">
-    <value>Your new password</value>
+    <value>Kata sandi baru Anda</value>
   </data>
   <data name="AddNewPasswordPlaceholder" xml:space="preserve">
-    <value>Please enter your new password</value>
+    <value>Silakan masukkan kata sandi baru Anda</value>
   </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
-    <value>Confirm your new password</value>
+    <value>Konfirmasikan kata sandi baru Anda</value>
   </data>
   <data name="AddConfirmNewPasswordPlaceholder" xml:space="preserve">
-    <value>Please re-enter your new password</value>
+    <value>Masukkan kembali kata sandi baru Anda</value>
   </data>
   <data name="UpdateYourUsername" xml:space="preserve">
-    <value>Update your username</value>
+    <value>Perbarui nama pengguna Anda</value>
   </data>
   <data name="YourUsername" xml:space="preserve">
-    <value>Your username</value>
+    <value>Nama pengguna Anda</value>
   </data>
   <data name="AddNewUsernamePlaceholder" xml:space="preserve">
-    <value>Please enter your new username</value>
+    <value>Masukkan nama pengguna baru Anda</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Logout</value>
