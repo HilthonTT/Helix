@@ -11,17 +11,18 @@
              xmlns:searchDrives="clr-namespace:Helix.App.Modals.Drives.Search"
              xmlns:driveTemplates="clr-namespace:Helix.App.Views.Drives"
              xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:local="clr-namespace:Helix.App"
              x:Class="Helix.App.Pages.Home.HomePage"
              x:DataType="home:HomeViewModel"
              Title="">
 
     <ContentPage.MenuBarItems>
-        <MenuBarItem Text="File">
-            <MenuFlyoutItem Text="Preferences" Clicked="Preferences_Clicked" />
+        <MenuBarItem Text="{local:Translate File}">
+            <MenuFlyoutItem Text="{local:Translate Preferences}" Clicked="Preferences_Clicked" />
         </MenuBarItem>
 
-        <MenuBarItem Text="Drives">
-            <MenuFlyoutItem Text="Add Drive" Clicked="AddDrive_Clicked">
+        <MenuBarItem Text="{local:Translate Drives}">
+            <MenuFlyoutItem Text="{local:Translate AddDrive}" Clicked="AddDrive_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="A" Modifiers="Cmd,Shift" />
                     <KeyboardAccelerator Key="A" Modifiers="Ctrl" />
@@ -35,7 +36,7 @@
                 </MenuFlyoutItem.IconImageSource>
             </MenuFlyoutItem>
 
-            <MenuFlyoutItem Text="Export Drives" Clicked="ExportDrives_Clicked">
+            <MenuFlyoutItem Text="{local:Translate ExportDrives}" Clicked="ExportDrives_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="E" Modifiers="Cmd,Shift" />
                     <KeyboardAccelerator Key="E" Modifiers="Ctrl" />
@@ -49,7 +50,7 @@
                 </MenuFlyoutItem.IconImageSource>
             </MenuFlyoutItem>
 
-            <MenuFlyoutItem Text="Import Drives" Clicked="ImportDrives_Clicked">
+            <MenuFlyoutItem Text="{local:Translate ImportDrives}" Clicked="ImportDrives_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="I" Modifiers="Cmd,Shift" />
                     <KeyboardAccelerator Key="I" Modifiers="Ctrl" />
@@ -73,7 +74,7 @@
           Margin="24, 0, 0, 0">
 
         <VerticalStackLayout Margin="0,24,0,0">
-            <Label Text="Dashboard" Style="{StaticResource LargeTitle}"/>
+            <Label Text="{local:Translate Dashboard}" Style="{StaticResource LargeTitle}"/>
             <Label Text="{Binding Source={x:Static system:DateTime.Now}, StringFormat='{0:dddd, MMMM dd yyyy}'}"/>
             <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
         </VerticalStackLayout>
@@ -126,10 +127,10 @@
                                 Style="{StaticResource LightBorderView}">
                                 <Image Source="database.png" HorizontalOptions="Center"/>
                             </Border>
-                            <Label Text="Storage Usage" class="Percent,Down"/>
+                            <Label Text="{local:Translate StorageUsage}" class="Percent,Down"/>
                         </HorizontalStackLayout>
                         <Label Text="{Binding TotalStorage}" FontSize="Micro"  Grid.Row="1" class="Data"/>
-                        <Label Text="Total storage of NAS" Grid.Row="2" class="Label"/>
+                        <Label Text="{local:Translate TotalStorageOfNas}" Grid.Row="2" class="Label"/>
                     </Grid>
                 </Border>
 
@@ -142,10 +143,10 @@
                                 Style="{StaticResource LightBorderView}">
                                 <Image Source="plug.png" HorizontalOptions="Center"/>
                             </Border>
-                            <Label Text="Connection" class="Percent,Down" TextColor="Azure"/>
+                            <Label Text="{local:Translate Connection}" class="Percent,Down" TextColor="Azure"/>
                         </HorizontalStackLayout>
                         <Label Text="{Binding TotalConnected}" FontSize="Micro"  Grid.Row="1" class="Data"/>
-                        <Label Text="Total Connected Drives" Grid.Row="2" class="Label"/>
+                        <Label Text="{local:Translate TotalConnectedDrives}" Grid.Row="2" class="Label"/>
                     </Grid>
                 </Border>
 
@@ -158,7 +159,7 @@
                                     Style="{StaticResource LightBorderView}">
                                 <Image Source="clock.png" HorizontalOptions="Center"/>
                             </Border>
-                            <Label Text="Timer" class="Percent,Up"/>
+                            <Label Text="{local:Translate Timer}" class="Percent,Up"/>
                         </HorizontalStackLayout>
 
                         <!-- Middle section with TimerCount label and X button -->
@@ -171,17 +172,18 @@
 
                             <!-- X button aligned to the end -->
                             <Button Text="{x:Static icons:FabIconFont.Cancel}" 
-                                     IsVisible="{Binding TimerCancelled, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}" 
-                                     Command="{Binding CancelTimerCommand}"
-                                     FontFamily="Fabric"
-                                     BackgroundColor="Transparent" 
-                                     TextColor="Red"
-                                     FontAttributes="Bold"
-                                     VerticalOptions="Center"
-                                     HorizontalOptions="End"
-                                     Padding="0"
-                                     WidthRequest="24" 
-                                     HeightRequest="24" />
+                                    IsVisible="{Binding TimerCancelled, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}" 
+                                    Command="{Binding CancelTimerCommand}"
+                                    FontFamily="Fabric"
+                                    BackgroundColor="Transparent" 
+                                    TextColor="Red"
+                                    FontAttributes="Bold"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="End"
+                                    Padding="0"
+                                    WidthRequest="24" 
+                                    HeightRequest="24"
+                                    BorderColor="Transparent"/>
 
                             <!-- Restart button aligned to the end -->
                             <Button Text="{x:Static icons:IconFont.RotateRight}" 
@@ -198,21 +200,21 @@
 
                             <!-- Redo timer button aligned to the end -->
                             <Button Text="{x:Static icons:IconFont.RotateRight}" 
-                                     IsVisible="{Binding ShowRedoButton}"
-                                     Command="{Binding StartTimerCommand}"
-                                     FontFamily="FontAwesome"
-                                     BackgroundColor="Transparent" 
-                                     FontAttributes="Bold"
-                                     VerticalOptions="Center"
-                                     HorizontalOptions="End"
-                                     Padding="0"
-                                     WidthRequest="24" 
-                                     HeightRequest="24" />
+                                    IsVisible="{Binding ShowRedoButton}"
+                                    Command="{Binding StartTimerCommand}"
+                                    FontFamily="FontAwesome"
+                                    BackgroundColor="Transparent" 
+                                    FontAttributes="Bold"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="End"
+                                    Padding="0"
+                                    WidthRequest="24" 
+                                    HeightRequest="24" />
 
                         </Grid>
 
                         <!-- Bottom section with description label -->
-                        <Label Text="Time before minimize" 
+                        <Label Text="{local:Translate TimeBeforeMinimize}" 
                                Grid.Row="2" 
                                class="Label" />
                     </Grid>
@@ -222,8 +224,7 @@
 
                 <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource DarkBorderView}">
                     <Grid Margin="24" RowDefinitions="80,*">
-                        <Label Text="Your drives" Style="{StaticResource Title1}" />
-
+                        <Label Text="{local:Translate YourDrives}" Style="{StaticResource Title1}" />
 
                         <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" VerticalOptions="Start" Spacing="8">
                             <Border Stroke="{StaticResource SecondaryBrush}"
@@ -235,7 +236,7 @@
                                 </Border.StrokeShape>
                                 <HorizontalStackLayout Margin="14,12" Spacing="12">
                                     <Image Source="wifi.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
-                                    <Label Text="Toggle Connect" VerticalOptions="Center" />
+                                    <Label Text="{local:Translate ToggleConnect}" VerticalOptions="Center" />
                                 </HorizontalStackLayout>
 
                                 <Border.GestureRecognizers>
@@ -252,7 +253,7 @@
                                 </Border.StrokeShape>
                                 <HorizontalStackLayout Margin="14,12" Spacing="12">
                                     <Image Source="filter.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
-                                    <Label Text="Filter" VerticalOptions="Center" />
+                                    <Label Text="{local:Translate Filter}" VerticalOptions="Center" />
                                 </HorizontalStackLayout>
 
                                 <Border.GestureRecognizers>
@@ -265,10 +266,10 @@
                             <VerticalStackLayout Spacing="16">
                                 <!-- heading -->
                                 <Grid ColumnDefinitions="100,*,*,120, 70">
-                                    <Label Text="Letter" Style="{StaticResource Headline}"/>
-                                    <Label Text="Name" Grid.Column="1" Style="{StaticResource Headline}"/>
-                                    <Label Text="Storage Usage" Grid.Column="2" Style="{StaticResource Headline}"/>
-                                    <Label Text="Status" Grid.Column="3" Style="{StaticResource Headline}"/>
+                                    <Label Text="{local:Translate Letter}" Style="{StaticResource Headline}"/>
+                                    <Label Text="{local:Translate Name}" Grid.Column="1" Style="{StaticResource Headline}"/>
+                                    <Label Text="{local:Translate StorageUsage}" Grid.Column="2" Style="{StaticResource Headline}"/>
+                                    <Label Text="{local:Translate Status}" Grid.Column="3" Style="{StaticResource Headline}"/>
                                 </Grid>
 
                                 <BoxView Style="{StaticResource HRule}"/>
@@ -300,7 +301,7 @@
                 <Grid Margin="24" RowDefinitions="50,1,*" RowSpacing="20">
                     <Label Grid.Row="0" 
                            VerticalOptions="Center" 
-                           Text="Connectivity" 
+                           Text="{local:Translate Connectivity}" 
                            Style="{StaticResource Title2}"/>
 
                     <Border Stroke="{StaticResource SecondaryBrush}" 
@@ -318,7 +319,7 @@
                             <Label Text="{x:Static icons:IconFont.ChevronDown}" 
                                    FontFamily="FontAwesome" 
                                    VerticalOptions="Center"/>
-                            <Label Text="Today" VerticalOptions="Center"/>
+                            <Label Text="{local:Translate Today}" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
                     </Border>
                     <BoxView Style="{StaticResource HRule}" Grid.Row="1"/>
@@ -338,8 +339,7 @@
                           VerticalOptions="End" 
                           ColumnSpacing="24"
                           RowSpacing="8">
-
-
+                        
                         <!-- First Row -->
                         <StackLayout Orientation="Horizontal" Spacing="4" Grid.Row="0" Grid.Column="0">
                             <Frame BackgroundColor="#EA7C69"

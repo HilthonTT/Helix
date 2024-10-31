@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:register="clr-namespace:Helix.App.Pages.Register"
+             xmlns:local="clr-namespace:Helix.App"
              x:DataType="register:RegisterViewModel"
              x:Class="Helix.App.Pages.Register.RegisterPage"
              Title=""
@@ -21,7 +22,7 @@
                Margin="0,0,0,20"/>
 
             <!-- Title -->
-            <Label Text="Register to Helix!" 
+            <Label Text="{local:Translate RegisterMessage}" 
                HorizontalOptions="Center" 
                Style="{StaticResource LargeTitle}"/>
 
@@ -36,7 +37,7 @@
                 </Border.StrokeShape>
 
                 <Entry Background="Transparent"
-                    Placeholder="Username"
+                    Placeholder="{local:Translate Username}"
                     Text="{Binding Username}"
                     PlaceholderColor="{StaticResource TextSecondary}"
                     TextColor="White"
@@ -59,7 +60,7 @@
 
                 <Grid>
                     <Entry Background="Transparent"
-                        Placeholder="Password"
+                        Placeholder="{local:Translate Password}"
                         IsPassword="{Binding HidePassword}"
                         Text="{Binding Password}"
                         PlaceholderColor="{StaticResource TextSecondary}"
@@ -86,26 +87,26 @@
 
             <!-- Confirmed Password Entry -->
             <Border HeightRequest="48"
-                 HorizontalOptions="FillAndExpand"
-                 Background="{StaticResource DarkBg1Brush}"
-                 Stroke="{StaticResource SecondaryBrush}"
-                 StrokeThickness="1">
+                    HorizontalOptions="FillAndExpand"
+                    Background="{StaticResource DarkBg1Brush}"
+                    Stroke="{StaticResource SecondaryBrush}"
+                    StrokeThickness="1">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="8"/>
                 </Border.StrokeShape>
 
                 <Grid>
                     <Entry Background="Transparent"
-                            Placeholder="Confirm Password"
-                            IsPassword="{Binding HideConfirmedPassword}"
-                            Text="{Binding ConfirmedPassword}"
-                            PlaceholderColor="{StaticResource TextSecondary}"
-                            TextColor="White"
-                            HorizontalOptions="StartAndExpand"
-                            MinimumWidthRequest="900"
-                            Margin="0,0,50,0"
-                            FontSize="14"
-                            IsEnabled="{Binding IsNotBusy}" />
+                           Placeholder="{local:Translate ConfirmPassword}"
+                           IsPassword="{Binding HideConfirmedPassword}"
+                           Text="{Binding ConfirmedPassword}"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="StartAndExpand"
+                           MinimumWidthRequest="900"
+                           Margin="0,0,50,0"
+                           FontSize="14"
+                           IsEnabled="{Binding IsNotBusy}" />
 
                     <ImageButton Source="eye.png"
                                  HorizontalOptions="End" 
@@ -123,7 +124,7 @@
 
 
             <!-- Register Button -->
-            <Button Text="Register" 
+            <Button Text="{local:Translate Register}" 
                     Grid.Row="1" 
                     Grid.Column="1" 
                     Margin="0,24,0,24" 
@@ -132,7 +133,7 @@
                     IsEnabled="{Binding IsNotBusy}"/>
 
             <!-- "Already have an account?" Button -->
-            <Button Text="Already have an account?"
+            <Button Text="{local:Translate AlreadyHaveAnAccount}"
                     FontSize="14"
                     BackgroundColor="Transparent"
                     Margin="12,-20,0,0" 

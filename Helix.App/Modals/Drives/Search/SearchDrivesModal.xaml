@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:modals="clr-namespace:Helix.App.Modals.Drives.Search"
              xmlns:layouts="clr-namespace:Helix.App.Layouts"
+             xmlns:local="clr-namespace:Helix.App"
              x:DataType="modals:SearchDrivesViewModel"
              x:Class="Helix.App.Modals.Drives.Search.SearchDrivesModal"
              Background="{StaticResource DarkBg2Brush}">
@@ -16,35 +17,35 @@
     <Grid RowDefinitions="*,108" ColumnDefinitions="*,*"  ColumnSpacing="0">
         <ScrollView Grid.ColumnSpan="2">
             <VerticalStackLayout Spacing="20" Margin="24">
-                <Label Text="Search Drives" Style="{StaticResource Title1}" />
+                <Label Text="{local:Translate SearchDrives}" Style="{StaticResource Title1}" />
                 <BoxView Style="{StaticResource HRule}" />
 
                 <Border HeightRequest="48"
-                    HorizontalOptions="Fill"
-                    Background="{StaticResource DarkBg1Brush}"
-                    Stroke="{StaticResource SecondaryBrush}"
-                    StrokeThickness="1">
+                        HorizontalOptions="Fill"
+                        Background="{StaticResource DarkBg1Brush}"
+                        Stroke="{StaticResource SecondaryBrush}"
+                        StrokeThickness="1">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="8"/>
                     </Border.StrokeShape>
 
                     <Entry Background="Transparent"
-                       Placeholder="Enter your search term (optional)"
-                       Text="{Binding SearchTerm}"
-                       PlaceholderColor="{StaticResource TextSecondary}"
-                       TextColor="White"
-                       HorizontalOptions="Start"
-                       MinimumWidthRequest="800"
-                       Margin="8,0"
-                       FontSize="14"
-                       IsEnabled="{Binding IsNotBusy}"/>
+                           Placeholder="{local:Translate SearchTermPlaceholder}"
+                           Text="{Binding SearchTerm}"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="Start"
+                           MinimumWidthRequest="800"
+                           Margin="8,0"
+                           FontSize="14"
+                           IsEnabled="{Binding IsNotBusy}"/>
                 </Border>
 
-                <Label Text="Your sort order" />
+                <Label Text="{local:Translate YourSortOrder}" />
 
                 <layouts:HorizontalWrapLayout Spacing="8"
-                      RadioButtonGroup.GroupName="SortOrder"
-                      RadioButtonGroup.SelectedValue="{Binding SortOrderString}">
+                          RadioButtonGroup.GroupName="SortOrder"
+                          RadioButtonGroup.SelectedValue="{Binding SortOrderString}">   
                     <BindableLayout.ItemsSource>
                         <x:Array Type="{x:Type x:String}">
                             <x:String>Ascending</x:String>
@@ -53,7 +54,9 @@
                     </BindableLayout.ItemsSource>
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <RadioButton Content="{Binding .}" Value="{Binding .}" IsEnabled="{Binding IsNotBusy}"/>
+                            <RadioButton Content="{Binding ., Converter={StaticResource TranslateConverter}}" 
+                                         Value="{Binding .}" 
+                                         IsEnabled="{Binding IsNotBusy}"/>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </layouts:HorizontalWrapLayout>
@@ -61,21 +64,21 @@
         </ScrollView>
 
         <Button Grid.Row="1"
-            Grid.Column="0"
-            Margin="24,24,12,24"
-            Style="{StaticResource SecondaryButtonOutline}"
-            HorizontalOptions="Fill"
-            Text="Cancel"
-            Command="{Binding CloseCommand}" 
-            IsEnabled="{Binding IsNotBusy}"/>
+                Grid.Column="0"
+                Margin="24,24,12,24"
+                Style="{StaticResource SecondaryButtonOutline}"
+                HorizontalOptions="Fill"
+                Text="{local:Translate Close}"
+                Command="{Binding CloseCommand}" 
+                IsEnabled="{Binding IsNotBusy}"/>
 
         <Button Grid.Row="1"
-            Grid.Column="1"
-            Margin="12,24,24,24"
-            Command="{Binding SearchCommand}"
-            HorizontalOptions="Fill"
-            Text="Search" 
-            IsEnabled="{Binding IsNotBusy}"/>
+                Grid.Column="1"
+                Margin="12,24,24,24"
+                Command="{Binding SearchCommand}"
+                HorizontalOptions="Fill"
+                Text="{local:Translate Search}" 
+                IsEnabled="{Binding IsNotBusy}"/>
     </Grid>
 
 </ContentView>

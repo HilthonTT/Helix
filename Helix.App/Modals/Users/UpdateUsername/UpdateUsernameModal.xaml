@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:modals="clr-namespace:Helix.App.Modals.Users.UpdateUsername"
+             xmlns:local="clr-namespace:Helix.App"
              x:DataType="modals:UpdateUsernameViewModel"
              x:Class="Helix.App.Modals.Users.UpdateUsername.UpdateUsernameModal"
              Background="{StaticResource DarkBg2Brush}">
@@ -11,29 +12,29 @@
           ColumnSpacing="0">
         <ScrollView Grid.ColumnSpan="2">
             <VerticalStackLayout Spacing="20" Margin="24">
-                <Label Text="Update your username" Style="{StaticResource Title1}" />
+                <Label Text="{local:Translate UpdateYourUsername}" Style="{StaticResource Title1}" />
                 <BoxView Style="{StaticResource HRule}"/>
 
-                <Label Text="Your username" />
+                <Label Text="{local:Translate YourUsername}" />
                 <Border HeightRequest="48"
-                    HorizontalOptions="Fill"
-                    Background="{StaticResource DarkBg1Brush}"
-                    Stroke="{StaticResource SecondaryBrush}"
-                    StrokeThickness="1">
+                        HorizontalOptions="Fill"
+                        Background="{StaticResource DarkBg1Brush}"
+                        Stroke="{StaticResource SecondaryBrush}"
+                        StrokeThickness="1">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="8"/>
                     </Border.StrokeShape>
 
                     <Entry Background="Transparent"
-                       Placeholder="Please enter your new username"
-                       Text="{Binding Username}"
-                       PlaceholderColor="{StaticResource TextSecondary}"
-                       TextColor="White"
-                       HorizontalOptions="Start"
-                       MinimumWidthRequest="800"
-                       Margin="8,0"
-                       FontSize="14"
-                       IsEnabled="{Binding IsNotBusy}"/>
+                           Placeholder="{local:Translate AddNewUsernamePlaceholder}"
+                           Text="{Binding Username}"
+                           PlaceholderColor="{StaticResource TextSecondary}"
+                           TextColor="White"
+                           HorizontalOptions="Start"
+                           MinimumWidthRequest="800"
+                           Margin="8,0"
+                           FontSize="14"
+                           IsEnabled="{Binding IsNotBusy}"/>
 
                 </Border>
 
@@ -45,7 +46,7 @@
                 Margin="24,24,12,24"
                 Style="{StaticResource SecondaryButtonOutline}"
                 HorizontalOptions="Fill"
-                Text="Close"
+                Text="{local:Translate Close}"
                 Command="{Binding CloseCommand}"
                 IsEnabled="{Binding IsNotBusy}"/>
 
@@ -54,7 +55,7 @@
                 Margin="12,24,24,24"
                 Command="{Binding UpdateUsernameCommand}"
                 HorizontalOptions="Fill"
-                Text="Save" 
+                Text="{local:Translate Save}" 
                 IsEnabled="{Binding IsNotBusy}"/>
     </Grid>
 

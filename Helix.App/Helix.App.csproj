@@ -161,10 +161,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Pages\Settings\Views\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Compile Update="Modals\Users\UpdatePassword\UpdatePasswordModal.xaml.cs">
 	    <DependentUpon>UpdatePasswordModal.xaml</DependentUpon>
 	  </Compile>

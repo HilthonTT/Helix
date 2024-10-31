@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:modals="clr-namespace:Helix.App.Modals.Drives.Create"
+             xmlns:local="clr-namespace:Helix.App"
              x:DataType="modals:CreateDriveViewModel"
              x:Class="Helix.App.Modals.Drives.Create.CreateDriveModal"
              Background="{StaticResource DarkBg2Brush}">
@@ -11,11 +12,11 @@
          ColumnSpacing="0">
         <ScrollView Grid.ColumnSpan="2">
             <VerticalStackLayout Spacing="20" Margin="24">
-                <Label Text="Add a Drive" Style="{StaticResource Title1}" />
+                <Label Text="{local:Translate AddDrive}" Style="{StaticResource Title1}" />
                 <BoxView Style="{StaticResource HRule}"/>
 
 
-                <Label Text="Letter" />
+                <Label Text="{local:Translate Letter}" />
                 <Border HeightRequest="48"
                         HorizontalOptions="Fill"
                         Background="{StaticResource DarkBg1Brush}"
@@ -26,7 +27,7 @@
                     </Border.StrokeShape>
 
                     <Entry Background="Transparent"
-                           Placeholder="Add network's drive letter"
+                           Placeholder="{local:Translate AddNetworkDriveLetterPlaceholder}"
                            Text="{Binding Form.Letter}"
                            PlaceholderColor="{StaticResource TextSecondary}"
                            TextColor="White"
@@ -37,7 +38,7 @@
                            IsEnabled="{Binding IsNotBusy}"/>
                 </Border>
 
-                <Label Text="NAS IP Address" />
+                <Label Text="{local:Translate NasIpAddress}" />
                 <Border HeightRequest="48"
                         HorizontalOptions="Fill"
                         Background="{StaticResource DarkBg1Brush}"
@@ -48,7 +49,7 @@
                     </Border.StrokeShape>
 
                     <Entry Background="Transparent"
-                           Placeholder="Add your NAS' IP Address"
+                           Placeholder="{local:Translate AddNasIpAddressPlaceholder}"
                            Text="{Binding Form.IpAddress}"
                            PlaceholderColor="{StaticResource TextSecondary}"
                            TextColor="White"
@@ -60,7 +61,7 @@
                            IsEnabled="{Binding IsNotBusy}"/>
                 </Border>
 
-                <Label Text="Drive's name" />
+                <Label Text="{local:Translate DriveName}" />
                 <Border HeightRequest="48"
                         HorizontalOptions="Fill"
                         Background="{StaticResource DarkBg1Brush}"
@@ -71,7 +72,7 @@
                     </Border.StrokeShape>
 
                     <Entry Background="Transparent"
-                           Placeholder="Add your drive's name"
+                           Placeholder="{local:Translate AddDriveNamePlaceholder}"
                            Text="{Binding Form.Name}"
                            PlaceholderColor="{StaticResource TextSecondary}"
                            TextColor="White"
@@ -82,7 +83,7 @@
                            IsEnabled="{Binding IsNotBusy}"/>
                 </Border>
 
-                <Label Text="NAS Username" />
+                <Label Text="{local:Translate NasUsername}" />
                 <Border HeightRequest="48"
                         HorizontalOptions="Fill"
                         Background="{StaticResource DarkBg1Brush}"
@@ -93,7 +94,7 @@
                     </Border.StrokeShape>
 
                     <Entry Background="Transparent"
-                           Placeholder="Add your NAS' username"
+                           Placeholder="{local:Translate AddNasUsernamePlaceholder}"
                            Text="{Binding Form.Username}"
                            PlaceholderColor="{StaticResource TextSecondary}"
                            TextColor="White"
@@ -105,7 +106,7 @@
                            IsEnabled="{Binding IsNotBusy}"/>
                 </Border>
 
-                <Label Text="NAS Password" />
+                <Label Text="{local:Translate NasPassword}" />
                 <Border HeightRequest="48"
                         HorizontalOptions="Fill"
                         Background="{StaticResource DarkBg1Brush}"
@@ -116,7 +117,7 @@
                     </Border.StrokeShape>
 
                     <Entry Background="Transparent"
-                           Placeholder="Add your NAS' password"
+                           Placeholder="{local:Translate AddNasPasswordPlaceholder}"
                            Text="{Binding Form.Password}"
                            IsPassword="True"
                            PlaceholderColor="{StaticResource TextSecondary}"
@@ -136,7 +137,7 @@
                 Margin="24,24,12,24"
                 Style="{StaticResource SecondaryButtonOutline}"
                 HorizontalOptions="Fill"
-                Text="Close"
+                Text="{local:Translate Close}"
                 Command="{Binding CloseCommand}" 
                 IsEnabled="{Binding IsNotBusy}"/>
 
@@ -145,7 +146,7 @@
                 Margin="12,24,24,24"
                 Command="{Binding SaveCommand}"
                 HorizontalOptions="Fill"
-                Text="Save" 
+                Text="{local:Translate Save}" 
                 IsEnabled="{Binding IsNotBusy}"/>
     </Grid>
 

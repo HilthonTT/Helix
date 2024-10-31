@@ -6,6 +6,7 @@
              xmlns:auditlogTemplates="clr-namespace:Helix.App.Views.Auditlogs"
              xmlns:auditlogs="clr-namespace:Helix.App.Pages.Auditlogs"
              xmlns:searchAuditlogs="clr-namespace:Helix.App.Modals.Auditlogs.Search"
+             xmlns:local="clr-namespace:Helix.App"
              x:Class="Helix.App.Pages.Auditlogs.AuditlogsPage"
              x:DataType="auditlogs:AuditlogsViewModel"
              Title=""
@@ -17,14 +18,14 @@
           Margin="24">
 
         <VerticalStackLayout Margin="0,24,0,0">
-            <Label Text="Dashboard" Style="{StaticResource LargeTitle}"/>
+            <Label Text="{local:Translate Auditlogs}" Style="{StaticResource LargeTitle}"/>
             <Label Text="{Binding Source={x:Static system:DateTime.Now}, StringFormat='{0:dddd, MMMM dd yyyy}'}"/>
             <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
         </VerticalStackLayout>
 
         <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource DarkBorderView}">
             <Grid Margin="24" RowDefinitions="80,*">
-                <Label Text="Your auditlogs" Style="{StaticResource Title1}" />
+                <Label Text="{local:Translate YourAuditlogs}" Style="{StaticResource Title1}" />
 
                 <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" VerticalOptions="Start" Spacing="8">
 
@@ -37,7 +38,7 @@
                         </Border.StrokeShape>
                         <HorizontalStackLayout Margin="14,12" Spacing="12">
                             <Image Source="filter.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
-                            <Label Text="Filter" VerticalOptions="Center" />
+                            <Label Text="{local:Translate Filter}" VerticalOptions="Center" />
                         </HorizontalStackLayout>
 
                         <Border.GestureRecognizers>
@@ -50,8 +51,8 @@
                     <VerticalStackLayout Spacing="16">
                         <!-- heading -->
                         <Grid ColumnDefinitions="*,250" Margin="0,0,0,10">
-                            <Label Text="Message" Style="{StaticResource Headline}"/>
-                            <Label Text="Date" Grid.Column="1" Style="{StaticResource Headline}"/>
+                            <Label Text="{local:Translate Message}" Style="{StaticResource Headline}"/>
+                            <Label Text="{local:Translate Date}" Grid.Column="1" Style="{StaticResource Headline}"/>
                         </Grid>
 
                         <BoxView Style="{StaticResource HRule}"/>

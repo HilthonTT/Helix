@@ -93,7 +93,7 @@
 
                 <RadioButton Value="dashboard" 
                              Grid.Row="1"
-                             ToolTipProperties.Text="Dashboard"
+                             ToolTipProperties.Text="{local:Translate Dashboard}"
                              behaviors:CursorBehavior.AttachBehavior="True"
                              CheckedChanged="OnMenuItemChanged"
                              IsChecked="True">
@@ -104,7 +104,7 @@
 
                 <RadioButton Value="auditlogs" 
                              Grid.Row="2"
-                             ToolTipProperties.Text="Auditlogs"
+                             ToolTipProperties.Text="{local:Translate Auditlogs}"
                              behaviors:CursorBehavior.AttachBehavior="True"
                              CheckedChanged="OnMenuItemChanged">
                     <RadioButton.Content>
@@ -114,7 +114,7 @@
 
                 <RadioButton Value="settings" 
                              Grid.Row="3"
-                             ToolTipProperties.Text="Settings"
+                             ToolTipProperties.Text="{local:Translate Settings}"
                              behaviors:CursorBehavior.AttachBehavior="True"
                              CheckedChanged="OnMenuItemChanged">
                     <RadioButton.Content>
@@ -125,7 +125,7 @@
                 <ImageButton
                     Clicked="OnLogout"
                     Source="logout.png"
-                    ToolTipProperties.Text="Logout"
+                    ToolTipProperties.Text="{local:Translate Logout}"
                     Margin="10,15,0,15" 
                     Grid.Row="4" 
                     Aspect="Fill" 

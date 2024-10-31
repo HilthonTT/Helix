@@ -63,7 +63,7 @@ public sealed partial class HomePage : ContentPage
         {
             await viewModel.ConnectDrivesOnStartupCommand.ExecuteAsync(null);
 
-            _isFirstView = true;
+            _isFirstView = false;
         }
     }
 

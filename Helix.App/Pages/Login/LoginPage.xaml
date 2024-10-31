@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:login="clr-namespace:Helix.App.Pages.Login"
+             xmlns:local="clr-namespace:Helix.App"
              x:Class="Helix.App.Pages.Login.LoginPage"
              x:DataType="login:LoginViewModel"
              Title=""
@@ -23,7 +24,7 @@
                    Margin="0,0,0,20"/>
 
             <!-- Title -->
-            <Label Text="Welcome back to Helix!" 
+            <Label Text="{local:Translate WelcomeMessage}" 
                    HorizontalOptions="Center" 
                    Style="{StaticResource LargeTitle}"/>
 
@@ -38,7 +39,7 @@
                 </Border.StrokeShape>
 
                 <Entry Background="Transparent"
-                       Placeholder="Username"
+                       Placeholder="{local:Translate Username}"
                        Text="{Binding Username}"
                        PlaceholderColor="{StaticResource TextSecondary}"
                        TextColor="White"
@@ -61,7 +62,7 @@
 
                 <Grid>
                     <Entry Background="Transparent"
-                           Placeholder="Password"
+                           Placeholder="{local:Translate Password}"
                            IsPassword="{Binding HidePassword}"
                            Text="{Binding Password}"
                            PlaceholderColor="{StaticResource TextSecondary}"
@@ -94,7 +95,7 @@
                     IsEnabled="{Binding IsNotBusy}"/>
 
             <!-- "Don't have an account?" Button -->
-            <Button Text="Don't have an account?"
+            <Button Text="{local:Translate DontHaveAnAccount}"
                     FontSize="14"
                     BackgroundColor="Transparent"
                     Margin="12,-20,0,0"

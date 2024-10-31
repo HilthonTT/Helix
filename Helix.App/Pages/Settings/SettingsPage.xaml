@@ -127,7 +127,7 @@
 
                         <RadioButton x:Name="AccountRadioButton"
                                      Value="account"
-                                     ToolTipProperties.Text="Account information"
+                                     ToolTipProperties.Text="{local:Translate AccountInformation}"
                                      behaviors:CursorBehavior.AttachBehavior="True"
                                      IsChecked="True">
                             <RadioButton.Content>
@@ -135,8 +135,10 @@
                                       RowDefinitions="Auto, Auto" RowSpacing="4"
                                       Padding="26">
                                     <Image Source="info.png" WidthRequest="20" HeightRequest="20" Aspect="AspectFit" />
-                                    <Label Text="Account Information" Grid.Column="1" Style="{StaticResource Headline}" />
-                                    <Label Text="Change your account info." 
+                                    <Label Text="{local:Translate AccountInformation}" 
+                                           Grid.Column="1" 
+                                           Style="{StaticResource Headline}" />
+                                    <Label Text="{local:Translate ChangeYourAccountInfo}" 
                                            Grid.Column="1" Grid.Row="1" 
                                            Style="{StaticResource Subhead}" />
                                 </Grid>
@@ -145,7 +147,7 @@
 
                         <RadioButton x:Name="SettingsRadioButton"
                                      Value="settings" 
-                                     ToolTipProperties.Text="Settings"
+                                     ToolTipProperties.Text="{local:Translate Settings}"
                                      behaviors:CursorBehavior.AttachBehavior="True">
                             <RadioButton.Content>
                                 <Grid ColumnDefinitions="20,Auto" 
@@ -154,8 +156,8 @@
                                       RowSpacing="4"
                                       Padding="26">
                                     <Image Source="cog.png" WidthRequest="20" HeightRequest="20" Aspect="AspectFit"/>
-                                    <Label Text="Settings" Grid.Column="1" Style="{StaticResource Headline}" />
-                                    <Label Text="Manage your preferences." 
+                                    <Label Text="{local:Translate Settings}" Grid.Column="1" Style="{StaticResource Headline}" />
+                                    <Label Text="{local:Translate ManageYourPreferences}" 
                                            Grid.Column="1" Grid.Row="1" 
                                            Style="{StaticResource Subhead}" />
                                 </Grid>
@@ -191,7 +193,7 @@
                         <!-- User Information Grid -->
                         <Grid Margin="24" RowDefinitions="Auto,Auto,Auto" RowSpacing="18">
                             <VerticalStackLayout Margin="0,24,0,0" Grid.Row="0">
-                                <Label Text="Account Information" Style="{StaticResource LargeTitle}"/>
+                                <Label Text="{local:Translate AccountInformation}" Style="{StaticResource LargeTitle}"/>
                                 <Label Text="{Binding Source={x:Static system:DateTime.Now}, StringFormat='{0:dddd, MMMM dd yyyy}'}"/>
                                 <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
                             </VerticalStackLayout>
@@ -200,8 +202,13 @@
                                 <Label>
                                     <Label.FormattedText>
                                         <FormattedString>
-                                            <Span Text="Username: " FontSize="Title" TextColor="LightGray" FontFamily="{StaticResource SpaceMonoBold}"/>
-                                            <Span Text="{Binding Username}" FontSize="Title" FontFamily="{StaticResource SpaceMonoRegular}"/>
+                                            <Span Text="{local:Translate UsernameField}"
+                                                  FontSize="Title" 
+                                                  TextColor="LightGray"
+                                                  FontFamily="{StaticResource SpaceMonoBold}"/>
+                                            <Span Text="{Binding Username}"
+                                                  FontSize="Title" 
+                                                  FontFamily="{StaticResource SpaceMonoRegular}"/>
                                         </FormattedString>
                                     </Label.FormattedText>
                                 </Label>
@@ -219,8 +226,13 @@
                                 <Label>
                                     <Label.FormattedText>
                                         <FormattedString>
-                                            <Span Text="Password: " FontSize="Title" TextColor="LightGray" FontFamily="{StaticResource SpaceMonoBold}"/>
-                                            <Span Text="-------"  FontSize="Title" FontFamily="{StaticResource SpaceMonoRegular}"/>
+                                            <Span Text="{local:Translate PasswordField}"
+                                                  FontSize="Title" 
+                                                  TextColor="LightGray" 
+                                                  FontFamily="{StaticResource SpaceMonoBold}"/>
+                                            <Span Text="-------"  
+                                                  FontSize="Title" 
+                                                  FontFamily="{StaticResource SpaceMonoRegular}"/>
                                         </FormattedString>
                                     </Label.FormattedText>
                                 </Label>
@@ -271,7 +283,7 @@
                             </VerticalStackLayout>
 
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="1">
-                                <Label Text="Auto connect drives on launch"/>
+                                <Label Text="{local:Translate AutoConnectDrivesOnLaunch}"/>
                                 <Switch HorizontalOptions="End" 
                                         OnColor="Green" 
                                         ThumbColor="White" 
@@ -280,7 +292,7 @@
                             </Grid>
 
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="2">
-                                <Label Text="Auto minimize app"/>
+                                <Label Text="{local:Translate AutoMinimizeApp}"/>
                                 <Switch HorizontalOptions="End"
                                         OnColor="Green" 
                                         ThumbColor="White" 
@@ -289,7 +301,7 @@
                             </Grid>
 
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="3">
-                                <Label Text="Set on startup"/>
+                                <Label Text="{local:Translate SetOnStartup}"/>
                                 <Switch HorizontalOptions="End" 
                                         OnColor="Green"
                                         ThumbColor="White"
@@ -298,7 +310,7 @@
                             </Grid>
 
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="4">
-                                <Label Text="Languages"/>
+                                <Label Text="{local:Translate Languages}"/>
                                 <Picker HorizontalOptions="End" 
                                         WidthRequest="230"
                                         IsEnabled="{Binding Settings.IsNotBusy}"
@@ -307,7 +319,7 @@
                             </Grid>
 
                             <Grid ColumnDefinitions="*,Auto" Grid.Row="5">
-                                <Label Text="Timer Count in seconds" Grid.Column="0"/>
+                                <Label Text="{local:Translate TimerCountInSeconds}" Grid.Column="0"/>
                                 <Border Grid.Column="1"
                                         HeightRequest="48"
                                         HorizontalOptions="FillAndExpand"
