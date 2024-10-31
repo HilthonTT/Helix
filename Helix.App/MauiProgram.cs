@@ -7,6 +7,7 @@ using Microsoft.Maui.Handlers;
 using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
+using SharpHook;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using Windows.Graphics;
 
@@ -44,7 +45,8 @@ public static class MauiProgram
 
         builder.Services
             .AddApplication()
-            .AddInfrastructure();
+            .AddInfrastructure()
+            .AddPresensation();
 
         builder.ConfigureLifecycleEvents(events =>
         {
@@ -67,7 +69,13 @@ public static class MauiProgram
             });
         });
 
-        return builder.Build();
+        MauiApp app = builder.Build();
+
+        var hook = app.Services.GetRequiredService<IGlobalHook>();
+
+        _ = hook.RunAsync();
+
+        return app;
     }
 
     private static void ModifyEntry()

@@ -11,6 +11,14 @@
     <!-- Left Side for Logo, Title, and Login Form -->
     <!-- Right Side for Image Illustration -->
     <Grid ColumnDefinitions="3*, 3*">
+
+        <Label Text="Press CTRL + ENTER"
+               VerticalOptions="Start" 
+               HorizontalOptions="Start" 
+               Margin="20,20,0,0"
+               TextColor="{StaticResource TextSecondary}" 
+               FontAttributes="Bold" />
+
         <StackLayout Grid.Column="0"
                      Padding="20"
                      VerticalOptions="Center"
