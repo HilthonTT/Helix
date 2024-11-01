@@ -351,4 +351,10 @@
   <data name="PressCtrlEnter" xml:space="preserve">
     <value>Ctrl + Enter キーを押します</value>
   </data>
+  <data name="Disconnected" xml:space="preserve">
+    <value>途切れ途切れ</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>接続</value>
+  </data>
 </root>

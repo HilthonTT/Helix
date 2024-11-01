@@ -348,7 +348,7 @@
                                    WidthRequest="20" 
                                    HeightRequest="20"
                                    HasShadow="False"/>
-                            <Label Text="Disconnected" VerticalOptions="Center"/>
+                            <Label Text="{local:Translate Disconnected}" VerticalOptions="Center"/>
                         </StackLayout>
 
                         <StackLayout Orientation="Horizontal" Spacing="4" Grid.Row="0" Grid.Column="1">
@@ -358,7 +358,7 @@
                                    WidthRequest="20" 
                                    HeightRequest="20"
                                    HasShadow="False"/>
-                            <Label Text="Connected" VerticalOptions="Center"/>
+                            <Label Text="{local:Translate Connected}" VerticalOptions="Center"/>
                         </StackLayout>
                     </Grid>
                 </Grid>

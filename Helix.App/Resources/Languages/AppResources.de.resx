@@ -351,4 +351,10 @@
   <data name="PressCtrlEnter" xml:space="preserve">
     <value>Drücken Sie STRG + EINGABETASTE</value>
   </data>
+  <data name="Disconnected" xml:space="preserve">
+    <value>Entfernt</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Verbunden</value>
+  </data>
 </root>

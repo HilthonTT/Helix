@@ -351,4 +351,10 @@
   <data name="PressCtrlEnter" xml:space="preserve">
     <value>Druk op CTRL + ENTER</value>
   </data>
+  <data name="Disconnected" xml:space="preserve">
+    <value>Verbroken</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Verbonden</value>
+  </data>
 </root>

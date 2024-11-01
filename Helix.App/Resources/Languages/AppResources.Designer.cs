@@ -241,6 +241,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connected.
+        /// </summary>
+        internal static string Connected {
+            get {
+                return ResourceManager.GetString("Connected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connection.
         /// </summary>
         internal static string Connection {
@@ -300,6 +309,15 @@ namespace Helix.App.Resources.Languages {
         internal static string Descending {
             get {
                 return ResourceManager.GetString("Descending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnected.
+        /// </summary>
+        internal static string Disconnected {
+            get {
+                return ResourceManager.GetString("Disconnected", resourceCulture);
             }
         }
         

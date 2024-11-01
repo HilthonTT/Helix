@@ -351,4 +351,10 @@
   <data name="PressCtrlEnter" xml:space="preserve">
     <value>Appuyez sur CTRL + ENTRÉE</value>
   </data>
+  <data name="Disconnected" xml:space="preserve">
+    <value>Déconnecté</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Connecté</value>
+  </data>
 </root>
