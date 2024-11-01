@@ -41,24 +41,24 @@
                 </VisualStateManager.VisualStateGroups>
 
                 <Border x:Name="OuterBorder" 
-                    Background="Transparent"
-                    Stroke="{StaticResource DarkBg1Brush}" 
-                    StrokeThickness="0"
-                    HorizontalOptions="Fill"
-                    HeightRequest="70"
-                    Margin="15,0,0,0">
+                        Background="Transparent"
+                        Stroke="{StaticResource DarkBg1Brush}" 
+                        StrokeThickness="0"
+                        HorizontalOptions="Fill"
+                        HeightRequest="70"
+                        Margin="15,0,0,0">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12,0,12,0" />
+                        <RoundRectangle CornerRadius="12" />
                     </Border.StrokeShape>
                 </Border>
 
                 <Border x:Name="InnerBorder" 
-                    Background="Transparent"
-                    Margin="20" 
-                    HorizontalOptions="Center" 
-                    VerticalOptions="Center"
-                    Stroke="{StaticResource PrimaryBrush}" 
-                    StrokeThickness="0">
+                        Background="Transparent"
+                        Margin="20" 
+                        HorizontalOptions="Center" 
+                        VerticalOptions="Center"
+                        Stroke="{StaticResource PrimaryBrush}" 
+                        StrokeThickness="0">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="8" />
                     </Border.StrokeShape>
@@ -89,9 +89,9 @@
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter
-                        TargetName="MainGrid"
-                        Property="Grid.ColumnDefinitions"
-                        Value="275,*" />
+                            TargetName="MainGrid"
+                            Property="Grid.ColumnDefinitions"
+                            Value="325,*" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
@@ -116,6 +116,7 @@
                     </Border.StrokeShape>
 
                     <VerticalStackLayout Padding="0,12" 
+                                         HorizontalOptions="Start"
                                          RadioButtonGroup.GroupName="Sections" 
                                          RadioButtonGroup.SelectedValue="{Binding CurrentSection, Mode=TwoWay}">
 
@@ -126,6 +127,9 @@
                         </VerticalStackLayout.Resources>
 
                         <RadioButton x:Name="AccountRadioButton"
+                                     WidthRequest="310"
+                                     HorizontalOptions="Start"
+                                     VerticalOptions="Center"
                                      Value="account"
                                      ToolTipProperties.Text="{local:Translate AccountInformation}"
                                      behaviors:CursorBehavior.AttachBehavior="True"
@@ -133,19 +137,27 @@
                             <RadioButton.Content>
                                 <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8"
                                       RowDefinitions="Auto, Auto" RowSpacing="4"
-                                      Padding="26">
+                                      Padding="26"
+                                      HorizontalOptions="Fill">
                                     <Image Source="info.png" WidthRequest="20" HeightRequest="20" Aspect="AspectFit" />
                                     <Label Text="{local:Translate AccountInformation}" 
                                            Grid.Column="1" 
-                                           Style="{StaticResource Headline}" />
+                                           Style="{StaticResource Headline}"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="1"/>
                                     <Label Text="{local:Translate ChangeYourAccountInfo}" 
                                            Grid.Column="1" Grid.Row="1" 
-                                           Style="{StaticResource Subhead}" />
+                                           Style="{StaticResource Subhead}"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="1"/>
                                 </Grid>
                             </RadioButton.Content>
                         </RadioButton>
 
                         <RadioButton x:Name="SettingsRadioButton"
+                                     WidthRequest="310"
+                                     HorizontalOptions="Start"
+                                     VerticalOptions="Center"
                                      Value="settings" 
                                      ToolTipProperties.Text="{local:Translate Settings}"
                                      behaviors:CursorBehavior.AttachBehavior="True">
@@ -154,12 +166,20 @@
                                       ColumnSpacing="8"
                                       RowDefinitions="Auto, Auto"
                                       RowSpacing="4"
-                                      Padding="26">
+                                      Padding="26"
+                                      HorizontalOptions="Fill">
                                     <Image Source="cog.png" WidthRequest="20" HeightRequest="20" Aspect="AspectFit"/>
-                                    <Label Text="{local:Translate Settings}" Grid.Column="1" Style="{StaticResource Headline}" />
+                                    <Label Text="{local:Translate Settings}"
+                                           Grid.Column="1" 
+                                           Style="{StaticResource Headline}" 
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="1"/>
                                     <Label Text="{local:Translate ManageYourPreferences}" 
-                                           Grid.Column="1" Grid.Row="1" 
-                                           Style="{StaticResource Subhead}" />
+                                           Grid.Column="1" 
+                                           Grid.Row="1" 
+                                           Style="{StaticResource Subhead}" 
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="1"/>
                                 </Grid>
                             </RadioButton.Content>
                         </RadioButton>

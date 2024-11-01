@@ -118,237 +118,237 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Settings" xml:space="preserve">
-    <value>Settings</value>
+    <value>設定</value>
   </data>
   <data name="File" xml:space="preserve">
-    <value>File</value>
+    <value>ファイル</value>
   </data>
   <data name="Preferences" xml:space="preserve">
-    <value>Preferences</value>
+    <value>設定</value>
   </data>
   <data name="AddDrive" xml:space="preserve">
-    <value>Add Drive</value>
+    <value>ドライブを追加</value>
   </data>
   <data name="ExportDrives" xml:space="preserve">
-    <value>Export Drives</value>
+    <value>ドライブのエクスポート</value>
   </data>
   <data name="ImportDrives" xml:space="preserve">
-    <value>Import Drives</value>
+    <value>ドライブのインポート</value>
   </data>
   <data name="Dashboard" xml:space="preserve">
-    <value>Dashboard</value>
+    <value>ダッシュボード</value>
   </data>
   <data name="Drives" xml:space="preserve">
-    <value>Drives</value>
+    <value>ドライブ</value>
   </data>
   <data name="StorageUsage" xml:space="preserve">
-    <value>Storage Usage</value>
+    <value>ストレージ使用量</value>
   </data>
   <data name="TotalStorageOfNas" xml:space="preserve">
-    <value>Total Storage of NAS</value>
+    <value>NASの総ストレージ</value>
   </data>
   <data name="Connection" xml:space="preserve">
-    <value>Connection</value>
+    <value>接続</value>
   </data>
   <data name="TotalConnectedDrives" xml:space="preserve">
-    <value>Total Connected Drives</value>
+    <value>接続されているドライブの合計</value>
   </data>
   <data name="Timer" xml:space="preserve">
-    <value>Timer</value>
+    <value>タイマー</value>
   </data>
   <data name="TimeBeforeMinimize" xml:space="preserve">
-    <value>Time before minimize</value>
+    <value>最小化までの時間</value>
   </data>
   <data name="YourDrives" xml:space="preserve">
-    <value>Your drives</value>
+    <value>ネットワークドライブ</value>
   </data>
   <data name="ToggleConnect" xml:space="preserve">
-    <value>Toggle Connect</value>
+    <value>トグル接続</value>
   </data>
   <data name="Filter" xml:space="preserve">
-    <value>Filter</value>
+    <value>フィルター</value>
   </data>
   <data name="Letter" xml:space="preserve">
-    <value>Letter</value>
+    <value>文字 </value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>Name</value>
+    <value>名前</value>
   </data>
   <data name="Status" xml:space="preserve">
-    <value>Status</value>
+    <value>地位</value>
   </data>
   <data name="Connectivity" xml:space="preserve">
-    <value>Connectivity</value>
+    <value>接続</value>
   </data>
   <data name="Today" xml:space="preserve">
-    <value>Today</value>
+    <value>今日</value>
   </data>
   <data name="WelcomeMessage" xml:space="preserve">
-    <value>Welcome back to Helix!</value>
+    <value>Helixへようこそ!</value>
   </data>
   <data name="Username" xml:space="preserve">
-    <value>Username</value>
+    <value>ユーザー名</value>
   </data>
   <data name="Password" xml:space="preserve">
-    <value>Password</value>
+    <value>パスワード</value>
   </data>
   <data name="DontHaveAnAccount" xml:space="preserve">
-    <value>Don't have an account?</value>
+    <value>アカウントをお持ちではありませんか?</value>
   </data>
   <data name="RegisterMessage" xml:space="preserve">
-    <value>Register to Helix!</value>
+    <value>Helixに登録してください!</value>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
-    <value>Confirm Password</value>
+    <value>パスワードの確認</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Register</value>
+    <value>登録する</value>
   </data>
   <data name="AlreadyHaveAnAccount" xml:space="preserve">
-    <value>Already have an account?</value>
+    <value>すでにアカウントをお持ちですか?</value>
   </data>
   <data name="AccountInformation" xml:space="preserve">
-    <value>Account Information</value>
+    <value>アカウント情報</value>
   </data>
   <data name="ChangeYourAccountInfo" xml:space="preserve">
-    <value>Change your account info.</value>
+    <value>アカウント情報を変更します。</value>
   </data>
   <data name="ManageYourPreferences" xml:space="preserve">
-    <value>Manage your preferences.</value>
+    <value>あなたの好みを管理します。</value>
   </data>
   <data name="UsernameField" xml:space="preserve">
-    <value>Username: </value>
+    <value>ユーザー名:</value>
   </data>
   <data name="PasswordField" xml:space="preserve">
-    <value>Password: </value>
+    <value>パスワード：</value>
   </data>
   <data name="AutoConnectDrivesOnLaunch" xml:space="preserve">
-    <value>Auto connect drives on launch</value>
+    <value>起動時にドライブを自動接続</value>
   </data>
   <data name="AutoMinimizeApp" xml:space="preserve">
-    <value>Auto minimize app</value>
+    <value>アプリの自動最小化</value>
   </data>
   <data name="SetOnStartup" xml:space="preserve">
-    <value>Set on startup</value>
+    <value>起動時に設定</value>
   </data>
   <data name="Languages" xml:space="preserve">
-    <value>Languages</value>
+    <value>言語</value>
   </data>
   <data name="TimerCountInSeconds" xml:space="preserve">
-    <value>Timer count in seconds</value>
+    <value>タイマーカウント(秒単位)</value>
   </data>
   <data name="Auditlogs" xml:space="preserve">
-    <value>Auditlogs</value>
+    <value>監査ログ</value>
   </data>
   <data name="YourAuditlogs" xml:space="preserve">
-    <value>Your auditlogs</value>
+    <value>監査ログ</value>
   </data>
   <data name="Message" xml:space="preserve">
-    <value>Message</value>
+    <value>メッセージ</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Date</value>
+    <value>日付</value>
   </data>
   <data name="SearchDrives" xml:space="preserve">
-    <value>Search Drives</value>
+    <value>検索ドライブ</value>
   </data>
   <data name="SearchTermPlaceholder" xml:space="preserve">
-    <value>Enter your search term (optional)</value>
+    <value>検索語を入力します(オプション)</value>
   </data>
   <data name="YourSortOrder" xml:space="preserve">
-    <value>Your sort order</value>
+    <value>並べ替え順序</value>
   </data>
   <data name="Close" xml:space="preserve">
-    <value>Close</value>
+    <value>閉める</value>
   </data>
   <data name="Search" xml:space="preserve">
-    <value>Search</value>
+    <value>捜索</value>
   </data>
   <data name="Ascending" xml:space="preserve">
-    <value>Ascending</value>
+    <value>昇順</value>
   </data>
   <data name="Descending" xml:space="preserve">
-    <value>Descending</value>
+    <value>下行</value>
   </data>
   <data name="SearchAuditlogs" xml:space="preserve">
-    <value>Search auditlogs</value>
+    <value>監査ログの検索</value>
   </data>
   <data name="AddNetworkDriveLetterPlaceholder" xml:space="preserve">
-    <value>Add network's drive letter</value>
+    <value>ネットワークのドライブ文字を追加する</value>
   </data>
   <data name="NasIpAddress" xml:space="preserve">
-    <value>NAS IP Address</value>
+    <value>NAS IPアドレス</value>
   </data>
   <data name="AddNasIpAddressPlaceholder" xml:space="preserve">
-    <value>Add your NAS' IP Address</value>
+    <value>NASのIPアドレスを追加</value>
   </data>
   <data name="DriveName" xml:space="preserve">
-    <value>Drive's name</value>
+    <value>ドライブの名前</value>
   </data>
   <data name="AddDriveNamePlaceholder" xml:space="preserve">
-    <value>Add your drive's name</value>
+    <value>ドライブの名前を追加します</value>
   </data>
   <data name="NasUsername" xml:space="preserve">
-    <value>NAS Username</value>
+    <value>NASユーザー名</value>
   </data>
   <data name="AddNasUsernamePlaceholder" xml:space="preserve">
-    <value>Add your NAS' username</value>
+    <value>NASのユーザー名を追加</value>
   </data>
   <data name="NasPassword" xml:space="preserve">
-    <value>NAS Password</value>
+    <value>NASパスワード</value>
   </data>
   <data name="AddNasPasswordPlaceholder" xml:space="preserve">
-    <value>Add your NAS' password</value>
+    <value>NASのパスワードを追加</value>
   </data>
   <data name="DeleteDrive" xml:space="preserve">
-    <value>Delete Drive</value>
+    <value>ドライブの削除</value>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>Delete</value>
+    <value>削除</value>
   </data>
   <data name="UpdateDrive" xml:space="preserve">
-    <value>Update Drive</value>
+    <value>ドライブを更新</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Save</value>
+    <value>セーブ</value>
   </data>
   <data name="UpdatePassword" xml:space="preserve">
-    <value>Update your password</value>
+    <value>パスワードを更新する</value>
   </data>
   <data name="YourCurrentPassword" xml:space="preserve">
-    <value>Your current password</value>
+    <value>現在のパスワード</value>
   </data>
   <data name="AddCurrentPasswordPlaceholder" xml:space="preserve">
-    <value>Please enter your current password</value>
+    <value>現在のパスワードを入力してください</value>
   </data>
   <data name="YourNewPassword" xml:space="preserve">
-    <value>Your new password</value>
+    <value>新しいパスワード</value>
   </data>
   <data name="AddNewPasswordPlaceholder" xml:space="preserve">
-    <value>Please enter your new password</value>
+    <value>新しいパスワードを入力してください</value>
   </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
-    <value>Confirm your new password</value>
+    <value>新しいパスワードを確認する</value>
   </data>
   <data name="AddConfirmNewPasswordPlaceholder" xml:space="preserve">
-    <value>Please re-enter your new password</value>
+    <value>新しいパスワードを再入力してください</value>
   </data>
   <data name="UpdateYourUsername" xml:space="preserve">
-    <value>Update your username</value>
+    <value>ユーザー名を更新する</value>
   </data>
   <data name="YourUsername" xml:space="preserve">
-    <value>Your username</value>
+    <value>あなたのユーザー名</value>
   </data>
   <data name="AddNewUsernamePlaceholder" xml:space="preserve">
-    <value>Please enter your new username</value>
+    <value>新しいユーザー名を入力してください</value>
   </data>
   <data name="Logout" xml:space="preserve">
-    <value>Logout</value>
+    <value>ログアウト</value>
   </data>
   <data name="Login" xml:space="preserve">
-    <value>Login</value>
+    <value>ログイン</value>
   </data>
   <data name="PressCtrlEnter" xml:space="preserve">
-    <value>Press CTRL + ENTER</value>
+    <value>Ctrl + Enter キーを押します</value>
   </data>
 </root>

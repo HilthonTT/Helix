@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Helix.App.Constants;
+using Helix.App.Helpers;
 using Helix.Application.Users;
+using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using SharedKernel;
+using System.Collections.ObjectModel;
 
 namespace Helix.App.Pages.Register;
 
@@ -14,6 +17,12 @@ internal sealed partial class RegisterViewModel : BaseViewModel
     public RegisterViewModel()
     {
         _registerUser = App.ServiceProvider.GetRequiredService<RegisterUser>();
+
+        Languages = new(CultureSwitcher.Languages);
+
+
+        LanguageService.Instance.LanguageChanged += OnLanguageChanged;
+        SelectedLanguage = CultureSwitcher.LanguageToString(LanguageService.Instance.CurrentLanguage);
     }
 
     [ObservableProperty]
@@ -30,6 +39,18 @@ internal sealed partial class RegisterViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool _hideConfirmedPassword = true;
+
+    [ObservableProperty]
+    private ObservableCollection<string> _languages = [];
+
+    [ObservableProperty]
+    private string _selectedLanguage = CultureSwitcher.LanguageToString(Language.English);
+    partial void OnSelectedLanguageChanged(string value)
+    {
+        Language language = CultureSwitcher.StringToLanguage(value);
+
+        CultureSwitcher.SwitchCulture(language);
+    }
 
     [RelayCommand]
     private async Task RegisterAsync()
@@ -78,6 +99,11 @@ internal sealed partial class RegisterViewModel : BaseViewModel
     private void ToggleConfirmedPasswordHidden()
     {
         HideConfirmedPassword = !HideConfirmedPassword;
+    }
+
+    private void OnLanguageChanged(Language newLanguage)
+    {
+        SelectedLanguage = CultureSwitcher.LanguageToString(newLanguage);
     }
 
     private void Clear()

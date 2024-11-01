@@ -348,4 +348,7 @@
   <data name="Login" xml:space="preserve">
     <value>Einloggen</value>
   </data>
+  <data name="PressCtrlEnter" xml:space="preserve">
+    <value>Drücken Sie STRG + EINGABETASTE</value>
+  </data>
 </root>

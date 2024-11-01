@@ -44,7 +44,7 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     private string _selectedLanguage = string.Empty;
     partial void OnSelectedLanguageChanged(string value)
     {
-        Language newSelectedLanguage = StringToLanguage(value);
+        Language newSelectedLanguage = CultureSwitcher.StringToLanguage(value);
         Language = newSelectedLanguage;
 
         if (Settings is not null)
@@ -76,34 +76,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Send(new UpdatePasswordMessage(true));
     }
 
-    private static Language StringToLanguage(string languageString)
-    {
-        return languageString switch
-        {
-            "English" => Language.English,
-            "Français" => Language.French,
-            "Deutsch" => Language.German,
-            "Bahasa Indonesia" => Language.Indonesian,
-            "日本語" => Language.Japanese,
-            "Nederlands" => Language.Dutch,
-            _ => throw new ArgumentException($"Unknown language: {languageString}")
-        };
-    }
-
-    private static string LanguageToString(Language language)
-    {
-        return language switch
-        {
-            Language.English => "English",
-            Language.French => "Français",
-            Language.German => "Deutsch",
-            Language.Indonesian => "Bahasa Indonesia",
-            Language.Japanese => "日本語",
-            Language.Dutch => "Nederlands",
-            _ => "Unknown Language"
-        };
-    }
-
     private void LoadSettings()
     {
         Task.Run(async () =>
@@ -116,16 +88,14 @@ internal sealed partial class SettingsViewModel : BaseViewModel
             else
             {
                 Settings = new SettingsDisplay(result.Value);
-                SelectedLanguage = LanguageToString(Settings.Language);
+                SelectedLanguage = CultureSwitcher.LanguageToString(Settings.Language);
             }
         });
     }
 
     private void LoadLanguages()
     {
-        string[] languages = ["English", "Français", "Deutsch", "Bahasa Indonesia", "日本語", "Nederlands"];
-
-        Languages = new(languages);
+        Languages = new(CultureSwitcher.Languages);
     }
 
     private void RegisterMessages()

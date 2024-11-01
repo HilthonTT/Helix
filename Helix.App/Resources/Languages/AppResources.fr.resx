@@ -348,4 +348,7 @@
   <data name="Login" xml:space="preserve">
     <value>Connectez-vous</value>
   </data>
+  <data name="PressCtrlEnter" xml:space="preserve">
+    <value>Appuyez sur CTRL + ENTRÉE</value>
+  </data>
 </root>

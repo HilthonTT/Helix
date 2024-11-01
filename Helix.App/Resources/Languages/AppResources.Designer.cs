@@ -484,6 +484,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Press CTRL + ENTER.
+        /// </summary>
+        internal static string PressCtrlEnter {
+            get {
+                return ResourceManager.GetString("PressCtrlEnter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Register.
         /// </summary>
         internal static string Register {

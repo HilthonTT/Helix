@@ -118,52 +118,52 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Settings" xml:space="preserve">
-    <value>Settings</value>
+    <value>Instellingen</value>
   </data>
   <data name="File" xml:space="preserve">
-    <value>File</value>
+    <value>Bestand</value>
   </data>
   <data name="Preferences" xml:space="preserve">
-    <value>Preferences</value>
+    <value>Voorkeuren</value>
   </data>
   <data name="AddDrive" xml:space="preserve">
-    <value>Add Drive</value>
+    <value>Drive toevoegen</value>
   </data>
   <data name="ExportDrives" xml:space="preserve">
-    <value>Export Drives</value>
+    <value>Schijven exporteren</value>
   </data>
   <data name="ImportDrives" xml:space="preserve">
-    <value>Import Drives</value>
+    <value>Schijven importeren</value>
   </data>
   <data name="Dashboard" xml:space="preserve">
     <value>Dashboard</value>
   </data>
   <data name="Drives" xml:space="preserve">
-    <value>Drives</value>
+    <value>Stations</value>
   </data>
   <data name="StorageUsage" xml:space="preserve">
-    <value>Storage Usage</value>
+    <value>Gebruik van opslagruimte</value>
   </data>
   <data name="TotalStorageOfNas" xml:space="preserve">
-    <value>Total Storage of NAS</value>
+    <value>Totale opslag van NAS</value>
   </data>
   <data name="Connection" xml:space="preserve">
-    <value>Connection</value>
+    <value>Verbinding</value>
   </data>
   <data name="TotalConnectedDrives" xml:space="preserve">
-    <value>Total Connected Drives</value>
+    <value>Totaal aantal aangesloten schijven</value>
   </data>
   <data name="Timer" xml:space="preserve">
     <value>Timer</value>
   </data>
   <data name="TimeBeforeMinimize" xml:space="preserve">
-    <value>Time before minimize</value>
+    <value>Tijd voordat de tijd wordt geminimaliseerd</value>
   </data>
   <data name="YourDrives" xml:space="preserve">
-    <value>Your drives</value>
+    <value>Uw schijven</value>
   </data>
   <data name="ToggleConnect" xml:space="preserve">
-    <value>Toggle Connect</value>
+    <value>Verbinden in-/uitschakelen</value>
   </data>
   <data name="Filter" xml:space="preserve">
     <value>Filter</value>
@@ -172,183 +172,183 @@
     <value>Letter</value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Naam</value>
   </data>
   <data name="Status" xml:space="preserve">
     <value>Status</value>
   </data>
   <data name="Connectivity" xml:space="preserve">
-    <value>Connectivity</value>
+    <value>Connectiviteit</value>
   </data>
   <data name="Today" xml:space="preserve">
-    <value>Today</value>
+    <value>Vandaag</value>
   </data>
   <data name="WelcomeMessage" xml:space="preserve">
-    <value>Welcome back to Helix!</value>
+    <value>Welkom terug in Helix!</value>
   </data>
   <data name="Username" xml:space="preserve">
-    <value>Username</value>
+    <value>Gebruikersnaam</value>
   </data>
   <data name="Password" xml:space="preserve">
-    <value>Password</value>
+    <value>Wachtwoord</value>
   </data>
   <data name="DontHaveAnAccount" xml:space="preserve">
-    <value>Don't have an account?</value>
+    <value>Heb je nog geen account?</value>
   </data>
   <data name="RegisterMessage" xml:space="preserve">
-    <value>Register to Helix!</value>
+    <value>Registreer je bij Helix!</value>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
-    <value>Confirm Password</value>
+    <value>Wachtwoord bevestigen</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Register</value>
+    <value>Registreren</value>
   </data>
   <data name="AlreadyHaveAnAccount" xml:space="preserve">
-    <value>Already have an account?</value>
+    <value>Heb je al een account?</value>
   </data>
   <data name="AccountInformation" xml:space="preserve">
-    <value>Account Information</value>
+    <value>Accountgegevens</value>
   </data>
   <data name="ChangeYourAccountInfo" xml:space="preserve">
-    <value>Change your account info.</value>
+    <value>Wijzig je accountgegevens.</value>
   </data>
   <data name="ManageYourPreferences" xml:space="preserve">
-    <value>Manage your preferences.</value>
+    <value>Beheer uw voorkeuren.</value>
   </data>
   <data name="UsernameField" xml:space="preserve">
-    <value>Username: </value>
+    <value>Gebruikersnaam: </value>
   </data>
   <data name="PasswordField" xml:space="preserve">
-    <value>Password: </value>
+    <value>Wachtwoord: </value>
   </data>
   <data name="AutoConnectDrivesOnLaunch" xml:space="preserve">
-    <value>Auto connect drives on launch</value>
+    <value>Schijven automatisch verbinden bij het opstarten</value>
   </data>
   <data name="AutoMinimizeApp" xml:space="preserve">
-    <value>Auto minimize app</value>
+    <value>App automatisch minimaliseren</value>
   </data>
   <data name="SetOnStartup" xml:space="preserve">
-    <value>Set on startup</value>
+    <value>Instellen bij opstarten</value>
   </data>
   <data name="Languages" xml:space="preserve">
-    <value>Languages</value>
+    <value>Talen</value>
   </data>
   <data name="TimerCountInSeconds" xml:space="preserve">
-    <value>Timer count in seconds</value>
+    <value>Timer tellen in seconden</value>
   </data>
   <data name="Auditlogs" xml:space="preserve">
     <value>Auditlogs</value>
   </data>
   <data name="YourAuditlogs" xml:space="preserve">
-    <value>Your auditlogs</value>
+    <value>Uw auditlogs</value>
   </data>
   <data name="Message" xml:space="preserve">
-    <value>Message</value>
+    <value>Bericht</value>
   </data>
   <data name="Date" xml:space="preserve">
-    <value>Date</value>
+    <value>Datum</value>
   </data>
   <data name="SearchDrives" xml:space="preserve">
-    <value>Search Drives</value>
+    <value>Schijven zoeken</value>
   </data>
   <data name="SearchTermPlaceholder" xml:space="preserve">
-    <value>Enter your search term (optional)</value>
+    <value>Voer uw zoekterm in (optioneel)</value>
   </data>
   <data name="YourSortOrder" xml:space="preserve">
-    <value>Your sort order</value>
+    <value>Uw sorteervolgorde</value>
   </data>
   <data name="Close" xml:space="preserve">
-    <value>Close</value>
+    <value>Sluiten</value>
   </data>
   <data name="Search" xml:space="preserve">
-    <value>Search</value>
+    <value>Zoeken</value>
   </data>
   <data name="Ascending" xml:space="preserve">
-    <value>Ascending</value>
+    <value>Oplopend</value>
   </data>
   <data name="Descending" xml:space="preserve">
-    <value>Descending</value>
+    <value>Aflopende</value>
   </data>
   <data name="SearchAuditlogs" xml:space="preserve">
-    <value>Search auditlogs</value>
+    <value>Auditlogs doorzoeken</value>
   </data>
   <data name="AddNetworkDriveLetterPlaceholder" xml:space="preserve">
-    <value>Add network's drive letter</value>
+    <value>De stationsletter van het netwerk toevoegen</value>
   </data>
   <data name="NasIpAddress" xml:space="preserve">
-    <value>NAS IP Address</value>
+    <value>IP-adres van de NAS</value>
   </data>
   <data name="AddNasIpAddressPlaceholder" xml:space="preserve">
-    <value>Add your NAS' IP Address</value>
+    <value>Voeg het IP-adres van uw NAS toe</value>
   </data>
   <data name="DriveName" xml:space="preserve">
-    <value>Drive's name</value>
+    <value>De naam van Drive</value>
   </data>
   <data name="AddDriveNamePlaceholder" xml:space="preserve">
-    <value>Add your drive's name</value>
+    <value>Voeg de naam van uw schijf toe</value>
   </data>
   <data name="NasUsername" xml:space="preserve">
-    <value>NAS Username</value>
+    <value>NAS-gebruikersnaam</value>
   </data>
   <data name="AddNasUsernamePlaceholder" xml:space="preserve">
-    <value>Add your NAS' username</value>
+    <value>Voeg de gebruikersnaam van uw NAS toe</value>
   </data>
   <data name="NasPassword" xml:space="preserve">
-    <value>NAS Password</value>
+    <value>NAS-wachtwoord</value>
   </data>
   <data name="AddNasPasswordPlaceholder" xml:space="preserve">
-    <value>Add your NAS' password</value>
+    <value>Voeg het wachtwoord van uw NAS toe</value>
   </data>
   <data name="DeleteDrive" xml:space="preserve">
-    <value>Delete Drive</value>
+    <value>Drive verwijderen</value>
   </data>
   <data name="Delete" xml:space="preserve">
-    <value>Delete</value>
+    <value>Verwijderen</value>
   </data>
   <data name="UpdateDrive" xml:space="preserve">
-    <value>Update Drive</value>
+    <value>Schijf bijwerken</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Save</value>
+    <value>Redden</value>
   </data>
   <data name="UpdatePassword" xml:space="preserve">
-    <value>Update your password</value>
+    <value>Je wachtwoord bijwerken</value>
   </data>
   <data name="YourCurrentPassword" xml:space="preserve">
-    <value>Your current password</value>
+    <value>Uw huidige wachtwoord</value>
   </data>
   <data name="AddCurrentPasswordPlaceholder" xml:space="preserve">
-    <value>Please enter your current password</value>
+    <value>Voer uw huidige wachtwoord in</value>
   </data>
   <data name="YourNewPassword" xml:space="preserve">
-    <value>Your new password</value>
+    <value>Uw nieuwe wachtwoord</value>
   </data>
   <data name="AddNewPasswordPlaceholder" xml:space="preserve">
-    <value>Please enter your new password</value>
+    <value>Voer uw nieuwe wachtwoord in</value>
   </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
-    <value>Confirm your new password</value>
+    <value>Bevestig je nieuwe wachtwoord</value>
   </data>
   <data name="AddConfirmNewPasswordPlaceholder" xml:space="preserve">
-    <value>Please re-enter your new password</value>
+    <value>Voer uw nieuwe wachtwoord opnieuw in</value>
   </data>
   <data name="UpdateYourUsername" xml:space="preserve">
-    <value>Update your username</value>
+    <value>Je gebruikersnaam bijwerken</value>
   </data>
   <data name="YourUsername" xml:space="preserve">
-    <value>Your username</value>
+    <value>Uw gebruikersnaam</value>
   </data>
   <data name="AddNewUsernamePlaceholder" xml:space="preserve">
-    <value>Please enter your new username</value>
+    <value>Voer uw nieuwe gebruikersnaam in</value>
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Logout</value>
   </data>
   <data name="Login" xml:space="preserve">
-    <value>Login</value>
+    <value>Inloggen</value>
   </data>
   <data name="PressCtrlEnter" xml:space="preserve">
-    <value>Press CTRL + ENTER</value>
+    <value>Druk op CTRL + ENTER</value>
   </data>
 </root>

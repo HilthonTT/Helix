@@ -70,6 +70,11 @@ public sealed class ImportDrives(IDbContext context, ILoggedInUser loggedInUser,
             return newDrives;
         }
 
+        foreach (Drive drive in newDrives)
+        {
+            drive.ChangeUserId(loggedInUser.UserId);
+        }
+
         context.Drives.AddRange(newDrives);
 
         await context.SaveChangesAsync(cancellationToken);

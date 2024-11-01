@@ -33,7 +33,7 @@
                 Margin="12,24,24,24"
                 Command="{Binding DeleteCommand}"
                 HorizontalOptions="Fill"
-                Text="{local:Translate Supprimer}" 
+                Text="{local:Translate Delete}" 
                 IsEnabled="{Binding IsNotBusy}"/>
     </Grid>
 </ContentView>

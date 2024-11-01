@@ -134,4 +134,9 @@ public sealed class Drive : Entity, IAuditable
         Username = username;
         Password = password;
     }
+
+    public void ChangeUserId(Guid userId)
+    {
+        UserId = userId;
+    }
 }

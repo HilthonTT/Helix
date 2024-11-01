@@ -117,6 +117,9 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
 
         SettingsModel settings = result.Value;
+
+        CultureSwitcher.SwitchCulture(settings.Language);
+
         if (!settings.AutoConnect)
         {
             return;
