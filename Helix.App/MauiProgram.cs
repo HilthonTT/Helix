@@ -55,19 +55,37 @@ public static class MauiProgram
                 wndLifeCycleBuilder.OnWindowCreated(window =>
                 {
                     IntPtr nativeWindowHandle = WinRT.Interop.WindowNative.GetWindowHandle(window);
-                    WindowId win32WindowsId = Win32Interop.GetWindowIdFromWindow(nativeWindowHandle);
-                    AppWindow winupAppWindow = AppWindow.GetFromWindowId(win32WindowsId);
+                    WindowId win32WindowId = Win32Interop.GetWindowIdFromWindow(nativeWindowHandle);
+                    AppWindow appWindow = AppWindow.GetFromWindowId(win32WindowId);
 
-                    const int height = 800;
-                    const int width = 1400;
+                    // Get the screen's current resolution
+                    DisplayArea displayArea = DisplayArea.GetFromWindowId(win32WindowId, DisplayAreaFallback.Primary);
+                    RectInt32 displayBounds = displayArea.WorkArea;
 
-                    const int x = 1920 / 2 - width / 2;
-                    const int y = 1080 / 2 - height / 2;
+                    int screenWidth = displayBounds.Width;
+                    int screenHeight = displayBounds.Height;
 
-                    winupAppWindow.MoveAndResize(new RectInt32(x, y, width, height));
+                    // Calculate the window size to maintain a 16:9 aspect ratio
+                    const double targetAspectRatio = 16.0 / 9.0;
+                    int windowWidth = (int)(screenWidth * 0.8); // 80% of the screen width
+                    int windowHeight = (int)(windowWidth / targetAspectRatio);
+
+                    // Ensure the window height fits within the screen's height
+                    if (windowHeight > screenHeight * 0.8)
+                    {
+                        windowHeight = (int)(screenHeight * 0.8);
+                        windowWidth = (int)(windowHeight * targetAspectRatio);
+                    }
+
+                    // Center the window on the screen
+                    int posX = (screenWidth - windowWidth) / 2;
+                    int posY = (screenHeight - windowHeight) / 2;
+
+                    appWindow.MoveAndResize(new RectInt32(posX, posY, windowWidth, windowHeight));
                 });
             });
         });
+
 
         MauiApp app = builder.Build();
 
