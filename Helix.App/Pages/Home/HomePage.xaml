@@ -230,7 +230,8 @@
                             <Border Stroke="{StaticResource SecondaryBrush}"
                                     StrokeThickness="1"
                                     Background="Transparent"
-                                    SemanticProperties.Description="Button that toggles the connectivity of all drives">
+                                    SemanticProperties.Description="Button that toggles the connectivity of all drives"
+                                    IsEnabled="{Binding IsNotBusy}">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="8"/>
                                 </Border.StrokeShape>

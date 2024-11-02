@@ -101,9 +101,26 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private void ToggleConnectDrives()
     {
-        foreach (DriveDisplay drive in Drives)
+        if (IsBusy)
         {
-            WeakReferenceMessenger.Default.Send(new ToggleConnectDriveMessage(drive.Id));
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            foreach (DriveDisplay drive in Drives)
+            {
+                if (drive.IsNotBusy)
+                {
+                    WeakReferenceMessenger.Default.Send(new ToggleConnectDriveMessage(drive.Id));
+                }
+            }
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 

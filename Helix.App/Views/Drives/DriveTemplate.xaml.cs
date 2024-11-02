@@ -70,35 +70,21 @@ public sealed partial class DriveTemplate : ContentView
             return;
         }
 
-        if (drive.IsBusy)
+        object request = _nasConnector.IsConnected(drive.Letter)
+            ? new DisconnectDrive.Request(drive.Id)
+            : new ConnectDrive.Request(drive.Id);
+
+        Result result = await HandleDriveConnection(request);
+        if (result.IsSuccess)
         {
-            return;
+            UpdateStatusButtonColor(drive.Letter);
+            UpdateStorageUsage(drive);
+
+            WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
         }
-
-        try
+        else
         {
-            drive.IsBusy = true;
-
-            object request = _nasConnector.IsConnected(drive.Letter)
-                ? new DisconnectDrive.Request(drive.Id)
-                : new ConnectDrive.Request(drive.Id);
-
-            Result result = await HandleDriveConnection(request);
-            if (result.IsSuccess)
-            {
-                UpdateStatusButtonColor(drive.Letter);
-                UpdateStorageUsage(drive);
-
-                WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
-            }
-            else
-            {
-                await ShowErrorAlert(result.Error.Description);
-            }
-        }
-        finally
-        {
-            drive.IsBusy = false;
+            await ShowErrorAlert(result.Error.Description);
         }
     }
 

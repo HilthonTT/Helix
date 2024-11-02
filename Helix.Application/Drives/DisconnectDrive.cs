@@ -31,6 +31,8 @@ public sealed class DisconnectDrive(IDbContext context, ILoggedInUser loggedInUs
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        return await nasConnector.DisconnectAsync(drive, cancellationToken);
+        Result result = await nasConnector.DisconnectAsync(drive, cancellationToken);
+
+        return result;
     }
 }

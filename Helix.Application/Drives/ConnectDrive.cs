@@ -31,6 +31,8 @@ public sealed class ConnectDrive(IDbContext context, ILoggedInUser loggedInUser,
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        return await nasConnector.ConnectAsync(drive, cancellationToken);
+        Result result = await nasConnector.ConnectAsync(drive, cancellationToken);
+
+        return result;
     }
 }

@@ -76,25 +76,37 @@ internal sealed class NasConnector : INasConnector
     {
         using Process process = CreateProcess(arguments);
 
+        var outputBuilder = new StringBuilder();
+        var errorBuilder = new StringBuilder();
+
+        process.OutputDataReceived += (sender, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                outputBuilder.AppendLine(e.Data);
+            }
+        };
+
+        process.ErrorDataReceived += (sender, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                errorBuilder.AppendLine(e.Data);
+            }
+        };
+
         try
         {
-            string error = string.Empty;
+            process.Start();
 
-            if (!process.Start())
-            {
-                error = await process.StandardError.ReadToEndAsync(cancellationToken);
-                return Result.Failure(DriveErrors.FailedToConnect($"Process failed to start: {error}"));
-            }
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
 
             await process.WaitForExitAsync(cancellationToken);
 
-            string output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
-
-            error = await process.StandardError.ReadToEndAsync(cancellationToken);
-
             return process.ExitCode == 0
-                ? Result.Success()
-                : Result.Failure(DriveErrors.FailedToConnect(error));
+                ? Result.Success() 
+                : Result.Failure(DriveErrors.FailedToConnect(errorBuilder.ToString()));
         }
         catch (OperationCanceledException)
         {
