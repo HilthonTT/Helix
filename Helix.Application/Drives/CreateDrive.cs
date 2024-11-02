@@ -2,6 +2,7 @@
 using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Core.Errors;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
@@ -58,7 +59,7 @@ public sealed class CreateDrive(IDbContext context, ILoggedInUser loggedInUser, 
         string[] properties = [request.Letter, request.IpAddress, request.Name, request.Username, request.Password];
 
         return properties.Any(string.IsNullOrWhiteSpace)
-            ? Result.Failure(Error.NullValue)
+            ? Result.Failure(ValidationErrors.MissingFields)
             : Result.Success();
     }
 }

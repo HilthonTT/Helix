@@ -13,6 +13,8 @@ namespace Helix.Application.Drives;
 
 public sealed class ExportDrives(IDbContext context, ILoggedInUser loggedInUser) : IHandler
 {
+    private const string FileName = "IMPORTED_DRIVES_DO_NOT_SHARE.json";
+
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = true
@@ -46,7 +48,7 @@ public sealed class ExportDrives(IDbContext context, ILoggedInUser loggedInUser)
             return Result.Failure(FolderPickerErrors.InvalidFolderPath);
         }
 
-        string filePath = Path.Combine(folderResult.Folder.Path, "imported-drives.json");
+        string filePath = Path.Combine(folderResult.Folder.Path, FileName);
 
         if (File.Exists(filePath))
         {

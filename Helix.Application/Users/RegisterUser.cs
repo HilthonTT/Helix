@@ -2,6 +2,7 @@
 using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Core.Errors;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -56,7 +57,7 @@ public sealed class RegisterUser(IDbContext context, IPasswordHasher passwordHas
         string[] properties = [request.Username, request.Password, request.ConfirmedPassword];
 
         return properties.Any(string.IsNullOrWhiteSpace)
-             ? Result.Failure(Error.NullValue)
+             ? Result.Failure(ValidationErrors.MissingFields)
              : Result.Success();
     }
 }

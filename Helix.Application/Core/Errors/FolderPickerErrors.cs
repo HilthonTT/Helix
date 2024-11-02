@@ -2,7 +2,7 @@
 
 namespace Helix.Application.Core.Errors;
 
-public static class FolderPickerErrors
+internal static class FolderPickerErrors
 {
     public static readonly Error Cancelled = Error.Problem(
         "FolderPicker.Cancelled",

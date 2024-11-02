@@ -2,6 +2,7 @@
 using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Core.Errors;
 using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
@@ -58,7 +59,7 @@ public sealed class GetDriveById(IDbContext context, ILoggedInUser loggedInUser,
     {
         if (request.DriveId == Guid.Empty)
         {
-            return Result.Failure(Error.NullValue);
+            return Result.Failure(ValidationErrors.MissingFields);
         }
 
         return Result.Success();

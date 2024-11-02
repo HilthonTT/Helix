@@ -2,7 +2,9 @@
 using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Core.Errors;
 using Helix.Application.Core.Extensions;
+using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
 
@@ -15,6 +17,12 @@ public sealed class ChangeUserPassword(IDbContext context, ILoggedInUser loggedI
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
+        Result validationResult = Validate(request);
+        if (validationResult.IsFailure)
+        {
+            return Result.Failure<Drive>(validationResult.Error);
+        }
+
         if (!loggedInUser.IsLoggedIn)
         {
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
@@ -44,5 +52,14 @@ public sealed class ChangeUserPassword(IDbContext context, ILoggedInUser loggedI
         await context.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
+    }
+
+    private static Result Validate(Request request)
+    {
+        string[] properties = [request.CurrentPassword, request.NewPassword, request.ConfirmedNewPassword];
+
+        return properties.Any(string.IsNullOrWhiteSpace)
+            ? Result.Failure(ValidationErrors.MissingFields)
+            : Result.Success();
     }
 }
