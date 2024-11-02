@@ -21,5 +21,11 @@ internal sealed class DriveConfiguration : IEntityTypeConfiguration<Drive>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(d => new { d.Name, d.Letter });
+
+        builder.HasIndex(d => d.Name);
+
+        builder.HasIndex(d => d.Letter);
+
+        builder.HasIndex(a => a.CreatedOnUtc);
     }
 }

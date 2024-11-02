@@ -357,4 +357,7 @@
   <data name="Connected" xml:space="preserve">
     <value>Terhubung</value>
   </data>
+  <data name="SetDesktopShortcut" xml:space="preserve">
+    <value>Atur pintasan desktop</value>
+  </data>
 </root>

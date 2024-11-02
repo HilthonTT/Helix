@@ -19,5 +19,7 @@ internal sealed class AuditLogConfiguration : IEntityTypeConfiguration<Auditlog>
            .HasForeignKey(a => a.UserId)
            .IsRequired()
            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(a => a.CreatedOnUtc);
     }
 }

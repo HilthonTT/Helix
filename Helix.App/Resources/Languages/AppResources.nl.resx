@@ -357,4 +357,7 @@
   <data name="Connected" xml:space="preserve">
     <value>Verbonden</value>
   </data>
+  <data name="SetDesktopShortcut" xml:space="preserve">
+    <value>Snelkoppeling op het bureaublad instellen</value>
+  </data>
 </root>

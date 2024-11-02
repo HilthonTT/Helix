@@ -7,6 +7,7 @@ using Helix.Infrastructure.Cryptography;
 using Helix.Infrastructure.Database.Constants;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Helix.Infrastructure.Database;
 
@@ -48,6 +49,8 @@ public sealed class AppDbContext : DbContext, IDbContext
 
         var connection = new SqliteConnection(connectionString);
 
-        optionsBuilder.UseSqlite(connection);
+        optionsBuilder
+            .UseSqlite(connection)
+            .ReplaceService<IRelationalCommandBuilderFactory, CustomRelationalCommandBuilderFactory>();
     }
 }

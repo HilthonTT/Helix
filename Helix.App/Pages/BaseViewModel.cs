@@ -11,6 +11,8 @@ namespace Helix.App.Pages;
 
 public abstract partial class BaseViewModel : ObservableObject
 {
+    
+
     private readonly ICountdownService _countdownService;
     private readonly GetSettings _getSettings;
 
@@ -37,6 +39,9 @@ public abstract partial class BaseViewModel : ObservableObject
     private int _secondsRemaining = 0;
 
     public string TimerCount => $"{SecondsRemaining} seconds";
+
+    [ObservableProperty]
+    private int _modalMaximumHeight = 600;
 
     [RelayCommand]
     public async Task StartTimerAsync()

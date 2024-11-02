@@ -19,10 +19,6 @@ internal sealed partial class RegisterViewModel : BaseViewModel
         _registerUser = App.ServiceProvider.GetRequiredService<RegisterUser>();
 
         Languages = new(CultureSwitcher.Languages);
-
-
-        LanguageService.Instance.LanguageChanged += OnLanguageChanged;
-        SelectedLanguage = CultureSwitcher.LanguageToString(LanguageService.Instance.CurrentLanguage);
     }
 
     [ObservableProperty]
@@ -44,7 +40,7 @@ internal sealed partial class RegisterViewModel : BaseViewModel
     private ObservableCollection<string> _languages = [];
 
     [ObservableProperty]
-    private string _selectedLanguage = CultureSwitcher.LanguageToString(Language.English);
+    private string _selectedLanguage = string.Empty;
     partial void OnSelectedLanguageChanged(string value)
     {
         Language language = CultureSwitcher.StringToLanguage(value);
@@ -101,9 +97,10 @@ internal sealed partial class RegisterViewModel : BaseViewModel
         HideConfirmedPassword = !HideConfirmedPassword;
     }
 
-    private void OnLanguageChanged(Language newLanguage)
+    [RelayCommand]
+    private void LoadCurrentLanguage()
     {
-        SelectedLanguage = CultureSwitcher.LanguageToString(newLanguage);
+        SelectedLanguage = CultureSwitcher.LanguageToString(CultureSwitcher.GetCurrentLanguage());
     }
 
     private void Clear()

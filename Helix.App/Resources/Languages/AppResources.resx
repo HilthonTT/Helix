@@ -357,4 +357,7 @@
   <data name="Connected" xml:space="preserve">
     <value>Connected</value>
   </data>
+  <data name="SetDesktopShortcut" xml:space="preserve">
+    <value>Set desktop shortcut</value>
+  </data>
 </root>

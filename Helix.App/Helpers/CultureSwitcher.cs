@@ -45,7 +45,11 @@ public static class CultureSwitcher
     {
         string currentCulture = AppResources.Culture.Name;
 
-        return LanguageToCultureMap.FirstOrDefault(x => x.Value.Contains(currentCulture)).Key;
+        Language currentLanguage = LanguageToCultureMap
+            .FirstOrDefault(x => currentCulture.StartsWith(x.Value, StringComparison.OrdinalIgnoreCase))
+            .Key;
+
+        return currentLanguage;
     }
 
     public static Language StringToLanguage(string languageString)

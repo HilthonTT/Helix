@@ -16,6 +16,8 @@ public sealed partial class LoginPage : ContentPage
 
     protected override void OnAppearing()
     {
+        LoadCurrentLanguage();
+
         _hook = new TaskPoolGlobalHook();
         _hook.KeyPressed += OnKeyPressed;
 
@@ -49,5 +51,18 @@ public sealed partial class LoginPage : ContentPage
         {
             await viewModel.LoginCommand.ExecuteAsync(null);
         });
+    }
+
+    private void LoadCurrentLanguage()
+    {
+        if (BindingContext is not LoginViewModel viewModel)
+        {
+            return;
+        }
+
+        if (viewModel.LoadCurrentLanguageCommand.CanExecute(null))
+        {
+            viewModel.LoadCurrentLanguageCommand.Execute(null);
+        }
     }
 }

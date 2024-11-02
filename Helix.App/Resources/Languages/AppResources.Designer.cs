@@ -574,6 +574,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Set desktop shortcut.
+        /// </summary>
+        internal static string SetDesktopShortcut {
+            get {
+                return ResourceManager.GetString("SetDesktopShortcut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Set on startup.
         /// </summary>
         internal static string SetOnStartup {

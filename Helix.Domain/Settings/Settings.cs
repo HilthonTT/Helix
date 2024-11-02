@@ -14,6 +14,7 @@ public sealed class Settings : Entity
         bool autoConnect,
         bool autoMinimize,
         bool setOnStartup,
+        bool setDesktopShortcut,
         int timerCount,
         Language language) 
         : base(id)
@@ -23,6 +24,7 @@ public sealed class Settings : Entity
         Ensure.NotNull(autoConnect, nameof(autoConnect));
         Ensure.NotNull(autoMinimize, nameof(autoMinimize));
         Ensure.NotNull(setOnStartup, nameof(setOnStartup));
+        Ensure.NotNull(setDesktopShortcut, nameof(setDesktopShortcut));
         Ensure.MustBePositive(timerCount, nameof(timerCount));
         Ensure.NotNull(language, nameof(language));
 
@@ -30,6 +32,7 @@ public sealed class Settings : Entity
         AutoConnect = autoConnect;
         AutoMinimize = autoMinimize;
         SetOnStartup = setOnStartup;
+        SetDesktopShortcut = setDesktopShortcut;
         TimerCount = timerCount;
         Language = language;
     }
@@ -52,6 +55,8 @@ public sealed class Settings : Entity
 
     public bool SetOnStartup { get; private set; }
 
+    public bool SetDesktopShortcut { get; private set; }
+
     public int TimerCount { get; private set; }
 
     public Language Language { get; private set; }
@@ -61,6 +66,7 @@ public sealed class Settings : Entity
         bool autoConnect, 
         bool autoMinimize, 
         bool setOnStartup,
+        bool setDesktopShortcut,
         int timerCount, 
         Language language)
     {
@@ -70,17 +76,25 @@ public sealed class Settings : Entity
             autoConnect,
             autoMinimize,
             setOnStartup,
+            setDesktopShortcut,
             timerCount,
             language);
 
         return settings;
     }
 
-    public void Update(bool autoConnect, bool autoMinimize, bool setOnStartup, int timerCount, Language language)
+    public void Update(
+        bool autoConnect, 
+        bool autoMinimize, 
+        bool setOnStartup, 
+        bool setDesktopShorcut, 
+        int timerCount,
+        Language language)
     {
         AutoConnect = autoConnect;
         AutoMinimize = autoMinimize;
         SetOnStartup = setOnStartup;
+        SetDesktopShortcut = setDesktopShorcut;
         TimerCount = timerCount;
         Language = language;
     }

@@ -16,6 +16,8 @@ public sealed partial class RegisterPage : ContentPage
 
     protected override void OnAppearing()
     {
+        LoadCurrentLanguage();
+
         _hook = new TaskPoolGlobalHook();
         _hook.KeyPressed += OnKeyPressed;
 
@@ -49,5 +51,18 @@ public sealed partial class RegisterPage : ContentPage
         {
             await viewModel.RegisterCommand.ExecuteAsync(null);
         });
+    }
+
+    private void LoadCurrentLanguage()
+    {
+        if (BindingContext is not RegisterViewModel viewModel)
+        {
+            return;
+        }
+
+        if (viewModel.LoadCurrentLanguageCommand.CanExecute(null))
+        {
+            viewModel.LoadCurrentLanguageCommand.Execute(null);
+        }
     }
 }

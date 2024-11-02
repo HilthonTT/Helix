@@ -14,5 +14,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.HasIndex(u => u.Username).IsUnique();
+
+        builder.HasIndex(u => u.CreatedOnUtc);
     }
 }

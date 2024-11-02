@@ -14,6 +14,8 @@ using Helix.Infrastructure.Caching;
 using Helix.Application.Abstractions.Time;
 using Helix.Application.Abstractions.Startup;
 using Helix.Infrastructure.Startup;
+using Helix.Application.Abstractions.Desktop;
+using Helix.Infrastructure.Desktop;
 
 namespace Helix.Infrastructure;
 
@@ -51,6 +53,7 @@ public static class DependencyInjection
 
         services.AddScoped<INasConnector, NasConnector>();
         services.AddScoped<IStartupService, StartupService>();
+        services.AddScoped<IDesktopService, DesktopService>();
 
         return services;
     }

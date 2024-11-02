@@ -46,6 +46,13 @@ internal sealed partial class SettingsDisplay : ObservableObject
     }
 
     [ObservableProperty]
+    private bool _setDesktopShortcut;
+    async partial void OnSetDesktopShortcutChanged(bool value)
+    {
+        await UpdatePropertyAsync(builder => builder.SetDesktopShortcut = value);
+    }
+
+    [ObservableProperty]
     private int _timerCount;
     partial void OnTimerCountChanged(int value)
     {
@@ -87,6 +94,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 AutoConnect,
                 AutoMinimize,
                 SetOnStartup,
+                SetDesktopShortcut,
                 TimerCount,
                 Language.English);
 

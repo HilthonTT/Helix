@@ -19,9 +19,6 @@ internal sealed partial class LoginViewModel : BaseViewModel
         _loginUser = App.ServiceProvider.GetRequiredService<LoginUser>();
 
         Languages = new(CultureSwitcher.Languages);
-
-        LanguageService.Instance.LanguageChanged += OnLanguageChanged;
-        SelectedLanguage = CultureSwitcher.LanguageToString(LanguageService.Instance.CurrentLanguage);
     }
 
     [ObservableProperty]
@@ -37,7 +34,7 @@ internal sealed partial class LoginViewModel : BaseViewModel
     private ObservableCollection<string> _languages = [];
 
     [ObservableProperty]
-    private string _selectedLanguage = CultureSwitcher.LanguageToString(Language.English);
+    private string _selectedLanguage = string.Empty;
     partial void OnSelectedLanguageChanged(string value)
     {
         Language language = CultureSwitcher.StringToLanguage(value);
@@ -88,9 +85,10 @@ internal sealed partial class LoginViewModel : BaseViewModel
         HidePassword = !HidePassword;
     }
 
-    private void OnLanguageChanged(Language newLanguage)
+    [RelayCommand]
+    private void LoadCurrentLanguage()
     {
-        SelectedLanguage = CultureSwitcher.LanguageToString(newLanguage);
+        SelectedLanguage = CultureSwitcher.LanguageToString(CultureSwitcher.GetCurrentLanguage());
     }
 
     private void Clear()

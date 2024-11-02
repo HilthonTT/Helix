@@ -357,4 +357,7 @@
   <data name="Connected" xml:space="preserve">
     <value>Verbunden</value>
   </data>
+  <data name="SetDesktopShortcut" xml:space="preserve">
+    <value>Festlegen einer Desktop-Verknüpfung</value>
+  </data>
 </root>

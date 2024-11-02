@@ -357,4 +357,7 @@
   <data name="Connected" xml:space="preserve">
     <value>接続</value>
   </data>
+  <data name="SetDesktopShortcut" xml:space="preserve">
+    <value>デスクトップ ショートカットを設定する</value>
+  </data>
 </root>

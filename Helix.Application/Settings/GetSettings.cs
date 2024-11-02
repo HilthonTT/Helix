@@ -56,7 +56,7 @@ public sealed class GetSettings(
 
     private async Task<Guid> CreateSettingsAsync(CancellationToken cancellationToken = default)
     {
-        var settings = SettingsModel.Create(loggedInUser.UserId, false, false, false, 20, Language.English);
+        var settings = SettingsModel.Create(loggedInUser.UserId, false, false, false, false, 20, Language.English);
 
         context.Settings.Add(settings);
 

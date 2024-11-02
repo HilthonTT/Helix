@@ -1,6 +1,7 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Startup;
 using Helix.Application.Core.Extensions;
@@ -14,33 +15,39 @@ public sealed class UpdateSettings(
     IDbContext context, 
     ILoggedInUser loggedInUser, 
     IStartupService startupService,
+    IDesktopService desktopService,
     ICacheService cacheService) : IHandler
 {
-    public sealed record Request(bool AutoConnect, bool AutoMinimize, bool SetOnStartup, int TimerCount, Language Language)
+    public sealed record Request(
+        bool AutoConnect, 
+        bool AutoMinimize, 
+        bool SetOnStartup, 
+        bool SetDesktopShortcut,
+        int TimerCount, 
+        Language Language)
     {
-        public sealed class Builder
+        public sealed class Builder(
+            bool autoConnect,
+            bool autoMinimize,
+            bool setOnStartup,
+            bool setDesktopShortcut,
+            int timerCount,
+            Language language)
         {
-            public bool AutoConnect { get; set; }
+            public bool AutoConnect { get; set; } = autoConnect;
 
-            public bool AutoMinimize { get; set; }
+            public bool AutoMinimize { get; set; } = autoMinimize;
 
-            public bool SetOnStartup { get; set; }
+            public bool SetOnStartup { get; set; } = setOnStartup;
 
-            public int TimerCount { get; set; }
+            public bool SetDesktopShortcut { get; set; } = setDesktopShortcut;
 
-            public Language Language { get; set; }
+            public int TimerCount { get; set; } = timerCount;
 
-            public Builder(bool autoConnect, bool autoMinimize, bool setOnStartup, int timerCount, Language language)
-            {
-                AutoConnect = autoConnect;
-                AutoMinimize = autoMinimize;
-                SetOnStartup = setOnStartup;
-                TimerCount = timerCount;
-                Language = language;
-            }
+            public Language Language { get; set; } = language;
 
             public Request Build() =>
-                new(AutoConnect, AutoMinimize, SetOnStartup, TimerCount, Language);
+                new(AutoConnect, AutoMinimize, SetOnStartup, SetDesktopShortcut, TimerCount, Language);
         }
     }
 
@@ -58,10 +65,18 @@ public sealed class UpdateSettings(
             return Result.Failure(SettingsError.NotFound);
         }
 
-        settings.Update(request.AutoConnect, request.AutoMinimize, request.SetOnStartup, request.TimerCount, request.Language);
+        settings.Update(
+            request.AutoConnect,
+            request.AutoMinimize, 
+            request.SetOnStartup,
+            request.SetDesktopShortcut,
+            request.TimerCount,
+            request.Language);
 
         startupService.ToggleStartup(settings.SetOnStartup);
-        
+
+        desktopService.ToggleDesktopShortcut(settings.SetDesktopShortcut);
+
         await context.SaveChangesAsync(cancellationToken);
 
         string cacheKey = CacheKeys.Settings.GetByUserId(loggedInUser.UserId);

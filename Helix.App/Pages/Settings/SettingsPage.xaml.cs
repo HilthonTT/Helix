@@ -39,7 +39,7 @@ public sealed partial class SettingsPage : ContentPage
 
     private async Task ShowUpdateUsernameModalAsync(bool show)
     {
-        if (_updateUsernameModalOpen)
+        if (_updatePasswordModalOpen)
         {
             await ShowUpdatePasswordModalAsync(false);
         }

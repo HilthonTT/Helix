@@ -24,6 +24,9 @@ public sealed partial class App : AppBase
 
     private void MigrateDatabase()
     {
-        _appDbContext.Database.Migrate();
+        Task.Run(async () =>
+        {
+            await _appDbContext.Database.MigrateAsync();
+        });
     }
 }
