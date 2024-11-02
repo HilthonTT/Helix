@@ -84,9 +84,16 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         await DisplaySuccessAsync("You've imported your drives!");
 
-        foreach (Drive drive in result.Value)
+        List<Drive> drives = result.Value;
+
+        if (drives.Count != 0)
         {
-            Drives.Add(new DriveDisplay(drive));
+            foreach (Drive drive in drives)
+            {
+                Drives.Add(new DriveDisplay(drive));
+            }
+
+            WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
         }
     }
 
