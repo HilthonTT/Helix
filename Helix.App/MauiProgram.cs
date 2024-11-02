@@ -65,15 +65,22 @@ public static class MauiProgram
                     int screenWidth = displayBounds.Width;
                     int screenHeight = displayBounds.Height;
 
+                    // Determine scaling factor based on resolution
+                    double scalingFactor =
+                        (screenWidth >= 3456 && screenWidth <= 4224) ||
+                        (screenHeight >= 1944 && screenHeight <= 2376)
+                            ? 0.9
+                            : 0.8;
+
                     // Calculate the window size to maintain a 16:9 aspect ratio
                     const double targetAspectRatio = 16.0 / 9.0;
-                    int windowWidth = (int)(screenWidth * 0.8); // 80% of the screen width
+                    int windowWidth = (int)(screenWidth * scalingFactor);
                     int windowHeight = (int)(windowWidth / targetAspectRatio);
 
                     // Ensure the window height fits within the screen's height
-                    if (windowHeight > screenHeight * 0.8)
+                    if (windowHeight > screenHeight * scalingFactor)
                     {
-                        windowHeight = (int)(screenHeight * 0.8);
+                        windowHeight = (int)(screenHeight * scalingFactor);
                         windowWidth = (int)(windowHeight * targetAspectRatio);
                     }
 
@@ -85,7 +92,6 @@ public static class MauiProgram
                 });
             });
         });
-
 
         MauiApp app = builder.Build();
 
