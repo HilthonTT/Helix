@@ -9,157 +9,168 @@
              Shell.NavBarIsVisible="False">
         <!-- Left Side for Logo, Title, and Login Form -->
     <!-- Right Side for Image Illustration -->
-    
-    <Grid ColumnDefinitions="3*, 3*">
-        <Label Text="{local:Translate PressCtrlEnter}"
-               VerticalOptions="Start" 
-               HorizontalOptions="Start" 
-               Margin="20,20,0,0"
-               TextColor="{StaticResource TextSecondary}" 
-               FontAttributes="Bold" />
 
-        <Picker VerticalOptions="Start" 
-                HorizontalOptions="End"
-                Margin="20"
-                ItemsSource="{Binding Languages}" 
-                SelectedItem="{Binding SelectedLanguage}" />
+    <Grid>
+        <Grid BackgroundColor="Black" Opacity="0.5" IsVisible="{Binding IsLoading}">
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"
+                       Color="White"
+                       WidthRequest="50"
+                       HeightRequest="50"/>
+        </Grid>
 
-        <StackLayout Grid.Column="0"
-             Padding="20"
-             VerticalOptions="Center">
+        <Grid ColumnDefinitions="3*, 3*" IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+            <Label Text="{local:Translate PressCtrlEnter}"
+                   VerticalOptions="Start" 
+                   HorizontalOptions="Start" 
+                   Margin="20,20,0,0"
+                   TextColor="{StaticResource TextSecondary}" 
+                   FontAttributes="Bold" />
 
-            <Image Source="logo.png" 
-               WidthRequest="100" 
-               Aspect="AspectFit" 
-               HeightRequest="100"
-               HorizontalOptions="Center" 
-               Margin="0,0,0,20"/>
+            <Picker VerticalOptions="Start" 
+                    HorizontalOptions="End"
+                    Margin="20"
+                    ItemsSource="{Binding Languages}" 
+                    SelectedItem="{Binding SelectedLanguage}" />
 
-            <!-- Title -->
-            <Label Text="{local:Translate RegisterMessage}" 
-               HorizontalOptions="Center" 
-               Style="{StaticResource LargeTitle}"/>
+            <StackLayout Grid.Column="0"
+                         Padding="20"
+                         VerticalOptions="Center">
 
-            <!-- Username Entry -->
-            <Border HeightRequest="48"
-                 HorizontalOptions="FillAndExpand"
-                 Background="{StaticResource DarkBg1Brush}"
-                 Stroke="{StaticResource SecondaryBrush}"
-                 StrokeThickness="1">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8"/>
-                </Border.StrokeShape>
+                <Image Source="logo.png" 
+                       WidthRequest="100" 
+                       Aspect="AspectFit" 
+                       HeightRequest="100"
+                       HorizontalOptions="Center" 
+                       Margin="0,0,0,20"/>
 
-                <Entry Background="Transparent"
-                    Placeholder="{local:Translate Username}"
-                    Text="{Binding Username}"
-                    PlaceholderColor="{StaticResource TextSecondary}"
-                    TextColor="White"
-                    HorizontalOptions="StartAndExpand"
-                    MinimumWidthRequest="900"
-                    Margin="8,0"
-                    FontSize="14"
-                    IsEnabled="{Binding IsNotBusy}" />
-            </Border>
+                <!-- Title -->
+                <Label Text="{local:Translate RegisterMessage}" 
+                       HorizontalOptions="Center" 
+                       Style="{StaticResource LargeTitle}"/>
 
-            <!-- Password Entry -->
-            <Border HeightRequest="48"
-                 HorizontalOptions="FillAndExpand"
-                 Background="{StaticResource DarkBg1Brush}"
-                 Stroke="{StaticResource SecondaryBrush}"
-                 StrokeThickness="1">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8"/>
-                </Border.StrokeShape>
+                <!-- Username Entry -->
+                <Border HeightRequest="48"
+                         HorizontalOptions="FillAndExpand"
+                         Background="{StaticResource DarkBg1Brush}"
+                         Stroke="{StaticResource SecondaryBrush}"
+                         StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
 
-                <Grid>
                     <Entry Background="Transparent"
-                        Placeholder="{local:Translate Password}"
-                        IsPassword="{Binding HidePassword}"
-                        Text="{Binding Password}"
-                        PlaceholderColor="{StaticResource TextSecondary}"
-                        TextColor="White"
-                        HorizontalOptions="StartAndExpand"
-                        MinimumWidthRequest="900"
-                        Margin="0,0,50,0"
+                            Placeholder="{local:Translate Username}"
+                            Text="{Binding Username}"
+                            PlaceholderColor="{StaticResource TextSecondary}"
+                            TextColor="White"
+                            HorizontalOptions="StartAndExpand"
+                            MinimumWidthRequest="900"
+                            Margin="8,0"
+                            FontSize="14"
+                            IsEnabled="{Binding IsNotBusy}" />
+                </Border>
+
+                <!-- Password Entry -->
+                <Border HeightRequest="48"
+                         HorizontalOptions="FillAndExpand"
+                         Background="{StaticResource DarkBg1Brush}"
+                         Stroke="{StaticResource SecondaryBrush}"
+                         StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+
+                    <Grid>
+                        <Entry Background="Transparent"
+                                Placeholder="{local:Translate Password}"
+                                IsPassword="{Binding HidePassword}"
+                                Text="{Binding Password}"
+                                PlaceholderColor="{StaticResource TextSecondary}"
+                                TextColor="White"
+                                HorizontalOptions="StartAndExpand"
+                                MinimumWidthRequest="900"
+                                Margin="0,0,50,0"
+                                FontSize="14"
+                                IsEnabled="{Binding IsNotBusy}" />
+
+                        <ImageButton Source="eye.png"
+                                     HorizontalOptions="End" 
+                                     VerticalOptions="Center"
+                                     BackgroundColor="Transparent"
+                                     HeightRequest="24"
+                                     WidthRequest="24"
+                                     Margin="0,0,10,0" 
+                                     Command="{Binding TogglePasswordHiddenCommand}"
+                                     Opacity="{Binding HidePassword, Converter={StaticResource BoolToOpacityConverter}}"
+                                     BorderColor="Transparent"/>
+                    </Grid>
+
+                </Border>
+
+                <!-- Confirmed Password Entry -->
+                <Border HeightRequest="48"
+                        HorizontalOptions="FillAndExpand"
+                        Background="{StaticResource DarkBg1Brush}"
+                        Stroke="{StaticResource SecondaryBrush}"
+                        StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8"/>
+                    </Border.StrokeShape>
+
+                    <Grid>
+                        <Entry Background="Transparent"
+                               Placeholder="{local:Translate ConfirmPassword}"
+                               IsPassword="{Binding HideConfirmedPassword}"
+                               Text="{Binding ConfirmedPassword}"
+                               PlaceholderColor="{StaticResource TextSecondary}"
+                               TextColor="White"
+                               HorizontalOptions="StartAndExpand"
+                               MinimumWidthRequest="900"
+                               Margin="0,0,50,0"
+                               FontSize="14"
+                               IsEnabled="{Binding IsNotBusy}" />
+
+                        <ImageButton Source="eye.png"
+                                     HorizontalOptions="End" 
+                                     VerticalOptions="Center"
+                                     BackgroundColor="Transparent"
+                                     HeightRequest="24"
+                                     WidthRequest="24"
+                                     Margin="0,0,10,0" 
+                                     Command="{Binding ToggleConfirmedPasswordHiddenCommand}"
+                                     Opacity="{Binding HideConfirmedPassword, Converter={StaticResource BoolToOpacityConverter}}"
+                                     BorderColor="Transparent" />
+                    </Grid>
+
+                </Border>
+
+
+                <!-- Register Button -->
+                <Button Text="{local:Translate Register}" 
+                        Grid.Row="1" 
+                        Grid.Column="1" 
+                        Margin="0,24,0,24" 
+                        Command="{Binding RegisterCommand}"
+                        HorizontalOptions="Fill"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <!-- "Already have an account?" Button -->
+                <Button Text="{local:Translate AlreadyHaveAnAccount}"
                         FontSize="14"
-                        IsEnabled="{Binding IsNotBusy}" />
+                        BackgroundColor="Transparent"
+                        Margin="12,-20,0,0" 
+                        Command="{Binding GoToLoginCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </StackLayout>
 
-                    <ImageButton Source="eye.png"
-                             HorizontalOptions="End" 
-                             VerticalOptions="Center"
-                             BackgroundColor="Transparent"
-                             HeightRequest="24"
-                             WidthRequest="24"
-                             Margin="0,0,10,0" 
-                             Command="{Binding TogglePasswordHiddenCommand}"
-                             Opacity="{Binding HidePassword, Converter={StaticResource BoolToOpacityConverter}}"
-                             BorderColor="Transparent"/>
-                </Grid>
-
-            </Border>
-
-            <!-- Confirmed Password Entry -->
-            <Border HeightRequest="48"
-                    HorizontalOptions="FillAndExpand"
-                    Background="{StaticResource DarkBg1Brush}"
-                    Stroke="{StaticResource SecondaryBrush}"
-                    StrokeThickness="1">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8"/>
-                </Border.StrokeShape>
-
-                <Grid>
-                    <Entry Background="Transparent"
-                           Placeholder="{local:Translate ConfirmPassword}"
-                           IsPassword="{Binding HideConfirmedPassword}"
-                           Text="{Binding ConfirmedPassword}"
-                           PlaceholderColor="{StaticResource TextSecondary}"
-                           TextColor="White"
-                           HorizontalOptions="StartAndExpand"
-                           MinimumWidthRequest="900"
-                           Margin="0,0,50,0"
-                           FontSize="14"
-                           IsEnabled="{Binding IsNotBusy}" />
-
-                    <ImageButton Source="eye.png"
-                                 HorizontalOptions="End" 
-                                 VerticalOptions="Center"
-                                 BackgroundColor="Transparent"
-                                 HeightRequest="24"
-                                 WidthRequest="24"
-                                 Margin="0,0,10,0" 
-                                 Command="{Binding ToggleConfirmedPasswordHiddenCommand}"
-                                 Opacity="{Binding HideConfirmedPassword, Converter={StaticResource BoolToOpacityConverter}}"
-                                 BorderColor="Transparent" />
-                </Grid>
-
-            </Border>
-
-
-            <!-- Register Button -->
-            <Button Text="{local:Translate Register}" 
-                    Grid.Row="1" 
-                    Grid.Column="1" 
-                    Margin="0,24,0,24" 
-                    Command="{Binding RegisterCommand}"
-                    HorizontalOptions="Fill"
-                    IsEnabled="{Binding IsNotBusy}"/>
-
-            <!-- "Already have an account?" Button -->
-            <Button Text="{local:Translate AlreadyHaveAnAccount}"
-                    FontSize="14"
-                    BackgroundColor="Transparent"
-                    Margin="12,-20,0,0" 
-                    Command="{Binding GoToLoginCommand}"
-                    IsEnabled="{Binding IsNotBusy}"/>
-        </StackLayout>
-
-        <!-- Right Side Content (Illustration Image) -->
-        <Image Source="illustration2.png" 
-               Grid.Column="1"
-               Aspect="AspectFill"
-               VerticalOptions="Center"
-               HorizontalOptions="Center"/>
+            <!-- Right Side Content (Illustration Image) -->
+            <Image Source="illustration2.png" 
+                   Grid.Column="1"
+                   Aspect="AspectFill"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"/>
+        </Grid>
     </Grid>
 </ContentPage>

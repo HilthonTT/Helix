@@ -7,15 +7,19 @@ public sealed partial class LoginPage : ContentPage
 {
 	private TaskPoolGlobalHook? _hook;
 
-	public LoginPage()
+    private readonly LoginViewModel _viewModel;
+
+    public LoginPage()
 	{
 		InitializeComponent();
 
-		BindingContext = new LoginViewModel();
-	}
+        _viewModel = new LoginViewModel();
+        BindingContext = _viewModel;
+    }
 
     protected override void OnAppearing()
     {
+        SetIsLoadingToFalse();
         LoadCurrentLanguage();
 
         _hook = new TaskPoolGlobalHook();
@@ -55,14 +59,17 @@ public sealed partial class LoginPage : ContentPage
 
     private void LoadCurrentLanguage()
     {
-        if (BindingContext is not LoginViewModel viewModel)
+        if (_viewModel.LoadCurrentLanguageCommand.CanExecute(null))
         {
-            return;
+            _viewModel.LoadCurrentLanguageCommand.Execute(null);
         }
+    }
 
-        if (viewModel.LoadCurrentLanguageCommand.CanExecute(null))
+    private void SetIsLoadingToFalse()
+    {
+        if (_viewModel.SetLoadingToFalseCommand.CanExecute(null))
         {
-            viewModel.LoadCurrentLanguageCommand.Execute(null);
+            _viewModel.SetLoadingToFalseCommand.Execute(null);
         }
     }
 }

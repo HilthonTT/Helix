@@ -24,12 +24,15 @@ public sealed partial class HomePage : ContentPage
 
     private readonly GetDrives _getDrives;
     private readonly INasConnector _nasConnector;
+    private readonly HomeViewModel _viewModel;
 
     public HomePage()
 	{
 		InitializeComponent();
 
-		BindingContext = new HomeViewModel();
+        _viewModel = new HomeViewModel();
+
+        BindingContext = _viewModel;
 
         _getDrives = App.ServiceProvider.GetRequiredService<GetDrives>();
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
@@ -39,12 +42,9 @@ public sealed partial class HomePage : ContentPage
 
     protected async override void OnAppearing()
     {
-        if (BindingContext is HomeViewModel viewModel)
+        if (_viewModel.FetchDrivesCommand.CanExecute(null) && _isFirstView)
         {
-            if (viewModel.FetchDrivesCommand.CanExecute(null) && _isFirstView)
-            {
-                await viewModel.FetchDrivesCommand.ExecuteAsync(null);
-            }
+            await _viewModel.FetchDrivesCommand.ExecuteAsync(null);
         }
 
         await InitializeChartAsync();
@@ -54,14 +54,14 @@ public sealed partial class HomePage : ContentPage
 
     private async Task HandleConnectDrivesOnStartupAsync()
     {
-        if (BindingContext is not HomeViewModel viewModel || !_isFirstView)
+        if (!_isFirstView)
         {
             return;
         }
 
-        if (viewModel.ConnectDrivesOnStartupCommand.CanExecute(null))
+        if (_viewModel.ConnectDrivesOnStartupCommand.CanExecute(null))
         {
-            await viewModel.ConnectDrivesOnStartupCommand.ExecuteAsync(null);
+            await _viewModel.ConnectDrivesOnStartupCommand.ExecuteAsync(null);
 
             _isFirstView = false;
         }
@@ -320,53 +320,33 @@ public sealed partial class HomePage : ContentPage
 
     private async void Preferences_Clicked(object sender, EventArgs e)
     {
-        if (BindingContext is not HomeViewModel viewModel)
+        if (_viewModel.GoToSettingsCommand.CanExecute(null))
         {
-            return;
-        }
-
-        if (viewModel.GoToSettingsCommand.CanExecute(null))
-        {
-            await viewModel.GoToSettingsCommand.ExecuteAsync(null);
+            await _viewModel.GoToSettingsCommand.ExecuteAsync(null);
         }
     }
 
     private void AddDrive_Clicked(object sender, EventArgs e)
     {
-        if (BindingContext is not HomeViewModel viewModel)
+        if (_viewModel.OpenCreateDriveModalCommand.CanExecute(null))
         {
-            return;
-        }
-
-        if (viewModel.OpenCreateDriveModalCommand.CanExecute(null))
-        {
-            viewModel.OpenCreateDriveModalCommand.Execute(null);
+            _viewModel.OpenCreateDriveModalCommand.Execute(null);
         }
     }
 
     private void ExportDrives_Clicked(object sender, EventArgs e)
     {
-        if (BindingContext is not HomeViewModel viewModel)
+        if (_viewModel.ExportDrivesCommand.CanExecute(null))
         {
-            return;
-        }
-
-        if (viewModel.ExportDrivesCommand.CanExecute(null))
-        {
-            viewModel.ExportDrivesCommand.Execute(null);
+            _viewModel.ExportDrivesCommand.Execute(null);
         }
     }
 
     private void ImportDrives_Clicked(object sender, EventArgs e)
     {
-        if (BindingContext is not HomeViewModel viewModel)
+        if (_viewModel.ImportDrivesCommand.CanExecute(null))
         {
-            return;
-        }
-
-        if (viewModel.ImportDrivesCommand.CanExecute(null))
-        {
-            viewModel.ImportDrivesCommand.Execute(null);
+            _viewModel.ImportDrivesCommand.Execute(null);
         }
     }
 }

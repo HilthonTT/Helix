@@ -9,7 +9,10 @@ using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class DisconnectDrive(IDbContext context, ILoggedInUser loggedInUser, INasConnector nasConnector) : IHandler
+public sealed class DisconnectDrive(
+    IDbContext context, 
+    ILoggedInUser loggedInUser, 
+    INasConnector nasConnector) : IHandler
 {
     public sealed record Request(Guid DriveId);
 

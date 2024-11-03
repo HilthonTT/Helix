@@ -42,6 +42,9 @@ internal sealed partial class LoginViewModel : BaseViewModel
         CultureSwitcher.SwitchCulture(language);
     }
 
+    [ObservableProperty]
+    private bool _isLoading = false;
+
     [RelayCommand]
     private async Task LoginAsync()
     {
@@ -52,6 +55,8 @@ internal sealed partial class LoginViewModel : BaseViewModel
 
         try
         {
+            IsLoading = true;
+
             IsBusy = true;
 
             var request = new LoginUser.Request(Username, Password);
@@ -59,9 +64,12 @@ internal sealed partial class LoginViewModel : BaseViewModel
             Result<User> result = await _loginUser.Handle(request);
             if (result.IsFailure)
             {
+                IsLoading = false;
                 await DisplayErrorAsync(result.Error);
                 return;
             }
+
+            await Task.Delay(100);
 
             await Shell.Current.GoToAsync($"//{PageNames.HomePage}", true);
 
@@ -89,6 +97,12 @@ internal sealed partial class LoginViewModel : BaseViewModel
     private void LoadCurrentLanguage()
     {
         SelectedLanguage = CultureSwitcher.LanguageToString(CultureSwitcher.GetCurrentLanguage());
+    }
+
+    [RelayCommand]
+    private void SetLoadingToFalse()
+    {
+        IsLoading = false;
     }
 
     private void Clear()

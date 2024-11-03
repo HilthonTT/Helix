@@ -9,7 +9,10 @@ using SharedKernel;
 
 namespace Helix.Application.Users;
 
-public sealed class LoginUser(IDbContext context, IPasswordHasher passwordHasher, ILoggedInUser loggedInUser) : IHandler
+public sealed class LoginUser(
+    IDbContext context, 
+    IPasswordHasher passwordHasher, 
+    ILoggedInUser loggedInUser) : IHandler
 {
     public sealed record Request(string Username, string Password);
 

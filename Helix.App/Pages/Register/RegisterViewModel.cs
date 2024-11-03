@@ -48,6 +48,9 @@ internal sealed partial class RegisterViewModel : BaseViewModel
         CultureSwitcher.SwitchCulture(language);
     }
 
+    [ObservableProperty]
+    private bool _isLoading = false;
+
     [RelayCommand]
     private async Task RegisterAsync()
     {
@@ -58,6 +61,8 @@ internal sealed partial class RegisterViewModel : BaseViewModel
 
         try
         {
+            IsLoading = true;
+
             IsBusy = true;
 
             var request = new RegisterUser.Request(Username, Password, ConfirmedPassword);
@@ -65,9 +70,12 @@ internal sealed partial class RegisterViewModel : BaseViewModel
             Result<User> result = await _registerUser.Handle(request);
             if (result.IsFailure)
             {
+                IsLoading = false;
                 await DisplayErrorAsync(result.Error);
                 return;
             }
+
+            await Task.Delay(100);
 
             await Shell.Current.GoToAsync($"//{PageNames.HomePage}", true);
 
@@ -101,6 +109,12 @@ internal sealed partial class RegisterViewModel : BaseViewModel
     private void LoadCurrentLanguage()
     {
         SelectedLanguage = CultureSwitcher.LanguageToString(CultureSwitcher.GetCurrentLanguage());
+    }
+
+    [RelayCommand]
+    private void SetLoadingToFalse()
+    {
+        IsLoading = false;
     }
 
     private void Clear()

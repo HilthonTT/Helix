@@ -1,6 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Helix.Application.Abstractions.Authentication;
-using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Time;
 using System.Timers;
 using Timer = System.Timers.Timer;
@@ -9,18 +7,13 @@ namespace Helix.Infrastructure.Time;
 
 internal sealed partial class CountdownService : ObservableObject, ICountdownService, IDisposable
 {
-    private readonly IDbContext _context;
-    private readonly ILoggedInUser _loggedInUser;
     private readonly Timer _countdownTimer;
 
     public event EventHandler<int>? CountdownTick;
     public event EventHandler? CountdownFinished;
 
-    public CountdownService(IDbContext context, ILoggedInUser loggedInUser)
+    public CountdownService()
     {
-        _context = context;
-        _loggedInUser = loggedInUser;
-
         _countdownTimer = new Timer(1000);
         _countdownTimer.Elapsed += OnCountdownTick;
     }

@@ -10,7 +10,10 @@ using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class GetDriveById(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService) : IHandler
+public sealed class GetDriveById(
+    IDbContext context,
+    ILoggedInUser loggedInUser,
+    ICacheService cacheService) : IHandler
 {
     public sealed record Request(Guid DriveId);
 

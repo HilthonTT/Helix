@@ -10,9 +10,18 @@ using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class UpdateDrive(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService) : IHandler
+public sealed class UpdateDrive(
+    IDbContext context, 
+    ILoggedInUser loggedInUser, 
+    ICacheService cacheService) : IHandler
 {
-    public sealed record Request(Guid DriveId, string Letter, string IpAddress, string Name, string Username, string Password);
+    public sealed record Request(
+        Guid DriveId, 
+        string Letter, 
+        string IpAddress, 
+        string Name, 
+        string Username, 
+        string Password);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {

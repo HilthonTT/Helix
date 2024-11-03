@@ -11,7 +11,10 @@ using System.Text.Json;
 
 namespace Helix.Application.Drives;
 
-public sealed class ImportDrives(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService) : IHandler
+public sealed class ImportDrives(
+    IDbContext context, 
+    ILoggedInUser loggedInUser,
+    ICacheService cacheService) : IHandler
 {
     private const string FileType = ".json";
 

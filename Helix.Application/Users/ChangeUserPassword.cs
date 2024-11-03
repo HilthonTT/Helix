@@ -10,8 +10,10 @@ using SharedKernel;
 
 namespace Helix.Application.Users;
 
-public sealed class ChangeUserPassword(IDbContext context, ILoggedInUser loggedInUser, IPasswordHasher passwordHasher)
-    : IHandler
+public sealed class ChangeUserPassword(
+    IDbContext context, 
+    ILoggedInUser loggedInUser, 
+    IPasswordHasher passwordHasher) : IHandler
 {
     public sealed record Request(string CurrentPassword, string NewPassword, string ConfirmedNewPassword);
 

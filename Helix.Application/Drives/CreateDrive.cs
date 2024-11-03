@@ -10,7 +10,10 @@ using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class CreateDrive(IDbContext context, ILoggedInUser loggedInUser, ICacheService cacheService) : IHandler
+public sealed class CreateDrive(
+    IDbContext context, 
+    ILoggedInUser loggedInUser, 
+    ICacheService cacheService) : IHandler
 {
     public sealed record Request(string Letter, string IpAddress, string Name, string Username, string Password);
 

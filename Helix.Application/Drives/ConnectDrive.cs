@@ -9,7 +9,10 @@ using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class ConnectDrive(IDbContext context, ILoggedInUser loggedInUser, INasConnector nasConnector) : IHandler
+public sealed class ConnectDrive(
+    IDbContext context, 
+    ILoggedInUser loggedInUser,
+    INasConnector nasConnector) : IHandler
 {
     public sealed record Request(Guid DriveId);
 

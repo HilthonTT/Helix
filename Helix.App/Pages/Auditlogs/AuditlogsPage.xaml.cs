@@ -7,25 +7,24 @@ public sealed partial class AuditlogsPage : ContentPage
 {
 	private static bool _searchAuditlogsModalOpen = false;
 
+    private readonly AuditlogsViewModel _viewModel;
+
 	public AuditlogsPage()
 	{
 		InitializeComponent();
 
-		BindingContext = new AuditlogsViewModel();
+        _viewModel = new AuditlogsViewModel();
 
-		RegisterMessages();
+        BindingContext = _viewModel;
+
+        RegisterMessages();
     }
 
     protected override async void OnAppearing()
     {
-		if (BindingContext is not AuditlogsViewModel viewModel)
+		if (_viewModel.GetAuditlogsCommand.CanExecute(null))
 		{
-			return;
-		}
-
-		if (viewModel.GetAuditlogsCommand.CanExecute(null))
-		{
-			await viewModel.GetAuditlogsCommand.ExecuteAsync(null);
+			await _viewModel.GetAuditlogsCommand.ExecuteAsync(null);
 		}
     }
 

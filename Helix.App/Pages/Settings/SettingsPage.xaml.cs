@@ -9,11 +9,15 @@ public sealed partial class SettingsPage : ContentPage
     private static bool _updateUsernameModalOpen = false;
     private static bool _updatePasswordModalOpen = false;
 
+    private readonly SettingsViewModel _viewModel;
+
 	public SettingsPage()
 	{
 		InitializeComponent();
 
-		BindingContext = new SettingsViewModel();
+        _viewModel = new SettingsViewModel();
+
+        BindingContext = _viewModel;
 
         RegisterMessages();
     }

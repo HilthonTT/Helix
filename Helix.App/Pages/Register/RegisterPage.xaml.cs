@@ -7,15 +7,20 @@ public sealed partial class RegisterPage : ContentPage
 {
     private TaskPoolGlobalHook? _hook;
 
+    private readonly RegisterViewModel _viewModel;
+
     public RegisterPage()
 	{
 		InitializeComponent();
 
-		BindingContext = new RegisterViewModel();
-	}
+        _viewModel = new RegisterViewModel();
+
+        BindingContext = _viewModel;
+    }
 
     protected override void OnAppearing()
     {
+        SetLoadingToFalse();
         LoadCurrentLanguage();
 
         _hook = new TaskPoolGlobalHook();
@@ -37,11 +42,6 @@ public sealed partial class RegisterPage : ContentPage
 
     private void OnKeyPressed(object? sender, KeyboardHookEventArgs e)
     {
-        if (BindingContext is not RegisterViewModel viewModel)
-        {
-            return;
-        }
-
         if (e.Data.KeyCode != KeyCode.VcEnter || (e.RawEvent.Mask & ModifierMask.Ctrl) == 0)
         {
             return;
@@ -49,20 +49,23 @@ public sealed partial class RegisterPage : ContentPage
 
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            await viewModel.RegisterCommand.ExecuteAsync(null);
+            await _viewModel.RegisterCommand.ExecuteAsync(null);
         });
     }
 
     private void LoadCurrentLanguage()
     {
-        if (BindingContext is not RegisterViewModel viewModel)
+        if (_viewModel.LoadCurrentLanguageCommand.CanExecute(null))
         {
-            return;
+            _viewModel.LoadCurrentLanguageCommand.Execute(null);
         }
+    }
 
-        if (viewModel.LoadCurrentLanguageCommand.CanExecute(null))
+    private void SetLoadingToFalse()
+    {
+        if (_viewModel.SetLoadingToFalseCommand.CanExecute(null))
         {
-            viewModel.LoadCurrentLanguageCommand.Execute(null);
+            _viewModel.SetLoadingToFalseCommand.Execute(null);
         }
     }
 }
