@@ -2,7 +2,6 @@
 using Helix.Application.Abstractions.Data;
 using Helix.Domain.Users;
 using SharedKernel;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Settings;
 using SettingsModel = Helix.Domain.Settings.Settings;
 using Helix.Application.Abstractions.Handlers;
@@ -11,7 +10,8 @@ using Helix.Application.Abstractions.Caching;
 namespace Helix.Application.Settings;
 
 public sealed class GetSettings(
-    IDbContext context, 
+    ISettingsRepository settingsRepository, 
+    IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser, 
     ICacheService cacheService) : IHandler
 {
@@ -43,7 +43,7 @@ public sealed class GetSettings(
 
     private async Task<SettingsModel?> GetOrCreateSettingsAsync(CancellationToken cancellationToken)
     {
-        SettingsModel? settings = await context.Settings.GetByUserIdAsNoTrackingAsync(loggedInUser.UserId, cancellationToken);
+        SettingsModel? settings = await settingsRepository.GetByUserIdAsNoTrackingAsync(loggedInUser.UserId, cancellationToken);
         if (settings is not null)
         {
             return settings;
@@ -51,16 +51,16 @@ public sealed class GetSettings(
 
         Guid settingsId = await CreateSettingsAsync(cancellationToken);
 
-        return await context.Settings.GetByIdAsNoTrackingAsync(settingsId, cancellationToken);
+        return await settingsRepository.GetByIdAsNoTrackingAsync(settingsId, cancellationToken);
     }
 
     private async Task<Guid> CreateSettingsAsync(CancellationToken cancellationToken = default)
     {
         var settings = SettingsModel.Create(loggedInUser.UserId, false, false, false, false, 20, Language.English);
 
-        context.Settings.Add(settings);
+        settingsRepository.Insert(settings);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return settings.Id;
     }

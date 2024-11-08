@@ -23,14 +23,15 @@ internal sealed class InsertAuditLogsInterceptor : SaveChangesInterceptor
 
     private static void InsertAuditLogs(DbContext context)
     {
-        List<Auditlog> auditLogs = GetCredentialAuditLogs(context).ToList();
+        List<Auditlog> auditLogs = GetDrivesAuditLogs(context).ToList();
 
         context.Set<Auditlog>().AddRange(auditLogs);
     }
 
-    private static IEnumerable<Auditlog> GetCredentialAuditLogs(DbContext context)
+    private static IEnumerable<Auditlog> GetDrivesAuditLogs(DbContext context)
     {
         DateTime utcNow = DateTime.UtcNow;
+
 
         return context.ChangeTracker
             .Entries<Entity>()

@@ -9,7 +9,9 @@ using SharedKernel;
 
 namespace Helix.Application.Drives;
 
-public sealed class SearchDrives(IDbContext context, ILoggedInUser loggedInUser) : IHandler
+public sealed class SearchDrives(
+    IDbContext context, 
+    ILoggedInUser loggedInUser) : IHandler
 {
     public sealed record Request(string SearchTerm, SortOrder SortOrder);
 
@@ -20,7 +22,9 @@ public sealed class SearchDrives(IDbContext context, ILoggedInUser loggedInUser)
             return Result.Failure<List<Drive>>(AuthenticationErrors.InvalidPermissions);
         }
 
-        IQueryable<Drive> drivesQuery = context.Drives.AsQueryable();
+        IQueryable<Drive> drivesQuery = context.Drives
+            .AsNoTracking()
+            .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {

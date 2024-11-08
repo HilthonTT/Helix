@@ -3,7 +3,6 @@ using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
@@ -11,7 +10,8 @@ using SharedKernel;
 namespace Helix.Application.Users;
 
 public sealed class RegisterUser(
-    IDbContext context, 
+    IUserRepository userRepository,
+    IUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher, 
     ILoggedInUser loggedInUser) : IHandler
 {
@@ -30,7 +30,7 @@ public sealed class RegisterUser(
             return Result.Failure<User>(AuthenticationErrors.PasswordsDoNotMatch);
         }
 
-        if (!await context.Users.IsUsernameUniqueAsync(request.Username, cancellationToken))
+        if (!await userRepository.IsUsernameUniqueAsync(request.Username, cancellationToken))
         {
             return Result.Failure<User>(AuthenticationErrors.UsernameNotUnique);
         }
@@ -39,11 +39,11 @@ public sealed class RegisterUser(
 
         var user = User.Create(request.Username, passwordHash);
 
-        context.Users.Add(user);
+        userRepository.Insert(user);
 
         try
         {
-            await context.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateException)
         {

@@ -4,7 +4,6 @@ using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Startup;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Settings;
 using SharedKernel;
 using SettingsModel = Helix.Domain.Settings.Settings;
@@ -12,7 +11,8 @@ using SettingsModel = Helix.Domain.Settings.Settings;
 namespace Helix.Application.Settings;
 
 public sealed class UpdateSettings(
-    IDbContext context, 
+    ISettingsRepository settingsRepository,
+    IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser, 
     IStartupService startupService,
     IDesktopService desktopService,
@@ -59,7 +59,7 @@ public sealed class UpdateSettings(
             return validationResult;
         }
 
-        SettingsModel? settings = await context.Settings.GetByUserIdAsAsync(loggedInUser.UserId, cancellationToken);
+        SettingsModel? settings = await settingsRepository.GetByUserIdAsync(loggedInUser.UserId, cancellationToken);
         if (settings is null)
         {
             return Result.Failure(SettingsError.NotFound);
@@ -77,7 +77,7 @@ public sealed class UpdateSettings(
 
         desktopService.ToggleDesktopShortcut(settings.SetDesktopShortcut);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         string cacheKey = CacheKeys.Settings.GetByUserId(loggedInUser.UserId);
 

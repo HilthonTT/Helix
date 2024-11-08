@@ -16,6 +16,10 @@ using Helix.Application.Abstractions.Startup;
 using Helix.Infrastructure.Startup;
 using Helix.Application.Abstractions.Desktop;
 using Helix.Infrastructure.Desktop;
+using Helix.Domain.Users;
+using Helix.Infrastructure.Database.Repositories;
+using Helix.Domain.Drives;
+using Helix.Domain.Settings;
 
 namespace Helix.Infrastructure;
 
@@ -41,7 +45,15 @@ public static class DependencyInjection
             options.AddInterceptors(sp.GetRequiredService<InsertAuditLogsInterceptor>());
         });
 
-        services.AddScoped<IDbContext, AppDbContext>();
+        services.AddScoped<IDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
+
+        services.AddScoped<IUserRepository, UserRepository>();
+
+        services.AddScoped<IDriveRepository, DriveRepository>();
+
+        services.AddScoped<ISettingsRepository, SettingsRepository>();
 
         return services;
     }

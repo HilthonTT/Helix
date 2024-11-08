@@ -1,9 +1,7 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Caching;
-using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
@@ -11,7 +9,7 @@ using SharedKernel;
 namespace Helix.Application.Drives;
 
 public sealed class GetDriveById(
-    IDbContext context,
+    IDriveRepository driveRepository,
     ILoggedInUser loggedInUser,
     ICacheService cacheService) : IHandler
 {
@@ -49,7 +47,7 @@ public sealed class GetDriveById(
             return drive;
         }
 
-        drive = await context.Drives.GetByIdAsNoTrackingAsync(driveId, cancellationToken);
+        drive = await driveRepository.GetByIdAsNoTrackingAsync(driveId, cancellationToken);
         if (drive is not null)
         {
             await cacheService.SetAsync(cacheKey, drive, cancellationToken: cancellationToken);

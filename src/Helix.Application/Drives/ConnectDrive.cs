@@ -1,8 +1,6 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
-using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
@@ -10,7 +8,7 @@ using SharedKernel;
 namespace Helix.Application.Drives;
 
 public sealed class ConnectDrive(
-    IDbContext context, 
+    IDriveRepository driveRepository,
     ILoggedInUser loggedInUser,
     INasConnector nasConnector) : IHandler
 {
@@ -23,7 +21,7 @@ public sealed class ConnectDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        Drive? drive = await context.Drives.GetByIdAsNoTrackingAsync(request.DriveId, cancellationToken);
+        Drive? drive = await driveRepository.GetByIdAsNoTrackingAsync(request.DriveId, cancellationToken);
         if (drive is null)
         {
             return Result.Failure(DriveErrors.NotFound(request.DriveId));

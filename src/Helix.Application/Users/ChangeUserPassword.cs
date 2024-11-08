@@ -3,7 +3,6 @@ using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
@@ -11,7 +10,8 @@ using SharedKernel;
 namespace Helix.Application.Users;
 
 public sealed class ChangeUserPassword(
-    IDbContext context, 
+    IUserRepository userRepository,
+    IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser, 
     IPasswordHasher passwordHasher) : IHandler
 {
@@ -35,7 +35,7 @@ public sealed class ChangeUserPassword(
             return Result.Failure(AuthenticationErrors.NewPasswordsDoNotMatch);
         }
 
-        User? user = await context.Users.GetByIdAsync(loggedInUser.UserId, cancellationToken);
+        User? user = await userRepository.GetByIdAsync(loggedInUser.UserId, cancellationToken);
         if (user is null)
         {
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
@@ -51,7 +51,7 @@ public sealed class ChangeUserPassword(
 
         user.ChangePassword(passwordHash);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }

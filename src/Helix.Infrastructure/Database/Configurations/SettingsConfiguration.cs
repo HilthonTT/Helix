@@ -15,9 +15,11 @@ internal sealed class SettingsConfiguration : IEntityTypeConfiguration<Settings>
         builder.HasKey(s => s.Id);
 
         builder.HasOne<User>()
-            .WithMany()
-            .HasForeignKey(f => f.UserId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+           .WithOne()
+           .HasForeignKey<Settings>(s => s.UserId)
+           .IsRequired()
+           .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(s => s.UserId).IsUnique();
     }
 }

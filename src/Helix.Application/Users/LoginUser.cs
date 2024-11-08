@@ -1,16 +1,14 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Cryptography;
-using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
 using Helix.Domain.Users;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Helix.Application.Users;
 
 public sealed class LoginUser(
-    IDbContext context, 
+    IUserRepository userRepository, 
     IPasswordHasher passwordHasher, 
     ILoggedInUser loggedInUser) : IHandler
 {
@@ -24,7 +22,7 @@ public sealed class LoginUser(
             return Result.Failure<User>(validationResult.Error);
         }
 
-        User? user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username, cancellationToken);
+        User? user = await userRepository.GetByUsernameAsync(request.Username, cancellationToken);
         if (user is null)
         {
             return Result.Failure<User>(AuthenticationErrors.InvalidUsernameOrPassword);

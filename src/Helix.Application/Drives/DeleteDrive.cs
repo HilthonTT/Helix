@@ -3,7 +3,6 @@ using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
@@ -11,7 +10,8 @@ using SharedKernel;
 namespace Helix.Application.Drives;
 
 public sealed class DeleteDrive(
-    IDbContext context, 
+    IDriveRepository driveRepository,
+    IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser, 
     ICacheService cacheService) : IHandler
 {
@@ -25,7 +25,7 @@ public sealed class DeleteDrive(
             return Result.Failure(validationResult.Error);
         }
 
-        Drive? drive = await context.Drives.GetByIdAsync(request.DriveId, cancellationToken);
+        Drive? drive = await driveRepository.GetByIdAsync(request.DriveId, cancellationToken);
         if (drive is null)
         {
             return Result.Failure(DriveErrors.NotFound(request.DriveId));
@@ -36,9 +36,9 @@ public sealed class DeleteDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        context.Drives.Remove(drive);
+        driveRepository.Remove(drive);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cacheService.RemoveAsync(CacheKeys.Drives.All, cancellationToken);
 

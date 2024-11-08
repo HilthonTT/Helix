@@ -3,7 +3,6 @@ using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
@@ -11,7 +10,9 @@ using System.Text.Json;
 
 namespace Helix.Application.Drives;
 
-public sealed class ExportDrives(IDbContext context, ILoggedInUser loggedInUser) : IHandler
+public sealed class ExportDrives(
+    IDriveRepository driveRepository,
+    ILoggedInUser loggedInUser) : IHandler
 {
     private const string FileName = "IMPORTED_DRIVES_DO_NOT_SHARE.json";
 
@@ -27,7 +28,7 @@ public sealed class ExportDrives(IDbContext context, ILoggedInUser loggedInUser)
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        List<Drive> drives = await context.Drives.GetAsNoTrackingAsync(loggedInUser.UserId, cancellationToken);
+        List<Drive> drives = await driveRepository.GetAsNoTrackingAsync(loggedInUser.UserId, cancellationToken);
         if (drives.Count == 0)
         {
             return Result.Failure(DriveErrors.NoDrivesFound);
@@ -43,7 +44,7 @@ public sealed class ExportDrives(IDbContext context, ILoggedInUser loggedInUser)
             return Result.Failure(FolderPickerErrors.Cancelled);
         }
 
-        if (string.IsNullOrEmpty(folderResult.Folder?.Path))
+        if (string.IsNullOrWhiteSpace(folderResult.Folder?.Path))
         {
             return Result.Failure(FolderPickerErrors.InvalidFolderPath);
         }

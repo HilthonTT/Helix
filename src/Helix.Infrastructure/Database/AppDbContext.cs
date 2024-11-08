@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Helix.Infrastructure.Database;
 
-public sealed class AppDbContext : DbContext, IDbContext
+public sealed class AppDbContext : DbContext, IUnitOfWork, IDbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)

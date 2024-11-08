@@ -3,7 +3,6 @@ using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
@@ -11,7 +10,8 @@ using SharedKernel;
 namespace Helix.Application.Drives;
 
 public sealed class UpdateDrive(
-    IDbContext context, 
+    IDriveRepository driveRepository,
+    IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser, 
     ICacheService cacheService) : IHandler
 {
@@ -36,13 +36,13 @@ public sealed class UpdateDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        Drive? drive = await context.Drives.GetByIdAsync(request.DriveId, cancellationToken);
+        Drive? drive = await driveRepository.GetByIdAsync(request.DriveId, cancellationToken);
         if (drive is null)
         {
             return Result.Failure(DriveErrors.NotFound(request.DriveId));
         }
 
-        if (await context.Drives.ExistsWithLetterAsync(request.Letter, cancellationToken)
+        if (!await driveRepository.IsLetterUniqueAsync(request.Letter, loggedInUser.UserId, cancellationToken)
             && drive.Letter != request.Letter)
         {
             return Result.Failure(DriveErrors.LetterNotUnique(request.Letter));
@@ -55,7 +55,7 @@ public sealed class UpdateDrive(
 
         drive.Update(request.Letter, request.IpAddress, request.Name, request.Username, request.Password);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cacheService.RemoveAsync(CacheKeys.Drives.All, cancellationToken);
 

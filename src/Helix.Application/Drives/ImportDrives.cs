@@ -5,14 +5,14 @@ using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
-using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 using System.Text.Json;
 
 namespace Helix.Application.Drives;
 
 public sealed class ImportDrives(
-    IDbContext context, 
+    IDriveRepository driveRepository,
+    IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
     ICacheService cacheService) : IHandler
 {
@@ -59,10 +59,8 @@ public sealed class ImportDrives(
             .Select(g => g.First())
             .ToList();
 
-        List<string> existingDriveLetters = await context.Drives
-            .Where(d => distinctDrives.Select(dr => dr.Letter).Contains(d.Letter))
-            .Select(d => d.Letter)
-            .ToListAsync(cancellationToken);
+        List<string> existingDriveLetters = await driveRepository.GetExistingDriveLettersAsync(
+            distinctDrives, cancellationToken);
 
         List<Drive> newDrives = distinctDrives
             .Where(drive => !existingDriveLetters.Contains(drive.Letter))
@@ -78,9 +76,9 @@ public sealed class ImportDrives(
             drive.ChangeUserId(loggedInUser.UserId);
         }
 
-        context.Drives.AddRange(newDrives);
+        driveRepository.AddRange(newDrives);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cacheService.RemoveAsync(CacheKeys.Drives.All, cancellationToken);
 

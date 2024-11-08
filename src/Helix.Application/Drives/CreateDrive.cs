@@ -3,7 +3,6 @@ using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
-using Helix.Application.Core.Extensions;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
@@ -11,7 +10,8 @@ using SharedKernel;
 namespace Helix.Application.Drives;
 
 public sealed class CreateDrive(
-    IDbContext context, 
+    IDriveRepository driveRepository, 
+    IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser, 
     ICacheService cacheService) : IHandler
 {
@@ -30,7 +30,7 @@ public sealed class CreateDrive(
             return Result.Failure<Drive>(AuthenticationErrors.InvalidPermissions);
         }
 
-        if (await context.Drives.ExistsWithLetterAsync(request.Letter, cancellationToken))
+        if (!await driveRepository.IsLetterUniqueAsync(request.Letter, loggedInUser.UserId, cancellationToken))
         {
             return Result.Failure<Drive>(DriveErrors.LetterNotUnique(request.Letter));
         }
@@ -43,9 +43,9 @@ public sealed class CreateDrive(
             request.Username, 
             request.Password);
 
-        context.Drives.Add(drive);
+        driveRepository.Insert(drive);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cacheService.RemoveAsync(CacheKeys.Drives.All, cancellationToken);
 
