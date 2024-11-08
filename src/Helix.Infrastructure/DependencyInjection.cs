@@ -20,6 +20,7 @@ using Helix.Domain.Users;
 using Helix.Infrastructure.Database.Repositories;
 using Helix.Domain.Drives;
 using Helix.Domain.Settings;
+using Helix.Domain.Auditlogs;
 
 namespace Helix.Infrastructure;
 
@@ -54,6 +55,8 @@ public static class DependencyInjection
         services.AddScoped<IDriveRepository, DriveRepository>();
 
         services.AddScoped<ISettingsRepository, SettingsRepository>();
+
+        services.AddScoped<IAuditlogRepository, AuditlogRepository>();
 
         return services;
     }
