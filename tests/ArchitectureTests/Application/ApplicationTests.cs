@@ -5,7 +5,7 @@ using NetArchTest.Rules;
 
 namespace ArchitectureTests.Application;
 
-public class ApplicationTests
+public sealed class ApplicationTests
 {
     [Fact]
     public void Handlers_Should_BePublic()

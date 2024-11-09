@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helix.Infrastructure", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedKernel", "src\SharedKernel\SharedKernel.csproj", "{D44D7AD5-768D-4A72-B6E0-9A238AAD6AB7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.UnitTests", "tests\Application.UnitTests\Application.UnitTests.csproj", "{130DEFB0-7C4A-4142-90A9-805195421F4D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{D44D7AD5-768D-4A72-B6E0-9A238AAD6AB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D44D7AD5-768D-4A72-B6E0-9A238AAD6AB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D44D7AD5-768D-4A72-B6E0-9A238AAD6AB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{130DEFB0-7C4A-4142-90A9-805195421F4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{130DEFB0-7C4A-4142-90A9-805195421F4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{130DEFB0-7C4A-4142-90A9-805195421F4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{130DEFB0-7C4A-4142-90A9-805195421F4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +68,7 @@ Global
 		{74D14491-6795-474C-82C1-38F0AE292B27} = {66941166-329C-4800-912E-E38988FBE096}
 		{3461B283-946F-401D-8399-3B2CDC5D5C17} = {66941166-329C-4800-912E-E38988FBE096}
 		{D44D7AD5-768D-4A72-B6E0-9A238AAD6AB7} = {66941166-329C-4800-912E-E38988FBE096}
+		{130DEFB0-7C4A-4142-90A9-805195421F4D} = {E28629AF-FBD2-484E-9EF3-2013CB42C0A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {284E3129-1CDF-49FC-8882-6981434D9288}

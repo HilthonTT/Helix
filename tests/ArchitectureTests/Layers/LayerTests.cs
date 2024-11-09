@@ -6,7 +6,7 @@ using NetArchTest.Rules;
 
 namespace ArchitectureTests.Layers;
 
-public class LayerTests
+public sealed class LayerTests
 {
     [Fact]
     public void DomainLayer_Should_NotHaveDependencyOn_ApplicationLayer()

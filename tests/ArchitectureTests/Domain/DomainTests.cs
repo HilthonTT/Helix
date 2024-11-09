@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace ArchitectureTests.Domain;
 
-public class DomainTests
+public sealed class DomainTests
 {
     [Fact]
     public void Entities_Should_HavePrivateParameterlessConstructor()
