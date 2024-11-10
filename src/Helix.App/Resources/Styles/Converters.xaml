@@ -8,9 +8,7 @@
     <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
     
     <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
-    
-    <converters:TranslateConverter x:Key="TranslateConverter" />
 
-    <converters:DisableLabelColorConveter x:Key="DisableLabelColorConveter" />
+    <converters:TranslateConverter x:Key="TranslateConverter" />
 
 </ResourceDictionary>

@@ -263,8 +263,7 @@
                                     </Border.StrokeShape>
                                     <HorizontalStackLayout Margin="14,12" Spacing="12">
                                         <Image x:Name="connectDrivesImage" Source="wifi.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
-                                        <Label TextColor="{Binding IsBusy, Converter={StaticResource DisableLabelColorConverter}}"
-                                               Text="{local:Translate Connect}"
+                                        <Label Text="{local:Translate Connect}"
                                                VerticalOptions="Center" />
                                     </HorizontalStackLayout>
 
@@ -283,8 +282,7 @@
                                     </Border.StrokeShape>
                                     <HorizontalStackLayout Margin="14,12" Spacing="12">
                                         <Image x:Name="disconnectDrivesImage" Source="no_wifi.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
-                                        <Label TextColor="{Binding IsBusy, Converter={StaticResource DisableLabelColorConverter}}"
-                                               Text="{local:Translate Disconnect}"
+                                        <Label Text="{local:Translate Disconnect}"
                                                VerticalOptions="Center" />
                                     </HorizontalStackLayout>
 
@@ -366,8 +364,8 @@
                             </Border.GestureRecognizers>
                             <HorizontalStackLayout Margin="14,12" Spacing="12">
                                 <Label Text="{x:Static icons:IconFont.ChevronDown}" 
-                               FontFamily="FontAwesome" 
-                               VerticalOptions="Center"/>
+                                       FontFamily="FontAwesome" 
+                                       VerticalOptions="Center"/>
                                 <Label Text="{local:Translate Today}" VerticalOptions="Center"/>
                             </HorizontalStackLayout>
                         </Border>

@@ -8,12 +8,22 @@ namespace Helix.Infrastructure.Connector;
 
 internal sealed class NasConnector : INasConnector
 {
+    private const int ConnectionTimeoutMilliseconds = 3000;
+
     public async Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default)
     {
         try
         {
             string arguments = CreateConnectArguments(drive);
-            return await ExecuteProcessAsync(arguments, cancellationToken);
+
+            using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(ConnectionTimeoutMilliseconds);
+
+            return await ExecuteProcessAsync(arguments, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return Result.Failure(DriveErrors.FailedToConnect("Connection timed out."));
         }
         catch (Exception ex)
         {
@@ -26,7 +36,16 @@ internal sealed class NasConnector : INasConnector
         try
         {
             string arguments = CreateDisconnectArguments(drive);
-            return await ExecuteProcessAsync(arguments, cancellationToken);
+
+            using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(ConnectionTimeoutMilliseconds);
+
+
+            return await ExecuteProcessAsync(arguments, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return Result.Failure(DriveErrors.FailedToDisconnect("Disconnection timed out."));
         }
         catch (Exception ex)
         {
@@ -39,7 +58,6 @@ internal sealed class NasConnector : INasConnector
         .GetDrives()
         .Any(d => d.Name.StartsWith($"{letter}:\\", StringComparison.OrdinalIgnoreCase));
     
-
     private static string CreateConnectArguments(Drive drive)
     {
         var stringBuilder = new StringBuilder()
