@@ -63,6 +63,18 @@ public sealed partial class DriveTemplate : ContentView
         await ToggleConnectInternalAsync();
     }
 
+    private void CheckConnectivityAndUpdateUI()
+    {
+        if (BindingContext is DriveDisplay drive)
+        {
+            UpdateDriveDetails(drive);
+            UpdateStorageUsage(drive);
+            UpdateStatusButtonColor(drive.Letter);
+
+            OnPropertyChanged();
+        }
+    }
+
     private async Task ToggleConnectInternalAsync()
     {
         if (BindingContext is not DriveDisplay drive)
@@ -151,6 +163,16 @@ public sealed partial class DriveTemplate : ContentView
             }
 
             await ToggleConnectInternalAsync();
+        });
+
+        WeakReferenceMessenger.Default.Register<NotifyDriveConnectivityMessage>(this, (r, m) =>
+        {
+            if (BindingContext is not DriveDisplay drive || drive.Id != m.DriveId)
+            {
+                return;
+            }
+
+            CheckConnectivityAndUpdateUI();
         });
     }
 }

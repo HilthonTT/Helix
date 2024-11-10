@@ -241,6 +241,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        internal static string Connect {
+            get {
+                return ResourceManager.GetString("Connect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connected.
         /// </summary>
         internal static string Connected {
@@ -309,6 +318,15 @@ namespace Helix.App.Resources.Languages {
         internal static string Descending {
             get {
                 return ResourceManager.GetString("Descending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect.
+        /// </summary>
+        internal static string Disconnect {
+            get {
+                return ResourceManager.GetString("Disconnect", resourceCulture);
             }
         }
         
@@ -651,15 +669,6 @@ namespace Helix.App.Resources.Languages {
         internal static string Today {
             get {
                 return ResourceManager.GetString("Today", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Toggle Connect.
-        /// </summary>
-        internal static string ToggleConnect {
-            get {
-                return ResourceManager.GetString("ToggleConnect", resourceCulture);
             }
         }
         

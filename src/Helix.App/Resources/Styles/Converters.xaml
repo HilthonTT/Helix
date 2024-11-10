@@ -11,4 +11,6 @@
     
     <converters:TranslateConverter x:Key="TranslateConverter" />
 
+    <converters:DisableLabelColorConveter x:Key="DisableLabelColorConveter" />
+
 </ResourceDictionary>

@@ -162,9 +162,6 @@
   <data name="YourDrives" xml:space="preserve">
     <value>Drive Anda</value>
   </data>
-  <data name="ToggleConnect" xml:space="preserve">
-    <value>Beralih Hubungkan</value>
-  </data>
   <data name="Filter" xml:space="preserve">
     <value>Saringan</value>
   </data>
@@ -359,5 +356,11 @@
   </data>
   <data name="SetDesktopShortcut" xml:space="preserve">
     <value>Atur pintasan desktop</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Hubungkan</value>
+  </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>Putuskan</value>
   </data>
 </root>

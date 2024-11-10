@@ -25,6 +25,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
     private readonly GetDrives _getDrives;
     private readonly ExportDrives _exportDrives;
     private readonly ImportDrives _importDrives;
+    private readonly ConnectAllDrives _connectAllDrives;
+    private readonly DisconnectAllDrives _disconnectAllDrives;
 
     public HomeViewModel()
     {
@@ -33,7 +35,9 @@ internal sealed partial class HomeViewModel : BaseViewModel
         _getDrives = App.ServiceProvider.GetRequiredService<GetDrives>();
         _exportDrives = App.ServiceProvider.GetRequiredService<ExportDrives>();
         _importDrives = App.ServiceProvider.GetRequiredService<ImportDrives>();
-        
+        _connectAllDrives = App.ServiceProvider.GetRequiredService<ConnectAllDrives>();
+        _disconnectAllDrives = App.ServiceProvider.GetRequiredService<DisconnectAllDrives>();
+
         RegisterMessages();
         InitializeCountdownEvents();
     }
@@ -106,7 +110,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void ToggleConnectDrives()
+    private async Task ConnectDrivesAsync()
     {
         if (IsBusy)
         {
@@ -117,12 +121,54 @@ internal sealed partial class HomeViewModel : BaseViewModel
         {
             IsBusy = true;
 
+            bool isFailure = false;
+            Error error = Error.None;
+
+            // Run the drive connection process on a background thread
+            await Task.Run(async () =>
+            {
+                Result result = await _connectAllDrives.Handle();
+                isFailure = result.IsFailure;
+                error = result.Error;
+
+                WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
+            });
+
             foreach (DriveDisplay drive in Drives)
             {
-                if (drive.IsNotBusy)
-                {
-                    WeakReferenceMessenger.Default.Send(new ToggleConnectDriveMessage(drive.Id));
-                }
+                WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
+            }
+
+            if (isFailure)
+            {
+                await DisplayErrorAsync(error);
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task DisconnectDrivesAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            await _disconnectAllDrives.Handle();
+
+            WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
+
+            foreach (DriveDisplay drive in Drives)
+            {
+                WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
             }
         }
         finally

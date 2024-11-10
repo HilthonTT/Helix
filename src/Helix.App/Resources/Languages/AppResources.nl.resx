@@ -162,9 +162,6 @@
   <data name="YourDrives" xml:space="preserve">
     <value>Uw schijven</value>
   </data>
-  <data name="ToggleConnect" xml:space="preserve">
-    <value>Verbinden in-/uitschakelen</value>
-  </data>
   <data name="Filter" xml:space="preserve">
     <value>Filter</value>
   </data>
@@ -359,5 +356,11 @@
   </data>
   <data name="SetDesktopShortcut" xml:space="preserve">
     <value>Snelkoppeling op het bureaublad instellen</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Aansluiten</value>
+  </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>Loskoppelen</value>
   </data>
 </root>

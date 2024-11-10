@@ -162,9 +162,6 @@
   <data name="YourDrives" xml:space="preserve">
     <value>Ihre Laufwerkes</value>
   </data>
-  <data name="ToggleConnect" xml:space="preserve">
-    <value>Verbinden umschalten</value>
-  </data>
   <data name="Filter" xml:space="preserve">
     <value>Filter</value>
   </data>
@@ -359,5 +356,11 @@
   </data>
   <data name="SetDesktopShortcut" xml:space="preserve">
     <value>Festlegen einer Desktop-Verknüpfung</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>anschließen</value>
+  </data>
+  <data name="Disconnect" xml:space="preserve">
+    <value>Trennen</value>
   </data>
 </root>

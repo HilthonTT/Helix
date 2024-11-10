@@ -90,6 +90,7 @@
 	  <None Remove="Resources\Images\logout.svg" />
 	  <None Remove="Resources\Images\movies.png" />
 	  <None Remove="Resources\Images\music.png" />
+	  <None Remove="Resources\Images\no_wifi.svg" />
 	  <None Remove="Resources\Images\pencil.png" />
 	  <None Remove="Resources\Images\picture.png" />
 	  <None Remove="Resources\Images\plug.png" />
