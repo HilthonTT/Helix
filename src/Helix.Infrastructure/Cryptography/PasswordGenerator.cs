@@ -6,8 +6,9 @@ namespace Helix.Infrastructure.Cryptography;
 public static class PasswordGenerator
 {
     private const int PasswordLength = 128;
-
     private const string PasswordKey = "GeneratedPassword";
+
+    private static ReadOnlySpan<char> ValidChars => "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$?_-".AsSpan();
 
     public static string GetOrCreatePassword()
     {
@@ -28,9 +29,7 @@ public static class PasswordGenerator
 
     private static string GenerateRandomPassword(int length)
     {
-        const string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$?_-";
-
-        var passwordBuilder = new StringBuilder();
+        var passwordBuilder = new StringBuilder(length);
 
         using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
         {
@@ -39,7 +38,8 @@ public static class PasswordGenerator
 
             for (int i = 0; i < length; i++)
             {
-                passwordBuilder.Append(validChars[randomBytes[i] % validChars.Length]);
+                char randomChar = ValidChars[randomBytes[i] % ValidChars.Length];
+                passwordBuilder.Append(randomChar);
             }
         }
 

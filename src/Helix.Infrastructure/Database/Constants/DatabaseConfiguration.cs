@@ -1,6 +1,6 @@
 ﻿namespace Helix.Infrastructure.Database.Constants;
 
-public static class DatabaseConfiguration
+internal static class DatabaseConfiguration
 {
     public const string DatabaseName = "helix.db";
 

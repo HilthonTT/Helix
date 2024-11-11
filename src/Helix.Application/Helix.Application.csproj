@@ -30,4 +30,8 @@
 	  <ProjectReference Include="..\Helix.Domain\Helix.Domain.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <InternalsVisibleTo Include="Application.UnitTests"/>
+	</ItemGroup>
+
 </Project>

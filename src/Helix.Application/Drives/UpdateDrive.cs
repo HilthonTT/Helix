@@ -3,6 +3,7 @@ using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
+using Helix.Application.Core.Validation;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
@@ -66,9 +67,14 @@ public sealed class UpdateDrive(
 
     private static Result Validate(Request request)
     {
-        if (request.Letter.Length > 1)
+        if (string.IsNullOrWhiteSpace(request.Letter) || request.Letter.Length != 1 || !char.IsLetter(request.Letter[0]))
         {
             return Result.Failure(DriveErrors.NotALetter);
+        }
+
+        if (!GeneralValidation.IsValidIpAddress(request.IpAddress))
+        {
+            return Result.Failure(ValidationErrors.InvalidIpAddress);
         }
 
         string[] properties = [request.Letter, request.IpAddress, request.Name, request.Username, request.Password];

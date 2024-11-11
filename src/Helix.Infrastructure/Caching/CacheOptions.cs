@@ -2,7 +2,7 @@
 
 namespace Helix.Infrastructure.Caching;
 
-public static class CacheOptions
+internal static class CacheOptions
 {
     public static DistributedCacheEntryOptions DefaultExpiration => new()
     {

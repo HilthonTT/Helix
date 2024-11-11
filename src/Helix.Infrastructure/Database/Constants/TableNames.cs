@@ -1,6 +1,6 @@
 ﻿namespace Helix.Infrastructure.Database.Constants;
 
-public static class TableNames
+internal static class TableNames
 {
     public const string Drives = nameof(Drives);
 

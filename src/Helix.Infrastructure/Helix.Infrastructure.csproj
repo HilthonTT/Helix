@@ -44,4 +44,8 @@
 	  <ProjectReference Include="..\Helix.Domain\Helix.Domain.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <InternalsVisibleTo Include="Infrastructure.UnitTests"/>
+	</ItemGroup>
+
 </Project>
