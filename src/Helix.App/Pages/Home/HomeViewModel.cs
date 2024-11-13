@@ -205,19 +205,22 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
     }
 
-    [RelayCommand]
-    private async Task FetchDrivesAsync()
+    public async Task<List<Drive>> FetchDrivesAsync()
     {
         Result<List<Drive>> result = await _getDrives.Handle();
         if (result.IsFailure)
         {
-            return;
+            return [];
         }
 
-        Drives = new(result.Value.Select(d => new DriveDisplay(d)));
+        List<Drive> drives = result.Value;
+
+        Drives = new(drives.Select(d => new DriveDisplay(d)));
 
         TotalStorage = ValidateTotalStorage();
         TotalConnected = ValidateTotalConnected();
+
+        return drives;
     }
 
     private string ValidateTotalStorage()

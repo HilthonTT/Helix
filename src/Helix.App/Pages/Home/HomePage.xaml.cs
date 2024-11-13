@@ -42,12 +42,14 @@ public sealed partial class HomePage : ContentPage
 
     protected async override void OnAppearing()
     {
-        if (_viewModel.FetchDrivesCommand.CanExecute(null) && _isFirstView)
+        List<Drive> drives = [];
+
+        if (_isFirstView)
         {
-            await _viewModel.FetchDrivesCommand.ExecuteAsync(null);
+            drives = await _viewModel.FetchDrivesAsync();
         }
 
-        await InitializeChartAsync();
+        await InitializeChartAsync(drives);
 
         await HandleConnectDrivesOnStartupAsync();
     }
@@ -203,18 +205,24 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    private async Task InitializeChartAsync()
+    private async Task InitializeChartAsync(List<Drive>? providedDrives = null)
+    {
+        // Use the provided drives if they are not null
+        List<Drive> drives = providedDrives ?? await FetchDrivesFromDatabaseAsync();
+
+        ChartEntry[] entries = GenerateChartEntries(drives);
+        chart.Chart = CreateDonutChart(entries);
+    }
+
+    private async Task<List<Drive>> FetchDrivesFromDatabaseAsync()
     {
         Result<List<Drive>> result = await _getDrives.Handle();
         if (result.IsFailure)
         {
-            return;
+            return [];
         }
 
-        List<Drive> drives = result.Value;
-        ChartEntry[] entries = GenerateChartEntries(drives);
-
-        chart.Chart = CreateDonutChart(entries);
+        return result.Value;
     }
 
     private ChartEntry[] GenerateChartEntries(List<Drive> drives)

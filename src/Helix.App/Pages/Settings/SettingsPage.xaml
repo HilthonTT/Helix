@@ -401,7 +401,7 @@
                         VerticalOptions="FillAndExpand">
             <updateUsename:UpdateUsernameModal x:Name="UpdateUsernameView"
                                                BackgroundColor="White"
-                                               MaximumHeightRequest="{Binding ModalMaximumHeight}"
+                                               MaximumHeightRequest="{Binding ModalMinimumHeight}"
                                                AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
                                                AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
@@ -412,7 +412,7 @@
                 VerticalOptions="FillAndExpand">
             <updatePassword:UpdatePasswordModal x:Name="UpdatePasswordView"
                                                 BackgroundColor="White"
-                                                MaximumHeightRequest="{Binding ModalMaximumHeight}"
+                                                MaximumHeightRequest="{Binding ModalMinimumHeight}"
                                                 AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
                                                 AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>

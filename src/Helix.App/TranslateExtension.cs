@@ -1,5 +1,6 @@
 ﻿namespace Helix.App;
 
+[AcceptEmptyServiceProvider]
 [ContentProperty(nameof(Name))]
 internal sealed class TranslateExtension : IMarkupExtension<BindingBase>
 {

@@ -12,21 +12,30 @@ public sealed class GetDrives(
     ILoggedInUser loggedInUser,
     ICacheService cacheService) : IHandler
 {
+    private static readonly SemaphoreSlim _semaphore = new(1, 1);
+
     public async Task<Result<List<Drive>>> Handle(CancellationToken cancellationToken = default)
     {
-        if (!loggedInUser.IsLoggedIn)
+        await _semaphore.WaitAsync(cancellationToken);
+        try
         {
-            return Result.Failure<List<Drive>>(AuthenticationErrors.InvalidPermissions);
-        }
+            if (!loggedInUser.IsLoggedIn)
+            {
+                return Result.Failure<List<Drive>>(AuthenticationErrors.InvalidPermissions);
+            }
 
-        List<Drive>? drives = await cacheService.GetAsync<List<Drive>>(CacheKeys.Drives.All, cancellationToken);
-        if (drives is null)
+            List<Drive>? drives = await cacheService.GetAsync<List<Drive>>(CacheKeys.Drives.All, cancellationToken);
+            if (drives is null)
+            {
+                drives = await driveRepository.GetAsNoTrackingAsync(loggedInUser.UserId, cancellationToken);
+                await cacheService.SetAsync(CacheKeys.Drives.All, drives, cancellationToken: cancellationToken);
+            }
+
+            return drives;
+        }
+        finally
         {
-            drives = await driveRepository.GetAsNoTrackingAsync(loggedInUser.UserId, cancellationToken);
-
-            await cacheService.SetAsync(CacheKeys.Drives.All, drives, cancellationToken: cancellationToken);
+            _semaphore.Release();
         }
-
-        return drives;
     }
 }

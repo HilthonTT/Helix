@@ -14,12 +14,15 @@ public sealed partial class App : AppBase
     {
         InitializeComponent();
 
-        MainPage = new AppShell();
-
         ServiceProvider = serviceProvider;
         _appDbContext = appDbContext;
 
         MigrateDatabase();
+    }
+
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        return new Window(new AppShell());
     }
 
     private void MigrateDatabase()
