@@ -42,7 +42,7 @@ public sealed partial class HomePage : ContentPage
 
     protected async override void OnAppearing()
     {
-        List<Drive> drives = [];
+        List<Drive>? drives = null;
 
         if (_isFirstView)
         {
