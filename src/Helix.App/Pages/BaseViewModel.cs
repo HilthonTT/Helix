@@ -39,7 +39,7 @@ public abstract partial class BaseViewModel : ObservableObject
     public string TimerCount => $"{SecondsRemaining} seconds";
 
     [ObservableProperty]
-    private int _modalMinimumHeight = 600;
+    private int _modalMaximumHeight = 500;
 
     [RelayCommand]
     public async Task StartTimerAsync()

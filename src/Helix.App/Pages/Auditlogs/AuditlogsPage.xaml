@@ -95,7 +95,7 @@
 
             <searchAuditlogs:SearchAuditlogsModal x:Name="SearchAuditlogsView" 
                                                   BackgroundColor="White"
-                                                  MaximumHeightRequest="{Binding ModalMinimumHeight}"
+                                                  MaximumHeightRequest="{Binding ModalMaximumHeight}"
                                                   AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
                                                   AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>

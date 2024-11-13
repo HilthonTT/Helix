@@ -437,9 +437,8 @@
                             VerticalOptions="FillAndExpand">
 
                 <createDrive:CreateDriveModal x:Name="CreateDriveView" 
-                                      
                                               BackgroundColor="White"
-                                              MinimumHeightRequest="{Binding ModalMinimumHeight}"
+                                              MaximumHeightRequest="500"
                                               AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
                                               AbsoluteLayout.LayoutFlags="PositionProportional"/>
             </AbsoluteLayout>
@@ -453,7 +452,7 @@
 
                 <deleteDrive:DeleteDriveModal x:Name="DeleteDriveView" 
                                            BackgroundColor="White"
-                                           MinimumHeightRequest="{Binding ModalMinimumHeight}"
+                                           MaximumHeightRequest="{Binding ModalMaximumHeight}"
                                            AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
                                            AbsoluteLayout.LayoutFlags="PositionProportional"/>
             </AbsoluteLayout>
@@ -467,7 +466,7 @@
 
                 <updateDrive:UpdateDriveModal x:Name="UpdateDriveView" 
                                       BackgroundColor="White"
-                                      MinimumHeightRequest="{Binding ModalMinimumHeight}"
+                                      MaximumHeightRequest="{Binding ModalMaximumHeight}"
                                       AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
                                       AbsoluteLayout.LayoutFlags="PositionProportional"/>
             </AbsoluteLayout>
@@ -481,7 +480,7 @@
 
                 <searchDrives:SearchDrivesModal x:Name="SearchDrivesView" 
                               BackgroundColor="White"
-                              MinimumHeightRequest="{Binding ModalMinimumHeight}"
+                              MaximumHeightRequest="{Binding ModalMaximumHeight}"
                               AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
                               AbsoluteLayout.LayoutFlags="PositionProportional"/>
             </AbsoluteLayout>
