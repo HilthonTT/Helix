@@ -40,6 +40,7 @@ internal sealed class DriveRepository(AppDbContext context) : IDriveRepository
 
     public Task<List<string>> GetExistingDriveLettersAsync(
         List<Drive> drives,
+        Guid userId,
         CancellationToken cancellationToken = default)
     {
         List<Drive> distinctDrives = drives
@@ -48,7 +49,7 @@ internal sealed class DriveRepository(AppDbContext context) : IDriveRepository
             .ToList();
 
         return context.Drives
-            .Where(d => distinctDrives.Select(dr => dr.Letter).Contains(d.Letter))
+            .Where(d => distinctDrives.Select(dr => dr.Letter).Contains(d.Letter) && d.UserId == userId)
             .Select(d => d.Letter)
             .ToListAsync(cancellationToken);
     }

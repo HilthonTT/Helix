@@ -60,7 +60,9 @@ public sealed class ImportDrives(
             .ToList();
 
         List<string> existingDriveLetters = await driveRepository.GetExistingDriveLettersAsync(
-            distinctDrives, cancellationToken);
+            distinctDrives,
+            loggedInUser.UserId,
+            cancellationToken);
 
         List<Drive> newDrives = distinctDrives
             .Where(drive => !existingDriveLetters.Contains(drive.Letter))

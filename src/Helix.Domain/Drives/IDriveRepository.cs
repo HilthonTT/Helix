@@ -12,7 +12,7 @@ public interface IDriveRepository
 
     Task<List<Drive>> GetAsNoTrackingAsync(Guid userId, CancellationToken cancellationToken = default);
 
-    Task<List<string>> GetExistingDriveLettersAsync(List<Drive> drives, CancellationToken cancellationToken = default);
+    Task<List<string>> GetExistingDriveLettersAsync(List<Drive> drives, Guid userId, CancellationToken cancellationToken = default);
 
     void Insert(Drive drive);
 
