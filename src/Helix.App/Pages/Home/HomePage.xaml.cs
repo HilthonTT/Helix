@@ -16,6 +16,7 @@ namespace Helix.App.Pages.Home;
 public sealed partial class HomePage : ContentPage
 {
     private static bool _isFirstView = true;
+    private bool _isInitializing;
 
     private static bool _searchDrivesModalOpen = false;
     private static bool _deleteDriveModalOpen = false;
@@ -42,16 +43,28 @@ public sealed partial class HomePage : ContentPage
 
     protected async override void OnAppearing()
     {
-        List<Drive>? drives = null;
-
-        if (_isFirstView)
+        if (_isInitializing)
         {
-            drives = await _viewModel.FetchDrivesAsync();
+            return;
         }
 
-        await InitializeChartAsync(drives);
+        _isInitializing = true;
+        try
+        {
+            List<Drive>? drives = null;
 
-        await HandleConnectDrivesOnStartupAsync();
+            if (_isFirstView)
+            {
+                drives = await _viewModel.FetchDrivesAsync();
+            }
+
+            await InitializeChartAsync(drives);
+            await HandleConnectDrivesOnStartupAsync();
+        }
+        finally
+        {
+            _isInitializing = false;
+        }
     }
 
     private async Task HandleConnectDrivesOnStartupAsync()

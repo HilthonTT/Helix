@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Helix.App.Resources.Styles.ControlTemplates">
 
-    <ControlTemplate x:Key="OptionTemplate">
+    <ControlTemplate x:Key="OptionTemplate"
+                     x:DataType="x:String">
         <Border Background="{StaticResource DarkBg2}"   
-            Stroke="{StaticResource SecondaryBrush}"
-            StrokeThickness="1">
+                Stroke="{StaticResource SecondaryBrush}"
+                StrokeThickness="1">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="8" />
             </Border.StrokeShape>

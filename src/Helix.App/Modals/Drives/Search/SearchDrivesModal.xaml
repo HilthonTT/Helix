@@ -53,10 +53,10 @@
                         </x:Array>
                     </BindableLayout.ItemsSource>
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate>
-                            <RadioButton Content="{Binding ., Converter={StaticResource TranslateConverter}}" 
-                                         Value="{Binding .}" 
-                                         IsEnabled="{Binding IsNotBusy}"/>
+                        <DataTemplate x:DataType="x:String">
+                            <RadioButton Content="{Binding Converter={StaticResource TranslateConverter}}" 
+                                         Value="{Binding}" 
+                                         IsEnabled="{Binding Source={RelativeSource AncestorType={x:Type modals:SearchDrivesViewModel}}, Path=IsNotBusy}"/>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </layouts:HorizontalWrapLayout>

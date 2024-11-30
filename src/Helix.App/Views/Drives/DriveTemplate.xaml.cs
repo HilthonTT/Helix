@@ -165,6 +165,8 @@ public sealed partial class DriveTemplate : ContentView
             await ToggleConnectInternalAsync();
         });
 
+        WeakReferenceMessenger.Default.Unregister<NotifyDriveConnectivityMessage>(this);
+
         WeakReferenceMessenger.Default.Register<NotifyDriveConnectivityMessage>(this, (r, m) =>
         {
             if (BindingContext is not DriveDisplay drive || drive.Id != m.DriveId)

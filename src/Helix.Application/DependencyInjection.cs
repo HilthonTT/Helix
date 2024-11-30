@@ -1,5 +1,7 @@
-﻿using Helix.Application.Abstractions.Handlers;
-using System.Reflection;
+﻿using Helix.Application.Auditlogs;
+using Helix.Application.Drives;
+using Helix.Application.Settings;
+using Helix.Application.Users;
 
 namespace Helix.Application;
 
@@ -7,31 +9,59 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddHandlers();
+        services
+            .AddAuditlogsHandlers()
+            .AddDrivesHandlers()
+            .AddSettingsHandlers()
+            .AddUsersHandlers();
 
         return services;
     }
 
-    /// <summary>
-    /// Scans the current assembly for all non-abstract classes that implement the <see cref="IHandler"/> interface 
-    /// and registers them as scoped services in the specified <paramref name="services"/> collection.
-    /// </summary>
-    /// <param name="services">The service collection to which the handler services will be added.</param>
-    /// <returns>The updated <see cref="IServiceCollection"/> instance, enabling method chaining.</returns>
-    private static IServiceCollection AddHandlers(this IServiceCollection services)
+    private static IServiceCollection AddAuditlogsHandlers(this IServiceCollection services)
     {
-        Assembly assembly = typeof(DependencyInjection).Assembly;
+        services.AddSingleton<GetAuditlogs>();
+        services.AddSingleton<SearchAuditlogs>();
 
-        TypeInfo[] handlerTypes = assembly
-            .DefinedTypes
-            .Where(type => type is { IsAbstract: false, IsInterface: false } &&
-                           type.IsAssignableTo(typeof(IHandler)))
-            .ToArray();
+        return services;
+    }
 
-        foreach (TypeInfo handlerType in handlerTypes)
-        {
-            services.AddScoped(handlerType);
-        }
+    private static IServiceCollection AddDrivesHandlers(this IServiceCollection services)
+    {
+        services.AddSingleton<ConnectAllDrives>();
+        services.AddSingleton<ConnectDrive>();
+
+        services.AddSingleton<CreateDrive>();
+        services.AddSingleton<DeleteDrive>();
+        services.AddSingleton<GetDriveById>();
+        services.AddSingleton<GetDrives>();
+        services.AddSingleton<SearchDrives>();
+        services.AddSingleton<UpdateDrive>();
+
+        services.AddSingleton<DisconnectDrive>();
+        services.AddSingleton<DisconnectAllDrives>();
+
+        services.AddSingleton<ExportDrives>();
+        services.AddSingleton<ImportDrives>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddSettingsHandlers(this IServiceCollection services)
+    {
+        services.AddSingleton<GetSettings>();
+        services.AddSingleton<UpdateSettings>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddUsersHandlers(this IServiceCollection services)
+    {
+        services.AddSingleton<ChangeUserPassword>();
+        services.AddSingleton<LoginUser>();
+        services.AddSingleton<LogoutUser>();
+        services.AddSingleton<RegisterUser>();
+        services.AddSingleton<UpdateUser>();
 
         return services;
     }

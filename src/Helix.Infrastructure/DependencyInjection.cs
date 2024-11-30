@@ -39,16 +39,16 @@ public static class DependencyInjection
 
     private static IServiceCollection AddDatabase(this IServiceCollection services)
     {
-        services.AddSingleton<InsertAuditLogsInterceptor>();
+        services.AddScoped<InsertAuditLogsInterceptor>();
 
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
             options.AddInterceptors(sp.GetRequiredService<InsertAuditLogsInterceptor>());
-        });
+        }, ServiceLifetime.Transient);
 
-        services.AddScoped<IDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+        services.AddTransient<IDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
+        services.AddTransient<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
 
         services.AddScoped<IUserRepository, UserRepository>();
 
