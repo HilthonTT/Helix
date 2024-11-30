@@ -117,18 +117,15 @@ public abstract partial class BaseViewModel : ObservableObject
 
     public void InitializeCountdownEvents()
     {
-        Task.Run(async () =>
+        Result<SettingsModel> result = _getSettings.Handle().GetAwaiter().GetResult();
+        if (result.IsSuccess)
         {
-            Result<SettingsModel> result = await _getSettings.Handle();
-            if (result.IsSuccess)
+            SettingsModel settings = result.Value;
+            if (settings.AutoMinimize)
             {
-                SettingsModel settings = result.Value;
-                if (settings.AutoMinimize)
-                {
-                    _countdownService.Start(settings.TimerCount);
-                }
+                _countdownService.Start(settings.TimerCount);
             }
-        });
+        }
 
         _countdownService.CountdownTick += (sender, remaining) =>
         {

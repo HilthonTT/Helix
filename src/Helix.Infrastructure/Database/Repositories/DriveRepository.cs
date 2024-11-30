@@ -14,6 +14,14 @@ internal sealed class DriveRepository(AppDbContext context) : IDriveRepository
             .ToListAsync(cancellationToken);
     }
 
+    public Task<List<Drive>> GetAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return context
+           .Drives
+           .Where(d => d.UserId == userId)
+           .ToListAsync(cancellationToken);
+    }
+
     public Task<Drive?> GetByIdAsNoTrackingAsync(Guid driveId, CancellationToken cancellationToken = default)
     {
         return context

@@ -17,19 +17,11 @@ public sealed partial class App : AppBase
         ServiceProvider = serviceProvider;
         _appDbContext = appDbContext;
 
-        MigrateDatabase();
+        _appDbContext.Database.Migrate();
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
         return new Window(new AppShell());
-    }
-
-    private void MigrateDatabase()
-    {
-        Task.Run(async () =>
-        {
-            await _appDbContext.Database.MigrateAsync();
-        });
     }
 }

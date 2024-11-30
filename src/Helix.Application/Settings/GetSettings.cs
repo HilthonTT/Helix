@@ -15,30 +15,41 @@ public sealed class GetSettings(
     ILoggedInUser loggedInUser, 
     ICacheService cacheService) : IHandler
 {
+    private static readonly SemaphoreSlim _semaphore = new(1, 1);
+
     public async Task<Result<SettingsModel>> Handle(CancellationToken cancellationToken = default)
     {
-        if (!loggedInUser.IsLoggedIn)
-        {
-            return Result.Failure<SettingsModel>(AuthenticationErrors.InvalidPermissions);
-        }
+        await _semaphore.WaitAsync(cancellationToken);
 
-        string cacheKey = CacheKeys.Settings.GetByUserId(loggedInUser.UserId);
-
-        SettingsModel? settings = await cacheService.GetAsync<SettingsModel>(cacheKey, cancellationToken);
-        if (settings is not null)
+        try
         {
+            if (!loggedInUser.IsLoggedIn)
+            {
+                return Result.Failure<SettingsModel>(AuthenticationErrors.InvalidPermissions);
+            }
+
+            string cacheKey = CacheKeys.Settings.GetByUserId(loggedInUser.UserId);
+
+            SettingsModel? settings = await cacheService.GetAsync<SettingsModel>(cacheKey, cancellationToken);
+            if (settings is not null)
+            {
+                return settings;
+            }
+
+            settings = await GetOrCreateSettingsAsync(cancellationToken);
+            if (settings is null)
+            {
+                return Result.Failure<SettingsModel>(Error.NullValue);
+            }
+
+            await cacheService.SetAsync(cacheKey, settings, cancellationToken: cancellationToken);
+
             return settings;
         }
-
-        settings = await GetOrCreateSettingsAsync(cancellationToken);
-        if (settings is null)
+        finally
         {
-            return Result.Failure<SettingsModel>(Error.NullValue);
+            _semaphore.Release();
         }
-
-        await cacheService.SetAsync(cacheKey, settings, cancellationToken: cancellationToken); 
-
-        return settings;
     }
 
     private async Task<SettingsModel?> GetOrCreateSettingsAsync(CancellationToken cancellationToken)

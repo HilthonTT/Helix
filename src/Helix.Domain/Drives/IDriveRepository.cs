@@ -17,4 +17,5 @@ public interface IDriveRepository
     void AddRange(IEnumerable<Drive> drives);
 
     void Remove(Drive drive);
+    Task<List<Drive>> GetAsync(Guid userId, CancellationToken cancellationToken = default);
 }

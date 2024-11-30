@@ -2,6 +2,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.Infrastructure.Database;
 
@@ -17,7 +18,10 @@ internal sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbCon
             Password = DatabaseConfiguration.DesignTimePassword
         }.ToString();
 
-        optionsBuilder.UseSqlite(connectionString);
+        optionsBuilder
+            .UseSqlite(connectionString)
+            .EnableSensitiveDataLogging()
+            .LogTo(Console.WriteLine, LogLevel.Information);
 
         return new AppDbContext(optionsBuilder.Options);
     }

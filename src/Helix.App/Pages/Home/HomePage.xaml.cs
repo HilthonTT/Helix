@@ -51,10 +51,14 @@ public sealed partial class HomePage : ContentPage
         _isInitializing = true;
         try
         {
+            List<Drive>? drives = null;
+
             if (_isFirstView)
             {
-                await _viewModel.FetchDrivesAsync();
+                drives = await _viewModel.FetchDrivesAsync();
             }
+
+            await InitializeChartAsync(drives);
 
             await HandleConnectDrivesOnStartupAsync();
         }
@@ -333,12 +337,6 @@ public sealed partial class HomePage : ContentPage
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(this, async (r, m) =>
         {
             await InitializeChartAsync();
-        });
-
-        WeakReferenceMessenger.Default.Register<FillDrivesMessage>(this, (r, m) =>
-        {
-            ChartEntry[] entries = GenerateChartEntries(m.Drives);
-            chart.Chart = CreateDonutChart(entries);
         });
     }
 
