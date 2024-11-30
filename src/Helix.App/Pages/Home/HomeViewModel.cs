@@ -215,6 +215,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         List<Drive> drives = result.Value;
 
+        WeakReferenceMessenger.Default.Send(new FillDrivesMessage(drives));
+
         Drives = new(drives.Select(d => new DriveDisplay(d)));
 
         TotalStorage = ValidateTotalStorage();

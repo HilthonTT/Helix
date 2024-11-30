@@ -33,6 +33,10 @@ public sealed class GetDrives(
 
             return drives;
         }
+        catch (InvalidOperationException)
+        {
+            return new List<Drive>();
+        }
         finally
         {
             _semaphore.Release();

@@ -14,14 +14,6 @@ internal sealed class DriveRepository(AppDbContext context) : IDriveRepository
             .ToListAsync(cancellationToken);
     }
 
-    public Task<List<Drive>> GetAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
-        return context
-            .Drives
-            .Where(d => d.UserId != userId)
-            .ToListAsync(cancellationToken);
-    }
-
     public Task<Drive?> GetByIdAsNoTrackingAsync(Guid driveId, CancellationToken cancellationToken = default)
     {
         return context
@@ -43,13 +35,12 @@ internal sealed class DriveRepository(AppDbContext context) : IDriveRepository
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        List<Drive> distinctDrives = drives
-            .GroupBy(d => d.Letter)
-            .Select(g => g.First())
-            .ToList();
+        IEnumerable<string> distinctLetters = drives
+            .Select(d => d.Letter.ToUpper())
+            .Distinct();
 
         return context.Drives
-            .Where(d => distinctDrives.Select(dr => dr.Letter).Contains(d.Letter) && d.UserId == userId)
+            .Where(d => distinctLetters.Contains(d.Letter) && d.UserId == userId)
             .Select(d => d.Letter)
             .ToListAsync(cancellationToken);
     }

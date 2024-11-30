@@ -8,8 +8,6 @@ public interface IDriveRepository
 
     Task<Drive?> GetByIdAsNoTrackingAsync(Guid driveId, CancellationToken cancellationToken = default);
 
-    Task<List<Drive>> GetAsync(Guid userId, CancellationToken cancellationToken = default);
-
     Task<List<Drive>> GetAsNoTrackingAsync(Guid userId, CancellationToken cancellationToken = default);
 
     Task<List<string>> GetExistingDriveLettersAsync(List<Drive> drives, Guid userId, CancellationToken cancellationToken = default);

@@ -20,48 +20,48 @@ public static class DependencyInjection
 
     private static IServiceCollection AddAuditlogsHandlers(this IServiceCollection services)
     {
-        services.AddSingleton<GetAuditlogs>();
-        services.AddSingleton<SearchAuditlogs>();
+        services.AddScoped<GetAuditlogs>();
+        services.AddScoped<SearchAuditlogs>();
 
         return services;
     }
 
     private static IServiceCollection AddDrivesHandlers(this IServiceCollection services)
     {
-        services.AddSingleton<ConnectAllDrives>();
-        services.AddSingleton<ConnectDrive>();
+        services.AddScoped<ConnectAllDrives>();
+        services.AddScoped<ConnectDrive>();
 
-        services.AddSingleton<CreateDrive>();
-        services.AddSingleton<DeleteDrive>();
-        services.AddSingleton<GetDriveById>();
-        services.AddSingleton<GetDrives>();
-        services.AddSingleton<SearchDrives>();
-        services.AddSingleton<UpdateDrive>();
+        services.AddScoped<CreateDrive>();
+        services.AddScoped<DeleteDrive>();
+        services.AddScoped<GetDriveById>();
+        services.AddScoped<GetDrives>();
+        services.AddScoped<SearchDrives>();
+        services.AddScoped<UpdateDrive>();
 
-        services.AddSingleton<DisconnectDrive>();
-        services.AddSingleton<DisconnectAllDrives>();
+        services.AddScoped<DisconnectDrive>();
+        services.AddScoped<DisconnectAllDrives>();
 
-        services.AddSingleton<ExportDrives>();
-        services.AddSingleton<ImportDrives>();
+        services.AddScoped<ExportDrives>();
+        services.AddScoped<ImportDrives>();
 
         return services;
     }
 
     private static IServiceCollection AddSettingsHandlers(this IServiceCollection services)
     {
-        services.AddSingleton<GetSettings>();
-        services.AddSingleton<UpdateSettings>();
+        services.AddScoped<GetSettings>();
+        services.AddScoped<UpdateSettings>();
 
         return services;
     }
 
     private static IServiceCollection AddUsersHandlers(this IServiceCollection services)
     {
-        services.AddSingleton<ChangeUserPassword>();
-        services.AddSingleton<LoginUser>();
-        services.AddSingleton<LogoutUser>();
-        services.AddSingleton<RegisterUser>();
-        services.AddSingleton<UpdateUser>();
+        services.AddScoped<ChangeUserPassword>();
+        services.AddScoped<LoginUser>();
+        services.AddScoped<LogoutUser>();
+        services.AddScoped<RegisterUser>();
+        services.AddScoped<UpdateUser>();
 
         return services;
     }

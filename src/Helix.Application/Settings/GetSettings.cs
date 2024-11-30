@@ -60,7 +60,7 @@ public sealed class GetSettings(
 
         settingsRepository.Insert(settings);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return settings.Id;
     }

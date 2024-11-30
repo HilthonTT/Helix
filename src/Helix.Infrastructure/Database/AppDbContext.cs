@@ -53,4 +53,9 @@ public sealed class AppDbContext : DbContext, IUnitOfWork, IDbContext
             .UseSqlite(connection)
             .ReplaceService<IRelationalCommandBuilderFactory, CustomRelationalCommandBuilderFactory>();
     }
+
+    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        return Database.BeginTransactionAsync(cancellationToken);
+    }
 }
