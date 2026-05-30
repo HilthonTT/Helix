@@ -19,9 +19,13 @@ internal sealed class StartupService : IStartupService
     public void ToggleStartup(bool value)
     {
         if (value)
+        {
             CreateStartupShortcut();
+        }
         else
+        {
             DeleteShortcut();
+        }
     }
 
     private static void CreateStartupShortcut()
@@ -76,7 +80,9 @@ internal sealed class StartupService : IStartupService
         try
         {
             if (File.Exists(ShortcutPath))
+            {
                 File.Delete(ShortcutPath);
+            }
         }
         catch (Exception ex)
         {

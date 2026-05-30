@@ -143,12 +143,25 @@ internal sealed class VaultCipher : IVaultCipher
 
     private sealed class VaultEnvelope
     {
-        [JsonPropertyName("v")] public int Version { get; set; }
-        [JsonPropertyName("kdf")] public string? Kdf { get; set; }
-        [JsonPropertyName("iters")] public int Iterations { get; set; }
-        [JsonPropertyName("salt")] public string? Salt { get; set; }
-        [JsonPropertyName("nonce")] public string? Nonce { get; set; }
-        [JsonPropertyName("ct")] public string? Ciphertext { get; set; }
-        [JsonPropertyName("tag")] public string? Tag { get; set; }
+        [JsonPropertyName("v")] 
+        public int Version { get; set; }
+
+        [JsonPropertyName("kdf")] 
+        public string? Kdf { get; set; }
+
+        [JsonPropertyName("iters")]
+        public int Iterations { get; set; }
+
+        [JsonPropertyName("salt")] 
+        public string? Salt { get; set; }
+
+        [JsonPropertyName("nonce")]
+        public string? Nonce { get; set; }
+
+        [JsonPropertyName("ct")] 
+        public string? Ciphertext { get; set; }
+
+        [JsonPropertyName("tag")]
+        public string? Tag { get; set; }
     }
 }

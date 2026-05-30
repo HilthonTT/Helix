@@ -60,8 +60,8 @@ internal sealed class PasswordHasher : IPasswordHasher
     private static bool TryParse(string passwordHash, out int iterations, out byte[] hash, out byte[] salt)
     {
         iterations = 0;
-        hash = Array.Empty<byte>();
-        salt = Array.Empty<byte>();
+        hash = [];
+        salt = [];
 
         try
         {

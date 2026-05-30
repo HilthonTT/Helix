@@ -13,9 +13,13 @@ internal sealed class DesktopService : IDesktopService
     public void ToggleDesktopShortcut(bool value)
     {
         if (value)
+        {
             CreateDesktopShortcut();
+        }
         else
+        {
             DeleteDesktopShortcut();
+        }
     }
 
     private static void CreateDesktopShortcut()
@@ -24,19 +28,19 @@ internal sealed class DesktopService : IDesktopService
 
         string? processPath = Environment.ProcessPath;
         if (string.IsNullOrEmpty(processPath) || !File.Exists(processPath))
+        {
             throw new InvalidOperationException("The process path is null or invalid.");
+        }
 
         // Late binding - no COM reference needed at compile time
         try
         {
             // Create WScript.Shell dynamically
-            Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
-            if (shellType == null)
-                throw new InvalidOperationException("WScript.Shell is not available.");
+            Type? shellType = Type.GetTypeFromProgID("WScript.Shell")
+                ?? throw new InvalidOperationException("WScript.Shell is not available.");
 
-            object? shellObj = Activator.CreateInstance(shellType);
-            if (shellObj == null)
-                throw new InvalidOperationException("Failed to create WScript.Shell instance.");
+            object? shellObj = Activator.CreateInstance(shellType)
+                ?? throw new InvalidOperationException("Failed to create WScript.Shell instance.");
 
             try
             {
@@ -53,9 +57,13 @@ internal sealed class DesktopService : IDesktopService
             finally
             {
                 if (shellObj is IDisposable disposable)
+                {
                     disposable.Dispose();
+                }
                 else
+                {
                     Marshal.ReleaseComObject(shellObj);
+                }
             }
         }
         catch (Exception ex)
@@ -69,7 +77,9 @@ internal sealed class DesktopService : IDesktopService
         try
         {
             if (File.Exists(ShortcutPath))
+            {
                 File.Delete(ShortcutPath);
+            }
         }
         catch (Exception ex)
         {
