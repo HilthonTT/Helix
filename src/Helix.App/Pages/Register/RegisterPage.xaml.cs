@@ -1,5 +1,6 @@
 using SharpHook;
 using SharpHook.Native;
+using System.Diagnostics;
 
 namespace Helix.App.Pages.Register;
 
@@ -26,7 +27,11 @@ public sealed partial class RegisterPage : ContentPage
         _hook = new TaskPoolGlobalHook();
         _hook.KeyPressed += OnKeyPressed;
 
-        _ = _hook.RunAsync();
+        _hook.RunAsync().ContinueWith(
+            static t => Debug.WriteLine($"Helix: RegisterPage hook faulted: {t.Exception}"),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 
     protected override void OnDisappearing()
@@ -49,7 +54,14 @@ public sealed partial class RegisterPage : ContentPage
 
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            await _viewModel.RegisterCommand.ExecuteAsync(null);
+            try
+            {
+                await _viewModel.RegisterCommand.ExecuteAsync(null);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Helix: RegisterCommand failed: {ex}");
+            }
         });
     }
 

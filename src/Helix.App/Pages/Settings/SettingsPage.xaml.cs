@@ -22,6 +22,18 @@ public sealed partial class SettingsPage : ContentPage
         RegisterMessages();
     }
 
+    protected override async void OnAppearing()
+    {
+        try
+        {
+            await _viewModel.LoadSettingsAsync();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Something went wrong!", ex.Message, "Ok");
+        }
+    }
+
     private async Task ShowUpdatePasswordModalAsync(bool show)
     {
         if (_updateUsernameModalOpen)

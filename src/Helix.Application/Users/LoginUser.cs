@@ -1,5 +1,6 @@
-﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Cryptography;
+using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
 using Helix.Domain.Users;
@@ -8,9 +9,10 @@ using SharedKernel;
 namespace Helix.Application.Users;
 
 public sealed class LoginUser(
-    IUserRepository userRepository, 
-    IPasswordHasher passwordHasher, 
-    ILoggedInUser loggedInUser) : IHandler
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
+    ILoggedInUser loggedInUser,
+    IUnitOfWork unitOfWork) : IHandler
 {
     public sealed record Request(string Username, string Password);
 
@@ -32,6 +34,15 @@ public sealed class LoginUser(
         if (!verified)
         {
             return Result.Failure<User>(AuthenticationErrors.InvalidUsernameOrPassword);
+        }
+
+        // Transparent migration: if the stored hash uses an older format or weaker
+        // KDF parameters than the current configuration, rehash with the verified
+        // plaintext and persist. The user keeps the same credentials.
+        if (passwordHasher.NeedsRehash(user.PasswordHash))
+        {
+            user.ChangePassword(passwordHasher.Hash(request.Password));
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
         loggedInUser.Login(user.Id, user.Username);

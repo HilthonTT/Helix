@@ -73,7 +73,7 @@
     </Shell.Resources>
 
     <Shell.FlyoutContentTemplate>
-        <DataTemplate>
+        <DataTemplate x:DataType="local:AppShell">
             <Grid Background="{StaticResource DarkBg2Brush}"
                RowDefinitions="*,*,*,*,*"
                RadioButtonGroup.GroupName="Menu"

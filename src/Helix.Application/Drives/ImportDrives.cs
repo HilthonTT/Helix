@@ -1,8 +1,9 @@
-﻿using Helix.Application.Abstractions.Authentication;
-using Helix.Application.Abstractions.Caching;
+using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Abstractions.Security;
 using Helix.Application.Core.Errors;
+using Helix.Application.Core.Validation;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
@@ -14,9 +15,10 @@ public sealed class ImportDrives(
     IDriveRepository driveRepository,
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
-    ICacheService cacheService) : IHandler
+    IVaultCipher vaultCipher,
+    IPassphrasePrompt passphrasePrompt) : IHandler
 {
-    private const string FileType = ".json";
+    private const string FileExtension = ".helixvault";
 
     public async Task<Result<List<Drive>>> Handle(CancellationToken cancellationToken = default)
     {
@@ -25,46 +27,75 @@ public sealed class ImportDrives(
             return Result.Failure<List<Drive>>(AuthenticationErrors.InvalidPermissions);
         }
 
-        PickOptions options = CreateOptions();
-        FileResult? result = await FilePicker.Default.PickAsync(options);
-        if (result is null)
+        FileResult? file = await FilePicker.Default.PickAsync(CreatePickOptions());
+        if (file is null)
         {
             return Result.Failure<List<Drive>>(FolderPickerErrors.Cancelled);
         }
 
-        if (!result.FileName.EndsWith(FileType))
+        if (!file.FileName.EndsWith(FileExtension, StringComparison.OrdinalIgnoreCase))
         {
             return Result.Failure<List<Drive>>(JsonErrors.Invalid);
         }
 
-        string json = await File.ReadAllTextAsync(result.FullPath, cancellationToken);
+        string? passphrase = await passphrasePrompt.PromptForImportPassphraseAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(passphrase))
+        {
+            return Result.Failure<List<Drive>>(JsonErrors.PassphraseMissing);
+        }
 
-        List<Drive>? drives;
+        string vault = await File.ReadAllTextAsync(file.FullPath, cancellationToken);
+
+        Result<string> decryptResult = vaultCipher.Decrypt(vault, passphrase);
+        if (decryptResult.IsFailure)
+        {
+            return Result.Failure<List<Drive>>(decryptResult.Error);
+        }
+
+        List<DriveImportDto>? dtos;
         try
         {
-            drives = JsonSerializer.Deserialize<List<Drive>>(json);
+            dtos = JsonSerializer.Deserialize<List<DriveImportDto>>(decryptResult.Value);
         }
         catch (JsonException)
         {
-            return Result.Failure<List<Drive>>(JsonErrors.Invalid); 
+            return Result.Failure<List<Drive>>(JsonErrors.VaultInvalidDriveData);
         }
 
-        if (drives is null || drives.Count == 0)
+        if (dtos is null || dtos.Count == 0)
         {
-            return Result.Failure<List<Drive>>(JsonErrors.Invalid);
+            return Result.Failure<List<Drive>>(JsonErrors.VaultInvalidDriveData);
         }
 
-        List<Drive> distinctDrives = drives
-            .GroupBy(d => d.Letter)
+        // Validate every DTO with the same rules as CreateDrive.Validate. Reject the
+        // entire vault on the first invalid entry — partial imports are confusing.
+        foreach (DriveImportDto dto in dtos)
+        {
+            if (!IsValidDto(dto))
+            {
+                return Result.Failure<List<Drive>>(JsonErrors.VaultInvalidDriveData);
+            }
+        }
+
+        // Case-insensitive dedup so that "C" and "c" collapse to one entry, matching
+        // the server-side uniqueness check in DriveRepository.IsLetterUniqueAsync.
+        List<DriveImportDto> distinct = dtos
+            .GroupBy(d => d.Letter.ToUpperInvariant())
             .Select(g => g.First())
             .ToList();
 
+        // Build candidate Drive entities (with fresh Ids + correct UserId) so that
+        // the existing-letter check can use the same repository method.
+        List<Drive> candidates = distinct
+            .Select(d => Drive.Create(loggedInUser.UserId, d.Letter, d.IpAddress, d.Name, d.Username, d.Password))
+            .ToList();
+
         List<string> existingDriveLetters = await driveRepository.GetExistingDriveLettersAsync(
-            distinctDrives,
+            candidates,
             loggedInUser.UserId,
             cancellationToken);
 
-        List<Drive> newDrives = distinctDrives
+        List<Drive> newDrives = candidates
             .Where(drive => !existingDriveLetters.Contains(drive.Letter))
             .ToList();
 
@@ -73,38 +104,56 @@ public sealed class ImportDrives(
             return newDrives;
         }
 
-        foreach (Drive drive in newDrives)
-        {
-            drive.ChangeUserId(loggedInUser.UserId);
-        }
-
         driveRepository.AddRange(newDrives);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        await cacheService.RemoveAsync(CacheKeys.Drives.All, cancellationToken);
-
         return newDrives;
     }
 
-    private static PickOptions CreateOptions()
+    private static bool IsValidDto(DriveImportDto dto)
     {
-        var customFileType = new FilePickerFileType(
+        if (dto is null)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Letter) || dto.Letter.Length != 1 || !char.IsLetter(dto.Letter[0]))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.IpAddress) || !GeneralValidation.IsValidIpAddress(dto.IpAddress))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Name) ||
+            string.IsNullOrWhiteSpace(dto.Username) ||
+            string.IsNullOrWhiteSpace(dto.Password))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static PickOptions CreatePickOptions()
+    {
+        var fileTypes = new FilePickerFileType(
             new Dictionary<DevicePlatform, IEnumerable<string>>
             {
-                { DevicePlatform.iOS, new[] { FileType } },
-                { DevicePlatform.Android, new[] { FileType } },
-                { DevicePlatform.WinUI, new[] { FileType } },
-                { DevicePlatform.Tizen, new[] { FileType } },
-                { DevicePlatform.macOS, new[] { FileType } },
+                { DevicePlatform.iOS, new[] { FileExtension } },
+                { DevicePlatform.Android, new[] { FileExtension } },
+                { DevicePlatform.WinUI, new[] { FileExtension } },
+                { DevicePlatform.Tizen, new[] { FileExtension } },
+                { DevicePlatform.macOS, new[] { FileExtension } },
             });
 
-        var options = new PickOptions()
+        return new PickOptions
         {
             PickerTitle = "Import drives",
-            FileTypes = customFileType,
+            FileTypes = fileTypes,
         };
-
-        return options;
     }
 }

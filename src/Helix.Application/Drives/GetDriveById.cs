@@ -1,5 +1,4 @@
 ﻿using Helix.Application.Abstractions.Authentication;
-using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
 using Helix.Domain.Drives;
@@ -10,8 +9,7 @@ namespace Helix.Application.Drives;
 
 public sealed class GetDriveById(
     IDriveRepository driveRepository,
-    ILoggedInUser loggedInUser,
-    ICacheService cacheService) : IHandler
+    ILoggedInUser loggedInUser) : IHandler
 {
     public sealed record Request(Guid DriveId);
 
@@ -28,8 +26,7 @@ public sealed class GetDriveById(
             return Result.Failure<Drive>(AuthenticationErrors.InvalidPermissions);
         }
 
-        string cacheKey = CacheKeys.Drives.GetById(request.DriveId);
-        Drive? drive = await GetCachedOrDbDriveAsync(request.DriveId, cacheKey, cancellationToken);
+        Drive? drive = await driveRepository.GetByIdAsNoTrackingAsync(request.DriveId, cancellationToken);
 
         return drive switch
         {
@@ -37,23 +34,6 @@ public sealed class GetDriveById(
             _ when drive.UserId != loggedInUser.UserId => Result.Failure<Drive>(AuthenticationErrors.InvalidPermissions),
             _ => Result.Success(drive)
         };
-    }
-
-    private async Task<Drive?> GetCachedOrDbDriveAsync(Guid driveId, string cacheKey, CancellationToken cancellationToken)
-    {
-        Drive? drive = await cacheService.GetAsync<Drive>(cacheKey, cancellationToken);
-        if (drive is not null)
-        {
-            return drive;
-        }
-
-        drive = await driveRepository.GetByIdAsNoTrackingAsync(driveId, cancellationToken);
-        if (drive is not null)
-        {
-            await cacheService.SetAsync(cacheKey, drive, cancellationToken: cancellationToken);
-        }
-
-        return drive;
     }
 
     private static Result Validate(Request request)

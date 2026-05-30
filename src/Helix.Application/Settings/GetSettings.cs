@@ -5,15 +5,13 @@ using SharedKernel;
 using Helix.Domain.Settings;
 using SettingsModel = Helix.Domain.Settings.Settings;
 using Helix.Application.Abstractions.Handlers;
-using Helix.Application.Abstractions.Caching;
 
 namespace Helix.Application.Settings;
 
 public sealed class GetSettings(
     ISettingsRepository settingsRepository, 
     IUnitOfWork unitOfWork,
-    ILoggedInUser loggedInUser, 
-    ICacheService cacheService) : IHandler
+    ILoggedInUser loggedInUser) : IHandler
 {
     private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
@@ -28,21 +26,11 @@ public sealed class GetSettings(
                 return Result.Failure<SettingsModel>(AuthenticationErrors.InvalidPermissions);
             }
 
-            string cacheKey = CacheKeys.Settings.GetByUserId(loggedInUser.UserId);
-
-            SettingsModel? settings = await cacheService.GetAsync<SettingsModel>(cacheKey, cancellationToken);
-            if (settings is not null)
-            {
-                return settings;
-            }
-
-            settings = await GetOrCreateSettingsAsync(cancellationToken);
+            var settings = await GetOrCreateSettingsAsync(cancellationToken);
             if (settings is null)
             {
                 return Result.Failure<SettingsModel>(Error.NullValue);
             }
-
-            await cacheService.SetAsync(cacheKey, settings, cancellationToken: cancellationToken);
 
             return settings;
         }

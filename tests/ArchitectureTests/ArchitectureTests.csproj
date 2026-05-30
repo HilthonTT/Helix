@@ -26,7 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Helix.App\Helix.App.csproj" />
+    <ProjectReference Include="..\..\src\Helix.Domain\Helix.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Helix.Application\Helix.Application.csproj" />
+    <ProjectReference Include="..\..\src\Helix.Infrastructure\Helix.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

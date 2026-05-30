@@ -34,7 +34,8 @@
         </Border>
     </ControlTemplate>
 
-    <ControlTemplate x:Key="ButtonRadioTemplate">
+    <ControlTemplate x:Key="ButtonRadioTemplate"
+                     x:DataType="RadioButton">
         <Border Stroke="{StaticResource SecondaryBrush}"
             StrokeThickness="1"
             Background="Transparent">

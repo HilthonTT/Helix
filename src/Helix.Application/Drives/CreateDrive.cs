@@ -1,5 +1,4 @@
 ﻿using Helix.Application.Abstractions.Authentication;
-using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
@@ -13,8 +12,7 @@ namespace Helix.Application.Drives;
 public sealed class CreateDrive(
     IDriveRepository driveRepository, 
     IUnitOfWork unitOfWork,
-    ILoggedInUser loggedInUser, 
-    ICacheService cacheService) : IHandler
+    ILoggedInUser loggedInUser) : IHandler
 {
     public sealed record Request(string Letter, string IpAddress, string Name, string Username, string Password);
 
@@ -47,8 +45,6 @@ public sealed class CreateDrive(
         driveRepository.Insert(drive);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        await cacheService.RemoveAsync(CacheKeys.Drives.All, cancellationToken);
 
         return drive;
     }

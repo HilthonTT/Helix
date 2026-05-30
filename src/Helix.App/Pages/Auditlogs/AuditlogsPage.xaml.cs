@@ -22,10 +22,17 @@ public sealed partial class AuditlogsPage : ContentPage
 
     protected override async void OnAppearing()
     {
-		if (_viewModel.GetAuditlogsCommand.CanExecute(null))
-		{
-			await _viewModel.GetAuditlogsCommand.ExecuteAsync(null);
-		}
+        try
+        {
+            if (_viewModel.GetAuditlogsCommand.CanExecute(null))
+            {
+                await _viewModel.GetAuditlogsCommand.ExecuteAsync(null);
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Something went wrong!", ex.Message, "Ok");
+        }
     }
 
     private async Task OpenSearchAuditlogsAsync(bool show)

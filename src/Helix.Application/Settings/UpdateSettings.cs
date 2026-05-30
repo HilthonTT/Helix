@@ -1,5 +1,4 @@
 ﻿using Helix.Application.Abstractions.Authentication;
-using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Handlers;
@@ -15,8 +14,7 @@ public sealed class UpdateSettings(
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser, 
     IStartupService startupService,
-    IDesktopService desktopService,
-    ICacheService cacheService) : IHandler
+    IDesktopService desktopService) : IHandler
 {
     public sealed record Request(
         bool AutoConnect, 
@@ -78,10 +76,6 @@ public sealed class UpdateSettings(
         desktopService.ToggleDesktopShortcut(settings.SetDesktopShortcut);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        string cacheKey = CacheKeys.Settings.GetByUserId(loggedInUser.UserId);
-
-        await cacheService.RemoveAsync(cacheKey, cancellationToken);
 
         return Result.Success();
     }

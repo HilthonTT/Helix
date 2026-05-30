@@ -30,7 +30,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         Username = _loggedInUser.Username;
 
         LoadLanguages();
-        LoadSettings();
         RegisterMessages();
     }
 
@@ -76,21 +75,24 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Send(new UpdatePasswordMessage(true));
     }
 
-    private void LoadSettings()
+    public async Task LoadSettingsAsync(CancellationToken cancellationToken = default)
     {
-        Task.Run(async () =>
+        try
         {
-            Result<SettingsModel> result = await _getSettings.Handle();
+            Result<SettingsModel> result = await _getSettings.Handle(cancellationToken);
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
+                return;
             }
-            else
-            {
-                Settings = new SettingsDisplay(result.Value);
-                SelectedLanguage = CultureSwitcher.LanguageToString(Settings.Language);
-            }
-        });
+
+            Settings = new SettingsDisplay(result.Value);
+            SelectedLanguage = CultureSwitcher.LanguageToString(Settings.Language);
+        }
+        catch (Exception ex)
+        {
+            await DisplayErrorAsync(SharedKernel.Error.Failure("Settings.Load", ex.Message));
+        }
     }
 
     private void LoadLanguages()

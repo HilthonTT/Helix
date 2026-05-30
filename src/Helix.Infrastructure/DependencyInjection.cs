@@ -2,6 +2,7 @@
 using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Connector;
+using Helix.Application.Abstractions.Security;
 using Helix.Infrastructure.Authentication;
 using Helix.Infrastructure.Cryptography;
 using Helix.Infrastructure.Database;
@@ -9,8 +10,6 @@ using Helix.Infrastructure.Connector;
 using Helix.Persistence.Interceptors;
 using SharedKernel;
 using Helix.Infrastructure.Time;
-using Helix.Application.Abstractions.Caching;
-using Helix.Infrastructure.Caching;
 using Helix.Application.Abstractions.Time;
 using Helix.Application.Abstractions.Startup;
 using Helix.Infrastructure.Startup;
@@ -31,7 +30,6 @@ public static class DependencyInjection
         services
             .AddServices()
             .AddDatabase()
-            .AddCaching()
             .AddAuthenticationInternal();
 
         return services;
@@ -79,14 +77,7 @@ public static class DependencyInjection
 
         services.AddScoped<ILoggedInUser, LoggedInUser>();
 
-        return services;
-    }
-
-    private static IServiceCollection AddCaching(this IServiceCollection services)
-    {
-        services.AddDistributedMemoryCache();
-
-        services.AddSingleton<ICacheService, CacheService>();
+        services.AddSingleton<IVaultCipher, VaultCipher>();
 
         return services;
     }

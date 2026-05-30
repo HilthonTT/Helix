@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Helix.Infrastructure.Cryptography;
 
 namespace Infrastructure.UnitTests.Cryptography;
@@ -9,7 +9,7 @@ public sealed class PasswordGeneratorTests
     public void Generated_Password_Should_Be_Random_Enough()
     {
         // Arrange
-        const int passwordLength = 128;
+        int passwordLength = PasswordGenerator.ConfiguredPasswordLength;
         const int sampleSize = 100;
         var generatedPasswords = new HashSet<string>();
 
@@ -18,15 +18,14 @@ public sealed class PasswordGeneratorTests
         bool hasDigit = false;
         bool hasSpecialChar = false;
 
-        // Act
+        // Act — exercise the random generator directly (the public API caches a
+        // single key in SecureStorage and would return the same value every call).
         for (int i = 0; i < sampleSize; i++)
         {
-            string password = PasswordGenerator.GetOrCreatePassword();
+            string password = PasswordGenerator.GenerateRandomPassword(passwordLength);
 
-            // Add to set to test uniqueness
             generatedPasswords.Add(password);
 
-            // Check password complexity in the first generated password
             if (i == 0)
             {
                 hasUpperCase = password.Any(char.IsUpper);

@@ -1,5 +1,6 @@
 using SharpHook;
 using SharpHook.Native;
+using System.Diagnostics;
 
 namespace Helix.App.Pages.Login;
 
@@ -25,7 +26,11 @@ public sealed partial class LoginPage : ContentPage
         _hook = new TaskPoolGlobalHook();
         _hook.KeyPressed += OnKeyPressed;
 
-        _ = _hook.RunAsync();
+        _hook.RunAsync().ContinueWith(
+            static t => Debug.WriteLine($"Helix: LoginPage hook faulted: {t.Exception}"),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 
     protected override void OnDisappearing()
@@ -53,7 +58,14 @@ public sealed partial class LoginPage : ContentPage
 
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            await viewModel.LoginCommand.ExecuteAsync(null);
+            try
+            {
+                await viewModel.LoginCommand.ExecuteAsync(null);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Helix: LoginCommand failed: {ex}");
+            }
         });
     }
 

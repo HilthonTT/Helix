@@ -115,30 +115,41 @@ public abstract partial class BaseViewModel : ObservableObject
         });
     }
 
+    /// <summary>
+    /// Wires up the countdown service events. Synchronous — safe to call from a ctor.
+    /// Must be paired with <see cref="InitializeCountdownAsync"/> for the I/O half.
+    /// </summary>
     public void InitializeCountdownEvents()
     {
-        Result<SettingsModel> result = _getSettings.Handle().GetAwaiter().GetResult();
-        if (result.IsSuccess)
-        {
-            SettingsModel settings = result.Value;
-            if (settings.AutoMinimize)
-            {
-                _countdownService.Start(settings.TimerCount);
-            }
-        }
-
         _countdownService.CountdownTick += (sender, remaining) =>
         {
-            // Update the view model property for binding
             SecondsRemaining = remaining;
         };
 
         _countdownService.CountdownFinished += (sender, args) =>
         {
-            // Perform action when timer reaches 0
             ShowRedoButton = true;
             TimerCancelled = true;
             MinimizeApp();
         };
+    }
+
+    /// <summary>
+    /// Loads the current settings and starts the countdown if <c>AutoMinimize</c> is
+    /// enabled. Awaited from page lifecycle methods — never blocks the UI thread.
+    /// </summary>
+    public async Task InitializeCountdownAsync(CancellationToken cancellationToken = default)
+    {
+        Result<SettingsModel> result = await _getSettings.Handle(cancellationToken);
+        if (result.IsFailure)
+        {
+            return;
+        }
+
+        SettingsModel settings = result.Value;
+        if (settings.AutoMinimize)
+        {
+            _countdownService.Start(settings.TimerCount);
+        }
     }
 }

@@ -61,6 +61,12 @@ public sealed partial class HomePage : ContentPage
             await InitializeChartAsync(drives);
 
             await HandleConnectDrivesOnStartupAsync();
+
+            await _viewModel.InitializeCountdownAsync();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Something went wrong!", ex.Message, "Ok");
         }
         finally
         {
@@ -246,7 +252,9 @@ public sealed partial class HomePage : ContentPage
             return CreateDisconnectedEntries();
         }
 
-        int connected = drives.Where(d => _nasConnector.IsConnected(d.Letter)).Count();
+        // Batch lookup — DriveInfo.GetDrives() is enumerated once instead of per drive.
+        HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+        int connected = drives.Count(d => connectedLetters.Contains(d.Letter));
         int disconnected = drives.Count - connected;
 
         return

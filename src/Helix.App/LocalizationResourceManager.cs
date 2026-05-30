@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace Helix.App;
 
-internal sealed class LocalizationResourceManager : INotifyPropertyChanged
+internal sealed partial class LocalizationResourceManager : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -45,7 +45,7 @@ internal sealed class LocalizationResourceManager : INotifyPropertyChanged
         CurrentDate = FormatCurrentDate();
     }
 
-    private string FormatCurrentDate()
+    private static string FormatCurrentDate()
     {
         return DateTime.Now.ToString("dddd, MMMM dd yyyy", AppResources.Culture);
     }

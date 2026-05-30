@@ -1,6 +1,7 @@
-﻿using CommunityToolkit.Maui.Storage;
+using CommunityToolkit.Maui.Storage;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Abstractions.Security;
 using Helix.Application.Core.Errors;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
@@ -11,13 +12,15 @@ namespace Helix.Application.Drives;
 
 public sealed class ExportDrives(
     IDriveRepository driveRepository,
-    ILoggedInUser loggedInUser) : IHandler
+    ILoggedInUser loggedInUser,
+    IVaultCipher vaultCipher,
+    IPassphrasePrompt passphrasePrompt) : IHandler
 {
-    private const string FileName = "IMPORTED_DRIVES_DO_NOT_SHARE.json";
+    private const string FileExtension = ".helixvault";
 
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
-        WriteIndented = true
+        WriteIndented = false,
     };
 
     public async Task<Result> Handle(CancellationToken cancellationToken = default)
@@ -33,9 +36,18 @@ public sealed class ExportDrives(
             return Result.Failure(DriveErrors.NoDrivesFound);
         }
 
-        List<Drive> drivesWithoutUserId = drives.Select(Drive.MapWithoutUserId).ToList();
+        string? passphrase = await passphrasePrompt.PromptForExportPassphraseAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(passphrase))
+        {
+            return Result.Failure(JsonErrors.PassphraseMissing);
+        }
 
-        string json = JsonSerializer.Serialize(drivesWithoutUserId, JsonSerializerOptions);
+        List<DriveImportDto> exportable = drives
+            .Select(d => new DriveImportDto(d.Letter, d.IpAddress, d.Name, d.Username, d.Password))
+            .ToList();
+
+        string plaintext = JsonSerializer.Serialize(exportable, JsonSerializerOptions);
+        string vault = vaultCipher.Encrypt(plaintext, passphrase);
 
         FolderPickerResult folderResult = await FolderPicker.Default.PickAsync(cancellationToken);
         if (!folderResult.IsSuccessful)
@@ -48,7 +60,8 @@ public sealed class ExportDrives(
             return Result.Failure(FolderPickerErrors.InvalidFolderPath);
         }
 
-        string filePath = Path.Combine(folderResult.Folder.Path, FileName);
+        string fileName = $"helix-drives-{DateTime.UtcNow:yyyyMMdd-HHmmss}{FileExtension}";
+        string filePath = Path.Combine(folderResult.Folder.Path, fileName);
 
         if (File.Exists(filePath))
         {
@@ -57,7 +70,7 @@ public sealed class ExportDrives(
 
         try
         {
-            await File.WriteAllTextAsync(filePath, json, cancellationToken);
+            await File.WriteAllTextAsync(filePath, vault, cancellationToken);
         }
         catch (UnauthorizedAccessException)
         {

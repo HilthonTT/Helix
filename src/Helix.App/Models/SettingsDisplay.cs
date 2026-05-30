@@ -42,7 +42,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
     private bool _setOnStartup;
     async partial void OnSetOnStartupChanged(bool value)
     {
-        await UpdatePropertyAsync(builder => builder.AutoMinimize = value);
+        await UpdatePropertyAsync(builder => builder.SetOnStartup = value);
     }
 
     [ObservableProperty]

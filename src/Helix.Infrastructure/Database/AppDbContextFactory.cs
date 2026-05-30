@@ -18,10 +18,13 @@ internal sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbCon
             Password = DatabaseConfiguration.DesignTimePassword
         }.ToString();
 
+        optionsBuilder.UseSqlite(connectionString);
+
+#if DEBUG
         optionsBuilder
-            .UseSqlite(connectionString)
             .EnableSensitiveDataLogging()
             .LogTo(Console.WriteLine, LogLevel.Information);
+#endif
 
         return new AppDbContext(optionsBuilder.Options);
     }

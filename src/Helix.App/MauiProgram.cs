@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using Helix.Application;
 using Helix.Infrastructure;
+using Helix.Infrastructure.Cryptography;
 using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Handlers;
@@ -9,6 +10,7 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using SharpHook;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using System.Diagnostics;
 using Windows.Graphics;
 
 namespace Helix.App;
@@ -95,9 +97,20 @@ public static class MauiProgram
 
         MauiApp app = builder.Build();
 
+        // Resolve the SQLCipher key from SecureStorage on a background thread before
+        // any DbContext is constructed. Wrapped in Task.Run so no UI/MAUI sync context
+        // is captured by the underlying SecureStorage call.
+        Task.Run(static () => PasswordGenerator.InitializeAsync()).GetAwaiter().GetResult();
+
         var hook = app.Services.GetRequiredService<IGlobalHook>();
 
-        _ = hook.RunAsync();
+        // Single fire-and-forget launch of the global hook; observe faults so they
+        // are not silently swallowed.
+        hook.RunAsync().ContinueWith(
+            static t => Debug.WriteLine($"Helix: global hook faulted: {t.Exception}"),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
 
         return app;
     }

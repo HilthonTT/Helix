@@ -121,27 +121,19 @@ internal sealed partial class HomeViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            bool isFailure = false;
-            Error error = Error.None;
+            // ConnectAllDrives.Handle is already fully async — no need to offload via Task.Run.
+            Result result = await _connectAllDrives.Handle();
 
-            // Run the drive connection process on a background thread
-            await Task.Run(async () =>
-            {
-                Result result = await _connectAllDrives.Handle();
-                isFailure = result.IsFailure;
-                error = result.Error;
-
-                WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
-            });
+            WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
             foreach (DriveDisplay drive in Drives)
             {
                 WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
             }
 
-            if (isFailure)
+            if (result.IsFailure)
             {
-                await DisplayErrorAsync(error);
+                await DisplayErrorAsync(result.Error);
             }
         }
         finally
@@ -195,13 +187,27 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        List<DriveDisplay> disconnectedDrives = Drives
-            .Where(d => !_nasConnector.IsConnected(d.Letter))
-            .ToList();
-
-        foreach (DriveDisplay disconnectedDrive in disconnectedDrives)
+        // Batch lookup — single DriveInfo.GetDrives() scan rather than per-drive.
+        HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+        if (Drives.All(d => connectedLetters.Contains(d.Letter)))
         {
-            WeakReferenceMessenger.Default.Send(new ToggleConnectDriveMessage(disconnectedDrive.Id));
+            return;
+        }
+
+        // ConnectAllDrives.Handle internally runs Task.WhenAll across all disconnected
+        // drives — much faster than the previous serial per-drive message dispatch.
+        Result connectResult = await _connectAllDrives.Handle();
+
+        WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
+
+        foreach (DriveDisplay drive in Drives)
+        {
+            WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
+        }
+
+        if (connectResult.IsFailure)
+        {
+            await DisplayErrorAsync(connectResult.Error);
         }
     }
 
@@ -225,9 +231,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     private string ValidateTotalStorage()
     {
-        DriveDisplay? connectedDrive = Drives
-            .Where(d => _nasConnector.IsConnected(d.Letter))
-            .FirstOrDefault();
+        HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+        DriveDisplay? connectedDrive = Drives.FirstOrDefault(d => connectedLetters.Contains(d.Letter));
 
         if (connectedDrive is null)
         {
@@ -239,11 +244,10 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     private string ValidateTotalConnected()
     {
-        List<DriveDisplay> connectedDrives = Drives
-            .Where(d => _nasConnector.IsConnected(d.Letter))
-            .ToList();
+        HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+        int count = Drives.Count(d => connectedLetters.Contains(d.Letter));
 
-        return $"{connectedDrives.Count} / {Drives.Count}";
+        return $"{count} / {Drives.Count}";
     }
 
     private void RegisterMessages()

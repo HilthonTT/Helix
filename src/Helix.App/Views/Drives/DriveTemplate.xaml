@@ -4,8 +4,7 @@
              xmlns:models="clr-namespace:Helix.App.Models"
              xmlns:icons="clr-namespace:Helix.App.Icons"
              x:Class="Helix.App.Views.Drives.DriveTemplate"
-             x:DataType="models:DriveDisplay"
-             BindingContext="{Binding .}">
+             x:DataType="models:DriveDisplay">
     
     <Grid ColumnDefinitions="100,*, *, 100, 70" ColumnSpacing="5">
         <Label x:Name="Letter" Text="{Binding Letter}"/>
