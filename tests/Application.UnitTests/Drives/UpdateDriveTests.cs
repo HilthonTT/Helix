@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using Helix.Application.Abstractions.Authentication;
-using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Core.Errors;
 using Helix.Application.Drives;
@@ -34,16 +33,14 @@ public sealed class UpdateDriveTests
     private readonly IDriveRepository _driveRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly ILoggedInUser _loggedInUserMock;
-    private readonly ICacheService _cacheServiceMock;
 
     public UpdateDriveTests()
     {
         _driveRepositoryMock = Substitute.For<IDriveRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _loggedInUserMock = Substitute.For<ILoggedInUser>();
-        _cacheServiceMock = Substitute.For<ICacheService>();
 
-        _updateDrive = new(_driveRepositoryMock, _unitOfWorkMock, _loggedInUserMock, _cacheServiceMock);
+        _updateDrive = new(_driveRepositoryMock, _unitOfWorkMock, _loggedInUserMock);
     }
 
     [Fact]

@@ -1,5 +1,4 @@
 ﻿using Helix.Application.Abstractions.Desktop;
-using IWshRuntimeLibrary;
 using SharedKernel;
 using System.Runtime.InteropServices;
 
@@ -14,58 +13,54 @@ internal sealed class DesktopService : IDesktopService
     public void ToggleDesktopShortcut(bool value)
     {
         if (value)
-        {
             CreateDesktopShortcut();
-        }
         else
-        {
             DeleteDesktopShortcut();
-        }
     }
 
     private static void CreateDesktopShortcut()
     {
-        // Ensure the Desktop folder path is accessible
         Ensure.NotNull(DesktopFolder, nameof(DesktopFolder));
 
-        // Ensure the process path is valid
         string? processPath = Environment.ProcessPath;
-        if (string.IsNullOrEmpty(processPath) || !System.IO.File.Exists(processPath))
-        {
+        if (string.IsNullOrEmpty(processPath) || !File.Exists(processPath))
             throw new InvalidOperationException("The process path is null or invalid.");
-        }
 
-        Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
-        Ensure.NotNull(shellType, nameof(shellType));
-
-        object? shellObj = null;
+        // Late binding - no COM reference needed at compile time
         try
         {
-            shellObj = Activator.CreateInstance(shellType);
-            if (shellObj is not IWshShell shell)
-            {
+            // Create WScript.Shell dynamically
+            Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
+            if (shellType == null)
+                throw new InvalidOperationException("WScript.Shell is not available.");
+
+            object? shellObj = Activator.CreateInstance(shellType);
+            if (shellObj == null)
                 throw new InvalidOperationException("Failed to create WScript.Shell instance.");
+
+            try
+            {
+                dynamic shell = shellObj;
+                dynamic shortcut = shell.CreateShortcut(ShortcutPath);
+
+                shortcut.TargetPath = processPath;
+                shortcut.WorkingDirectory = Path.GetDirectoryName(processPath);
+                shortcut.Description = "Helix desktop shortcut.";
+                // Optional: shortcut.IconLocation = "...";
+
+                shortcut.Save();
             }
-
-            // Create the shortcut
-            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(ShortcutPath);
-            shortcut.TargetPath = processPath;
-            shortcut.WorkingDirectory = Path.GetDirectoryName(processPath)
-                ?? throw new InvalidOperationException("Unable to determine the working directory.");
-            shortcut.Description = "Helix desktop shortcut.";
-
-            shortcut.Save();
+            finally
+            {
+                if (shellObj is IDisposable disposable)
+                    disposable.Dispose();
+                else
+                    Marshal.ReleaseComObject(shellObj);
+            }
         }
         catch (Exception ex)
         {
-            throw new IOException("Failed to create or save the desktop shortcut.", ex);
-        }
-        finally
-        {
-            if (shellObj is not null)
-            {
-                Marshal.ReleaseComObject(shellObj);
-            }
+            throw new IOException("Failed to create desktop shortcut.", ex);
         }
     }
 
@@ -73,14 +68,12 @@ internal sealed class DesktopService : IDesktopService
     {
         try
         {
-            if (System.IO.File.Exists(ShortcutPath))
-            {
-                System.IO.File.Delete(ShortcutPath);
-            }
+            if (File.Exists(ShortcutPath))
+                File.Delete(ShortcutPath);
         }
         catch (Exception ex)
         {
-            throw new IOException("Failed to delete the desktop shortcut.", ex);
+            throw new IOException("Failed to delete desktop shortcut.", ex);
         }
     }
 }

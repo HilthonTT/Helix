@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using Helix.Application.Abstractions.Authentication;
-using Helix.Application.Abstractions.Caching;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Core.Errors;
 using Helix.Application.Drives;
@@ -25,16 +24,14 @@ public class CreateDriveTests
     private readonly IDriveRepository _driveRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly ILoggedInUser _loggedInUserMock;
-    private readonly ICacheService _cacheServiceMock;
 
     public CreateDriveTests()
     {
         _driveRepositoryMock = Substitute.For<IDriveRepository>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _loggedInUserMock = Substitute.For<ILoggedInUser>();
-        _cacheServiceMock = Substitute.For<ICacheService>();
 
-        _createDrive = new(_driveRepositoryMock, _unitOfWorkMock, _loggedInUserMock, _cacheServiceMock);
+        _createDrive = new(_driveRepositoryMock, _unitOfWorkMock, _loggedInUserMock);
     }
 
     [Fact]
@@ -107,23 +104,6 @@ public class CreateDriveTests
 
         // Assert
         await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task Handle_Should_CallCacheService_WhenCreateSucceeds()
-    {
-        // Arrange
-        _loggedInUserMock.UserId.Returns(UserId);
-        _loggedInUserMock.IsLoggedIn.Returns(true);
-
-        _driveRepositoryMock.IsLetterUniqueAsync(Arg.Is<string>(e => e == Request.Letter), _loggedInUserMock.UserId)
-            .Returns(true);
-
-        // Act
-        await _createDrive.Handle(Request);
-
-        // Assert
-        await _cacheServiceMock.Received(1).RemoveAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]

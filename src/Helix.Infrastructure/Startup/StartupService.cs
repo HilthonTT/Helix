@@ -1,5 +1,4 @@
 ﻿using Helix.Application.Abstractions.Startup;
-using IWshRuntimeLibrary;
 using SharedKernel;
 using System.Runtime.InteropServices;
 
@@ -14,63 +13,60 @@ internal sealed class StartupService : IStartupService
 
     public bool IsSetToStartup()
     {
-        return System.IO.File.Exists(ShortcutPath);
+        return File.Exists(ShortcutPath);
     }
 
     public void ToggleStartup(bool value)
     {
         if (value)
-        {
-            ToggleStartupInternal();
-        }
+            CreateStartupShortcut();
         else
-        {
             DeleteShortcut();
-        }
     }
 
-    private static void ToggleStartupInternal()
+    private static void CreateStartupShortcut()
     {
-        // Check if the Startup folder path is accessible
         Ensure.NotNull(StartupFolder, nameof(StartupFolder));
 
-        // Ensure the process path is not null or invalid before proceeding
         string? processPath = Environment.ProcessPath;
-        if (string.IsNullOrEmpty(processPath) || !System.IO.File.Exists(processPath))
-        {
+        if (string.IsNullOrEmpty(processPath) || !File.Exists(processPath))
             throw new InvalidOperationException("The process path is null or invalid.");
-        }
 
+        // Late binding - no COM reference needed
         Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
-        Ensure.NotNull(shellType, nameof(shellType));
+        if (shellType == null)
+            throw new InvalidOperationException("WScript.Shell is not available on this system.");
 
         object? shellObj = null;
+
         try
         {
             shellObj = Activator.CreateInstance(shellType);
-            if (shellObj is not IWshShell shell)
-            {
+            if (shellObj == null)
                 throw new InvalidOperationException("Failed to create WScript.Shell instance.");
-            }
 
-            // Create the shortcut
-            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(ShortcutPath);
+            dynamic shell = shellObj;
+            dynamic shortcut = shell.CreateShortcut(ShortcutPath);
+
             shortcut.TargetPath = processPath;
             shortcut.WorkingDirectory = Path.GetDirectoryName(processPath)
                 ?? throw new InvalidOperationException("Unable to determine the working directory.");
             shortcut.Description = "Helix startup shortcut.";
 
+            // Optional: You can add an icon
+            // shortcut.IconLocation = $"{processPath},0";
+
             shortcut.Save();
         }
         catch (Exception ex)
         {
-            throw new IOException("Failed to create or save the startup shortcut.", ex);
+            throw new IOException("Failed to create startup shortcut.", ex);
         }
         finally
         {
-            if (shellObj is not null)
+            if (shellObj != null)
             {
-                Marshal.ReleaseComObject(shellObj);
+                try { Marshal.ReleaseComObject(shellObj); } catch { }
             }
         }
     }
@@ -79,10 +75,8 @@ internal sealed class StartupService : IStartupService
     {
         try
         {
-            if (System.IO.File.Exists(ShortcutPath))
-            {
-                System.IO.File.Delete(ShortcutPath);
-            }
+            if (File.Exists(ShortcutPath))
+                File.Delete(ShortcutPath);
         }
         catch (Exception ex)
         {
