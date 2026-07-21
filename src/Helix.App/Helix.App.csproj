@@ -50,6 +50,19 @@
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 	</PropertyGroup>
 
+	<!--
+	Folder (unpackaged) publish support: `dotnet publish -p:RuntimeIdentifierOverride=win-x64`.
+	The RID and self-contained switches are applied HERE (App project only) instead of on the
+	command line, because as global CLI properties they would also flow into the referenced
+	class libraries, where WindowsAppSDKSelfContained fails with
+	"requires a supported Windows architecture".
+	-->
+	<PropertyGroup Condition="'$(RuntimeIdentifierOverride)' != ''">
+		<RuntimeIdentifier>$(RuntimeIdentifierOverride)</RuntimeIdentifier>
+		<SelfContained>true</SelfContained>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\mainicon.svg" />

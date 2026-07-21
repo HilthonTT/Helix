@@ -27,6 +27,7 @@
 5. 🏗️ [Architecture](#architecture)
 6. 🤸 [Quick Start](#quick-start)
 7. 🧪 [Building & Testing](#building-testing)
+8. 📦 [Publishing to a Folder](#publishing)
 
 ## <a name="introduction">🤖 Introduction</a>
 
@@ -116,3 +117,21 @@ dotnet test tests/ArchitectureTests/ArchitectureTests.csproj
 ```
 
 The MAUI app itself (`Helix.App`) is normally launched from Visual Studio 2022 because of its Windows packaging configuration.
+
+## <a name="publishing">📦 Publishing to a Folder</a>
+
+To compile the app into a single deployable folder (e.g. `C:\Helix`) containing `Helix.App.exe` and everything it needs to run, execute this from the repository root:
+
+```bash
+dotnet publish src/Helix.App/Helix.App.csproj -f net9.0-windows10.0.19041.0 -c Release -p:RuntimeIdentifierOverride=win-x64 -o C:\Helix
+```
+
+Then start the app with `C:\Helix\Helix.App.exe`.
+
+**Notes**
+
+- The output is fully **self-contained**: the .NET runtime, the Windows App SDK runtime, and the native SQLCipher library are all included, so the target machine needs nothing pre-installed.
+- For ARM64 Windows machines, use `-p:RuntimeIdentifierOverride=win-arm64` instead.
+- `-p:RuntimeIdentifierOverride` (rather than the usual `-r`) is required: passing the runtime identifier as a global CLI property would leak into the referenced class libraries and fail the Windows App SDK build. The override is picked up by `Helix.App.csproj` only, which turns it into a self-contained, RID-specific publish.
+- The folder is portable — you can copy it to another location or machine and run it from there.
+- **User data is not stored in this folder.** The encrypted database lives in the per-user app data directory (`%LOCALAPPDATA%`), so replacing or upgrading the `C:\Helix` folder never touches your drives, settings, or audit logs.
