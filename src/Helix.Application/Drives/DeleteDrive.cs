@@ -23,6 +23,11 @@ public sealed class DeleteDrive(
             return Result.Failure(validationResult.Error);
         }
 
+        if (!loggedInUser.IsLoggedIn)
+        {
+            return Result.Failure(AuthenticationErrors.InvalidPermissions);
+        }
+
         Drive? drive = await driveRepository.GetByIdAsync(request.DriveId, cancellationToken);
         if (drive is null)
         {

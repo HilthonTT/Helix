@@ -25,28 +25,36 @@ public sealed class ConnectAllDrives(
             return Result.Success();
         }
 
-        List<Drive> disconnectedDrives = drives
-            .Where(d => !nasConnector.IsConnected(d.Letter))
-            .ToList();
+        // Enumerate mounted drives once rather than calling IsConnected (a full
+        // DriveInfo.GetDrives() scan) once per drive.
+        HashSet<string> connectedLetters = nasConnector.GetConnectedLetters();
 
-        IEnumerable<Task> connectTasks = disconnectedDrives.Select(async drive =>
+        Drive[] disconnectedDrives = drives
+            .Where(d => !connectedLetters.Contains(d.Letter))
+            .ToArray();
+
+        if (disconnectedDrives.Length == 0)
         {
-            Result result = await nasConnector.ConnectAsync(drive, cancellationToken);
-            if (result.IsFailure)
+            return Result.Success();
+        }
+
+        // ConnectAsync never throws — it returns Result.Failure for expected failures
+        // (e.g. a bad password), so Task.WhenAll cannot fault and we aggregate the
+        // per-drive outcomes instead of using exceptions for control flow.
+        Result[] results = await Task.WhenAll(
+            disconnectedDrives.Select(drive => nasConnector.ConnectAsync(drive, cancellationToken)));
+
+        List<string> failures = [];
+        for (int i = 0; i < results.Length; i++)
+        {
+            if (results[i].IsFailure)
             {
-                throw new InvalidOperationException(result.Error.Description);
+                failures.Add($"{disconnectedDrives[i].Letter}: {results[i].Error.Description}");
             }
-        });
-
-        try
-        {
-            await Task.WhenAll(connectTasks);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Result.Failure(ex.Message);
         }
 
-        return Result.Success();
+        return failures.Count == 0
+            ? Result.Success()
+            : Result.Failure(DriveErrors.FailedToConnect(string.Join(Environment.NewLine, failures)));
     }
 }

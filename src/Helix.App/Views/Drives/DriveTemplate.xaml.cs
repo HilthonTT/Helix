@@ -60,7 +60,16 @@ public sealed partial class DriveTemplate : ContentView
 
     private async void ToggleConnect(object? sender, EventArgs e)
     {
-        await ToggleConnectInternalAsync();
+        // Event handler is `async void`: an escaping exception would tear down the
+        // whole app. Guard it so connection problems always surface as an alert.
+        try
+        {
+            await ToggleConnectInternalAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAlert(ex.Message);
+        }
     }
 
     private void CheckConnectivityAndUpdateUI()
@@ -112,7 +121,24 @@ public sealed partial class DriveTemplate : ContentView
 
     private static Task ShowErrorAlert(string message)
     {
-        return Shell.Current.DisplayAlert("Something went wrong!", message, "Ok");
+        // Marshal to the UI thread and swallow failures from stacked alerts: on WinUI
+        // a DisplayAlert raised while another is showing throws, which would otherwise
+        // bubble out of an async void handler and crash the app.
+        return MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            try
+            {
+                Page? page = Shell.Current;
+                if (page is not null)
+                {
+                    await page.DisplayAlert("Something went wrong!", message, "Ok");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Helix: failed to show error alert: {ex}");
+            }
+        });
     }
 
     private void HandleUpdate(object? sender, TappedEventArgs e)
@@ -162,7 +188,15 @@ public sealed partial class DriveTemplate : ContentView
                 return;
             }
 
-            await ToggleConnectInternalAsync();
+            // `async void` messenger callback — never let an exception escape.
+            try
+            {
+                await ToggleConnectInternalAsync();
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAlert(ex.Message);
+            }
         });
 
         WeakReferenceMessenger.Default.Unregister<NotifyDriveConnectivityMessage>(this);

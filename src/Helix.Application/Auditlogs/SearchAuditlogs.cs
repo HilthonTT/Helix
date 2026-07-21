@@ -20,7 +20,11 @@ public sealed class SearchAuditlogs(IDbContext context, ILoggedInUser loggedInUs
             return Result.Failure<List<Auditlog>>(AuthenticationErrors.InvalidPermissions);
         }
 
-        IQueryable<Auditlog> auditlogsQuery = context.AuditLogs.AsNoTracking();
+        // Scope to the logged-in user — without this filter the search would leak
+        // other users' audit logs.
+        IQueryable<Auditlog> auditlogsQuery = context.AuditLogs
+            .AsNoTracking()
+            .Where(a => a.UserId == loggedInUser.UserId);
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {

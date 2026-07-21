@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Helix.Infrastructure.Cryptography;
 
@@ -93,18 +92,11 @@ public static class PasswordGenerator
     /// </summary>
     internal static string GenerateRandomPassword(int length)
     {
-        var passwordBuilder = new StringBuilder(length);
-
-        byte[] randomBytes = new byte[length];
-        RandomNumberGenerator.Fill(randomBytes);
-
-        for (int i = 0; i < length; i++)
-        {
-            char randomChar = ValidChars[randomBytes[i] % ValidChars.Length];
-            passwordBuilder.Append(randomChar);
-        }
-
-        return passwordBuilder.ToString();
+        // GetItems performs unbiased sampling — `randomByte % ValidChars.Length`
+        // would skew the distribution toward the start of the alphabet because
+        // 256 is not a multiple of the character-set size. Only affects freshly
+        // generated keys; existing keys are read back from SecureStorage as-is.
+        return new string(RandomNumberGenerator.GetItems<char>(ValidChars, length));
     }
 
     /// <summary>The configured password length, exposed for tests.</summary>

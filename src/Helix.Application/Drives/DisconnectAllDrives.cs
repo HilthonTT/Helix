@@ -25,28 +25,36 @@ public sealed class DisconnectAllDrives(
             return Result.Success();
         }
 
-        List<Drive> connectedDrives = drives
-            .Where(d => nasConnector.IsConnected(d.Letter))
-            .ToList();
+        // Enumerate mounted drives once rather than calling IsConnected (a full
+        // DriveInfo.GetDrives() scan) once per drive.
+        HashSet<string> connectedLetters = nasConnector.GetConnectedLetters();
 
-        IEnumerable<Task> disconnectTasks = connectedDrives.Select(async drive =>
+        Drive[] connectedDrives = drives
+            .Where(d => connectedLetters.Contains(d.Letter))
+            .ToArray();
+
+        if (connectedDrives.Length == 0)
         {
-            Result result = await nasConnector.DisconnectAsync(drive, cancellationToken);
-            if (result.IsFailure)
+            return Result.Success();
+        }
+
+        // DisconnectAsync never throws — it returns Result.Failure for expected
+        // failures, so we aggregate the per-drive outcomes instead of using
+        // exceptions for control flow.
+        Result[] results = await Task.WhenAll(
+            connectedDrives.Select(drive => nasConnector.DisconnectAsync(drive, cancellationToken)));
+
+        List<string> failures = [];
+        for (int i = 0; i < results.Length; i++)
+        {
+            if (results[i].IsFailure)
             {
-                throw new InvalidOperationException(result.Error.Description);
+                failures.Add($"{connectedDrives[i].Letter}: {results[i].Error.Description}");
             }
-        });
-
-        try
-        {
-            await Task.WhenAll(disconnectTasks);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Result.Failure(ex.Message);
         }
 
-        return Result.Success();
+        return failures.Count == 0
+            ? Result.Success()
+            : Result.Failure(DriveErrors.FailedToDisconnect(string.Join(Environment.NewLine, failures)));
     }
 }

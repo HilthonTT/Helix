@@ -4,6 +4,7 @@ using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Startup;
 using Helix.Domain.Settings;
+using Helix.Domain.Users;
 using SharedKernel;
 using SettingsModel = Helix.Domain.Settings.Settings;
 
@@ -57,6 +58,11 @@ public sealed class UpdateSettings(
             return validationResult;
         }
 
+        if (!loggedInUser.IsLoggedIn)
+        {
+            return Result.Failure(AuthenticationErrors.InvalidPermissions);
+        }
+
         SettingsModel? settings = await settingsRepository.GetByUserIdAsync(loggedInUser.UserId, cancellationToken);
         if (settings is null)
         {
@@ -65,15 +71,25 @@ public sealed class UpdateSettings(
 
         settings.Update(
             request.AutoConnect,
-            request.AutoMinimize, 
+            request.AutoMinimize,
             request.SetOnStartup,
             request.SetDesktopShortcut,
             request.TimerCount,
             request.Language);
 
-        startupService.ToggleStartup(settings.SetOnStartup);
+        // The shortcut services throw IOException on failure (e.g. the startup folder
+        // is locked down by policy). Handlers must never throw for expected failures —
+        // convert to a Result so the settings page shows an alert instead of crashing.
+        try
+        {
+            startupService.ToggleStartup(settings.SetOnStartup);
 
-        desktopService.ToggleDesktopShortcut(settings.SetDesktopShortcut);
+            desktopService.ToggleDesktopShortcut(settings.SetDesktopShortcut);
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException)
+        {
+            return Result.Failure(SettingsError.ShortcutUpdateFailed(ex.Message));
+        }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

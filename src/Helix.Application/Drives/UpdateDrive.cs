@@ -41,15 +41,17 @@ public sealed class UpdateDrive(
             return Result.Failure(DriveErrors.NotFound(request.DriveId));
         }
 
-        if (!await driveRepository.IsLetterUniqueAsync(request.Letter, loggedInUser.UserId, cancellationToken)
-            && drive.Letter != request.Letter)
-        {
-            return Result.Failure(DriveErrors.LetterNotUnique(request.Letter));
-        }
-
         if (drive.UserId != loggedInUser.UserId)
         {
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
+        }
+
+        // Letters are stored uppercase, so compare case-insensitively — otherwise
+        // re-saving your own drive with a lowercase letter is falsely rejected.
+        bool isSameLetter = string.Equals(drive.Letter, request.Letter, StringComparison.OrdinalIgnoreCase);
+        if (!isSameLetter && !await driveRepository.IsLetterUniqueAsync(request.Letter, loggedInUser.UserId, cancellationToken))
+        {
+            return Result.Failure(DriveErrors.LetterNotUnique(request.Letter));
         }
 
         drive.Update(request.Letter, request.IpAddress, request.Name, request.Username, request.Password);

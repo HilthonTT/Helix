@@ -22,9 +22,11 @@ public sealed class SearchDrives(
             return Result.Failure<List<Drive>>(AuthenticationErrors.InvalidPermissions);
         }
 
+        // Scope to the logged-in user — without this filter the search would leak
+        // other users' drives (including their NAS credentials).
         IQueryable<Drive> drivesQuery = context.Drives
             .AsNoTracking()
-            .AsQueryable();
+            .Where(d => d.UserId == loggedInUser.UserId);
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {

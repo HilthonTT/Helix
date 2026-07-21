@@ -9,7 +9,7 @@ namespace Helix.Persistence.Interceptors;
 internal sealed class InsertAuditLogsInterceptor : SaveChangesInterceptor
 {
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
-        DbContextEventData eventData, 
+        DbContextEventData eventData,
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
@@ -19,6 +19,20 @@ internal sealed class InsertAuditLogsInterceptor : SaveChangesInterceptor
         }
 
         return base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
+
+    public override InterceptionResult<int> SavingChanges(
+        DbContextEventData eventData,
+        InterceptionResult<int> result)
+    {
+        // Mirror the async path — a synchronous SaveChanges() call must not
+        // silently skip audit logging.
+        if (eventData.Context is not null)
+        {
+            InsertAuditLogs(eventData.Context);
+        }
+
+        return base.SavingChanges(eventData, result);
     }
 
     private static void InsertAuditLogs(DbContext context)
