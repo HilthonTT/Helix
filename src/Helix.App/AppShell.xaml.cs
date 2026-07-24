@@ -47,9 +47,7 @@ public sealed partial class AppShell : Shell
 
     private async void OnLogout(object? sender, EventArgs e)
     {
-        LogoutUser logoutUser = App.ServiceProvider.GetRequiredService<LogoutUser>();
-
-        Result result = await logoutUser.Handle();
+        Result result = await ScopedHandler.HandleAsync((LogoutUser h) => h.Handle());
         if (result.IsFailure)
         {
             await Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");

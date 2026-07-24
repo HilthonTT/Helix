@@ -21,22 +21,10 @@ namespace Helix.App.Pages.Home;
 internal sealed partial class HomeViewModel : BaseViewModel
 {
     private readonly INasConnector _nasConnector;
-    private readonly GetSettings _getSettings;
-    private readonly GetDrives _getDrives;
-    private readonly ExportDrives _exportDrives;
-    private readonly ImportDrives _importDrives;
-    private readonly ConnectAllDrives _connectAllDrives;
-    private readonly DisconnectAllDrives _disconnectAllDrives;
 
     public HomeViewModel()
     {
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
-        _getSettings = App.ServiceProvider.GetRequiredService<GetSettings>();
-        _getDrives = App.ServiceProvider.GetRequiredService<GetDrives>();
-        _exportDrives = App.ServiceProvider.GetRequiredService<ExportDrives>();
-        _importDrives = App.ServiceProvider.GetRequiredService<ImportDrives>();
-        _connectAllDrives = App.ServiceProvider.GetRequiredService<ConnectAllDrives>();
-        _disconnectAllDrives = App.ServiceProvider.GetRequiredService<DisconnectAllDrives>();
 
         RegisterMessages();
         InitializeCountdownEvents();
@@ -66,7 +54,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private async Task ExportDrivesAsync()
     {
-        Result result = await _exportDrives.Handle();
+        Result result = await ScopedHandler.HandleAsync((ExportDrives h) => h.Handle());
         if (result.IsFailure)
         {
             await DisplayErrorAsync(result.Error);
@@ -79,7 +67,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private async Task ImportDrivesAsync()
     {
-        Result<List<Drive>> result = await _importDrives.Handle();
+        Result<List<Drive>> result = await ScopedHandler.HandleAsync((ImportDrives h) => h.Handle());
         if (result.IsFailure)
         {
             await DisplayErrorAsync(result.Error);
@@ -122,7 +110,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
             IsBusy = true;
 
             // ConnectAllDrives.Handle is already fully async — no need to offload via Task.Run.
-            Result result = await _connectAllDrives.Handle();
+            Result result = await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle());
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
@@ -154,7 +142,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            await _disconnectAllDrives.Handle();
+            await ScopedHandler.HandleAsync((DisconnectAllDrives h) => h.Handle());
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
@@ -172,7 +160,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private async Task ConnectDrivesOnStartupAsync()
     {
-        Result<SettingsModel> result = await _getSettings.Handle();
+        Result<SettingsModel> result = await ScopedHandler.HandleAsync((GetSettings h) => h.Handle());
         if (result.IsFailure)
         {
             return;
@@ -196,7 +184,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         // ConnectAllDrives.Handle internally runs Task.WhenAll across all disconnected
         // drives — much faster than the previous serial per-drive message dispatch.
-        Result connectResult = await _connectAllDrives.Handle();
+        Result connectResult = await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle());
 
         WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
@@ -213,7 +201,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     public async Task<List<Drive>> FetchDrivesAsync()
     {
-        Result<List<Drive>> result = await _getDrives.Handle();
+        Result<List<Drive>> result = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
         if (result.IsFailure)
         {
             return [];

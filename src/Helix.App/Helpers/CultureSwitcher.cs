@@ -43,13 +43,16 @@ public static class CultureSwitcher
 
     public static Language GetCurrentLanguage()
     {
-        string currentCulture = AppResources.Culture.Name;
+        string currentCulture = AppResources.Culture?.Name ?? CultureInfo.CurrentUICulture.Name;
 
         Language currentLanguage = LanguageToCultureMap
             .FirstOrDefault(x => currentCulture.StartsWith(x.Value, StringComparison.OrdinalIgnoreCase))
             .Key;
 
-        return currentLanguage;
+        // Unsupported OS cultures (e.g. es-ES) miss the map and FirstOrDefault yields
+        // default(Language) = 0, which is not a member of the enum and would blow up
+        // LanguageToString/StringToLanguage round-trips. Fall back to English.
+        return currentLanguage == default ? Language.English : currentLanguage;
     }
 
     public static Language StringToLanguage(string languageString)

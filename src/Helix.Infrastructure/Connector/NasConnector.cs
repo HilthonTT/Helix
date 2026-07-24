@@ -22,12 +22,14 @@ internal sealed class NasConnector : INasConnector
         RunWithTimeoutAsync(
             () => Connect(drive),
             timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+            failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
             cancellationToken);
 
     public Task<Result> DisconnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
         RunWithTimeoutAsync(
             () => Disconnect(drive),
             timeoutError: () => Result.Failure(DriveErrors.FailedToDisconnect("Disconnection timed out.")),
+            failure: message => Result.Failure(DriveErrors.FailedToDisconnect(message)),
             cancellationToken);
 
     public bool IsConnected(string letter)
@@ -99,6 +101,7 @@ internal sealed class NasConnector : INasConnector
     private static async Task<Result> RunWithTimeoutAsync(
         Func<Result> work,
         Func<Result> timeoutError,
+        Func<string, Result> failure,
         CancellationToken cancellationToken)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -112,12 +115,12 @@ internal sealed class NasConnector : INasConnector
         catch (OperationCanceledException)
         {
             return cancellationToken.IsCancellationRequested
-                ? Result.Failure(DriveErrors.FailedToConnect("Operation canceled by user."))
+                ? failure("Operation canceled by user.")
                 : timeoutError();
         }
         catch (Exception ex)
         {
-            return Result.Failure(DriveErrors.FailedToConnect($"Unexpected error: {ex.Message}"));
+            return failure($"Unexpected error: {ex.Message}");
         }
     }
 

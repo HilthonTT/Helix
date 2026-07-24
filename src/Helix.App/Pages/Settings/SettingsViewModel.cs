@@ -19,12 +19,10 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     private const string AccountSection = "account";
     private const string PreferencesSection = "preferences";
 
-    private readonly GetSettings _getSettings;
     private readonly ILoggedInUser _loggedInUser;
 
     public SettingsViewModel()
     {
-        _getSettings = App.ServiceProvider.GetRequiredService<GetSettings>();
         _loggedInUser = App.ServiceProvider.GetRequiredService<ILoggedInUser>();
 
         Username = _loggedInUser.Username;
@@ -79,7 +77,12 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     {
         try
         {
-            Result<SettingsModel> result = await _getSettings.Handle(cancellationToken);
+            // The page instance is cached by Shell across logins — re-read the
+            // username so a different account doesn't see the previous one.
+            Username = _loggedInUser.Username;
+
+            Result<SettingsModel> result = await ScopedHandler.HandleAsync(
+                (GetSettings h) => h.Handle(cancellationToken));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);

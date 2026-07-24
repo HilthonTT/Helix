@@ -11,14 +11,8 @@ namespace Helix.App.Modals.Drives.Update;
 
 internal sealed partial class UpdateDriveViewModel : BaseViewModel
 {
-    private readonly GetDriveById _getDriveById;
-    private readonly UpdateDrive _updateDrive;
-
     public UpdateDriveViewModel()
     {
-        _updateDrive = App.ServiceProvider.GetRequiredService<UpdateDrive>();
-        _getDriveById = App.ServiceProvider.GetRequiredService<GetDriveById>();
-
         RegisterMessages();
     }
 
@@ -39,7 +33,7 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
 
             var request = new UpdateDrive.Request(Drive.Id, Drive.Letter, Drive.IpAddress, Drive.Name, Drive.Username, Drive.Password);
 
-            Result result = await _updateDrive.Handle(request);
+            Result result = await ScopedHandler.HandleAsync((UpdateDrive h) => h.Handle(request));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
@@ -74,7 +68,7 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
 
             var request = new GetDriveById.Request(m.DriveId);
 
-            Result<Drive> result = await _getDriveById.Handle(request);
+            Result<Drive> result = await ScopedHandler.HandleAsync((GetDriveById h) => h.Handle(request));
             if (result.IsFailure)
             {
                 Close();

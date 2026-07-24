@@ -7,20 +7,18 @@ namespace Helix.App;
 
 public sealed partial class App : AppBase
 {
-    private readonly AppDbContext _appDbContext;
-
     public static IServiceProvider ServiceProvider { get; private set; } = default!;
 
-    public App(IServiceProvider serviceProvider, AppDbContext appDbContext)
+    public App(IServiceProvider serviceProvider)
     {
         InitializeComponent();
 
         ServiceProvider = serviceProvider;
-        _appDbContext = appDbContext;
 
         RegisterGlobalExceptionHandlers();
 
-        _appDbContext.Database.Migrate();
+        using IServiceScope scope = serviceProvider.CreateScope();
+        scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
     }
 
     /// <summary>

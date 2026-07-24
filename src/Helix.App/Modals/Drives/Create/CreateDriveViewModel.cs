@@ -12,11 +12,8 @@ namespace Helix.App.Modals.Drives.Create;
 
 internal sealed partial class CreateDriveViewModel : BaseViewModel
 {
-    private readonly CreateDrive _createDrive;
-
     public CreateDriveViewModel()
     {
-        _createDrive = App.ServiceProvider.GetRequiredService<CreateDrive>();
     }
 
     [ObservableProperty]
@@ -36,7 +33,7 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 
             var request = new CreateDrive.Request(Form.Letter, Form.IpAddress, Form.Name, Form.Username, Form.Password);
 
-            Result<Drive> result = await _createDrive.Handle(request);
+            Result<Drive> result = await ScopedHandler.HandleAsync((CreateDrive h) => h.Handle(request));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);

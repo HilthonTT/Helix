@@ -72,8 +72,14 @@ public sealed partial class SettingsPage : ContentPage
         }
     }
 
+    private readonly Dictionary<AbsoluteLayout, int> _modalCloseTokens = [];
+
     private void OpenModalInternal(AbsoluteLayout absoluteLayout, ContentView contentView)
     {
+        // Invalidate any pending close: its delayed hide would otherwise blank out a
+        // modal that was reopened within the 800 ms close animation.
+        _modalCloseTokens[absoluteLayout] = _modalCloseTokens.GetValueOrDefault(absoluteLayout) + 1;
+
         absoluteLayout.IsVisible = true;
         contentView.Opacity = 0;
         _ = contentView.FadeTo(1, 800, Easing.CubicIn);
@@ -84,12 +90,19 @@ public sealed partial class SettingsPage : ContentPage
 
     private async Task CloseModalInternal(AbsoluteLayout absoluteLayout, ContentView contentView)
     {
+        int token = _modalCloseTokens.GetValueOrDefault(absoluteLayout) + 1;
+        _modalCloseTokens[absoluteLayout] = token;
+
         _ = contentView.FadeTo(0, 800, Easing.CubicOut);
         _ = BlockScreen.FadeTo(0, 800, Easing.CubicOut);
         BlockScreen.InputTransparent = true;
 
         await Task.Delay(800);
-        absoluteLayout.IsVisible = false;
+
+        if (_modalCloseTokens.GetValueOrDefault(absoluteLayout) == token)
+        {
+            absoluteLayout.IsVisible = false;
+        }
     }
 
     private void RegisterMessages()

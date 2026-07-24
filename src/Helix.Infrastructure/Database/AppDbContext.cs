@@ -47,10 +47,11 @@ public sealed class AppDbContext : DbContext, IUnitOfWork, IDbContext
             Password = PasswordGenerator.GetOrCreatePassword(),
         }.ToString();
 
-        var connection = new SqliteConnection(connectionString);
-
+        // Pass the connection string, not a SqliteConnection instance — EF Core does
+        // not take ownership of externally supplied connections, so each context
+        // instantiation would leak an undisposed connection (and its native handle).
         optionsBuilder
-            .UseSqlite(connection)
+            .UseSqlite(connectionString)
             .ReplaceService<IRelationalCommandBuilderFactory, CustomRelationalCommandBuilderFactory>();
     }
 

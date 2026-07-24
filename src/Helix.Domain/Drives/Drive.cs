@@ -73,7 +73,7 @@ public sealed class Drive : Entity, IAuditable
         var drive = new Drive(
             Guid.NewGuid(),
             userId,
-            letter.ToUpper(),
+            letter.ToUpperInvariant(),
             ipAddress,
             name,
             username,
@@ -91,7 +91,7 @@ public sealed class Drive : Entity, IAuditable
         Ensure.NotNullOrEmpty(username, nameof(username));
         Ensure.NotNullOrEmpty(password, nameof(password));
 
-        Letter = letter.ToUpper();
+        Letter = letter.ToUpperInvariant();
         IpAddress = ipAddress;
         Name = name;
         Username = username;

@@ -3,7 +3,6 @@ using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
-using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
 
@@ -22,7 +21,7 @@ public sealed class ChangeUserPassword(
         Result validationResult = Validate(request);
         if (validationResult.IsFailure)
         {
-            return Result.Failure<Drive>(validationResult.Error);
+            return validationResult;
         }
 
         if (!loggedInUser.IsLoggedIn)

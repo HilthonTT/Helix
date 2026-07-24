@@ -12,12 +12,8 @@ namespace Helix.App.Pages.Register;
 
 internal sealed partial class RegisterViewModel : BaseViewModel
 {
-    private readonly RegisterUser _registerUser;
-
     public RegisterViewModel()
     {
-        _registerUser = App.ServiceProvider.GetRequiredService<RegisterUser>();
-
         Languages = new(CultureSwitcher.Languages);
     }
 
@@ -67,7 +63,7 @@ internal sealed partial class RegisterViewModel : BaseViewModel
 
             var request = new RegisterUser.Request(Username, Password, ConfirmedPassword);
 
-            Result<User> result = await _registerUser.Handle(request);
+            Result<User> result = await ScopedHandler.HandleAsync((RegisterUser h) => h.Handle(request));
             if (result.IsFailure)
             {
                 IsLoading = false;

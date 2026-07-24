@@ -42,6 +42,18 @@ public static class PasswordGenerator
 
             string fresh = GenerateRandomPassword(PasswordLength);
             await TryWriteToSecureStorageAsync(fresh).ConfigureAwait(false);
+
+            // If the key was not actually persisted, refuse to continue: creating the
+            // database with an in-memory-only key means it can never be reopened after
+            // a restart — silent, unrecoverable loss of all user data.
+            string? persisted = await TryReadFromSecureStorageAsync().ConfigureAwait(false);
+            if (!string.Equals(persisted, fresh, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "Failed to persist the database encryption key to SecureStorage; " +
+                    "refusing to create a database that could not be reopened.");
+            }
+
             _cachedPassword = fresh;
         }
         finally

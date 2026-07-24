@@ -98,7 +98,7 @@ public sealed class UpdateSettings(
 
     private static Result Validate(Request request)
     {
-        if (request.TimerCount < 0)
+        if (request.TimerCount <= 0)
         {
             return Result.Failure(SettingsError.TimerCountMustBePositive);
         }

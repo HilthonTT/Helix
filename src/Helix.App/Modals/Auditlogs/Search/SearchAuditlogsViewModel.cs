@@ -12,11 +12,8 @@ namespace Helix.App.Modals.Auditlogs.Search;
 
 internal sealed partial class SearchAuditlogsViewModel : BaseViewModel
 {
-    private readonly SearchAuditlogs _searchAuditlogs;
-
     public SearchAuditlogsViewModel()
     {
-        _searchAuditlogs = App.ServiceProvider.GetRequiredService<SearchAuditlogs>();
     }
 
     [ObservableProperty]
@@ -53,7 +50,7 @@ internal sealed partial class SearchAuditlogsViewModel : BaseViewModel
 
             var request = new SearchAuditlogs.Request(SearchTerm, SortOrder);
 
-            Result<List<Auditlog>> result = await _searchAuditlogs.Handle(request);
+            Result<List<Auditlog>> result = await ScopedHandler.HandleAsync((SearchAuditlogs h) => h.Handle(request));
 
             if (result.IsSuccess)
             {

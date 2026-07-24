@@ -12,11 +12,9 @@ namespace Helix.App.Pages;
 public abstract partial class BaseViewModel : ObservableObject
 {
     private readonly ICountdownService _countdownService;
-    private readonly GetSettings _getSettings;
 
     protected BaseViewModel()
     {
-        _getSettings = App.ServiceProvider.GetRequiredService<GetSettings>();
         _countdownService = App.ServiceProvider.GetRequiredService<ICountdownService>();
     }
 
@@ -44,7 +42,7 @@ public abstract partial class BaseViewModel : ObservableObject
     [RelayCommand]
     public async Task StartTimerAsync()
     {
-        Result<SettingsModel> result = await _getSettings.Handle();
+        Result<SettingsModel> result = await ScopedHandler.HandleAsync((GetSettings h) => h.Handle());
         if (result.IsSuccess)
         {
             SettingsModel settings = result.Value;
@@ -121,17 +119,19 @@ public abstract partial class BaseViewModel : ObservableObject
     /// </summary>
     public void InitializeCountdownEvents()
     {
+        // The countdown timer raises these events on a thread-pool thread; the
+        // properties are bound to UI, so marshal onto the main thread — WinUI throws
+        // when PropertyChanged for a bound property fires off the UI thread.
         _countdownService.CountdownTick += (sender, remaining) =>
-        {
-            SecondsRemaining = remaining;
-        };
+            MainThread.BeginInvokeOnMainThread(() => SecondsRemaining = remaining);
 
         _countdownService.CountdownFinished += (sender, args) =>
-        {
-            ShowRedoButton = true;
-            TimerCancelled = true;
-            MinimizeApp();
-        };
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ShowRedoButton = true;
+                TimerCancelled = true;
+                MinimizeApp();
+            });
     }
 
     /// <summary>
@@ -140,7 +140,8 @@ public abstract partial class BaseViewModel : ObservableObject
     /// </summary>
     public async Task InitializeCountdownAsync(CancellationToken cancellationToken = default)
     {
-        Result<SettingsModel> result = await _getSettings.Handle(cancellationToken);
+        Result<SettingsModel> result = await ScopedHandler.HandleAsync(
+            (GetSettings h) => h.Handle(cancellationToken));
         if (result.IsFailure)
         {
             return;

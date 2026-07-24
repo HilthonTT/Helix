@@ -9,11 +9,8 @@ namespace Helix.App.Modals.Users.UpdatePassword;
 
 internal sealed partial class UpdatePasswordViewModel : BaseViewModel
 {
-    private readonly ChangeUserPassword _changeUserPassword;
-
     public UpdatePasswordViewModel()
     {
-        _changeUserPassword = App.ServiceProvider.GetRequiredService<ChangeUserPassword>();
     }
 
     [ObservableProperty]
@@ -39,7 +36,7 @@ internal sealed partial class UpdatePasswordViewModel : BaseViewModel
 
             var request = new ChangeUserPassword.Request(CurrentPassword, NewPassword, ConfirmedNewPassword);
 
-            Result result = await _changeUserPassword.Handle(request);
+            Result result = await ScopedHandler.HandleAsync((ChangeUserPassword h) => h.Handle(request));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
@@ -68,5 +65,6 @@ internal sealed partial class UpdatePasswordViewModel : BaseViewModel
     {
         CurrentPassword = string.Empty;
         NewPassword = string.Empty;
+        ConfirmedNewPassword = string.Empty;
     }
 }

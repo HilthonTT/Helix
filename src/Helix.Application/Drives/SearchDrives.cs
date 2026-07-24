@@ -30,9 +30,13 @@ public sealed class SearchDrives(
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
+            // Letters are stored uppercase; upper-case both sides so the search
+            // box matches regardless of the casing the user types.
+            string searchTerm = request.SearchTerm.ToUpperInvariant();
+
             drivesQuery = drivesQuery
-                .Where(d => d.Name.Contains(request.SearchTerm) ||
-                       d.Letter.Contains(request.SearchTerm));
+                .Where(d => d.Name.ToUpper().Contains(searchTerm) ||
+                       d.Letter.Contains(searchTerm));
         }
 
         if (request.SortOrder == SortOrder.Descending)

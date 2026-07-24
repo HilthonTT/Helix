@@ -11,11 +11,8 @@ namespace Helix.App.Modals.Drives.Search;
 
 internal sealed partial class SearchDrivesViewModel : BaseViewModel
 {
-    private readonly SearchDrives _searchDrives;
-
     public SearchDrivesViewModel()
     {
-        _searchDrives = App.ServiceProvider.GetRequiredService<SearchDrives>();
     }
 
     [ObservableProperty]
@@ -52,7 +49,7 @@ internal sealed partial class SearchDrivesViewModel : BaseViewModel
 
             var request = new SearchDrives.Request(SearchTerm, SortOrder);
 
-            Result<List<Drive>> result = await _searchDrives.Handle(request);
+            Result<List<Drive>> result = await ScopedHandler.HandleAsync((SearchDrives h) => h.Handle(request));
 
             if (result.IsSuccess)
             {

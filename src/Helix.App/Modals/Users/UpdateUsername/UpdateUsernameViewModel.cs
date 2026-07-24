@@ -9,12 +9,8 @@ namespace Helix.App.Modals.Users.UpdateUsername;
 
 internal sealed partial class UpdateUsernameViewModel : BaseViewModel
 {
-    private readonly UpdateUser _updateUser;
-
     public UpdateUsernameViewModel()
     {
-        _updateUser = App.ServiceProvider.GetRequiredService<UpdateUser>();
-
         RegisterMessages();
     }
 
@@ -35,7 +31,7 @@ internal sealed partial class UpdateUsernameViewModel : BaseViewModel
 
             var request = new UpdateUser.Request(Username);
 
-            Result result = await _updateUser.Handle(request);
+            Result result = await ScopedHandler.HandleAsync((UpdateUser h) => h.Handle(request));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);

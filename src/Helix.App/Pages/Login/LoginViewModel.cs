@@ -12,12 +12,8 @@ namespace Helix.App.Pages.Login;
 
 internal sealed partial class LoginViewModel : BaseViewModel
 {
-    private readonly LoginUser _loginUser;
-
     public LoginViewModel()
     {
-        _loginUser = App.ServiceProvider.GetRequiredService<LoginUser>();
-
         Languages = new(CultureSwitcher.Languages);
     }
 
@@ -61,7 +57,7 @@ internal sealed partial class LoginViewModel : BaseViewModel
 
             var request = new LoginUser.Request(Username, Password);
 
-            Result<User> result = await _loginUser.Handle(request);
+            Result<User> result = await ScopedHandler.HandleAsync((LoginUser h) => h.Handle(request));
             if (result.IsFailure)
             {
                 IsLoading = false;

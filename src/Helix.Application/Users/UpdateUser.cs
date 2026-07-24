@@ -2,8 +2,8 @@
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
-using Helix.Domain.Drives;
 using Helix.Domain.Users;
+using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Helix.Application.Users;
@@ -20,7 +20,7 @@ public sealed class UpdateUser(
         Result validationResult = Validate(request);
         if (validationResult.IsFailure)
         {
-            return Result.Failure<Drive>(validationResult.Error);
+            return validationResult;
         }
 
         if (!loggedInUser.IsLoggedIn)
@@ -34,9 +34,22 @@ public sealed class UpdateUser(
             return Result.Failure(UserErrors.NotFound);
         }
 
+        if (!string.Equals(user.Username, request.Username, StringComparison.Ordinal) &&
+            !await userRepository.IsUsernameUniqueAsync(request.Username, cancellationToken))
+        {
+            return Result.Failure(AuthenticationErrors.UsernameNotUnique);
+        }
+
         user.Update(request.Username);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            return Result.Failure(AuthenticationErrors.UsernameNotUnique);
+        }
 
         loggedInUser.Update(request.Username);
 

@@ -44,7 +44,7 @@ internal sealed class DriveRepository(AppDbContext context) : IDriveRepository
         CancellationToken cancellationToken = default)
     {
         IEnumerable<string> distinctLetters = drives
-            .Select(d => d.Letter.ToUpper())
+            .Select(d => d.Letter.ToUpperInvariant())
             .Distinct();
 
         return context.Drives
@@ -55,7 +55,7 @@ internal sealed class DriveRepository(AppDbContext context) : IDriveRepository
 
     public async Task<bool> IsLetterUniqueAsync(string letter, Guid userId, CancellationToken cancellationToken = default)
     {
-        string driveLetter = letter.ToUpper();
+        string driveLetter = letter.ToUpperInvariant();
 
         return !await context
             .Drives

@@ -64,7 +64,8 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddSingleton<ICountdownService, CountdownService>();
 
-        services.AddScoped<INasConnector, NasConnector>();
+        // Stateless and cached in viewmodel fields — must survive per-operation scopes.
+        services.AddSingleton<INasConnector, NasConnector>();
         services.AddScoped<IStartupService, StartupService>();
         services.AddScoped<IDesktopService, DesktopService>();
 
@@ -75,7 +76,9 @@ public static class DependencyInjection
     {
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 
-        services.AddScoped<ILoggedInUser, LoggedInUser>();
+        // Holds the app-wide login state — must be shared across the per-operation
+        // scopes the presentation layer creates for each handler invocation.
+        services.AddSingleton<ILoggedInUser, LoggedInUser>();
 
         services.AddSingleton<IVaultCipher, VaultCipher>();
 

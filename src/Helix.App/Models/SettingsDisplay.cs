@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Helix.Application.Settings;
 using Helix.Domain.Settings;
 using SharedKernel;
@@ -8,9 +8,6 @@ namespace Helix.App.Models;
 internal sealed partial class SettingsDisplay : ObservableObject
 {
     private readonly System.Timers.Timer _debounceTimer;
-
-    private static readonly UpdateSettings UpdateSettings =
-        App.ServiceProvider.GetRequiredService<UpdateSettings>();
 
     [ObservableProperty]
     private Guid _id;
@@ -69,19 +66,27 @@ internal sealed partial class SettingsDisplay : ObservableObject
 
     public SettingsDisplay(Settings settings)
     {
-        Id = settings.Id;
-        UserId = settings.UserId;
-        AutoConnect = settings.AutoConnect;
-        AutoMinimize = settings.AutoMinimize;
-        SetOnStartup = settings.SetOnStartup;
-        TimerCount = settings.TimerCount;
-        Language = settings.Language;
+        // Assign the backing fields, not the generated properties: property setters
+        // fire the On…Changed hooks, which would issue UpdateSettings writes while the
+        // remaining fields still hold half-initialized values (e.g. TimerCount = 0).
+        _id = settings.Id;
+        _userId = settings.UserId;
+        _autoConnect = settings.AutoConnect;
+        _autoMinimize = settings.AutoMinimize;
+        _setOnStartup = settings.SetOnStartup;
+        _setDesktopShortcut = settings.SetDesktopShortcut;
+        _timerCount = settings.TimerCount;
+        _language = settings.Language;
 
         _debounceTimer = new(500)
         {
             AutoReset = false
         };
-        _debounceTimer.Elapsed += async (_, _) => await DebouncedUpdateTimerCount();
+
+        // Elapsed fires on a thread-pool thread; the update mutates bound properties
+        // (IsBusy/IsNotBusy), so marshal the whole thing onto the UI thread.
+        _debounceTimer.Elapsed += (_, _) =>
+            MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateTimerCount());
     }
 
     private async Task UpdatePropertyAsync(Action<UpdateSettings.Request.Builder> updateAction)
@@ -96,14 +101,14 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 SetOnStartup,
                 SetDesktopShortcut,
                 TimerCount,
-                Language.English);
+                Language);
 
             // Apply the specific update.
             updateAction(requestBuilder);
 
             UpdateSettings.Request request = requestBuilder.Build();
 
-            Result result = await UpdateSettings.Handle(request);
+            Result result = await ScopedHandler.HandleAsync((UpdateSettings h) => h.Handle(request));
             if (result.IsFailure)
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>

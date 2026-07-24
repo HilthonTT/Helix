@@ -13,12 +13,8 @@ namespace Helix.App.Pages.Auditlogs;
 
 internal sealed partial class AuditlogsViewModel : BaseViewModel
 {
-    private readonly GetAuditlogs _getAuditlogs;
-
     public AuditlogsViewModel()
     {
-        _getAuditlogs = App.ServiceProvider.GetRequiredService<GetAuditlogs>();
-
         RegisterMessages();
     }
 
@@ -34,7 +30,7 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
     [RelayCommand]
     private async Task GetAuditlogsAsync()
     {
-        Result<List<Auditlog>> result = await _getAuditlogs.Handle();
+        Result<List<Auditlog>> result = await ScopedHandler.HandleAsync((GetAuditlogs h) => h.Handle());
         if (result.IsSuccess)
         {
             List<Auditlog> auditlogs = result.Value;

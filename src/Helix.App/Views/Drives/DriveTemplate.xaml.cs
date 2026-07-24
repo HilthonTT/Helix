@@ -16,20 +16,20 @@ public sealed partial class DriveTemplate : ContentView
     private static readonly Color DisconnectedColor = Color.FromArgb("#FF0000");
 
     private readonly INasConnector _nasConnector;
-    private readonly ConnectDrive _connectDrive;
-    private readonly DisconnectDrive _disconnectDrive;
 
     public DriveTemplate()
     {
         InitializeComponent();
 
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
-        _connectDrive = App.ServiceProvider.GetRequiredService<ConnectDrive>();
-        _disconnectDrive = App.ServiceProvider.GetRequiredService<DisconnectDrive>();
     }
 
     protected override void OnBindingContextChanged()
     {
+        // Without the base call the BindingContext is never propagated to Content,
+        // leaving every {Binding} in the template unresolved.
+        base.OnBindingContextChanged();
+
         if (BindingContext is DriveDisplay drive)
         {
             UpdateDriveDetails(drive);
@@ -113,8 +113,10 @@ public sealed partial class DriveTemplate : ContentView
     {
         return request switch
         {
-            ConnectDrive.Request connect => await _connectDrive.Handle(connect),
-            DisconnectDrive.Request disconnect => await _disconnectDrive.Handle(disconnect),
+            ConnectDrive.Request connect =>
+                await ScopedHandler.HandleAsync((ConnectDrive h) => h.Handle(connect)),
+            DisconnectDrive.Request disconnect =>
+                await ScopedHandler.HandleAsync((DisconnectDrive h) => h.Handle(disconnect)),
             _ => Result.Failure(Error.NullValue)
         };
     }
@@ -172,9 +174,15 @@ public sealed partial class DriveTemplate : ContentView
                 return;
             }
 
-            UpdateDriveDetails(m.UpdatedDrive);
-            UpdateStorageUsage(m.UpdatedDrive);
-            UpdateStatusButtonColor(m.UpdatedDrive.Letter);
+            // Mutate the bound DriveDisplay too — it lives in HomeViewModel.Drives,
+            // and leaving it stale makes later connectivity refreshes revert the tile
+            // to the old letter/name.
+            drive.Letter = m.UpdatedDrive.Letter;
+            drive.Name = m.UpdatedDrive.Name;
+
+            UpdateDriveDetails(drive);
+            UpdateStorageUsage(drive);
+            UpdateStatusButtonColor(drive.Letter);
 
             OnPropertyChanged();
         });

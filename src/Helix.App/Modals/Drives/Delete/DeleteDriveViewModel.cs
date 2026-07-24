@@ -10,12 +10,8 @@ namespace Helix.App.Modals.Drives.Delete;
 
 internal sealed partial class DeleteDriveViewModel : BaseViewModel
 {
-    private readonly DeleteDrive _deleteDrive;
-
     public DeleteDriveViewModel()
     {
-        _deleteDrive = App.ServiceProvider.GetRequiredService<DeleteDrive>();
-
         RegisterMessages();
     }
 
@@ -41,7 +37,7 @@ internal sealed partial class DeleteDriveViewModel : BaseViewModel
 
             var request = new DeleteDrive.Request(Drive.Id);
 
-            Result result = await _deleteDrive.Handle(request);
+            Result result = await ScopedHandler.HandleAsync((DeleteDrive h) => h.Handle(request));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
