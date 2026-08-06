@@ -13,6 +13,9 @@
     <a href="https://github.com/HilthonTT/Helix/actions/workflows/ci.yml">
       <img src="https://github.com/HilthonTT/Helix/actions/workflows/ci.yml/badge.svg" alt="CI status" />
     </a>
+    <a href="https://github.com/HilthonTT/Helix/actions/workflows/codeql.yml">
+      <img src="https://github.com/HilthonTT/Helix/actions/workflows/codeql.yml/badge.svg" alt="CodeQL status" />
+    </a>
     <a href="LICENSE">
       <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" />
     </a>
@@ -43,7 +46,8 @@
 6. 🧪 [Building & Testing](#-building--testing)
 7. 📦 [Publishing to a Folder](#-publishing-to-a-folder)
 8. ⚙️ [Continuous Integration](#%EF%B8%8F-continuous-integration)
-9. 📄 [License](#-license)
+9. 🤝 [Contributing](#-contributing)
+10. 📄 [License](#-license)
 
 ## 🤖 Introduction
 
@@ -151,6 +155,18 @@ Every push and pull request to `main` runs the [CI workflow](.github/workflows/c
 1. Install the .NET 9 SDK and the MAUI workload
 2. Restore and build `Helix.sln` in Release
 3. Run the Application, Infrastructure, and Architecture test suites
+
+Alongside it:
+
+- **[CodeQL](.github/workflows/codeql.yml)** scans the C# sources and the workflows themselves on every push, every pull request, and weekly.
+- **[Dependabot](.github/dependabot.yml)** opens grouped weekly pull requests for NuGet packages and GitHub Actions.
+- **[Release](.github/workflows/release.yml)** builds self-contained `win-x64` and `win-arm64` folders when a `v*` tag is pushed, and attaches them to a GitHub release.
+
+## 🤝 Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the handler pattern, the architecture rules enforced by tests, and the pull request checklist. Participation is governed by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Found a security issue? Please report it privately as described in [SECURITY.md](SECURITY.md) rather than opening a public issue.
 
 ## 📄 License
 

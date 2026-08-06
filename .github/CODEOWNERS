@@ -1,0 +1,11 @@
+# Default owner for everything in the repository.
+* @HilthonTT
+
+# Security-sensitive areas — cryptography, credential handling and the encrypted database.
+/src/Helix.Infrastructure/Cryptography/  @HilthonTT
+/src/Helix.Infrastructure/Database/      @HilthonTT
+/src/Helix.Infrastructure/Connector/     @HilthonTT
+
+# CI, dependency automation and repository policy.
+/.github/     @HilthonTT
+/SECURITY.md  @HilthonTT

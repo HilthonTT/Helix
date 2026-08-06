@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build and publish (e.g. v1.0.0)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish ${{ matrix.rid }}
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [win-x64, win-arm64]
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Install .NET MAUI workload
+        run: dotnet workload install maui
+
+      - name: Publish (${{ matrix.rid }})
+        run: >
+          dotnet publish src/Helix.App/Helix.App.csproj
+          -f net9.0-windows10.0.19041.0
+          -c Release
+          -p:RuntimeIdentifierOverride=${{ matrix.rid }}
+          -p:AppxPackageSigningEnabled=false
+          -o publish/${{ matrix.rid }}
+
+      - name: Create archive
+        shell: pwsh
+        run: |
+          $tag = "${{ inputs.tag }}"
+          if (-not $tag) { $tag = "${{ github.ref_name }}" }
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          Compress-Archive -Path publish/${{ matrix.rid }}/* -DestinationPath "artifacts/Helix-$tag-${{ matrix.rid }}.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Helix-${{ matrix.rid }}
+          path: artifacts/*.zip
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub release
+    needs: publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          gh release create "$TAG" artifacts/*.zip \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --generate-notes \
+            --verify-tag

@@ -1,0 +1,64 @@
+version: 2
+
+updates:
+  # NuGet packages across the solution (src/ and tests/).
+  - package-ecosystem: nuget
+    directories:
+      - "/"
+      - "/src/**"
+      - "/tests/**"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Brussels
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+      include: scope
+    labels:
+      - dependencies
+      - nuget
+    groups:
+      # MAUI/Windows SDK packages move together — a partial bump usually fails to build.
+      maui:
+        patterns:
+          - "Microsoft.Maui.*"
+          - "CommunityToolkit.Maui*"
+          - "Microsoft.WindowsAppSDK"
+          - "Microsoft.Windows.SDK.BuildTools"
+      entity-framework:
+        patterns:
+          - "Microsoft.EntityFrameworkCore*"
+          - "SQLitePCLRaw.*"
+      test-tooling:
+        patterns:
+          - "xunit*"
+          - "NSubstitute*"
+          - "FluentAssertions"
+          - "Microsoft.NET.Test.Sdk"
+          - "coverlet.*"
+          - "NetArchTest.*"
+      # Everything else: batch low-risk updates into a single PR.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions used by the workflows in .github/workflows.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Brussels
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      actions:
+        patterns:
+          - "*"
