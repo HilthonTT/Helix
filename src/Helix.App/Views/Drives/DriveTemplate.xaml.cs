@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Helpers;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Delete;
@@ -133,7 +133,7 @@ public sealed partial class DriveTemplate : ContentView
                 Page? page = Shell.Current;
                 if (page is not null)
                 {
-                    await page.DisplayAlert("Something went wrong!", message, "Ok");
+                    await page.DisplayAlertAsync("Something went wrong!", message, "Ok");
                 }
             }
             catch (Exception ex)

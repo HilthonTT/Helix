@@ -54,7 +54,7 @@ public sealed partial class App : AppBase
                     Page? page = Current?.Windows.Count > 0 ? Current.Windows[0].Page : null;
                     if (page is not null)
                     {
-                        await page.DisplayAlert("Something went wrong!", message, "Ok");
+                        await page.DisplayAlertAsync("Something went wrong!", message, "Ok");
                     }
                 }
                 catch (Exception ex)

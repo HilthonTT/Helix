@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Helix.Application.Settings;
 using Helix.Domain.Settings;
 using SharedKernel;
@@ -113,7 +113,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await Shell.Current.DisplayAlert("Something went wrong!", result.Error.Description, "Ok");
+                    await Shell.Current.DisplayAlertAsync("Something went wrong!", result.Error.Description, "Ok");
                 });
             }
         }
@@ -121,7 +121,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                await Shell.Current.DisplayAlert("Something went wrong!", ex.Message, "Ok");
+                await Shell.Current.DisplayAlertAsync("Something went wrong!", ex.Message, "Ok");
             });
         }
         finally

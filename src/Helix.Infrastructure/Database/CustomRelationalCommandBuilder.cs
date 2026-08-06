@@ -15,13 +15,20 @@ internal sealed class CustomRelationalCommandBuilder : RelationalCommandBuilder
 
     public override IRelationalCommand Build()
     {
-        return new RelationalCommand(Dependencies, FixCreateTableCommand(), Parameters);
+        // EF Core 10 keeps a separate command text for logging, in which fragments appended
+        // as sensitive are redacted. Build through the base so that redaction is preserved,
+        // then apply the WITHOUT ROWID fix-up to both texts.
+        IRelationalCommand command = base.Build();
+
+        return new RelationalCommand(
+            Dependencies,
+            FixCreateTableCommand(command.CommandText),
+            FixCreateTableCommand(command.LogCommandText),
+            command.Parameters);
     }
 
-    private string FixCreateTableCommand()
+    private static string FixCreateTableCommand(string originalCommandText)
     {
-        string originalCommandText = ToString();
-
         int startCreateTableIndex = originalCommandText.IndexOf(BeginCreateTable);
 
         if (startCreateTableIndex < 0 || 

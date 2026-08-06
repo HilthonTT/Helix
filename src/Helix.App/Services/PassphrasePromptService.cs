@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Security;
+﻿using Helix.Application.Abstractions.Security;
 
 namespace Helix.App.Services;
 
@@ -49,7 +49,7 @@ internal sealed class PassphrasePromptService : IPassphrasePrompt
 
         if (!string.Equals(first, second, StringComparison.Ordinal))
         {
-            await shell.DisplayAlert(
+            await shell.DisplayAlertAsync(
                 "Passphrases don't match",
                 "The two passphrases you entered are different. Please try again.",
                 "Ok");

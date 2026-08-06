@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Create;
 using Helix.App.Modals.Drives.Delete;
@@ -94,8 +94,8 @@ public sealed partial class HomePage : ContentPage
 
         absoluteLayout.IsVisible = true;
         contentView.Opacity = 0;
-        _ = contentView.FadeTo(1, 800, Easing.CubicIn);
-        _ = BlockScreen.FadeTo(0.8, 800, Easing.CubicOut);
+        _ = contentView.FadeToAsync(1, 800, Easing.CubicIn);
+        _ = BlockScreen.FadeToAsync(0.8, 800, Easing.CubicOut);
 
         BlockScreen.InputTransparent = false;
     }
@@ -105,8 +105,8 @@ public sealed partial class HomePage : ContentPage
         int token = _modalCloseTokens.GetValueOrDefault(absoluteLayout) + 1;
         _modalCloseTokens[absoluteLayout] = token;
 
-        _ = contentView.FadeTo(0, 800, Easing.CubicOut);
-        _ = BlockScreen.FadeTo(0, 800, Easing.CubicOut);
+        _ = contentView.FadeToAsync(0, 800, Easing.CubicOut);
+        _ = BlockScreen.FadeToAsync(0, 800, Easing.CubicOut);
         BlockScreen.InputTransparent = true;
 
         await Task.Delay(800);

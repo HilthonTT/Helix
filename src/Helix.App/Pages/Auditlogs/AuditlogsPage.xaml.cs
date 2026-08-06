@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Modals.Auditlogs.Search;
 
 namespace Helix.App.Pages.Auditlogs;
@@ -31,7 +31,7 @@ public sealed partial class AuditlogsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Something went wrong!", ex.Message, "Ok");
+            await DisplayAlertAsync("Something went wrong!", ex.Message, "Ok");
         }
     }
 
@@ -59,8 +59,8 @@ public sealed partial class AuditlogsPage : ContentPage
 
         absoluteLayout.IsVisible = true;
         contentView.Opacity = 0;
-        _ = contentView.FadeTo(1, 800, Easing.CubicIn);
-        _ = BlockScreen.FadeTo(0.8, 800, Easing.CubicOut);
+        _ = contentView.FadeToAsync(1, 800, Easing.CubicIn);
+        _ = BlockScreen.FadeToAsync(0.8, 800, Easing.CubicOut);
 
         BlockScreen.InputTransparent = false;
     }
@@ -70,8 +70,8 @@ public sealed partial class AuditlogsPage : ContentPage
         int token = _modalCloseTokens.GetValueOrDefault(absoluteLayout) + 1;
         _modalCloseTokens[absoluteLayout] = token;
 
-        _ = contentView.FadeTo(0, 800, Easing.CubicOut);
-        _ = BlockScreen.FadeTo(0, 800, Easing.CubicOut);
+        _ = contentView.FadeToAsync(0, 800, Easing.CubicOut);
+        _ = BlockScreen.FadeToAsync(0, 800, Easing.CubicOut);
         BlockScreen.InputTransparent = true;
 
         await Task.Delay(800);

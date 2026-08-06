@@ -73,17 +73,17 @@ public abstract partial class BaseViewModel : ObservableObject
     [RelayCommand]
     private static async Task NotImplementedAsync()
     {
-        await Shell.Current.DisplayAlert("Not Implemented", "Maybe some day, or it's just decoration!", "Ok");
+        await Shell.Current.DisplayAlertAsync("Not Implemented", "Maybe some day, or it's just decoration!", "Ok");
     }
 
     public static Task DisplayErrorAsync(Error error)
     {
-        return Shell.Current.DisplayAlert("Something went wrong!", error.Description, "Ok");
+        return Shell.Current.DisplayAlertAsync("Something went wrong!", error.Description, "Ok");
     }
 
     public static Task DisplaySuccessAsync(string message)
     {
-        return Shell.Current.DisplayAlert("Success!", message, "Ok");
+        return Shell.Current.DisplayAlertAsync("Success!", message, "Ok");
     }
 
     public static void MinimizeApp()

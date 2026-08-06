@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Modals.Users.UpdatePassword;
 using Helix.App.Modals.Users.UpdateUsername;
 
@@ -82,8 +82,8 @@ public sealed partial class SettingsPage : ContentPage
 
         absoluteLayout.IsVisible = true;
         contentView.Opacity = 0;
-        _ = contentView.FadeTo(1, 800, Easing.CubicIn);
-        _ = BlockScreen.FadeTo(0.8, 800, Easing.CubicOut);
+        _ = contentView.FadeToAsync(1, 800, Easing.CubicIn);
+        _ = BlockScreen.FadeToAsync(0.8, 800, Easing.CubicOut);
 
         BlockScreen.InputTransparent = false;
     }
@@ -93,8 +93,8 @@ public sealed partial class SettingsPage : ContentPage
         int token = _modalCloseTokens.GetValueOrDefault(absoluteLayout) + 1;
         _modalCloseTokens[absoluteLayout] = token;
 
-        _ = contentView.FadeTo(0, 800, Easing.CubicOut);
-        _ = BlockScreen.FadeTo(0, 800, Easing.CubicOut);
+        _ = contentView.FadeToAsync(0, 800, Easing.CubicOut);
+        _ = BlockScreen.FadeToAsync(0, 800, Easing.CubicOut);
         BlockScreen.InputTransparent = true;
 
         await Task.Delay(800);
