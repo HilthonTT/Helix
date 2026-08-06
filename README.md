@@ -135,7 +135,7 @@ The MAUI app itself (`Helix.App`) is normally launched from Visual Studio 2022 b
 To compile the app into a single deployable folder (e.g. `C:\Helix`) containing `Helix.App.exe` and everything it needs to run, execute this from the repository root:
 
 ```bash
-dotnet publish src/Helix.App/Helix.App.csproj -f net9.0-windows10.0.19041.0 -c Release -p:RuntimeIdentifierOverride=win-x64 -o C:\Helix
+dotnet publish src/Helix.App/Helix.App.csproj -c Release -p:RuntimeIdentifierOverride=win-x64 -o C:\Helix
 ```
 
 Then start the app with `C:\Helix\Helix.App.exe`.
