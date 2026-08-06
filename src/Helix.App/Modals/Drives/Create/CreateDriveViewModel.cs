@@ -14,10 +14,12 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 {
     public CreateDriveViewModel()
     {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        Form = new();
     }
 
     [ObservableProperty]
-    private CreateDriveModel _form = new();
+    public partial CreateDriveModel Form { get; set; }
 
     [RelayCommand]
     private async Task SaveAsync()

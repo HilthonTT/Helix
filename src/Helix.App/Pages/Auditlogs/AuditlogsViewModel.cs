@@ -15,11 +15,14 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
 {
     public AuditlogsViewModel()
     {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        Auditlogs = [];
+
         RegisterMessages();
     }
 
     [ObservableProperty]
-    private ObservableCollection<AuditlogDisplay> _auditlogs = [];
+    public partial ObservableCollection<AuditlogDisplay> Auditlogs { get; set; }
 
     [RelayCommand]
     private static void OpenSearchAuditlogsModal()

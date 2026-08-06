@@ -13,11 +13,14 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
 {
     public UpdateDriveViewModel()
     {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        Drive = new();
+
         RegisterMessages();
     }
 
     [ObservableProperty]
-    private UpdateDriveModel _drive = new();
+    public partial UpdateDriveModel Drive { get; set; }
 
     [RelayCommand]
     private async Task UpdateAsync()

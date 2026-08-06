@@ -4,18 +4,28 @@ namespace Helix.App.Models;
 
 internal sealed partial class CreateDriveModel : ObservableObject
 {
-    [ObservableProperty]
-    private string _letter = string.Empty;
+    public CreateDriveModel()
+    {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        Letter = string.Empty;
+        IpAddress = string.Empty;
+        Name = string.Empty;
+        Username = string.Empty;
+        Password = string.Empty;
+    }
 
     [ObservableProperty]
-    private string _ipAddress = string.Empty;
+    public partial string Letter { get; set; }
 
     [ObservableProperty]
-    private string _name = string.Empty;
+    public partial string IpAddress { get; set; }
 
     [ObservableProperty]
-    private string _username = string.Empty;
+    public partial string Name { get; set; }
 
     [ObservableProperty]
-    private string _password = string.Empty;
+    public partial string Username { get; set; }
+
+    [ObservableProperty]
+    public partial string Password { get; set; }
 }

@@ -25,6 +25,11 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     {
         _loggedInUser = App.ServiceProvider.GetRequiredService<ILoggedInUser>();
 
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        Languages = [];
+        SelectedLanguage = string.Empty;
+        CurrentSection = AccountSection;
+
         Username = _loggedInUser.Username;
 
         LoadLanguages();
@@ -32,15 +37,21 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     }
 
     [ObservableProperty]
-    private SettingsDisplay? _settings;
+    public partial SettingsDisplay? Settings { get; set; }
 
     [ObservableProperty]
-    private ObservableCollection<string> _languages = [];
+    public partial ObservableCollection<string> Languages { get; set; }
 
     [ObservableProperty]
-    private string _selectedLanguage = string.Empty;
+    public partial string SelectedLanguage { get; set; }
     partial void OnSelectedLanguageChanged(string value)
     {
+        // "no selection yet" is not a language — StringToLanguage would throw on it.
+        if (string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+
         Language newSelectedLanguage = CultureSwitcher.StringToLanguage(value);
         Language = newSelectedLanguage;
 
@@ -53,13 +64,13 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     }
 
     [ObservableProperty]
-    private Language _language;
+    public partial Language Language { get; set; }
 
     [ObservableProperty]
-    private string _username = string.Empty;
+    public partial string Username { get; set; }
 
     [ObservableProperty]
-    private string _currentSection = AccountSection;
+    public partial string CurrentSection { get; set; }
 
     [RelayCommand]
     private void EditUsername()

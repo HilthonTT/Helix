@@ -27,6 +27,8 @@ public sealed class Auditlog : Entity, IAuditable
     /// </remarks>
     private Auditlog()
     {
+        // EF Core materializes this from the database right after this constructor runs.
+        Message = null!;
     }
 
     public Guid UserId { get; private set; }

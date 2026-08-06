@@ -16,28 +16,31 @@ public abstract partial class BaseViewModel : ObservableObject
     protected BaseViewModel()
     {
         _countdownService = App.ServiceProvider.GetRequiredService<ICountdownService>();
+
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        ModalMaximumHeight = 500;
     }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]
-    private bool _isBusy;
+    public partial bool IsBusy { get; set; }
 
     public bool IsNotBusy => !IsBusy;
 
     [ObservableProperty]
-    private bool _timerCancelled;
+    public partial bool TimerCancelled { get; set; }
 
     [ObservableProperty]
-    private bool _showRedoButton;
+    public partial bool ShowRedoButton { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TimerCount))]
-    private int _secondsRemaining = 0;
+    public partial int SecondsRemaining { get; set; }
 
     public string TimerCount => $"{SecondsRemaining} seconds";
 
     [ObservableProperty]
-    private int _modalMaximumHeight = 500;
+    public partial int ModalMaximumHeight { get; set; }
 
     [RelayCommand]
     public async Task StartTimerAsync()

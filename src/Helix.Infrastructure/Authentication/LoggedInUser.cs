@@ -5,11 +5,17 @@ namespace Helix.Infrastructure.Authentication;
 
 internal sealed partial class LoggedInUser : ObservableObject, ILoggedInUser
 {
-    [ObservableProperty]
-    private Guid _userId;
+    public LoggedInUser()
+    {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        Username = string.Empty;
+    }
 
     [ObservableProperty]
-    private string _username = string.Empty;
+    public partial Guid UserId { get; set; }
+
+    [ObservableProperty]
+    public partial string Username { get; set; }
 
     public bool IsLoggedIn { get; private set; }
 

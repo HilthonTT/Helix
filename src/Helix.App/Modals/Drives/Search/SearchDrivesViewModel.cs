@@ -13,16 +13,20 @@ internal sealed partial class SearchDrivesViewModel : BaseViewModel
 {
     public SearchDrivesViewModel()
     {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        SearchTerm = string.Empty;
+        SortOrder = SortOrder.Ascending;
+        SortOrderString = "Ascending";
     }
 
     [ObservableProperty]
-    private string _searchTerm = string.Empty;
+    public partial string SearchTerm { get; set; }
 
     [ObservableProperty]
-    private SortOrder _sortOrder = SortOrder.Ascending;
+    public partial SortOrder SortOrder { get; set; }
 
     [ObservableProperty]
-    private string _sortOrderString = "Ascending";
+    public partial string SortOrderString { get; set; }
     partial void OnSortOrderStringChanged(string value)
     {
         if (value == "Ascending")

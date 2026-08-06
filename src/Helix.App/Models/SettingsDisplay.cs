@@ -9,75 +9,98 @@ internal sealed partial class SettingsDisplay : ObservableObject
 {
     private readonly System.Timers.Timer _debounceTimer;
 
-    [ObservableProperty]
-    private Guid _id;
+    // Stays false for the duration of the constructor. The On…Changed hooks issue
+    // UpdateSettings writes, which must not run while the constructor is still seeding
+    // properties and the rest still hold half-initialized values (e.g. TimerCount = 0).
+    private readonly bool _initialized;
 
     [ObservableProperty]
-    private Guid _userId;
+    public partial Guid Id { get; set; }
+
+    [ObservableProperty]
+    public partial Guid UserId { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]
-    private bool _isBusy;
+    public partial bool IsBusy { get; set; }
 
     public bool IsNotBusy => !IsBusy;
 
     [ObservableProperty]
-    private bool _autoConnect;
+    public partial bool AutoConnect { get; set; }
     async partial void OnAutoConnectChanged(bool value)
     {
+        if (!_initialized)
+        {
+            return;
+        }
+
         await UpdatePropertyAsync(builder => builder.AutoConnect = value);
     }
 
     [ObservableProperty]
-    private bool _autoMinimize;
+    public partial bool AutoMinimize { get; set; }
     async partial void OnAutoMinimizeChanged(bool value)
     {
+        if (!_initialized)
+        {
+            return;
+        }
+
         await UpdatePropertyAsync(builder => builder.AutoMinimize = value);
     }
 
     [ObservableProperty]
-    private bool _setOnStartup;
+    public partial bool SetOnStartup { get; set; }
     async partial void OnSetOnStartupChanged(bool value)
     {
+        if (!_initialized)
+        {
+            return;
+        }
+
         await UpdatePropertyAsync(builder => builder.SetOnStartup = value);
     }
 
     [ObservableProperty]
-    private bool _setDesktopShortcut;
+    public partial bool SetDesktopShortcut { get; set; }
     async partial void OnSetDesktopShortcutChanged(bool value)
     {
+        if (!_initialized)
+        {
+            return;
+        }
+
         await UpdatePropertyAsync(builder => builder.SetDesktopShortcut = value);
     }
 
     [ObservableProperty]
-    private int _timerCount;
+    public partial int TimerCount { get; set; }
     partial void OnTimerCountChanged(int value)
     {
-        _debounceTimer?.Stop();
-        _debounceTimer?.Start();
+        if (!_initialized)
+        {
+            return;
+        }
+
+        _debounceTimer.Stop();
+        _debounceTimer.Start();
     }
 
     [ObservableProperty]
-    private Language _language;
+    public partial Language Language { get; set; }
     async partial void OnLanguageChanged(Language value)
     {
+        if (!_initialized)
+        {
+            return;
+        }
+
         await UpdatePropertyAsync(builder => builder.Language = value);
     }
 
     public SettingsDisplay(Settings settings)
     {
-        // Assign the backing fields, not the generated properties: property setters
-        // fire the On…Changed hooks, which would issue UpdateSettings writes while the
-        // remaining fields still hold half-initialized values (e.g. TimerCount = 0).
-        _id = settings.Id;
-        _userId = settings.UserId;
-        _autoConnect = settings.AutoConnect;
-        _autoMinimize = settings.AutoMinimize;
-        _setOnStartup = settings.SetOnStartup;
-        _setDesktopShortcut = settings.SetDesktopShortcut;
-        _timerCount = settings.TimerCount;
-        _language = settings.Language;
-
         _debounceTimer = new(500)
         {
             AutoReset = false
@@ -87,6 +110,18 @@ internal sealed partial class SettingsDisplay : ObservableObject
         // (IsBusy/IsNotBusy), so marshal the whole thing onto the UI thread.
         _debounceTimer.Elapsed += (_, _) =>
             MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateTimerCount());
+
+        Id = settings.Id;
+        UserId = settings.UserId;
+        AutoConnect = settings.AutoConnect;
+        AutoMinimize = settings.AutoMinimize;
+        SetOnStartup = settings.SetOnStartup;
+        SetDesktopShortcut = settings.SetDesktopShortcut;
+        TimerCount = settings.TimerCount;
+        Language = settings.Language;
+
+        // Every seed above is done — from here on the hooks may write back.
+        _initialized = true;
     }
 
     private async Task UpdatePropertyAsync(Action<UpdateSettings.Request.Builder> updateAction)

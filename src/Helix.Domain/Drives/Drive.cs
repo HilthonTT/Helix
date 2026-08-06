@@ -44,6 +44,12 @@ public sealed class Drive : Entity, IAuditable
     /// </remarks>
     private Drive()
     {
+        // EF Core materializes these from the database right after this constructor runs.
+        Letter = null!;
+        IpAddress = null!;
+        Name = null!;
+        Username = null!;
+        Password = null!;
     }
 
     public Guid UserId { get; private set; }

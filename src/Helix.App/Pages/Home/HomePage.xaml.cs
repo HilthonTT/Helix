@@ -61,7 +61,7 @@ public sealed partial class HomePage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Something went wrong!", ex.Message, "Ok");
+            await DisplayAlertAsync("Something went wrong!", ex.Message, "Ok");
         }
         finally
         {

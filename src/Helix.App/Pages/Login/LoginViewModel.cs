@@ -14,32 +14,44 @@ internal sealed partial class LoginViewModel : BaseViewModel
 {
     public LoginViewModel()
     {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        Username = string.Empty;
+        Password = string.Empty;
+        SelectedLanguage = string.Empty;
+        HidePassword = true;
+
         Languages = new(CultureSwitcher.Languages);
     }
 
     [ObservableProperty]
-    private string _username = string.Empty;
+    public partial string Username { get; set; }
 
     [ObservableProperty]
-    private string _password = string.Empty;
+    public partial string Password { get; set; }
 
     [ObservableProperty]
-    private bool _hidePassword = true;
+    public partial bool HidePassword { get; set; }
 
     [ObservableProperty]
-    private ObservableCollection<string> _languages = [];
+    public partial ObservableCollection<string> Languages { get; set; }
 
     [ObservableProperty]
-    private string _selectedLanguage = string.Empty;
+    public partial string SelectedLanguage { get; set; }
     partial void OnSelectedLanguageChanged(string value)
     {
+        // "no selection yet" is not a language — StringToLanguage would throw on it.
+        if (string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+
         Language language = CultureSwitcher.StringToLanguage(value);
 
         CultureSwitcher.SwitchCulture(language);
     }
 
     [ObservableProperty]
-    private bool _isLoading = false;
+    public partial bool IsLoading { get; set; }
 
     [RelayCommand]
     private async Task LoginAsync()

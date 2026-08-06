@@ -6,35 +6,36 @@ namespace Helix.App.Models;
 internal sealed partial class DriveDisplay : ObservableObject
 {
     [ObservableProperty]
-    private Guid _id;
+    public partial Guid Id { get; set; }
 
     [ObservableProperty]
-    private string _letter = string.Empty;
+    public partial string Letter { get; set; }
 
     [ObservableProperty]
-    private string _name = string.Empty;
+    public partial string Name { get; set; }
 
     [ObservableProperty]
-    public string _buttonColor = "#ff0000";
+    public partial string ButtonColor { get; set; }
 
     [ObservableProperty]
-    private bool _connected;
+    public partial bool Connected { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]
-    private bool _isBusy = false;
+    public partial bool IsBusy { get; set; }
 
     public bool IsNotBusy => !IsBusy;
 
     public DriveDisplay(Drive drive)
+        : this()
     {
         Id = drive.Id;
         Letter = drive.Letter;
         Name = drive.Name;
-        ButtonColor = "#ff0000";
     }
 
     public DriveDisplay(UpdateDriveModel updateDrive)
+        : this()
     {
         Id = updateDrive.Id;
         Letter = updateDrive.Letter;
@@ -43,8 +44,11 @@ internal sealed partial class DriveDisplay : ObservableObject
 
     public DriveDisplay()
     {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        // The other constructors chain through this one to pick them up.
         Id = Guid.Empty;
         Letter = string.Empty;
         Name = string.Empty;
+        ButtonColor = "#ff0000";
     }
 }

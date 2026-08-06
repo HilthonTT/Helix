@@ -6,19 +6,19 @@ namespace Helix.App.Models;
 internal sealed partial class AuditlogDisplay : ObservableObject
 {
     [ObservableProperty]
-    private Guid _id;
+    public partial Guid Id { get; set; }
 
     [ObservableProperty]
-    private Guid _userId;
+    public partial Guid UserId { get; set; }
 
     [ObservableProperty]
-    private string _message;
+    public partial string Message { get; set; }
 
     [ObservableProperty]
-    private DateTime _createdOnUtc;
+    public partial DateTime CreatedOnUtc { get; set; }
 
     [ObservableProperty]
-    private DateTime? _modifiedOnUtc;
+    public partial DateTime? ModifiedOnUtc { get; set; }
 
     public AuditlogDisplay(Auditlog auditlog)
     {

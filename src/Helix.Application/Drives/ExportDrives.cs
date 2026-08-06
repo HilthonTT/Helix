@@ -6,6 +6,7 @@ using Helix.Application.Core.Errors;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using SharedKernel;
+using System.Runtime.Versioning;
 using System.Text.Json;
 
 namespace Helix.Application.Drives;
@@ -23,6 +24,9 @@ public sealed class ExportDrives(
         WriteIndented = false,
     };
 
+    // FolderPicker is not available on every platform this assembly's TFM allows, and Helix
+    // only ever runs on Windows, so the call site is narrowed to match.
+    [SupportedOSPlatform("windows")]
     public async Task<Result> Handle(CancellationToken cancellationToken = default)
     {
         if (!loggedInUser.IsLoggedIn)

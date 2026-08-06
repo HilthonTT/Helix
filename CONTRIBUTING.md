@@ -8,7 +8,7 @@ By participating you agree to abide by the [Code of Conduct](CODE_OF_CONDUCT.md)
 
 **Prerequisites**
 
-- [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) with the **.NET MAUI** workload (or the .NET 9 SDK plus `dotnet workload install maui`)
+- [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) with the **.NET MAUI** workload (or the .NET 10 SDK plus `dotnet workload install maui`)
 - Windows 10 build 19041 or later — Helix is Windows-only (WinRT/Win32 interop)
 
 ```bash

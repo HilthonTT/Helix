@@ -11,11 +11,14 @@ internal sealed partial class UpdateUsernameViewModel : BaseViewModel
 {
     public UpdateUsernameViewModel()
     {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        Username = string.Empty;
+
         RegisterMessages();
     }
 
     [ObservableProperty]
-    private string _username = string.Empty;
+    public partial string Username { get; set; }
 
     [RelayCommand]
     private async Task UpdateUsernameAsync()

@@ -23,6 +23,9 @@ public sealed class User : Entity, IAuditable
     /// </remarks>
     private User()
     {
+        // EF Core materializes these from the database right after this constructor runs.
+        Username = null!;
+        PasswordHash = null!;
     }
 
     public string Username { get; private set; }

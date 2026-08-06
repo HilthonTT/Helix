@@ -11,16 +11,20 @@ internal sealed partial class UpdatePasswordViewModel : BaseViewModel
 {
     public UpdatePasswordViewModel()
     {
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        CurrentPassword = string.Empty;
+        NewPassword = string.Empty;
+        ConfirmedNewPassword = string.Empty;
     }
 
     [ObservableProperty]
-    private string _currentPassword = string.Empty;
+    public partial string CurrentPassword { get; set; }
 
     [ObservableProperty]
-    private string _newPassword = string.Empty;
+    public partial string NewPassword { get; set; }
 
     [ObservableProperty]
-    private string _confirmedNewPassword = string.Empty;
+    public partial string ConfirmedNewPassword { get; set; }
 
     [RelayCommand]
     private async Task UpdatePasswordAsync()

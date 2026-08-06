@@ -26,18 +26,23 @@ internal sealed partial class HomeViewModel : BaseViewModel
     {
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
 
+        // Partial properties cannot carry field initializers, so defaults are seeded here.
+        Drives = [];
+        TotalStorage = string.Empty;
+        TotalConnected = string.Empty;
+
         RegisterMessages();
         InitializeCountdownEvents();
     }
 
     [ObservableProperty]
-    private ObservableCollection<DriveDisplay> _drives = [];
+    public partial ObservableCollection<DriveDisplay> Drives { get; set; }
 
     [ObservableProperty]
-    private string _totalStorage = string.Empty;
+    public partial string TotalStorage { get; set; }
 
     [ObservableProperty]
-    private string _totalConnected = string.Empty;
+    public partial string TotalConnected { get; set; }
 
     [RelayCommand]
     private static void OpenCreateDriveModal()

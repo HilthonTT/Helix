@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Helix is a .NET MAUI Windows desktop app for managing connections to NAS drives. It targets `net9.0-windows10.0.19041.0` and is Windows-only (uses WinRT/Win32 interop in `Helix.App/MauiProgram.cs` and a `IWshRuntimeLibrary` COM reference in `Helix.Infrastructure`). Open `Helix.sln` in Visual Studio 2022 to build/run.
+Helix is a .NET MAUI Windows desktop app for managing connections to NAS drives. It targets `net10.0-windows10.0.19041.0` and is Windows-only (uses WinRT/Win32 interop in `Helix.App/MauiProgram.cs` and a `IWshRuntimeLibrary` COM reference in `Helix.Infrastructure`). Open `Helix.sln` in Visual Studio 2022 to build/run.
 
 ## Commands
 

@@ -19,7 +19,7 @@ internal sealed partial class CountdownService : ObservableObject, ICountdownSer
     }
 
     [ObservableProperty]
-    private int _secondsRemaining;
+    public partial int SecondsRemaining { get; set; }
 
     public void Start(int initialSeconds)
     {

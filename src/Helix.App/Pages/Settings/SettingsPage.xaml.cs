@@ -30,7 +30,7 @@ public sealed partial class SettingsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Something went wrong!", ex.Message, "Ok");
+            await DisplayAlertAsync("Something went wrong!", ex.Message, "Ok");
         }
     }
 

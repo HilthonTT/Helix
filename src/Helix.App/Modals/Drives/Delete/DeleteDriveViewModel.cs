@@ -17,7 +17,7 @@ internal sealed partial class DeleteDriveViewModel : BaseViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Description))]
-    private DriveDisplay? _drive;
+    public partial DriveDisplay? Drive { get; set; }
 
     public string Description => Drive is null 
         ? "Are you sure you want to delete this drive?"

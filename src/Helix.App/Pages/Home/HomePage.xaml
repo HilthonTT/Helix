@@ -102,7 +102,7 @@
 
             <VerticalStackLayout Margin="0,24,0,0">
                 <Label Text="{local:Translate Dashboard}" Style="{StaticResource LargeTitle}"/>
-                <Label Text="{Binding Source={x:Static local:LocalizationResourceManager.Instance}, Path=CurrentDate}" />
+                <Label Text="{Binding Source={x:Static local:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=local:LocalizationResourceManager}" />
                 <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
             </VerticalStackLayout>
 

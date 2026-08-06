@@ -26,7 +26,7 @@
   </p>
 
   <p align="center">
-    <img src="https://img.shields.io/badge/.NET%209-%23512BD4.svg?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 9" />
+    <img src="https://img.shields.io/badge/.NET%2010-%23512BD4.svg?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 10" />
     <img src="https://img.shields.io/badge/C%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white" alt="C#" />
     <img src="https://img.shields.io/badge/.NET%20MAUI-%23007FFF.svg?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET MAUI" />
     <img src="https://img.shields.io/badge/EF%20Core-%235C2D91.svg?style=for-the-badge&logo=dotnet&logoColor=white" alt="Entity Framework Core" />
@@ -152,7 +152,7 @@ Then start the app with `C:\Helix\Helix.App.exe`.
 
 Every push and pull request to `main` runs the [CI workflow](.github/workflows/ci.yml) on a Windows runner:
 
-1. Install the .NET 9 SDK and the MAUI workload
+1. Install the .NET 10 SDK and the MAUI workload
 2. Restore and build `Helix.sln` in Release
 3. Run the Application, Infrastructure, and Architecture test suites
 
