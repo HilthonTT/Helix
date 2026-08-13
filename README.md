@@ -144,7 +144,9 @@ dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --filter "F
 To compile the app into a single deployable folder (for example `C:\Helix`) containing
 `Helix.App.exe` and everything it needs to run:
 
-```bash
+```powershell
+Remove-Item C:\Helix -Recurse -Force -ErrorAction SilentlyContinue
+
 dotnet publish src/Helix.App/Helix.App.csproj -c Release -p:RuntimeIdentifierOverride=win-x64 -o C:\Helix
 ```
 
@@ -154,6 +156,11 @@ Then start the app with `C:\Helix\Helix.App.exe`.
 
 - The output is fully self-contained: the .NET runtime, the Windows App SDK runtime, and the
   native SQLCipher library are all included, so the target machine needs nothing pre-installed.
+- **Clear the output folder first.** `dotnet publish -o` only adds and overwrites files; it
+  never deletes ones the build no longer produces. A stale `resources.pri` left over from an
+  earlier publish shadows the current `Helix.App.pri`, and because `MauiImage` assets are
+  rasterised to scale-qualified files (`logoipsum.scale-100.png`, …) and resolved by name
+  through that index, every image in the app silently renders blank.
 - For ARM64 machines, use `-p:RuntimeIdentifierOverride=win-arm64` instead.
 - `-p:RuntimeIdentifierOverride` (rather than the usual `-r`) is required. Passing the runtime
   identifier as a global CLI property would leak into the referenced class libraries and fail
