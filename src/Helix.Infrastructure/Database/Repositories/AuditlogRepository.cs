@@ -23,4 +23,9 @@ internal sealed class AuditlogRepository(AppDbContext context) : IAuditlogReposi
             .OrderByDescending(a => a.CreatedOnUtc)
             .ToListAsync(cancellationToken);
     }
+
+    public void Insert(Auditlog auditlog)
+    {
+        context.AuditLogs.Add(auditlog);
+    }
 }

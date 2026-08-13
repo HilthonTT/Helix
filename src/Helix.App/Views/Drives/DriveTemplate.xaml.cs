@@ -39,10 +39,25 @@ public sealed partial class DriveTemplate : ContentView
     /// line and enabled state are all data-bound, so refreshing the model is all the
     /// view needs — no imperative control updates.
     /// </summary>
+    /// <remarks>
+    /// Connectivity is a cheap logical-drive lookup and stays inline, but capacity does
+    /// I/O against the share and can block for seconds on an unreachable NAS. Since the
+    /// monitor now refreshes rows on a timer, that probe is pushed off the UI thread —
+    /// leaving it inline would stall the app on every poll while a drive was down.
+    /// </remarks>
     private void RefreshStatus(DriveDisplay drive)
     {
         drive.Connected = _nasConnector.IsConnected(drive.Letter);
-        drive.StorageUsage = StorageUsageHelper.GetStorageUsage(drive.Letter);
+
+        _ = RefreshStorageUsageAsync(drive);
+    }
+
+    private static async Task RefreshStorageUsageAsync(DriveDisplay drive)
+    {
+        string usage = await StorageUsageHelper.GetStorageUsageAsync(drive.Letter);
+
+        // The row may have been rebound to another drive while the probe ran.
+        MainThread.BeginInvokeOnMainThread(() => drive.StorageUsage = usage);
     }
 
     private async void ToggleConnect(object? sender, TappedEventArgs e)

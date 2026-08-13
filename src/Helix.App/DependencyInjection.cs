@@ -13,6 +13,9 @@ public static class DependencyInjection
 
         services.AddSingleton<IPassphrasePrompt, PassphrasePromptService>();
 
+        // Owns the reaction to connectivity changes for the app's lifetime.
+        services.AddSingleton<DriveWatchdog>();
+
         services.AddScoped<HomePage>();
 
         return services;

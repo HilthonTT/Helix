@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Constants;
 using Helix.App.Messages;
 using Helix.App.Modals.Users.UpdateUsername;
+using Helix.App.Services;
 using Helix.App.Pages.Auditlogs;
 using Helix.App.Pages.Home;
 using Helix.App.Pages.Login;
@@ -72,6 +73,10 @@ public sealed partial class AppShell : Shell
             await Current.DisplayAlertAsync("Something went wrong!", result.Error.Description, "Ok");
             return;
         }
+
+        // Stop watching before the user is gone: every poll and reconnect runs against
+        // the signed-in user, so leaving it running would work on the next one's behalf.
+        App.ServiceProvider.GetRequiredService<DriveWatchdog>().Stop();
 
         await Current.GoToAsync($"//{PageNames.LoginPage}");
     }

@@ -66,6 +66,10 @@ public static class DependencyInjection
 
         // Stateless and cached in viewmodel fields — must survive per-operation scopes.
         services.AddSingleton<INasConnector, NasConnector>();
+
+        // Holds the watched set and the polling loop for the app's lifetime.
+        services.AddSingleton<IDriveMonitor, DriveMonitor>();
+
         services.AddScoped<IStartupService, StartupService>();
         services.AddScoped<IDesktopService, DesktopService>();
 

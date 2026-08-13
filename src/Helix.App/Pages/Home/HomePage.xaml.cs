@@ -5,6 +5,7 @@ using Helix.App.Modals.Drives.Create;
 using Helix.App.Modals.Drives.Delete;
 using Helix.App.Modals.Drives.Search;
 using Helix.App.Modals.Drives.Update;
+using Helix.App.Services;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Drives;
 using Helix.Domain.Drives;
@@ -27,6 +28,7 @@ public sealed partial class HomePage : ContentPage
     private readonly INasConnector _nasConnector;
     private readonly HomeViewModel _viewModel;
     private readonly ModalHost _modals;
+    private readonly DriveWatchdog _watchdog;
 
     public HomePage()
     {
@@ -37,6 +39,7 @@ public sealed partial class HomePage : ContentPage
         BindingContext = _viewModel;
 
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
+        _watchdog = App.ServiceProvider.GetRequiredService<DriveWatchdog>();
 
         _modals = new ModalHost(BlockScreen);
         _modals.Register(CreateDrive, CreateDriveLayout, CreateDriveView);
@@ -67,6 +70,10 @@ public sealed partial class HomePage : ContentPage
             await HandleConnectDrivesOnStartupAsync();
 
             await _viewModel.InitializeCountdownAsync();
+
+            // Started here rather than at app start: the watch set comes from GetDrives,
+            // which requires a signed-in user.
+            await _watchdog.StartAsync();
         }
         catch (Exception ex)
         {

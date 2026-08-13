@@ -223,23 +223,41 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         Drives = new(drives.Select(d => new DriveDisplay(d)));
 
-        TotalStorage = ValidateTotalStorage();
-        TotalConnected = ValidateTotalConnected();
+        await RefreshTotalsAsync();
 
         return drives;
     }
 
-    private string ValidateTotalStorage()
+    /// <summary>
+    /// Recomputes the dashboard tiles. The connection count is a cheap logical-drive
+    /// lookup, but the capacity figure does I/O against the share, so it is probed off
+    /// the UI thread — the monitor drives this on a timer now, and an unreachable NAS
+    /// would otherwise stall the app on every poll.
+    /// </summary>
+    private async Task RefreshTotalsAsync()
+    {
+        try
+        {
+            TotalConnected = ValidateTotalConnected();
+            TotalStorage = await ValidateTotalStorageAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Helix: failed to refresh dashboard totals: {ex}");
+        }
+    }
+
+    private Task<string> ValidateTotalStorageAsync()
     {
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
         DriveDisplay? connectedDrive = Drives.FirstOrDefault(d => connectedLetters.Contains(d.Letter));
 
         if (connectedDrive is null)
         {
-            return "0 TB";
+            return Task.FromResult("0 TB");
         }
 
-        return StorageUsageHelper.GetCompactUsage(connectedDrive.Letter);
+        return StorageUsageHelper.GetCompactUsageAsync(connectedDrive.Letter);
     }
 
     private string ValidateTotalConnected()
@@ -257,8 +275,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
     {
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(this, (r, m) =>
         {
-            TotalStorage = ValidateTotalStorage();
-            TotalConnected = ValidateTotalConnected();
+            _ = RefreshTotalsAsync();
         });
 
         WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, (r, m) =>
@@ -268,8 +285,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
             {
                 Drives.Remove(existingDrive);
 
-                TotalStorage = ValidateTotalStorage();
-                TotalConnected = ValidateTotalConnected();
+                _ = RefreshTotalsAsync();
             }
         });
 
@@ -278,8 +294,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
             var driveDisplay = new DriveDisplay(m.Drive);
             Drives.Add(driveDisplay);
 
-            TotalStorage = ValidateTotalStorage();
-            TotalConnected = ValidateTotalConnected();
+            _ = RefreshTotalsAsync();
         });
 
         WeakReferenceMessenger.Default.Register<DriveSearchedMessage>(this, (r, m) =>
