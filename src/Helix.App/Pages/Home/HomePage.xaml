@@ -60,12 +60,22 @@
                 </VerticalStackLayout>
 
                 <!-- Adding a drive used to live only in the menu bar; it is the page's
-                     primary action, so it gets a primary button. -->
-                <Button Grid.Column="1"
-                        Text="{local:Translate AddDrive}"
-                        VerticalOptions="Center"
-                        Command="{Binding OpenCreateDriveModalCommand}"
-                        ToolTipProperties.Text="Ctrl+A"/>
+                     primary action, so it gets a primary button. Import/export are still
+                     in the Drives menu too, but they were undiscoverable there, so they
+                     sit alongside as secondary actions. -->
+                <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
+                    <Button Text="{local:Translate ImportDrives}"
+                            Style="{StaticResource ButtonSecondary}"
+                            Command="{Binding ImportDrivesCommand}"/>
+
+                    <Button Text="{local:Translate ExportDrives}"
+                            Style="{StaticResource ButtonSecondary}"
+                            Command="{Binding ExportDrivesCommand}"/>
+
+                    <Button Text="{local:Translate AddDrive}"
+                            Command="{Binding OpenCreateDriveModalCommand}"
+                            ToolTipProperties.Text="Ctrl+A"/>
+                </HorizontalStackLayout>
             </Grid>
 
             <!-- ===== Left column: stats over the drive list ===== -->
