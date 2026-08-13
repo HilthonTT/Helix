@@ -23,8 +23,19 @@ internal sealed partial class CountdownService : ObservableObject, ICountdownSer
 
     public void Start(int initialSeconds)
     {
+        // A non-positive countdown would tick straight to "finished" a second later and
+        // minimize the window; there is nothing to run.
+        if (initialSeconds <= 0)
+        {
+            Reset();
+            return;
+        }
+
         SecondsRemaining = initialSeconds;
 
+        // Stop first: restarting an already-running timer leaves its current interval in
+        // flight, so the first tick could land almost immediately after a re-arm.
+        _countdownTimer.Stop();
         _countdownTimer.Start();
     }
 

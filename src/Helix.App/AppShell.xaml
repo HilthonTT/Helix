@@ -28,7 +28,7 @@
                          HeightRequest="-1"
                          VerticalOptions="Fill"/>
 
-                <Grid RowDefinitions="Auto,Auto,*,Auto,Auto"
+                <Grid RowDefinitions="Auto,Auto,*,Auto,Auto,Auto"
                       RadioButtonGroup.GroupName="Menu"
                       RadioButtonGroup.SelectedValue="{Binding SelectedRoute}">
 
@@ -99,7 +99,7 @@
 
                     <!-- Sign out -->
                     <Border Grid.Row="4"
-                            Margin="16,0,16,20"
+                            Margin="16,0,16,4"
                             Padding="14,11"
                             Background="Transparent"
                             Stroke="Transparent"
@@ -122,6 +122,34 @@
                                    VerticalOptions="Center"/>
                         </HorizontalStackLayout>
                     </Border>
+
+                    <!-- Footer -->
+                    <VerticalStackLayout Grid.Row="5" Spacing="12" Margin="20,8,16,18">
+
+                        <BoxView Style="{StaticResource Divider}" HorizontalOptions="Fill"/>
+
+                        <Grid ColumnDefinitions="*,Auto" Margin="6,0,0,0">
+                            <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Label Text="{Binding AppVersion}" Style="{StaticResource Caption}"/>
+                                <Label Text="{Binding Author}" Style="{StaticResource Faint}"/>
+                            </VerticalStackLayout>
+
+                            <Border Grid.Column="1"
+                                    Style="{StaticResource IconChip}"
+                                    WidthRequest="30"
+                                    HeightRequest="30"
+                                    ToolTipProperties.Text="{Binding RepositoryUrl}"
+                                    behaviors:Hover.Cursor="True">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnOpenRepository"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="{x:Static icons:IconFont.Code}"
+                                       Style="{StaticResource IconSm}"
+                                       InputTransparent="True"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                            </Border>
+                        </Grid>
+                    </VerticalStackLayout>
 
                 </Grid>
             </Grid>

@@ -85,6 +85,16 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
+    /// <summary>
+    /// Clears the once-per-session state so the next sign-in starts clean. Shell caches
+    /// this page across a sign-out, so without this the startup pass — which also applies
+    /// the signed-in user's language — only ever ran for the first user of the process.
+    /// </summary>
+    internal static void ResetSessionState()
+    {
+        _isFirstView = true;
+    }
+
     private async Task HandleConnectDrivesOnStartupAsync()
     {
         if (!_isFirstView)
