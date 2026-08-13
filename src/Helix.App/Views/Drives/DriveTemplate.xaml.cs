@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Helpers;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Delete;
@@ -12,9 +12,6 @@ namespace Helix.App.Views.Drives;
 
 public sealed partial class DriveTemplate : ContentView
 {
-    private static readonly Color ConnectedColor = Color.FromArgb("#00FF00");
-    private static readonly Color DisconnectedColor = Color.FromArgb("#FF0000");
-
     private readonly INasConnector _nasConnector;
 
     public DriveTemplate()
@@ -32,33 +29,23 @@ public sealed partial class DriveTemplate : ContentView
 
         if (BindingContext is DriveDisplay drive)
         {
-            UpdateDriveDetails(drive);
-            UpdateStorageUsage(drive);
-            UpdateStatusButtonColor(drive.Letter);
-
+            RefreshStatus(drive);
             RegisterMessages();
         }
     }
 
-    private void UpdateStorageUsage(DriveDisplay drive)
+    /// <summary>
+    /// Pushes live connectivity onto the bound model. The row's status pill, capacity
+    /// line and enabled state are all data-bound, so refreshing the model is all the
+    /// view needs — no imperative control updates.
+    /// </summary>
+    private void RefreshStatus(DriveDisplay drive)
     {
-        StorageUsage.Text = StorageUsageHelper.GetStorageUsage(drive.Letter);
+        drive.Connected = _nasConnector.IsConnected(drive.Letter);
+        drive.StorageUsage = StorageUsageHelper.GetStorageUsage(drive.Letter);
     }
 
-    private void UpdateDriveDetails(DriveDisplay drive)
-    {
-        Name.Text = drive.Name;
-        Letter.Text = drive.Letter;
-    }
-
-    private void UpdateStatusButtonColor(string driveLetter)
-    {
-        StatusButton.BackgroundColor = _nasConnector.IsConnected(driveLetter)
-            ? ConnectedColor
-            : DisconnectedColor;
-    }
-
-    private async void ToggleConnect(object? sender, EventArgs e)
+    private async void ToggleConnect(object? sender, TappedEventArgs e)
     {
         // Event handler is `async void`: an escaping exception would tear down the
         // whole app. Guard it so connection problems always surface as an alert.
@@ -72,40 +59,37 @@ public sealed partial class DriveTemplate : ContentView
         }
     }
 
-    private void CheckConnectivityAndUpdateUI()
-    {
-        if (BindingContext is DriveDisplay drive)
-        {
-            UpdateDriveDetails(drive);
-            UpdateStorageUsage(drive);
-            UpdateStatusButtonColor(drive.Letter);
-
-            OnPropertyChanged();
-        }
-    }
-
     private async Task ToggleConnectInternalAsync()
     {
-        if (BindingContext is not DriveDisplay drive)
+        if (BindingContext is not DriveDisplay drive || drive.IsBusy)
         {
             return;
         }
 
-        object request = _nasConnector.IsConnected(drive.Letter)
+        object request = drive.Connected
             ? new DisconnectDrive.Request(drive.Id)
             : new ConnectDrive.Request(drive.Id);
 
-        Result result = await HandleDriveConnection(request);
-        if (result.IsSuccess)
+        // Blocks a second click while the mount is in flight — the row binds its
+        // IsEnabled to this.
+        drive.IsBusy = true;
+
+        try
         {
-            UpdateStatusButtonColor(drive.Letter);
-            UpdateStorageUsage(drive);
+            Result result = await HandleDriveConnection(request);
+            if (result.IsFailure)
+            {
+                await ShowErrorAlert(result.Error.Description);
+                return;
+            }
+
+            RefreshStatus(drive);
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
         }
-        else
+        finally
         {
-            await ShowErrorAlert(result.Error.Description);
+            drive.IsBusy = false;
         }
     }
 
@@ -175,36 +159,12 @@ public sealed partial class DriveTemplate : ContentView
             }
 
             // Mutate the bound DriveDisplay too — it lives in HomeViewModel.Drives,
-            // and leaving it stale makes later connectivity refreshes revert the tile
+            // and leaving it stale makes later connectivity refreshes revert the row
             // to the old letter/name.
             drive.Letter = m.UpdatedDrive.Letter;
             drive.Name = m.UpdatedDrive.Name;
 
-            UpdateDriveDetails(drive);
-            UpdateStorageUsage(drive);
-            UpdateStatusButtonColor(drive.Letter);
-
-            OnPropertyChanged();
-        });
-
-        WeakReferenceMessenger.Default.Unregister<ToggleConnectDriveMessage>(this);
-
-        WeakReferenceMessenger.Default.Register<ToggleConnectDriveMessage>(this, async (r, m) =>
-        {
-            if (BindingContext is not DriveDisplay drive || drive.Id != m.DriveId)
-            {
-                return;
-            }
-
-            // `async void` messenger callback — never let an exception escape.
-            try
-            {
-                await ToggleConnectInternalAsync();
-            }
-            catch (Exception ex)
-            {
-                await ShowErrorAlert(ex.Message);
-            }
+            RefreshStatus(drive);
         });
 
         WeakReferenceMessenger.Default.Unregister<NotifyDriveConnectivityMessage>(this);
@@ -216,7 +176,7 @@ public sealed partial class DriveTemplate : ContentView
                 return;
             }
 
-            CheckConnectivityAndUpdateUI();
+            RefreshStatus(drive);
         });
     }
 }

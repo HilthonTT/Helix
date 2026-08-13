@@ -664,15 +664,6 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Today.
-        /// </summary>
-        internal static string Today {
-            get {
-                return ResourceManager.GetString("Today", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Total Connected Drives.
         /// </summary>
         internal static string TotalConnectedDrives {

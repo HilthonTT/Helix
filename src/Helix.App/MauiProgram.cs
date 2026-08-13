@@ -31,7 +31,6 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 fonts.AddFont("fa_solid.ttf", "FontAwesome");
-                fonts.AddFont("fabmdl2.ttf", "Fabric");
 
                 fonts.AddFont("SpaceMono-Regular.ttf", "SpaceMonoRegular");
                 fonts.AddFont("SpaceMono-Bold.ttf", "SpaceMonoBold");
@@ -117,10 +116,15 @@ public static class MauiProgram
 
     private static void ModifyEntry()
     {
-        EntryHandler.Mapper.AppendToMapping("NoMoreBorders", (handler, view) =>
+        // Entries sit inside our own bordered Field container, so the platform chrome
+        // is removed. Weight stays Normal — the previous Thin made input text noticeably
+        // lighter than every label beside it.
+        EntryHandler.Mapper.AppendToMapping("HelixEntryChrome", (handler, view) =>
         {
-            handler.PlatformView.FontWeight = Microsoft.UI.Text.FontWeights.Thin;
+            handler.PlatformView.FontWeight = Microsoft.UI.Text.FontWeights.Normal;
             handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+            handler.PlatformView.Background = null;
+            handler.PlatformView.Padding = new Microsoft.UI.Xaml.Thickness(0);
         });
     }
 }

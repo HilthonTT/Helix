@@ -17,15 +17,6 @@
     <resheader name="version">2.0</resheader>
     <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
     <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
                 
     There are any number of "resheader" rows that contain simple 
     name/value pairs.
@@ -176,9 +167,6 @@
   </data>
   <data name="Connectivity" xml:space="preserve">
     <value>接続</value>
-  </data>
-  <data name="Today" xml:space="preserve">
-    <value>今日</value>
   </data>
   <data name="WelcomeMessage" xml:space="preserve">
     <value>Helixへようこそ!</value>
@@ -362,5 +350,53 @@
   </data>
   <data name="Disconnect" xml:space="preserve">
     <value>切断 (せつだん</value>
+  </data>
+  <data name="NasManager" xml:space="preserve">
+    <value>NAS マネージャー</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>メニュー</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>サインイン中</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="NoDrivesTitle" xml:space="preserve">
+    <value>ドライブがありません</value>
+  </data>
+  <data name="NoDrivesMessage" xml:space="preserve">
+    <value>最初のネットワーク ドライブを追加すると、ワンクリックで NAS に接続できます。</value>
+  </data>
+  <data name="NoAuditlogsTitle" xml:space="preserve">
+    <value>記録はまだありません</value>
+  </data>
+  <data name="NoAuditlogsMessage" xml:space="preserve">
+    <value>Helix での操作がここに表示されます。</value>
+  </data>
+  <data name="AutoConnectDescription" xml:space="preserve">
+    <value>Helix の起動時にドライブを再接続します。</value>
+  </data>
+  <data name="AutoMinimizeDescription" xml:space="preserve">
+    <value>タイマー終了後に Helix をタスクバーに最小化します。</value>
+  </data>
+  <data name="SetOnStartupDescription" xml:space="preserve">
+    <value>Windows へのサインイン時に Helix を起動します。</value>
+  </data>
+  <data name="SetDesktopShortcutDescription" xml:space="preserve">
+    <value>デスクトップに Helix のショートカットを残します。</value>
+  </data>
+  <data name="LanguageDescription" xml:space="preserve">
+    <value>アプリ全体で使用する言語です。</value>
+  </data>
+  <data name="TimerCountDescription" xml:space="preserve">
+    <value>最小化するまでの秒数です。</value>
+  </data>
+  <data name="ShowCredentials" xml:space="preserve">
+    <value>認証情報を表示</value>
   </data>
 </root>

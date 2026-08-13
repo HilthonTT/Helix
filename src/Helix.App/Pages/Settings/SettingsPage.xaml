@@ -1,422 +1,244 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
              xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:settings="clr-namespace:Helix.App.Pages.Settings"
+             xmlns:controls="clr-namespace:Helix.App.Controls"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:updateUsename="clr-namespace:Helix.App.Modals.Users.UpdateUsername"
              xmlns:updatePassword="clr-namespace:Helix.App.Modals.Users.UpdatePassword"
              xmlns:local="clr-namespace:Helix.App"
              x:Class="Helix.App.Pages.Settings.SettingsPage"
              x:DataType="settings:SettingsViewModel"
-             Title=""
-             Shell.NavBarIsVisible="False">
+             Title="">
 
     <ContentPage.Resources>
-        <ControlTemplate x:Key="MenuItemTemplate">
-            <Grid RowDefinitions="Auto">
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroupList>
-                        <VisualStateGroup x:Name="CheckedStates">
-                            <VisualState x:Name="Checked">
-                                <VisualState.Setters>
-                                    <Setter TargetName="OuterBorder" Property="Background" Value="{StaticResource DarkBg1Brush}" />
-                                    <Setter TargetName="OuterBorder" Property="Border.StrokeThickness" Value="1" />
-                                    <Setter TargetName="InnerBorder" Property="Background" Value="Transparent" />
-                                    <Setter TargetName="InnerBorder" Property="Border.StrokeThickness" Value="1" />
-                                </VisualState.Setters>
-                            </VisualState>
-
-                            <VisualState x:Name="Unchecked">
-                                <VisualState.Setters>
-                                    <Setter TargetName="OuterBorder" Property="Background" Value="Transparent" />
-                                    <Setter TargetName="OuterBorder" Property="Border.StrokeThickness" Value="0" />
-                                    <Setter TargetName="InnerBorder" Property="Background" Value="Transparent" />
-                                    <Setter TargetName="InnerBorder" Property="Border.StrokeThickness" Value="0" />
-                                </VisualState.Setters>
-                            </VisualState>
-
-                        </VisualStateGroup>
-                    </VisualStateGroupList>
-                </VisualStateManager.VisualStateGroups>
-
-                <Border x:Name="OuterBorder" 
-                        Background="Transparent"
-                        Stroke="{StaticResource DarkBg1Brush}" 
-                        StrokeThickness="0"
-                        HorizontalOptions="Fill"
-                        HeightRequest="70"
-                        Margin="15,0,0,0">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12" />
-                    </Border.StrokeShape>
-                </Border>
-
-                <Border x:Name="InnerBorder" 
-                        Background="Transparent"
-                        Margin="20" 
-                        HorizontalOptions="Center" 
-                        VerticalOptions="Center"
-                        Stroke="{StaticResource PrimaryBrush}" 
-                        StrokeThickness="0">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8" />
-                    </Border.StrokeShape>
-                </Border>
-
-                <ContentPresenter x:Name="CP"/>
-            </Grid>
-        </ControlTemplate>
+        <!-- One preference row: title, supporting line, and its control on the right -->
+        <Style x:Key="PreferenceRow" TargetType="Grid">
+            <Setter Property="ColumnDefinitions" Value="*,Auto"/>
+            <Setter Property="ColumnSpacing" Value="24"/>
+        </Style>
     </ContentPage.Resources>
 
-    <VisualStateManager.VisualStateGroups>
-        <VisualStateGroupList>
-            <VisualStateGroup x:Name="CommonStates">
-                <VisualState x:Name="Hidden">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="0"/>
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                        <Setter
-                        TargetName="MainGrid"
-                        Property="Grid.ColumnDefinitions"
-                        Value="0,*" />
-                    </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="Shown">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="1250" />
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                        <Setter
-                            TargetName="MainGrid"
-                            Property="Grid.ColumnDefinitions"
-                            Value="325,*" />
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateGroupList>
-    </VisualStateManager.VisualStateGroups>
-
     <Grid>
-        <ScrollView>
-            <Grid x:Name="MainGrid"
-                  RowDefinitions="Auto,*,Auto"
-                  ColumnDefinitions="325,*"
-                  ColumnSpacing="24"
-                  Padding="24">
 
-                <!-- Row 1: First Border for Account Settings -->
-                <Border Background="{StaticResource DarkBg2Brush}"
-                        Stroke="{StaticResource DarkBg2Brush}"
-                        StrokeThickness="1"
-                        Grid.Row="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12"/>
-                    </Border.StrokeShape>
+        <Grid RowDefinitions="Auto,*"
+              ColumnDefinitions="300,*"
+              ColumnSpacing="20"
+              RowSpacing="20"
+              Padding="28,24">
 
-                    <VerticalStackLayout Padding="0,12" 
-                                         HorizontalOptions="Start"
-                                         RadioButtonGroup.GroupName="Sections" 
-                                         RadioButtonGroup.SelectedValue="{Binding CurrentSection, Mode=TwoWay}">
+            <!-- ===== Page header ===== -->
+            <VerticalStackLayout Grid.ColumnSpan="2" Spacing="2">
+                <Label Text="{local:Translate Settings}" Style="{StaticResource Display}"/>
+                <Label Style="{StaticResource Muted}"
+                       Text="{Binding Source={x:Static local:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=local:LocalizationResourceManager}"/>
+            </VerticalStackLayout>
 
-                        <VerticalStackLayout.Resources>
-                            <Style TargetType="RadioButton">
-                                <Setter Property="ControlTemplate" Value="{StaticResource MenuItemTemplate}"/>
-                            </Style>
-                        </VerticalStackLayout.Resources>
+            <!-- ===== Section list ===== -->
+            <Border Grid.Row="1" Style="{StaticResource Card}" VerticalOptions="Start">
+                <VerticalStackLayout Padding="8,10"
+                                     Spacing="2"
+                                     RadioButtonGroup.GroupName="Sections"
+                                     RadioButtonGroup.SelectedValue="{Binding CurrentSection, Mode=TwoWay}">
+                    <VerticalStackLayout.Resources>
+                        <Style TargetType="controls:NavItem">
+                            <Setter Property="ControlTemplate" Value="{StaticResource NavSectionTemplate}"/>
+                        </Style>
+                    </VerticalStackLayout.Resources>
 
-                        <RadioButton x:Name="AccountRadioButton"
-                                     WidthRequest="310"
-                                     HorizontalOptions="Start"
-                                     VerticalOptions="Center"
-                                     Value="account"
-                                     ToolTipProperties.Text="{local:Translate AccountInformation}"
-                                     behaviors:CursorBehavior.AttachBehavior="True"
-                                     IsChecked="True">
-                            <RadioButton.Content>
-                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8"
-                                      RowDefinitions="Auto, Auto" RowSpacing="4"
-                                      Padding="26"
-                                      HorizontalOptions="Fill">
-                                    <Image Source="info.png" WidthRequest="20" HeightRequest="20" Aspect="AspectFit" />
-                                    <Label Text="{local:Translate AccountInformation}" 
-                                           Grid.Column="1" 
-                                           Style="{StaticResource Headline}"
-                                           LineBreakMode="TailTruncation"
-                                           MaxLines="1"/>
-                                    <Label Text="{local:Translate ChangeYourAccountInfo}" 
-                                           Grid.Column="1" Grid.Row="1" 
-                                           Style="{StaticResource Subhead}"
-                                           LineBreakMode="TailTruncation"
-                                           MaxLines="1"/>
-                                </Grid>
-                            </RadioButton.Content>
-                        </RadioButton>
+                    <controls:NavItem Value="account"
+                                      Glyph="{x:Static icons:IconFont.UserCircle}"
+                                      Content="{local:Translate AccountInformation}"
+                                      Description="{local:Translate ChangeYourAccountInfo}"
+                                      IsChecked="True"/>
 
-                        <RadioButton x:Name="SettingsRadioButton"
-                                     WidthRequest="310"
-                                     HorizontalOptions="Start"
-                                     VerticalOptions="Center"
-                                     Value="settings" 
-                                     ToolTipProperties.Text="{local:Translate Settings}"
-                                     behaviors:CursorBehavior.AttachBehavior="True">
-                            <RadioButton.Content>
-                                <Grid ColumnDefinitions="20,Auto" 
-                                      ColumnSpacing="8"
-                                      RowDefinitions="Auto, Auto"
-                                      RowSpacing="4"
-                                      Padding="26"
-                                      HorizontalOptions="Fill">
-                                    <Image Source="cog.png" WidthRequest="20" HeightRequest="20" Aspect="AspectFit"/>
-                                    <Label Text="{local:Translate Settings}"
-                                           Grid.Column="1" 
-                                           Style="{StaticResource Headline}" 
-                                           LineBreakMode="TailTruncation"
-                                           MaxLines="1"/>
-                                    <Label Text="{local:Translate ManageYourPreferences}" 
-                                           Grid.Column="1" 
-                                           Grid.Row="1" 
-                                           Style="{StaticResource Subhead}" 
-                                           LineBreakMode="TailTruncation"
-                                           MaxLines="1"/>
-                                </Grid>
-                            </RadioButton.Content>
-                        </RadioButton>
+                    <controls:NavItem Value="settings"
+                                      Glyph="{x:Static icons:IconFont.SlidersH}"
+                                      Content="{local:Translate Preferences}"
+                                      Description="{local:Translate ManageYourPreferences}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ===== Account panel ===== -->
+            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Card}" VerticalOptions="Start" IsVisible="False">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="account">
+                        <Setter Property="IsVisible" Value="True"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="{x:Static system:String.Empty}">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                </Border.Triggers>
+
+                <VerticalStackLayout Padding="24" Spacing="18">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{local:Translate AccountInformation}" Style="{StaticResource Title1}"/>
+                        <Label Text="{local:Translate ChangeYourAccountInfo}" Style="{StaticResource Caption}"/>
                     </VerticalStackLayout>
-                </Border>
 
-                <!-- Row 2: Second Border for Username and Password fields -->
-                <Border Background="{StaticResource DarkBg2Brush}"
-                        Stroke="{StaticResource DarkBg2Brush}"
-                        StrokeThickness="1"
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        IsVisible="False">
-                    <Border.Triggers>
-                        <DataTrigger TargetType="Border" 
-                                     Binding="{Binding CurrentSection}" 
-                                     Value="account">
-                            <Setter Property="IsVisible" Value="True" />
-                        </DataTrigger>
-                        <DataTrigger TargetType="Border"
-                                     Binding="{Binding CurrentSection}" 
-                                     Value="{x:Static system:String.Empty}">
-                            <Setter Property="IsVisible" Value="False" />
-                        </DataTrigger>
-                    </Border.Triggers>
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12"/>
-                    </Border.StrokeShape>
+                    <BoxView Style="{StaticResource Divider}"/>
 
-                    <VerticalStackLayout Spacing="16">
-                        <!-- User Information Grid -->
-                        <Grid Margin="24" RowDefinitions="Auto,Auto,Auto" RowSpacing="18">
-                            <VerticalStackLayout Margin="0,24,0,0" Grid.Row="0">
-                                <Label Text="{local:Translate AccountInformation}" Style="{StaticResource LargeTitle}"/>
-                                <Label Text="{Binding Source={x:Static local:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=local:LocalizationResourceManager}" />
-                                <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
-                            </VerticalStackLayout>
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{local:Translate UsernameField}" Style="{StaticResource Caption}"/>
+                            <Label Text="{Binding Username}" Style="{StaticResource Title2}"/>
+                        </VerticalStackLayout>
 
-                            <Grid ColumnDefinitions="*,Auto" Grid.Row="1">
-                                <Label>
-                                    <Label.FormattedText>
-                                        <FormattedString>
-                                            <Span Text="{local:Translate UsernameField}"
-                                                  FontSize="Title" 
-                                                  TextColor="LightGray"
-                                                  FontFamily="{StaticResource SpaceMonoBold}"/>
-                                            <Span Text="{Binding Username}"
-                                                  FontSize="Title" 
-                                                  FontFamily="{StaticResource SpaceMonoRegular}"/>
-                                        </FormattedString>
-                                    </Label.FormattedText>
-                                </Label>
-                                <ImageButton Grid.Column="1" Source="pencil.png"
-                                             Aspect="Fill" 
-                                             WidthRequest="40" 
-                                             HeightRequest="40" 
-                                             Background="Transparent"
-                                             BorderColor="Transparent"
-                                             Command="{Binding EditUsernameCommand}"
-                                             IsEnabled="{Binding IsNotBusy}"/>
-                            </Grid>
+                        <Border Grid.Column="1"
+                                Style="{StaticResource IconChip}"
+                                IsEnabled="{Binding IsNotBusy}"
+                                ToolTipProperties.Text="{local:Translate UpdateYourUsername}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding EditUsernameCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="{x:Static icons:IconFont.PencilAlt}"
+                                   Style="{StaticResource IconSm}"
+                                   InputTransparent="True"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                        </Border>
+                    </Grid>
 
-                            <Grid ColumnDefinitions="*,Auto" Grid.Row="2">
-                                <Label>
-                                    <Label.FormattedText>
-                                        <FormattedString>
-                                            <Span Text="{local:Translate PasswordField}"
-                                                  FontSize="Title" 
-                                                  TextColor="LightGray" 
-                                                  FontFamily="{StaticResource SpaceMonoBold}"/>
-                                            <Span Text="-------"  
-                                                  FontSize="Title" 
-                                                  FontFamily="{StaticResource SpaceMonoRegular}"/>
-                                        </FormattedString>
-                                    </Label.FormattedText>
-                                </Label>
-                                <ImageButton Grid.Column="1" Source="pencil.png"
-                                             Aspect="Fill" 
-                                             WidthRequest="40" 
-                                             HeightRequest="40" 
-                                             Background="Transparent"
-                                             BorderColor="Transparent"
-                                             Command="{Binding EditPasswordCommand}" 
-                                             IsEnabled="{Binding IsNotBusy}"/>
-                            </Grid>
-                        </Grid>
+                    <BoxView Style="{StaticResource Divider}"/>
+
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{local:Translate PasswordField}" Style="{StaticResource Caption}"/>
+                            <Label Text="••••••••" Style="{StaticResource Title2}"/>
+                        </VerticalStackLayout>
+
+                        <Border Grid.Column="1"
+                                Style="{StaticResource IconChip}"
+                                IsEnabled="{Binding IsNotBusy}"
+                                ToolTipProperties.Text="{local:Translate UpdatePassword}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding EditPasswordCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="{x:Static icons:IconFont.PencilAlt}"
+                                   Style="{StaticResource IconSm}"
+                                   InputTransparent="True"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ===== Preferences panel ===== -->
+            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Card}" VerticalOptions="Start" IsVisible="False">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="settings">
+                        <Setter Property="IsVisible" Value="True"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="{x:Static system:String.Empty}">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                </Border.Triggers>
+
+                <VerticalStackLayout Padding="24" Spacing="18">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{local:Translate Preferences}" Style="{StaticResource Title1}"/>
+                        <Label Text="{local:Translate ManageYourPreferences}" Style="{StaticResource Caption}"/>
                     </VerticalStackLayout>
-                </Border>
 
+                    <BoxView Style="{StaticResource Divider}"/>
 
-                <!-- Row 2: Settings, preferences -->
-                <Border Background="{StaticResource DarkBg2Brush}"
-                        Stroke="{StaticResource DarkBg2Brush}"
-                        StrokeThickness="1"
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        IsVisible="False">
-                    <Border.Triggers>
-                        <DataTrigger TargetType="Border" 
-                                     Binding="{Binding CurrentSection}" 
-                                     Value="settings">
-                            <Setter Property="IsVisible" Value="True" />
-                        </DataTrigger>
-                        <DataTrigger TargetType="Border"
-                                     Binding="{Binding CurrentSection}" 
-                                     Value="{x:Static system:String.Empty}">
-                            <Setter Property="IsVisible" Value="False" />
-                        </DataTrigger>
-                    </Border.Triggers>
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12"/>
-                    </Border.StrokeShape>
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{local:Translate AutoConnectDrivesOnLaunch}" Style="{StaticResource Title3}"/>
+                            <Label Text="{local:Translate AutoConnectDescription}" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                VerticalOptions="Center"
+                                IsToggled="{Binding Settings.AutoConnect}"
+                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                    </Grid>
 
-                    <VerticalStackLayout Spacing="16">
-                        <!-- User Information Grid -->
-                        <Grid Margin="24" 
-                              RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" 
-                              RowSpacing="18">
-                            <VerticalStackLayout Margin="0,24,0,0" Grid.Row="0">
-                                <Label Text="{local:Translate Settings}" Style="{StaticResource LargeTitle}"/>
-                                <Label Text="{Binding Source={x:Static local:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=local:LocalizationResourceManager}" />
-                                <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
-                            </VerticalStackLayout>
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{local:Translate AutoMinimizeApp}" Style="{StaticResource Title3}"/>
+                            <Label Text="{local:Translate AutoMinimizeDescription}" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                VerticalOptions="Center"
+                                IsToggled="{Binding Settings.AutoMinimize}"
+                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                    </Grid>
 
-                            <Grid ColumnDefinitions="*,Auto" Grid.Row="1">
-                                <Label Text="{local:Translate AutoConnectDrivesOnLaunch}"/>
-                                <Switch HorizontalOptions="End" 
-                                        OnColor="Green" 
-                                        ThumbColor="White" 
-                                        IsToggled="{Binding Settings.AutoConnect}"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{local:Translate SetOnStartup}" Style="{StaticResource Title3}"/>
+                            <Label Text="{local:Translate SetOnStartupDescription}" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                VerticalOptions="Center"
+                                IsToggled="{Binding Settings.SetOnStartup}"
+                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                    </Grid>
 
-                            <Grid ColumnDefinitions="*,Auto" Grid.Row="2">
-                                <Label Text="{local:Translate AutoMinimizeApp}"/>
-                                <Switch HorizontalOptions="End"
-                                        OnColor="Green" 
-                                        ThumbColor="White" 
-                                        IsToggled="{Binding Settings.AutoMinimize}"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{local:Translate SetDesktopShortcut}" Style="{StaticResource Title3}"/>
+                            <Label Text="{local:Translate SetDesktopShortcutDescription}" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                VerticalOptions="Center"
+                                IsToggled="{Binding Settings.SetDesktopShortcut}"
+                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                    </Grid>
 
-                            <Grid ColumnDefinitions="*,Auto" Grid.Row="3">
-                                <Label Text="{local:Translate SetOnStartup}"/>
-                                <Switch HorizontalOptions="End" 
-                                        OnColor="Green"
-                                        ThumbColor="White"
-                                        IsToggled="{Binding Settings.SetOnStartup}" 
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
+                    <BoxView Style="{StaticResource Divider}"/>
 
-                            <Grid ColumnDefinitions="*,Auto" Grid.Row="4">
-                                <Label Text="{local:Translate SetDesktopShortcut}"/>
-                                <Switch HorizontalOptions="End" 
-                                         OnColor="Green"
-                                         ThumbColor="White"
-                                         IsToggled="{Binding Settings.SetDesktopShortcut}" 
-                                         IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{local:Translate Languages}" Style="{StaticResource Title3}"/>
+                            <Label Text="{local:Translate LanguageDescription}" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
+                            <Picker Margin="8,0"
+                                    BackgroundColor="Transparent"
+                                    IsEnabled="{Binding Settings.IsNotBusy}"
+                                    ItemsSource="{Binding Languages}"
+                                    SelectedItem="{Binding SelectedLanguage}"/>
+                        </Border>
+                    </Grid>
 
-                            <Grid ColumnDefinitions="*,Auto" Grid.Row="5">
-                                <Label Text="{local:Translate Languages}"/>
-                                <Picker HorizontalOptions="End" 
-                                        WidthRequest="230"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"
-                                        ItemsSource="{Binding Languages}"
-                                        SelectedItem="{Binding SelectedLanguage}"/>
-                            </Grid>
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{local:Translate TimerCountInSeconds}" Style="{StaticResource Title3}"/>
+                            <Label Text="{local:Translate TimerCountDescription}" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
+                            <Entry Placeholder="20"
+                                   Keyboard="Numeric"
+                                   Text="{Binding Settings.TimerCount}"
+                                   IsEnabled="{Binding Settings.IsNotBusy}"/>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
 
-                            <Grid ColumnDefinitions="*,Auto" Grid.Row="6">
-                                <Label Text="{local:Translate TimerCountInSeconds}" Grid.Column="0"/>
-                                <Border Grid.Column="1"
-                                        HeightRequest="48"
-                                        HorizontalOptions="FillAndExpand"
-                                        Background="{StaticResource DarkBg1Brush}"
-                                        Stroke="{StaticResource SecondaryBrush}"
-                                        StrokeThickness="1">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="8"/>
-                                    </Border.StrokeShape>
+        </Grid>
 
-                                    <Grid>
-                                        <Entry Background="Transparent"
-                                               Placeholder="e.g. 20"
-                                               Keyboard="Numeric"
-                                               Text="{Binding Settings.TimerCount}"
-                                               PlaceholderColor="{StaticResource TextSecondary}"
-                                               TextColor="White"
-                                               HorizontalOptions="Fill"
-                                               MinimumWidthRequest="0"
-                                               Margin="0,0,50,0"
-                                               FontSize="14"
-                                               IsEnabled="{Binding Settings.IsNotBusy}" />
-
-                                    </Grid>
-
-                                </Border>
-                            </Grid>
-                        </Grid>
-                    </VerticalStackLayout>
-                </Border>
-
-            </Grid>
-        </ScrollView>
-
-        <BoxView Color="Black"
+        <!-- ===== Modal layer ===== -->
+        <BoxView x:Name="BlockScreen"
+                 Color="{StaticResource Black}"
                  Opacity="0"
-                 Grid.RowSpan="3"
-                 Grid.ColumnSpan="2"
-                 HorizontalOptions="Fill"
-                 VerticalOptions="Fill"
-                 Margin="-24"
-                 InputTransparent="True"
-                 x:Name="BlockScreen" />
+                 InputTransparent="True"/>
 
-        <AbsoluteLayout x:Name="UpdateUsernameLayout"
-                        IsVisible="False"
-                        HorizontalOptions="FillAndExpand"
-                        VerticalOptions="FillAndExpand">
+        <AbsoluteLayout x:Name="UpdateUsernameLayout" IsVisible="False">
             <updateUsename:UpdateUsernameModal x:Name="UpdateUsernameView"
-                                               BackgroundColor="White"
-                                               MaximumHeightRequest="{Binding ModalMaximumHeight}"
-                                               AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
+                                               WidthRequest="440"
+                                               AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
                                                AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
-        <AbsoluteLayout x:Name="UpdatePasswordLayout"
-                IsVisible="False"
-                HorizontalOptions="FillAndExpand"
-                VerticalOptions="FillAndExpand">
+        <AbsoluteLayout x:Name="UpdatePasswordLayout" IsVisible="False">
             <updatePassword:UpdatePasswordModal x:Name="UpdatePasswordView"
-                                                BackgroundColor="White"
-                                                MaximumHeightRequest="{Binding ModalMaximumHeight}"
-                                                AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
+                                                WidthRequest="460"
+                                                MaximumHeightRequest="560"
+                                                AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
                                                 AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
-
 
     </Grid>
 

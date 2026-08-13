@@ -1,65 +1,134 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
-<ResourceDictionary 
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
+    <!--
+    Design tokens.
 
+    Raw palette only. Nothing here is theme-aware — semantic pairs are suffixed
+    "Light"/"Dark" and resolved with {AppThemeBinding} inside Styles.xaml, so pages
+    apply styles rather than naming colours directly. The brand ramp is sampled from
+    the Helix logomark (Resources/Images/logoipsum.svg).
+    -->
 
-    <Color x:Key="Primary">#4A90E2</Color>
-    <!-- Blue shade -->
-    <Color x:Key="Secondary">#273A5D</Color>
-    <!-- Darker blue shade -->
-    <Color x:Key="Tertiary">#42A0E6</Color>
-    <!-- Lighter blue accent -->
-    <Color x:Key="Neutral">#A0AAB3</Color>
-    <!-- Neutral grey -->
-    <Color x:Key="NeutralLighter">#D9DEE5</Color>
-    <!-- Light grey -->
-    <Color x:Key="NeutralDarker">#4F5B65</Color>
-    <!-- Dark grey -->
-    <Color x:Key="White">#F5F7FA</Color>
-    <!-- Off-white -->
-    <Color x:Key="Black">#1B1E25</Color>
-    <!-- Almost black -->
-    <Color x:Key="Accent">#4FC3F7</Color>
-    <!-- Sky blue accent -->
-    <Color x:Key="Error">#D32F2F</Color>
-    <!-- Red for errors -->
-    <Color x:Key="Warning">#FFB74D</Color>
-    <!-- Orange for warnings -->
-    <Color x:Key="Text_Light">#1B1E25</Color>
-    <!-- Dark text -->
-    <Color x:Key="Text_Dark">#F5F7FA</Color>
-    <!-- Light text -->
-    <Color x:Key="TextOnSolid_Light">#F5F7FA</Color>
-    <!-- Light text on dark background -->
-    <Color x:Key="TextOnSolid_Dark">#1B1E25</Color>
-    <!-- Dark text on light background -->
-    <Color x:Key="TextSecondary_Light">#2E3A47</Color>
-    <!-- Secondary text for light theme -->
-    <Color x:Key="TextSecondary_Dark">#F0F2F4</Color>
-    <!-- Secondary text for dark theme -->
-    <Color x:Key="DarkBg1">#22303C</Color>
-    <!-- Dark blue background -->
-    <Color x:Key="DarkBg2">#1A2833</Color>
-    <!-- Darker blue background -->
-    <Color x:Key="DarkBg1Transparent">#E622303C</Color>
-    <!-- Transparent dark blue -->
-    <Color x:Key="TextSecondary">#99A9B5</Color>
-    <!-- Secondary text color -->
+    <!-- ===== Brand ===== -->
+    <Color x:Key="BrandAmber">#FFC212</Color>
+    <Color x:Key="BrandGold">#F99419</Color>
+    <Color x:Key="BrandOrange">#F77C1C</Color>
+    <Color x:Key="Brand">#F14E23</Color>
+    <Color x:Key="BrandDeep">#D33F1A</Color>
+    <Color x:Key="BrandInk">#422520</Color>
 
+    <!-- Brand washes: brand at low alpha, for selected rows and soft fills (#AARRGGBB) -->
+    <Color x:Key="BrandWashDark">#24F14E23</Color>
+    <Color x:Key="BrandWashLight">#16F14E23</Color>
+    <Color x:Key="BrandWashStrongDark">#3DF14E23</Color>
+    <Color x:Key="BrandWashStrongLight">#28F14E23</Color>
+
+    <!-- ===== Neutrals — warm stone, tuned to sit under the brand orange ===== -->
+    <Color x:Key="CanvasDark">#121110</Color>
+    <Color x:Key="SurfaceDark">#1B1918</Color>
+    <Color x:Key="SurfaceAltDark">#242120</Color>
+    <Color x:Key="SurfaceHoverDark">#2C2827</Color>
+    <Color x:Key="BorderDark">#302C2A</Color>
+    <Color x:Key="BorderStrongDark">#4A4441</Color>
+    <Color x:Key="TextDark">#FAFAF9</Color>
+    <Color x:Key="TextMutedDark">#A8A29E</Color>
+    <Color x:Key="TextFaintDark">#7C736E</Color>
+
+    <Color x:Key="CanvasLight">#F7F6F4</Color>
+    <Color x:Key="SurfaceLight">#FFFFFF</Color>
+    <Color x:Key="SurfaceAltLight">#F2F1EF</Color>
+    <Color x:Key="SurfaceHoverLight">#EAE8E5</Color>
+    <Color x:Key="BorderLight">#E4E1DD</Color>
+    <Color x:Key="BorderStrongLight">#CFC9C4</Color>
+    <Color x:Key="TextLight">#1C1917</Color>
+    <Color x:Key="TextMutedLight">#57534E</Color>
+    <Color x:Key="TextFaintLight">#8A827C</Color>
+
+    <!-- ===== Status ===== -->
+    <Color x:Key="SuccessDark">#34D399</Color>
+    <Color x:Key="SuccessLight">#0E9F6E</Color>
+    <Color x:Key="SuccessWashDark">#2634D399</Color>
+    <Color x:Key="SuccessWashLight">#1F0E9F6E</Color>
+
+    <Color x:Key="DangerDark">#F87171</Color>
+    <Color x:Key="DangerLight">#DC2626</Color>
+    <Color x:Key="DangerWashDark">#26F87171</Color>
+    <Color x:Key="DangerWashLight">#1FDC2626</Color>
+
+    <Color x:Key="WarningDark">#FBBF24</Color>
+    <Color x:Key="WarningLight">#B45309</Color>
+
+    <Color x:Key="ScrimColor">#B3000000</Color>
+
+    <!-- ===== Brushes for the raw palette ===== -->
+    <SolidColorBrush x:Key="BrandBrush" Color="{StaticResource Brand}"/>
+    <SolidColorBrush x:Key="BrandAmberBrush" Color="{StaticResource BrandAmber}"/>
+    <SolidColorBrush x:Key="BrandDeepBrush" Color="{StaticResource BrandDeep}"/>
+    <SolidColorBrush x:Key="BrandInkBrush" Color="{StaticResource BrandInk}"/>
+
+    <SolidColorBrush x:Key="CanvasDarkBrush" Color="{StaticResource CanvasDark}"/>
+    <SolidColorBrush x:Key="SurfaceDarkBrush" Color="{StaticResource SurfaceDark}"/>
+    <SolidColorBrush x:Key="SurfaceAltDarkBrush" Color="{StaticResource SurfaceAltDark}"/>
+    <SolidColorBrush x:Key="SurfaceHoverDarkBrush" Color="{StaticResource SurfaceHoverDark}"/>
+    <SolidColorBrush x:Key="BorderDarkBrush" Color="{StaticResource BorderDark}"/>
+
+    <SolidColorBrush x:Key="CanvasLightBrush" Color="{StaticResource CanvasLight}"/>
+    <SolidColorBrush x:Key="SurfaceLightBrush" Color="{StaticResource SurfaceLight}"/>
+    <SolidColorBrush x:Key="SurfaceAltLightBrush" Color="{StaticResource SurfaceAltLight}"/>
+    <SolidColorBrush x:Key="SurfaceHoverLightBrush" Color="{StaticResource SurfaceHoverLight}"/>
+    <SolidColorBrush x:Key="BorderLightBrush" Color="{StaticResource BorderLight}"/>
+
+    <SolidColorBrush x:Key="BrandWashDarkBrush" Color="{StaticResource BrandWashDark}"/>
+    <SolidColorBrush x:Key="BrandWashLightBrush" Color="{StaticResource BrandWashLight}"/>
+
+    <SolidColorBrush x:Key="SuccessWashDarkBrush" Color="{StaticResource SuccessWashDark}"/>
+    <SolidColorBrush x:Key="SuccessWashLightBrush" Color="{StaticResource SuccessWashLight}"/>
+    <SolidColorBrush x:Key="DangerWashDarkBrush" Color="{StaticResource DangerWashDark}"/>
+    <SolidColorBrush x:Key="DangerWashLightBrush" Color="{StaticResource DangerWashLight}"/>
+
+    <!-- The brand gradient, lifted straight off the logomark. Used sparingly:
+         the sign-in panel and the dashboard's primary call to action. -->
+    <LinearGradientBrush x:Key="BrandGradientBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource BrandAmber}" Offset="0.0"/>
+        <GradientStop Color="{StaticResource BrandOrange}" Offset="0.5"/>
+        <GradientStop Color="{StaticResource Brand}" Offset="1.0"/>
+    </LinearGradientBrush>
+
+    <!--
+    ===== Legacy aliases =====
+    Kept so any stray reference outside the styled surface keeps resolving. Prefer
+    the styles in Styles.xaml over these.
+    -->
+    <Color x:Key="Primary">#F14E23</Color>
+    <Color x:Key="Secondary">#302C2A</Color>
+    <Color x:Key="Tertiary">#F77C1C</Color>
+    <Color x:Key="Accent">#FFC212</Color>
+    <Color x:Key="Neutral">#A8A29E</Color>
+    <Color x:Key="NeutralLighter">#E4E1DD</Color>
+    <Color x:Key="NeutralDarker">#57534E</Color>
+    <Color x:Key="White">#FAFAF9</Color>
+    <Color x:Key="Black">#121110</Color>
+    <Color x:Key="Error">#F87171</Color>
+    <Color x:Key="Warning">#FBBF24</Color>
+    <Color x:Key="Text_Light">#1C1917</Color>
+    <Color x:Key="Text_Dark">#FAFAF9</Color>
+    <Color x:Key="TextSecondary">#A8A29E</Color>
+    <Color x:Key="DarkBg1">#242120</Color>
+    <Color x:Key="DarkBg2">#1B1918</Color>
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}"/>
     <SolidColorBrush x:Key="NeutralBrush" Color="{StaticResource Neutral}"/>
     <SolidColorBrush x:Key="NeutralLigherBrush" Color="{StaticResource NeutralLighter}"/>
     <SolidColorBrush x:Key="NeutralDarkerBrush" Color="{StaticResource NeutralDarker}"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}"/>
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
-    <SolidColorBrush x:Key="WhiteBrush"  Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="DarkBg1Brush" Color="{StaticResource DarkBg1}"/>
     <SolidColorBrush x:Key="DarkBg2Brush" Color="{StaticResource DarkBg2}"/>
 

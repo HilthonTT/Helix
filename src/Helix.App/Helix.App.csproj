@@ -62,56 +62,22 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\mainicon.svg" />
+		<!-- App Icon — the Helix logomark on the app's canvas colour -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#121110" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#121110" BaseSize="128,165" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		<!-- The logomark is 31x40 intrinsically but is shown up to ~57px tall on the
+		     sign-in screen; rasterise it larger so it stays crisp. -->
+		<MauiImage Update="Resources\Images\logoipsum.svg" BaseSize="124,160" />
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
-
-		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <None Remove="Resources\Fonts\fabmdl2.ttf" />
-	  <None Remove="Resources\Fonts\fa_solid.ttf" />
-	  <None Remove="Resources\Fonts\SpaceMono-Bold.ttf" />
-	  <None Remove="Resources\Fonts\SpaceMono-Regular.ttf" />
-	  <None Remove="Resources\Images\auditlogs.svg" />
-	  <None Remove="Resources\Images\check.png" />
-	  <None Remove="Resources\Images\clock.png" />
-	  <None Remove="Resources\Images\cog.png" />
-	  <None Remove="Resources\Images\connect.svg" />
-	  <None Remove="Resources\Images\dashboard.svg" />
-	  <None Remove="Resources\Images\database.png" />
-	  <None Remove="Resources\Images\disconnect.svg" />
-	  <None Remove="Resources\Images\documents.png" />
-	  <None Remove="Resources\Images\eye.png" />
-	  <None Remove="Resources\Images\filter.svg" />
-	  <None Remove="Resources\Images\folder.png" />
-	  <None Remove="Resources\Images\home.svg" />
-	  <None Remove="Resources\Images\illustration1.png" />
-	  <None Remove="Resources\Images\illustration2.png" />
-	  <None Remove="Resources\Images\info.png" />
-	  <None Remove="Resources\Images\logo.png" />
-	  <None Remove="Resources\Images\logout.svg" />
-	  <None Remove="Resources\Images\movies.png" />
-	  <None Remove="Resources\Images\music.png" />
-	  <None Remove="Resources\Images\no_wifi.svg" />
-	  <None Remove="Resources\Images\pencil.png" />
-	  <None Remove="Resources\Images\picture.png" />
-	  <None Remove="Resources\Images\plug.png" />
-	  <None Remove="Resources\Images\settings.svg" />
-	  <None Remove="Resources\Images\software.png" />
-	  <None Remove="Resources\Images\wifi.svg" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" />

@@ -2,175 +2,163 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:register="clr-namespace:Helix.App.Pages.Register"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:local="clr-namespace:Helix.App"
              x:DataType="register:RegisterViewModel"
              x:Class="Helix.App.Pages.Register.RegisterPage"
              Title=""
              Shell.NavBarIsVisible="False">
-        <!-- Left Side for Logo, Title, and Login Form -->
-    <!-- Right Side for Image Illustration -->
 
     <Grid>
-        <Grid BackgroundColor="Black" Opacity="0.5" IsVisible="{Binding IsLoading}">
-            <ActivityIndicator IsRunning="{Binding IsLoading}"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center"
-                       Color="White"
-                       WidthRequest="50"
-                       HeightRequest="50"/>
+
+        <Grid ColumnDefinitions="*,*"
+              IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+
+            <!-- ===== Form ===== -->
+            <Grid Padding="48,32">
+
+                <Picker VerticalOptions="Start"
+                        HorizontalOptions="End"
+                        WidthRequest="150"
+                        ItemsSource="{Binding Languages}"
+                        SelectedItem="{Binding SelectedLanguage}"/>
+
+                <VerticalStackLayout VerticalOptions="Center"
+                                     HorizontalOptions="Center"
+                                     WidthRequest="360"
+                                     Spacing="0">
+
+                    <Image Source="logoipsum.png"
+                           Aspect="AspectFit"
+                           WidthRequest="44"
+                           HeightRequest="57"
+                           HorizontalOptions="Start"/>
+
+                    <Label Text="{local:Translate RegisterMessage}"
+                           Style="{StaticResource Display}"
+                           Margin="0,20,0,28"/>
+
+                    <!-- Username -->
+                    <Label Text="{local:Translate Username}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/>
+                    <Border Style="{StaticResource Field}">
+                        <Entry Placeholder="{local:Translate Username}"
+                               Text="{Binding Username}"
+                               IsEnabled="{Binding IsNotBusy}"/>
+                    </Border>
+
+                    <!-- Password -->
+                    <Label Text="{local:Translate Password}" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
+                    <Border Style="{StaticResource Field}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Entry Placeholder="{local:Translate Password}"
+                                   IsPassword="{Binding HidePassword}"
+                                   Text="{Binding Password}"
+                                   Margin="14,0,0,0"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+
+                            <Border Grid.Column="1"
+                                    Style="{StaticResource IconChip}"
+                                    Stroke="Transparent"
+                                    Margin="0,0,7,0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TogglePasswordHiddenCommand}"/>
+                                </Border.GestureRecognizers>
+                                <Grid InputTransparent="True">
+                                    <Label Text="{x:Static icons:IconFont.Eye}"
+                                           Style="{StaticResource IconSm}"
+                                           IsVisible="{Binding HidePassword}"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                    <Label Text="{x:Static icons:IconFont.EyeSlash}"
+                                           Style="{StaticResource IconSm}"
+                                           IsVisible="{Binding HidePassword, Converter={StaticResource InvertedBoolConverter}}"
+                                           TextColor="{StaticResource Brand}"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Confirm password -->
+                    <Label Text="{local:Translate ConfirmPassword}" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
+                    <Border Style="{StaticResource Field}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Entry Placeholder="{local:Translate ConfirmPassword}"
+                                   IsPassword="{Binding HideConfirmedPassword}"
+                                   Text="{Binding ConfirmedPassword}"
+                                   Margin="14,0,0,0"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+
+                            <Border Grid.Column="1"
+                                    Style="{StaticResource IconChip}"
+                                    Stroke="Transparent"
+                                    Margin="0,0,7,0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleConfirmedPasswordHiddenCommand}"/>
+                                </Border.GestureRecognizers>
+                                <Grid InputTransparent="True">
+                                    <Label Text="{x:Static icons:IconFont.Eye}"
+                                           Style="{StaticResource IconSm}"
+                                           IsVisible="{Binding HideConfirmedPassword}"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                    <Label Text="{x:Static icons:IconFont.EyeSlash}"
+                                           Style="{StaticResource IconSm}"
+                                           IsVisible="{Binding HideConfirmedPassword, Converter={StaticResource InvertedBoolConverter}}"
+                                           TextColor="{StaticResource Brand}"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Button Text="{local:Translate Register}"
+                            Margin="0,24,0,0"
+                            HorizontalOptions="Fill"
+                            Command="{Binding RegisterCommand}"
+                            IsEnabled="{Binding IsNotBusy}"/>
+
+                    <Label Text="{local:Translate PressCtrlEnter}"
+                           Style="{StaticResource Faint}"
+                           HorizontalOptions="Center"
+                           Margin="0,10,0,0"/>
+
+                    <Button Text="{local:Translate AlreadyHaveAnAccount}"
+                            Style="{StaticResource ButtonGhost}"
+                            Margin="0,8,0,0"
+                            HorizontalOptions="Center"
+                            Command="{Binding GoToLoginCommand}"
+                            IsEnabled="{Binding IsNotBusy}"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- ===== Brand panel ===== -->
+            <Grid Grid.Column="1" Background="{StaticResource BrandGradientBrush}">
+                <Image Source="orange_background.png"
+                       Aspect="AspectFill"
+                       HorizontalOptions="Fill"
+                       VerticalOptions="Fill"/>
+
+                <VerticalStackLayout VerticalOptions="End"
+                                     HorizontalOptions="Start"
+                                     Margin="48"
+                                     Spacing="8">
+                    <Label Text="Helix"
+                           FontFamily="{StaticResource FontSemibold}"
+                           FontSize="36"
+                           TextColor="#FFFFFF"/>
+                    <Label Text="{local:Translate NasManager}"
+                           FontSize="15"
+                           TextColor="#F2FFFFFF"
+                           MaximumWidthRequest="340"/>
+                </VerticalStackLayout>
+            </Grid>
         </Grid>
 
-        <Grid ColumnDefinitions="3*, 3*" IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
-            <Label Text="{local:Translate PressCtrlEnter}"
-                   VerticalOptions="Start" 
-                   HorizontalOptions="Start" 
-                   Margin="20,20,0,0"
-                   TextColor="{StaticResource TextSecondary}" 
-                   FontAttributes="Bold" />
-
-            <Picker VerticalOptions="Start" 
-                    HorizontalOptions="End"
-                    Margin="20"
-                    ItemsSource="{Binding Languages}" 
-                    SelectedItem="{Binding SelectedLanguage}" />
-
-            <StackLayout Grid.Column="0"
-                         Padding="20"
-                         VerticalOptions="Center">
-
-                <Image Source="logo.png" 
-                       WidthRequest="100" 
-                       Aspect="AspectFit" 
-                       HeightRequest="100"
-                       HorizontalOptions="Center" 
-                       Margin="0,0,0,20"/>
-
-                <!-- Title -->
-                <Label Text="{local:Translate RegisterMessage}" 
-                       HorizontalOptions="Center" 
-                       Style="{StaticResource LargeTitle}"/>
-
-                <!-- Username Entry -->
-                <Border HeightRequest="48"
-                         HorizontalOptions="FillAndExpand"
-                         Background="{StaticResource DarkBg1Brush}"
-                         Stroke="{StaticResource SecondaryBrush}"
-                         StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
-
-                    <Entry Background="Transparent"
-                            Placeholder="{local:Translate Username}"
-                            Text="{Binding Username}"
-                            PlaceholderColor="{StaticResource TextSecondary}"
-                            TextColor="White"
-                            HorizontalOptions="StartAndExpand"
-                            MinimumWidthRequest="900"
-                            Margin="8,0"
-                            FontSize="14"
-                            IsEnabled="{Binding IsNotBusy}" />
-                </Border>
-
-                <!-- Password Entry -->
-                <Border HeightRequest="48"
-                         HorizontalOptions="FillAndExpand"
-                         Background="{StaticResource DarkBg1Brush}"
-                         Stroke="{StaticResource SecondaryBrush}"
-                         StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
-
-                    <Grid>
-                        <Entry Background="Transparent"
-                                Placeholder="{local:Translate Password}"
-                                IsPassword="{Binding HidePassword}"
-                                Text="{Binding Password}"
-                                PlaceholderColor="{StaticResource TextSecondary}"
-                                TextColor="White"
-                                HorizontalOptions="StartAndExpand"
-                                MinimumWidthRequest="900"
-                                Margin="0,0,50,0"
-                                FontSize="14"
-                                IsEnabled="{Binding IsNotBusy}" />
-
-                        <ImageButton Source="eye.png"
-                                     HorizontalOptions="End" 
-                                     VerticalOptions="Center"
-                                     BackgroundColor="Transparent"
-                                     HeightRequest="24"
-                                     WidthRequest="24"
-                                     Margin="0,0,10,0" 
-                                     Command="{Binding TogglePasswordHiddenCommand}"
-                                     Opacity="{Binding HidePassword, Converter={StaticResource BoolToOpacityConverter}}"
-                                     BorderColor="Transparent"/>
-                    </Grid>
-
-                </Border>
-
-                <!-- Confirmed Password Entry -->
-                <Border HeightRequest="48"
-                        HorizontalOptions="FillAndExpand"
-                        Background="{StaticResource DarkBg1Brush}"
-                        Stroke="{StaticResource SecondaryBrush}"
-                        StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
-
-                    <Grid>
-                        <Entry Background="Transparent"
-                               Placeholder="{local:Translate ConfirmPassword}"
-                               IsPassword="{Binding HideConfirmedPassword}"
-                               Text="{Binding ConfirmedPassword}"
-                               PlaceholderColor="{StaticResource TextSecondary}"
-                               TextColor="White"
-                               HorizontalOptions="StartAndExpand"
-                               MinimumWidthRequest="900"
-                               Margin="0,0,50,0"
-                               FontSize="14"
-                               IsEnabled="{Binding IsNotBusy}" />
-
-                        <ImageButton Source="eye.png"
-                                     HorizontalOptions="End" 
-                                     VerticalOptions="Center"
-                                     BackgroundColor="Transparent"
-                                     HeightRequest="24"
-                                     WidthRequest="24"
-                                     Margin="0,0,10,0" 
-                                     Command="{Binding ToggleConfirmedPasswordHiddenCommand}"
-                                     Opacity="{Binding HideConfirmedPassword, Converter={StaticResource BoolToOpacityConverter}}"
-                                     BorderColor="Transparent" />
-                    </Grid>
-
-                </Border>
-
-
-                <!-- Register Button -->
-                <Button Text="{local:Translate Register}" 
-                        Grid.Row="1" 
-                        Grid.Column="1" 
-                        Margin="0,24,0,24" 
-                        Command="{Binding RegisterCommand}"
-                        HorizontalOptions="Fill"
-                        IsEnabled="{Binding IsNotBusy}"/>
-
-                <!-- "Already have an account?" Button -->
-                <Button Text="{local:Translate AlreadyHaveAnAccount}"
-                        FontSize="14"
-                        BackgroundColor="Transparent"
-                        Margin="12,-20,0,0" 
-                        Command="{Binding GoToLoginCommand}"
-                        IsEnabled="{Binding IsNotBusy}"/>
-            </StackLayout>
-
-            <!-- Right Side Content (Illustration Image) -->
-            <Image Source="illustration2.png" 
-                   Grid.Column="1"
-                   Aspect="AspectFill"
-                   VerticalOptions="Center"
-                   HorizontalOptions="Center"/>
+        <!-- ===== Busy overlay ===== -->
+        <Grid IsVisible="{Binding IsLoading}"
+              Background="{AppThemeBinding Light={StaticResource CanvasLightBrush}, Dark={StaticResource CanvasDarkBrush}}">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="16">
+                <Image Source="logoipsum.png" Aspect="AspectFit" WidthRequest="36" HeightRequest="46"/>
+                <ActivityIndicator IsRunning="{Binding IsLoading}" WidthRequest="28" HeightRequest="28"/>
+            </VerticalStackLayout>
         </Grid>
     </Grid>
+
 </ContentPage>

@@ -20,6 +20,9 @@ internal sealed partial class AuditlogDisplay : ObservableObject
     [ObservableProperty]
     public partial DateTime? ModifiedOnUtc { get; set; }
 
+    /// <summary>Pre-formatted stamp so the row template stays pure XAML bindings.</summary>
+    public string Timestamp => CreatedOnUtc.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+
     public AuditlogDisplay(Auditlog auditlog)
     {
         Id = auditlog.Id;

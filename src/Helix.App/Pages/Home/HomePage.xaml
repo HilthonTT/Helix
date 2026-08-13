@@ -4,7 +4,7 @@
              xmlns:home="clr-namespace:Helix.App.Pages.Home"
              xmlns:views="clr-namespace:Helix.App.Views"
              xmlns:icons="clr-namespace:Helix.App.Icons"
-             xmlns:system="clr-namespace:System;assembly=netstandard"
+             xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
              xmlns:createDrive="clr-namespace:Helix.App.Modals.Drives.Create"
              xmlns:deleteDrive="clr-namespace:Helix.App.Modals.Drives.Delete"
              xmlns:updateDrive="clr-namespace:Helix.App.Modals.Drives.Update"
@@ -18,478 +18,391 @@
 
     <ContentPage.MenuBarItems>
         <MenuBarItem Text="{local:Translate File}">
-            <MenuFlyoutItem Text="{local:Translate Preferences}" Clicked="Preferences_Clicked" />
+            <MenuFlyoutItem Text="{local:Translate Preferences}" Clicked="Preferences_Clicked"/>
         </MenuBarItem>
 
         <MenuBarItem Text="{local:Translate Drives}">
             <MenuFlyoutItem Text="{local:Translate AddDrive}" Clicked="AddDrive_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="A" Modifiers="Cmd,Shift" />
-                    <KeyboardAccelerator Key="A" Modifiers="Ctrl" />
+                    <KeyboardAccelerator Key="A" Modifiers="Ctrl"/>
                 </MenuFlyoutItem.KeyboardAccelerators>
-                <MenuFlyoutItem.IconImageSource>
-                    <FontImageSource 
-                           Glyph="&#xECDC;"
-                           Size="12" 
-                           Color="Black"
-                           FontFamily="Fabric" />
-                </MenuFlyoutItem.IconImageSource>
             </MenuFlyoutItem>
 
             <MenuFlyoutItem Text="{local:Translate ExportDrives}" Clicked="ExportDrives_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="E" Modifiers="Cmd,Shift" />
-                    <KeyboardAccelerator Key="E" Modifiers="Ctrl" />
+                    <KeyboardAccelerator Key="E" Modifiers="Ctrl"/>
                 </MenuFlyoutItem.KeyboardAccelerators>
-                <MenuFlyoutItem.IconImageSource>
-                    <FontImageSource 
-                           Glyph="&#xE898;"  
-                           Size="12" 
-                           Color="Black"
-                           FontFamily="Fabric" />
-                </MenuFlyoutItem.IconImageSource>
             </MenuFlyoutItem>
 
             <MenuFlyoutItem Text="{local:Translate ImportDrives}" Clicked="ImportDrives_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
-                    <KeyboardAccelerator Key="I" Modifiers="Cmd,Shift" />
-                    <KeyboardAccelerator Key="I" Modifiers="Ctrl" />
+                    <KeyboardAccelerator Key="I" Modifiers="Ctrl"/>
                 </MenuFlyoutItem.KeyboardAccelerators>
-                <MenuFlyoutItem.IconImageSource>
-                    <FontImageSource 
-                          Glyph="&#xE8B5;" 
-                          Size="12" 
-                          Color="Black"
-                          FontFamily="Fabric" />
-                </MenuFlyoutItem.IconImageSource>
             </MenuFlyoutItem>
-
         </MenuBarItem>
-
     </ContentPage.MenuBarItems>
 
-    <ContentView IsEnabled="{Binding IsNotBusy}">
+    <!-- Root layers: content, scrim, then one AbsoluteLayout per modal sheet -->
+    <Grid>
 
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup Name="CommonStates">
-                <VisualState Name="Normal">
-                    <VisualState.Setters>
-                        <!-- Set normal state properties -->
-                        <Setter TargetName="connectDrivesButton" Property="BackgroundColor" Value="Transparent" />
-                        <Setter TargetName="connectDrivesImage" Property="Opacity" Value="1" />
+        <Grid RowDefinitions="Auto,*"
+              ColumnDefinitions="*,320"
+              RowSpacing="20"
+              ColumnSpacing="20"
+              Padding="28,24">
 
-                        <Setter TargetName="disconnectDrivesButton" Property="BackgroundColor" Value="Transparent" />
-                        <Setter TargetName="disconnectDrivesImage" Property="Opacity" Value="1" />
-                    </VisualState.Setters>
-                </VisualState>
-                <VisualState Name="Disabled">
-                    <VisualState.Setters>
-                        <!-- Set disabled state properties to gray out controls -->
-                        <Setter TargetName="connectDrivesButton" Property="BackgroundColor" Value="Gray" />
-                        <Setter TargetName="connectDrivesImage" Property="Opacity" Value="0.5" />
+            <!-- ===== Page header ===== -->
+            <Grid Grid.ColumnSpan="2" ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{local:Translate Dashboard}" Style="{StaticResource Display}"/>
+                    <Label Style="{StaticResource Muted}"
+                           Text="{Binding Source={x:Static local:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=local:LocalizationResourceManager}"/>
+                </VerticalStackLayout>
 
-                        <Setter TargetName="disconnectDrivesButton" Property="BackgroundColor" Value="Gray" />
-                        <Setter TargetName="disconnectDrivesImage" Property="Opacity" Value="0.5" />
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
-
-        <Grid RowDefinitions="100, *"
-              ColumnDefinitions="*, 400"
-              RowSpacing="24"
-              Margin="24, 0, 0, 0">
-
-            <VerticalStackLayout Margin="0,24,0,0">
-                <Label Text="{local:Translate Dashboard}" Style="{StaticResource LargeTitle}"/>
-                <Label Text="{Binding Source={x:Static local:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=local:LocalizationResourceManager}" />
-                <BoxView Style="{StaticResource HRule}" Margin="0,24,0,0"/>
-            </VerticalStackLayout>
-
-            <ScrollView Grid.Row="1" Margin="0, 24, 0, 24">
-                <Grid RowDefinitions="150, *"
-                      RowSpacing="24"
-                      ColumnDefinitions="*,*,*"
-                      ColumnSpacing="24">
-
-                    <Grid.Resources>
-                        <Style TargetType="Label" Class="Percent">
-                            <Setter Property="TextColor" Value="#50D1AA"/>
-                            <Setter Property="FontSize" Value="12"/>
-                            <Setter Property="VerticalTextAlignment" Value="Center"/>
-                        </Style>
-
-                        <Style TargetType="Label" Class="Up">
-                            <Setter Property="TextColor" Value="#50D1AA"/>
-                        </Style>
-
-                        <Style TargetType="Label" Class="Down">
-                            <Setter Property="TextColor" Value="#FF7CA3"/>
-                        </Style>
-
-                        <Style TargetType="Label" Class="Data">
-                            <Setter Property="TextColor" Value="#ffffff"/>
-                            <Setter Property="FontSize" Value="20"/>
-                            <Setter Property="VerticalTextAlignment" Value="Center"/>
-                        </Style>
-
-                        <Style TargetType="Label" Class="Label">
-                            <Setter Property="TextColor" Value="#ABBBC2"/>
-                            <Setter Property="FontSize" Value="13"/>
-                            <Setter Property="VerticalTextAlignment" Value="Center"/>
-                        </Style>
-
-                        <Style TargetType="Image">
-                            <Setter Property="VerticalOptions" Value="Center"/>
-                        </Style>
-                    </Grid.Resources>
-
-                    <!--3 widgets horizontal-->
-
-                    <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource DarkBorderView}">
-                        <Grid RowDefinitions="45,*,24" Margin="16" IsClippedToBounds="False">
-                            <HorizontalStackLayout Spacing="12">
-                                <Border WidthRequest="38" HeightRequest="38" 
-                                        VerticalOptions="Center"
-                                        Style="{StaticResource LightBorderView}">
-                                    <Image Source="database.png" HorizontalOptions="Center"/>
-                                </Border>
-                                <Label Text="{local:Translate StorageUsage}" class="Percent,Down"/>
-                            </HorizontalStackLayout>
-                            <Label Text="{Binding TotalStorage}" FontSize="Micro"  Grid.Row="1" class="Data"/>
-                            <Label Text="{local:Translate TotalStorageOfNas}" Grid.Row="2" class="Label"/>
-                        </Grid>
-                    </Border>
-
-                    <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource DarkBorderView}">
-                        <Grid RowDefinitions="45,*,24" Margin="16" IsClippedToBounds="False">
-                            <HorizontalStackLayout Spacing="12">
-                                <Border WidthRequest="38" HeightRequest="38"
-                                        VerticalOptions="Center"
-                                        Style="{StaticResource LightBorderView}">
-                                    <Image Source="plug.png" HorizontalOptions="Center"/>
-                                </Border>
-                                <Label Text="{local:Translate Connection}" class="Percent,Down" TextColor="Azure"/>
-                            </HorizontalStackLayout>
-                            <Label Text="{Binding TotalConnected}" FontSize="Micro"  Grid.Row="1" class="Data"/>
-                            <Label Text="{local:Translate TotalConnectedDrives}" Grid.Row="2" class="Label"/>
-                        </Grid>
-                    </Border>
-
-                    <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource DarkBorderView}">
-                        <Grid RowDefinitions="45,*,24" Margin="16" IsClippedToBounds="False">
-                            <!-- Top section with the icon and title -->
-                            <HorizontalStackLayout Spacing="12">
-                                <Border WidthRequest="38" HeightRequest="38"
-                                        VerticalOptions="Center"
-                                        Style="{StaticResource LightBorderView}">
-                                    <Image Source="clock.png" HorizontalOptions="Center"/>
-                                </Border>
-                                <Label Text="{local:Translate Timer}" class="Percent,Up"/>
-                            </HorizontalStackLayout>
-
-                            <!-- Middle section with TimerCount label and X button -->
-                            <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
-                                <!-- Timer count label on the left -->
-                                <Label Text="{Binding TimerCount}" 
-                                       FontSize="Micro" 
-                                       class="Data" 
-                                       VerticalOptions="Center" />
-
-                                <!-- X button aligned to the end -->
-                                <Button Text="{x:Static icons:FabIconFont.Cancel}" 
-                                        IsVisible="{Binding TimerCancelled, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}" 
-                                        Command="{Binding CancelTimerCommand}"
-                                        FontFamily="Fabric"
-                                        BackgroundColor="Transparent" 
-                                        TextColor="Red"
-                                        FontAttributes="Bold"
-                                        VerticalOptions="Center"
-                                        HorizontalOptions="End"
-                                        Padding="0"
-                                        WidthRequest="24" 
-                                        HeightRequest="24"
-                                        BorderColor="Transparent"/>
-
-                                <!-- Restart button aligned to the end -->
-                                <Button Text="{x:Static icons:IconFont.RotateRight}" 
-                                         IsVisible="{Binding TimerCancelled}"
-                                         Command="{Binding ResumeTimerCommand}"
-                                         FontFamily="FontAwesome"
-                                         BackgroundColor="Transparent" 
-                                         FontAttributes="Bold"
-                                         VerticalOptions="Center"
-                                         HorizontalOptions="End"
-                                         Padding="0"
-                                         WidthRequest="24" 
-                                         HeightRequest="24" />  
-
-                                <!-- Redo timer button aligned to the end -->
-                                <Button Text="{x:Static icons:IconFont.RotateRight}" 
-                                        IsVisible="{Binding ShowRedoButton}"
-                                        Command="{Binding StartTimerCommand}"
-                                        FontFamily="FontAwesome"
-                                        BackgroundColor="Transparent" 
-                                        FontAttributes="Bold"
-                                        VerticalOptions="Center"
-                                        HorizontalOptions="End"
-                                        Padding="0"
-                                        WidthRequest="24" 
-                                        HeightRequest="24" />
-
-                            </Grid>
-
-                            <!-- Bottom section with description label -->
-                            <Label Text="{local:Translate TimeBeforeMinimize}" 
-                                   Grid.Row="2" 
-                                   class="Label" />
-                        </Grid>
-                    </Border>
-
-                    <!-- Drive list -->
-
-                    <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource DarkBorderView}">
-                        <Grid Margin="24" RowDefinitions="80,*">
-                            <Label Text="{local:Translate YourDrives}" Style="{StaticResource Title1}" />
-
-                            <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" VerticalOptions="Start" Spacing="8">
-                                <Border x:Name="connectDrivesButton"
-                                        Stroke="{StaticResource SecondaryBrush}"
-                                        StrokeThickness="1"
-                                        Background="Transparent"
-                                        SemanticProperties.Description="Button that connects all disconnect drives">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="8"/>
-                                    </Border.StrokeShape>
-                                    <HorizontalStackLayout Margin="14,12" Spacing="12">
-                                        <Image x:Name="connectDrivesImage" Source="wifi.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
-                                        <Label Text="{local:Translate Connect}"
-                                               VerticalOptions="Center" />
-                                    </HorizontalStackLayout>
-
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding ConnectDrivesCommand}" />
-                                    </Border.GestureRecognizers>
-                                </Border>
-
-                                <Border x:Name="disconnectDrivesButton"
-                                         Stroke="{StaticResource SecondaryBrush}"
-                                         StrokeThickness="1"
-                                         Background="Transparent"
-                                         SemanticProperties.Description="Button that disconnects all connected drives">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="8"/>
-                                    </Border.StrokeShape>
-                                    <HorizontalStackLayout Margin="14,12" Spacing="12">
-                                        <Image x:Name="disconnectDrivesImage" Source="no_wifi.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
-                                        <Label Text="{local:Translate Disconnect}"
-                                               VerticalOptions="Center" />
-                                    </HorizontalStackLayout>
-
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding DisconnectDrivesCommand}" />
-                                    </Border.GestureRecognizers>
-                                </Border>
-
-                                <Border Stroke="{StaticResource SecondaryBrush}"
-                                        StrokeThickness="1"
-                                        Background="Transparent"
-                                        SemanticProperties.Description="Button that opens a filter dialog">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="8"/>
-                                    </Border.StrokeShape>
-                                    <HorizontalStackLayout Margin="14,12" Spacing="12">
-                                        <Image Source="filter.png" VerticalOptions="Center" WidthRequest="20" HeightRequest="20"/>
-                                        <Label Text="{local:Translate Filter}" VerticalOptions="Center" />
-                                    </HorizontalStackLayout>
-
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding OpenSearchDrivesModalCommand}" />
-                                    </Border.GestureRecognizers>
-                                </Border>
-                            </HorizontalStackLayout>
-
-                            <ScrollView Grid.Row="1">
-                                <VerticalStackLayout Spacing="16">
-                                    <!-- heading -->
-                                    <Grid ColumnDefinitions="100,*,*,120, 70">
-                                        <Label Text="{local:Translate Letter}" Style="{StaticResource Headline}"/>
-                                        <Label Text="{local:Translate Name}" Grid.Column="1" Style="{StaticResource Headline}"/>
-                                        <Label Text="{local:Translate StorageUsage}" Grid.Column="2" Style="{StaticResource Headline}"/>
-                                        <Label Text="{local:Translate Status}" Grid.Column="3" Style="{StaticResource Headline}"/>
-                                    </Grid>
-
-                                    <BoxView Style="{StaticResource HRule}"/>
-
-                                    <VerticalStackLayout Spacing="16" BindableLayout.ItemsSource="{Binding Drives}">
-
-                                        <!-- Drive Information Rows -->
-                                        <BindableLayout.ItemTemplate>
-                                            <DataTemplate x:DataType="models:DriveDisplay">
-
-                                                <driveTemplates:DriveTemplate BindingContext="{Binding .}" />
-
-                                            </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
-
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-
-                            </ScrollView>
-
-                        </Grid>
-                    </Border>
-
-                </Grid>
-            </ScrollView>
-
-            <Grid Grid.Column="1" Grid.RowSpan="2" Margin="24">
-                <Border Grid.Row="1"  Style="{StaticResource DarkBorderView}">
-                    <Grid Margin="24" RowDefinitions="50,1,*" RowSpacing="20">
-                        <Label Grid.Row="0" 
-                               VerticalOptions="Center" 
-                               Text="{local:Translate Connectivity}" 
-                               Style="{StaticResource Title2}"/>
-
-                        <Border Stroke="{StaticResource SecondaryBrush}" 
-                                StrokeThickness="1" 
-                                Background="Transparent" 
-                                Grid.Row="0" 
-                                HorizontalOptions="End">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="8"/>
-                            </Border.StrokeShape>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding NotImplementedCommand}" />
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Margin="14,12" Spacing="12">
-                                <Label Text="{x:Static icons:IconFont.ChevronDown}" 
-                                       FontFamily="FontAwesome" 
-                                       VerticalOptions="Center"/>
-                                <Label Text="{local:Translate Today}" VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
-                        </Border>
-                        <BoxView Style="{StaticResource HRule}" Grid.Row="1"/>
-
-                        <views:ChartView
-                              x:Name="chart"
-                              Grid.Row="2"
-                              MinimumHeightRequest="300"
-                              HorizontalOptions="Fill"
-                              VerticalOptions="Fill"/>
-
-                        <!-- Legend Section -->
-                        <Grid Grid.Row="3" 
-                              ColumnDefinitions="Auto,Auto" 
-                              RowDefinitions="Auto,Auto,Auto,Auto"
-                              Margin="0,10,0,0"
-                              VerticalOptions="End" 
-                              ColumnSpacing="24"
-                              RowSpacing="8">
-
-                            <!-- First Row -->
-                            <StackLayout Orientation="Horizontal" Spacing="4" Grid.Row="0" Grid.Column="0">
-                                <Border Stroke="Transparent"
-                                        StrokeThickness="0"
-                                        Background="#EA7C69"
-                                        StrokeShape="RoundRectangle 10,10,10,10"
-                                        WidthRequest="20"
-                                        HeightRequest="20"
-                                        HorizontalOptions="Center"
-                                        VerticalOptions="Center">
-                                </Border>
-                                <Label Text="{local:Translate Disconnected}" VerticalOptions="Center"/>
-                            </StackLayout>
-
-                            <StackLayout Orientation="Horizontal" Spacing="4" Grid.Row="0" Grid.Column="1">
-                                <Border Stroke="Transparent"
-                                        StrokeThickness="0"
-                                        Background="#50D1AA"
-                                        StrokeShape="RoundRectangle 10,10,10,10"
-                                        WidthRequest="20"
-                                        HeightRequest="20"
-                                        HorizontalOptions="Center"
-                                        VerticalOptions="Center">
-                                </Border>
-                                <Label Text="{local:Translate Connected}" VerticalOptions="Center"/>
-                            </StackLayout>
-                        </Grid>
-                    </Grid>
-                </Border>
-
+                <!-- Adding a drive used to live only in the menu bar; it is the page's
+                     primary action, so it gets a primary button. -->
+                <Button Grid.Column="1"
+                        Text="{local:Translate AddDrive}"
+                        VerticalOptions="Center"
+                        Command="{Binding OpenCreateDriveModalCommand}"
+                        ToolTipProperties.Text="Ctrl+A"/>
             </Grid>
 
-            <BoxView Color="Black"
-                     Opacity="0"
-                     Grid.RowSpan="3"
-                     Grid.ColumnSpan="2"
-                     HorizontalOptions="Fill"
-                     VerticalOptions="Fill"
-                     Margin="-24"
-                     InputTransparent="True"
-                     x:Name="BlockScreen" />
+            <!-- ===== Left column: stats over the drive list ===== -->
+            <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="20">
 
-            <AbsoluteLayout x:Name="CreateDriveLayout"
-                            Grid.RowSpan="3" 
-                            Grid.ColumnSpan="2"
-                            IsVisible="False"
-                            HorizontalOptions="FillAndExpand"
-                            VerticalOptions="FillAndExpand">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
 
-                <createDrive:CreateDriveModal x:Name="CreateDriveView" 
-                                              BackgroundColor="White"
-                                              MaximumHeightRequest="500"
-                                              AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
-                                              AbsoluteLayout.LayoutFlags="PositionProportional"/>
-            </AbsoluteLayout>
+                    <!-- Storage -->
+                    <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18">
+                        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                            <HorizontalStackLayout Spacing="12">
+                                <Border Style="{StaticResource IconTile}">
+                                    <Label Text="{x:Static icons:IconFont.Database}"
+                                           Style="{StaticResource Icon}"
+                                           TextColor="{StaticResource BrandAmber}"/>
+                                </Border>
+                                <Label Text="{local:Translate StorageUsage}"
+                                       Style="{StaticResource Overline}"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
 
-            <AbsoluteLayout x:Name="DeleteDriveLayout"
-                             Grid.RowSpan="3" 
-                             Grid.ColumnSpan="2"
-                             IsVisible="False"
-                             HorizontalOptions="FillAndExpand"
-                             VerticalOptions="FillAndExpand">
+                            <Label Grid.Row="1"
+                                   Text="{Binding TotalStorage}"
+                                   Style="{StaticResource Metric}"
+                                   VerticalOptions="Center"/>
 
-                <deleteDrive:DeleteDriveModal x:Name="DeleteDriveView" 
-                                           BackgroundColor="White"
-                                           MaximumHeightRequest="{Binding ModalMaximumHeight}"
-                                           AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
-                                           AbsoluteLayout.LayoutFlags="PositionProportional"/>
-            </AbsoluteLayout>
+                            <Label Grid.Row="2"
+                                   Text="{local:Translate TotalStorageOfNas}"
+                                   Style="{StaticResource Caption}"/>
+                        </Grid>
+                    </Border>
 
-            <AbsoluteLayout x:Name="UpdateDriveLayout"
-                     Grid.RowSpan="3" 
-                     Grid.ColumnSpan="2"
-                     IsVisible="False"
-                     HorizontalOptions="FillAndExpand"
-                     VerticalOptions="FillAndExpand">
+                    <!-- Connections -->
+                    <Border Grid.Column="1" Style="{StaticResource Card}" Padding="18">
+                        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                            <HorizontalStackLayout Spacing="12">
+                                <Border Style="{StaticResource IconTile}">
+                                    <Label Text="{x:Static icons:IconFont.Plug}"
+                                           Style="{StaticResource Icon}"
+                                           TextColor="{StaticResource Brand}"/>
+                                </Border>
+                                <Label Text="{local:Translate Connection}"
+                                       Style="{StaticResource Overline}"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
 
-                <updateDrive:UpdateDriveModal x:Name="UpdateDriveView" 
-                                      BackgroundColor="White"
-                                      MaximumHeightRequest="{Binding ModalMaximumHeight}"
-                                      AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
-                                      AbsoluteLayout.LayoutFlags="PositionProportional"/>
-            </AbsoluteLayout>
+                            <Label Grid.Row="1"
+                                   Text="{Binding TotalConnected}"
+                                   Style="{StaticResource Metric}"
+                                   VerticalOptions="Center"/>
 
-            <AbsoluteLayout x:Name="SearchDrivesLayout"
-                             Grid.RowSpan="3" 
-                             Grid.ColumnSpan="2"
-                             IsVisible="False"
-                             HorizontalOptions="FillAndExpand"
-                             VerticalOptions="FillAndExpand">
+                            <Label Grid.Row="2"
+                                   Text="{local:Translate TotalConnectedDrives}"
+                                   Style="{StaticResource Caption}"/>
+                        </Grid>
+                    </Border>
 
-                <searchDrives:SearchDrivesModal x:Name="SearchDrivesView" 
-                              BackgroundColor="White"
-                              MaximumHeightRequest="{Binding ModalMaximumHeight}"
-                              AbsoluteLayout.LayoutBounds="0.5, 0.5, -1, -1"
-                              AbsoluteLayout.LayoutFlags="PositionProportional"/>
-            </AbsoluteLayout>
+                    <!-- Auto-minimise timer -->
+                    <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18">
+                        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                            <HorizontalStackLayout Spacing="12">
+                                <Border Style="{StaticResource IconTile}">
+                                    <Label Text="{x:Static icons:IconFont.Clock}"
+                                           Style="{StaticResource Icon}"
+                                           TextColor="{StaticResource BrandOrange}"/>
+                                </Border>
+                                <Label Text="{local:Translate Timer}"
+                                       Style="{StaticResource Overline}"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
 
+                            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                                <Label Text="{Binding TimerCount}"
+                                       Style="{StaticResource Metric}"
+                                       VerticalOptions="Center"/>
+
+                                <Border Grid.Column="1"
+                                        Style="{StaticResource IconChip}"
+                                        HorizontalOptions="End"
+                                        ToolTipProperties.Text="{local:Translate Cancel}"
+                                        IsVisible="{Binding TimerCancelled, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding CancelTimerCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{x:Static icons:IconFont.Times}"
+                                           Style="{StaticResource IconSm}"
+                                           InputTransparent="True"
+                                           TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                </Border>
+
+                                <Border Grid.Column="1"
+                                        Style="{StaticResource IconChip}"
+                                        HorizontalOptions="End"
+                                        IsVisible="{Binding TimerCancelled}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ResumeTimerCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{x:Static icons:IconFont.RotateRight}"
+                                           Style="{StaticResource IconSm}"
+                                           InputTransparent="True"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                </Border>
+                            </Grid>
+
+                            <Label Grid.Row="2"
+                                   Text="{local:Translate TimeBeforeMinimize}"
+                                   Style="{StaticResource Caption}"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- ===== Drive list ===== -->
+                <Border Grid.Row="1" Style="{StaticResource Card}">
+                    <Grid RowDefinitions="Auto,Auto,*" Padding="20">
+
+                        <!-- Card header -->
+                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,16">
+                            <Label Text="{local:Translate YourDrives}"
+                                   Style="{StaticResource Title1}"
+                                   VerticalOptions="Center"/>
+
+                            <Border Grid.Column="1" Style="{StaticResource PillNeutral}" Padding="9,3">
+                                <Label Text="{Binding Drives.Count}"
+                                       Style="{StaticResource Caption}"
+                                       FontFamily="{StaticResource FontMonoBold}"/>
+                            </Border>
+
+                            <ActivityIndicator Grid.Column="2"
+                                               HorizontalOptions="Start"
+                                               VerticalOptions="Center"
+                                               WidthRequest="18"
+                                               HeightRequest="18"
+                                               IsRunning="{Binding IsBusy}"
+                                               IsVisible="{Binding IsBusy}"/>
+
+                            <HorizontalStackLayout Grid.Column="3" Spacing="8">
+                                <Border Style="{StaticResource Chip}"
+                                        IsEnabled="{Binding IsNotBusy}"
+                                        Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}"
+                                        SemanticProperties.Description="Connects every disconnected drive">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ConnectDrivesCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                        <Label Text="{x:Static icons:IconFont.Link}"
+                                               Style="{StaticResource IconSm}"
+                                               TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                                        <Label Text="{local:Translate Connect}" FontSize="13" VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <Border Style="{StaticResource Chip}"
+                                        IsEnabled="{Binding IsNotBusy}"
+                                        Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}"
+                                        SemanticProperties.Description="Disconnects every connected drive">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding DisconnectDrivesCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                        <Label Text="{x:Static icons:IconFont.Unlink}"
+                                               Style="{StaticResource IconSm}"
+                                               TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                        <Label Text="{local:Translate Disconnect}" FontSize="13" VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <Border Style="{StaticResource Chip}"
+                                        SemanticProperties.Description="Opens the drive filter">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenSearchDrivesModalCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                        <Label Text="{x:Static icons:IconFont.Filter}"
+                                               Style="{StaticResource IconSm}"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                        <Label Text="{local:Translate Filter}" FontSize="13" VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </HorizontalStackLayout>
+                        </Grid>
+
+                        <!-- Column headers, aligned to DriveTemplate's grid -->
+                        <VerticalStackLayout Grid.Row="1"
+                                             Spacing="10"
+                                             IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
+                            <Grid ColumnDefinitions="72,*,190,160,72" ColumnSpacing="14" Padding="12,0">
+                                <Label Text="{local:Translate Letter}" Style="{StaticResource Overline}"/>
+                                <Label Grid.Column="1" Text="{local:Translate Name}" Style="{StaticResource Overline}"/>
+                                <Label Grid.Column="2" Text="{local:Translate StorageUsage}" Style="{StaticResource Overline}"/>
+                                <Label Grid.Column="3" Text="{local:Translate Status}" Style="{StaticResource Overline}"/>
+                                <Label Grid.Column="4" Text="{local:Translate Actions}" Style="{StaticResource Overline}"/>
+                            </Grid>
+
+                            <BoxView Style="{StaticResource Divider}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Rows -->
+                        <ScrollView Grid.Row="2"
+                                    Margin="0,8,0,0"
+                                    IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
+                            <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Drives}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:DriveDisplay">
+                                        <driveTemplates:DriveTemplate BindingContext="{Binding .}"/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </ScrollView>
+
+                        <!-- Empty state -->
+                        <VerticalStackLayout Grid.Row="1"
+                                             Grid.RowSpan="2"
+                                             Spacing="10"
+                                             VerticalOptions="Center"
+                                             HorizontalOptions="Center"
+                                             IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}, ConverterParameter=invert}">
+                            <Border Style="{StaticResource IconTile}"
+                                    WidthRequest="56"
+                                    HeightRequest="56"
+                                    HorizontalOptions="Center">
+                                <Label Text="{x:Static icons:IconFont.Server}"
+                                       Style="{StaticResource IconLg}"
+                                       TextColor="{StaticResource Brand}"/>
+                            </Border>
+
+                            <Label Text="{local:Translate NoDrivesTitle}"
+                                   Style="{StaticResource Title2}"
+                                   HorizontalTextAlignment="Center"/>
+
+                            <Label Text="{local:Translate NoDrivesMessage}"
+                                   Style="{StaticResource Caption}"
+                                   HorizontalTextAlignment="Center"
+                                   MaximumWidthRequest="360"/>
+
+                            <Button Text="{local:Translate AddDrive}"
+                                    Margin="0,6,0,0"
+                                    HorizontalOptions="Center"
+                                    Command="{Binding OpenCreateDriveModalCommand}"/>
+                        </VerticalStackLayout>
+
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ===== Right column: connectivity ===== -->
+            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Card}">
+                <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="20" RowSpacing="16">
+                    <Label Text="{local:Translate Connectivity}" Style="{StaticResource Title1}"/>
+
+                    <BoxView Grid.Row="1" Style="{StaticResource Divider}"/>
+
+                    <views:ChartView x:Name="chart"
+                                     Grid.Row="2"
+                                     MinimumHeightRequest="220"
+                                     HorizontalOptions="Fill"
+                                     VerticalOptions="Fill"/>
+
+                    <VerticalStackLayout Grid.Row="3" Spacing="10">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Border WidthRequest="10"
+                                    HeightRequest="10"
+                                    Background="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"
+                                    Stroke="Transparent"
+                                    StrokeThickness="0"
+                                    StrokeShape="{RoundRectangle CornerRadius=999}"
+                                    VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="{local:Translate Connected}"
+                                   Style="{StaticResource Caption}"
+                                   Margin="10,0,0,0"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                   Text="{Binding ConnectedCount}"
+                                   Style="{StaticResource Caption}"
+                                   FontFamily="{StaticResource FontMonoBold}"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Border WidthRequest="10"
+                                    HeightRequest="10"
+                                    Background="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"
+                                    Stroke="Transparent"
+                                    StrokeThickness="0"
+                                    StrokeShape="{RoundRectangle CornerRadius=999}"
+                                    VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="{local:Translate Disconnected}"
+                                   Style="{StaticResource Caption}"
+                                   Margin="10,0,0,0"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="2"
+                                   Text="{Binding DisconnectedCount}"
+                                   Style="{StaticResource Caption}"
+                                   FontFamily="{StaticResource FontMonoBold}"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
         </Grid>
 
-    </ContentView>
+        <!-- ===== Modal layer ===== -->
+        <BoxView x:Name="BlockScreen"
+                 Color="{StaticResource Black}"
+                 Opacity="0"
+                 InputTransparent="True"/>
 
-    
-    
+        <AbsoluteLayout x:Name="CreateDriveLayout" IsVisible="False">
+            <createDrive:CreateDriveModal x:Name="CreateDriveView"
+                                          WidthRequest="480"
+                                          MaximumHeightRequest="600"
+                                          AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                          AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="UpdateDriveLayout" IsVisible="False">
+            <updateDrive:UpdateDriveModal x:Name="UpdateDriveView"
+                                          WidthRequest="480"
+                                          MaximumHeightRequest="600"
+                                          AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                          AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="DeleteDriveLayout" IsVisible="False">
+            <deleteDrive:DeleteDriveModal x:Name="DeleteDriveView"
+                                          WidthRequest="440"
+                                          AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                          AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="SearchDrivesLayout" IsVisible="False">
+            <searchDrives:SearchDrivesModal x:Name="SearchDrivesView"
+                                            WidthRequest="460"
+                                            AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                            AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+    </Grid>
 </ContentPage>
-    

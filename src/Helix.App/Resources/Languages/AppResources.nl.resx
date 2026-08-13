@@ -17,15 +17,6 @@
     <resheader name="version">2.0</resheader>
     <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
     <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
                 
     There are any number of "resheader" rows that contain simple 
     name/value pairs.
@@ -176,9 +167,6 @@
   </data>
   <data name="Connectivity" xml:space="preserve">
     <value>Connectiviteit</value>
-  </data>
-  <data name="Today" xml:space="preserve">
-    <value>Vandaag</value>
   </data>
   <data name="WelcomeMessage" xml:space="preserve">
     <value>Welkom terug in Helix!</value>
@@ -362,5 +350,53 @@
   </data>
   <data name="Disconnect" xml:space="preserve">
     <value>Loskoppelen</value>
+  </data>
+  <data name="NasManager" xml:space="preserve">
+    <value>NAS-beheer</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>Aangemeld</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Acties</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuleren</value>
+  </data>
+  <data name="NoDrivesTitle" xml:space="preserve">
+    <value>Nog geen schijven</value>
+  </data>
+  <data name="NoDrivesMessage" xml:space="preserve">
+    <value>Voeg je eerste netwerkschijf toe om met één klik bij je NAS te komen.</value>
+  </data>
+  <data name="NoAuditlogsTitle" xml:space="preserve">
+    <value>Nog niets vastgelegd</value>
+  </data>
+  <data name="NoAuditlogsMessage" xml:space="preserve">
+    <value>Acties die je in Helix uitvoert verschijnen hier.</value>
+  </data>
+  <data name="AutoConnectDescription" xml:space="preserve">
+    <value>Schijven opnieuw verbinden zodra Helix opent.</value>
+  </data>
+  <data name="AutoMinimizeDescription" xml:space="preserve">
+    <value>Helix naar de taakbalk minimaliseren als de timer afloopt.</value>
+  </data>
+  <data name="SetOnStartupDescription" xml:space="preserve">
+    <value>Helix starten wanneer je je bij Windows aanmeldt.</value>
+  </data>
+  <data name="SetDesktopShortcutDescription" xml:space="preserve">
+    <value>Een Helix-snelkoppeling op het bureaublad houden.</value>
+  </data>
+  <data name="LanguageDescription" xml:space="preserve">
+    <value>Taal die in de hele app wordt gebruikt.</value>
+  </data>
+  <data name="TimerCountDescription" xml:space="preserve">
+    <value>Seconden voor het minimaliseren.</value>
+  </data>
+  <data name="ShowCredentials" xml:space="preserve">
+    <value>Inloggegevens tonen</value>
   </data>
 </root>

@@ -1,82 +1,259 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Helix.App.Resources.Styles.ControlTemplates">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    xmlns:controls="clr-namespace:Helix.App.Controls"
+                    xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
+                    x:Class="Helix.App.Resources.Styles.ControlTemplates">
 
-    <ControlTemplate x:Key="OptionTemplate"
-                     x:DataType="x:String">
-        <Border Background="{StaticResource DarkBg2}"   
-                Stroke="{StaticResource SecondaryBrush}"
-                StrokeThickness="1">
-            <Border.StrokeShape>
-                <RoundRectangle CornerRadius="8" />
-            </Border.StrokeShape>
+    <!--
+    Templates for the selectable surfaces: the sidebar rail, the settings section
+    list, and the segmented sort-order toggle. Each one names its icon and label
+    parts so the checked state can tint them, not just swap a background.
+    -->
 
+    <!-- Sidebar rail item: brand indicator bar + tinted glyph and label -->
+    <ControlTemplate x:Key="NavItemTemplate" x:DataType="controls:NavItem">
+        <Grid Padding="10,3" behaviors:Hover.Cursor="True">
             <VisualStateManager.VisualStateGroups>
                 <VisualStateGroupList>
                     <VisualStateGroup x:Name="CheckedStates">
                         <VisualState x:Name="Checked">
                             <VisualState.Setters>
-                                <Setter Property="Stroke" Value="{StaticResource WhiteBrush}"/>
+                                <Setter TargetName="Pill"
+                                        Property="Border.Background"
+                                        Value="{AppThemeBinding Light={StaticResource BrandWashLightBrush}, Dark={StaticResource BrandWashDarkBrush}}"/>
+                                <Setter TargetName="Indicator" Property="Border.Opacity" Value="1"/>
+                                <Setter TargetName="NavIcon" Property="Label.TextColor" Value="{StaticResource Brand}"/>
+                                <Setter TargetName="NavLabel" Property="Label.TextColor" Value="{StaticResource Brand}"/>
+                                <Setter TargetName="NavLabel" Property="Label.FontFamily" Value="{StaticResource FontSemibold}"/>
                             </VisualState.Setters>
                         </VisualState>
 
                         <VisualState x:Name="Unchecked">
                             <VisualState.Setters>
-                                <Setter Property="Stroke" Value="{StaticResource SecondaryBrush}" />
+                                <Setter TargetName="Pill" Property="Border.Background" Value="Transparent"/>
+                                <Setter TargetName="Indicator" Property="Border.Opacity" Value="0"/>
+                                <Setter TargetName="NavIcon"
+                                        Property="Label.TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                <Setter TargetName="NavLabel"
+                                        Property="Label.TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                <Setter TargetName="NavLabel" Property="Label.FontFamily" Value="{StaticResource FontRegular}"/>
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>
                 </VisualStateGroupList>
             </VisualStateManager.VisualStateGroups>
 
-            <ContentPresenter />
+            <Border x:Name="Pill"
+                    Background="Transparent"
+                    Stroke="Transparent"
+                    StrokeThickness="0"
+                    StrokeShape="{RoundRectangle CornerRadius=11}"
+                    HeightRequest="44"
+                    behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}"/>
+
+            <Border x:Name="Indicator"
+                    Background="{StaticResource BrandBrush}"
+                    Stroke="Transparent"
+                    StrokeThickness="0"
+                    StrokeShape="{RoundRectangle CornerRadius=999}"
+                    WidthRequest="3"
+                    HeightRequest="20"
+                    Opacity="0"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"/>
+
+            <HorizontalStackLayout Spacing="12" Margin="16,0" VerticalOptions="Center" InputTransparent="True">
+                <Label x:Name="NavIcon"
+                       Text="{TemplateBinding Glyph}"
+                       Style="{StaticResource Icon}"
+                       FontSize="16"
+                       WidthRequest="20"/>
+                <Label x:Name="NavLabel"
+                       Text="{TemplateBinding Content}"
+                       FontSize="14"
+                       VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+        </Grid>
+    </ControlTemplate>
+
+    <!-- Settings section entry: glyph, title and supporting description -->
+    <ControlTemplate x:Key="NavSectionTemplate" x:DataType="controls:NavItem">
+        <Grid Padding="8,3" behaviors:Hover.Cursor="True">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CheckedStates">
+                        <VisualState x:Name="Checked">
+                            <VisualState.Setters>
+                                <Setter TargetName="Pill"
+                                        Property="Border.Background"
+                                        Value="{AppThemeBinding Light={StaticResource BrandWashLightBrush}, Dark={StaticResource BrandWashDarkBrush}}"/>
+                                <Setter TargetName="Pill" Property="Border.Stroke" Value="{StaticResource BrandBrush}"/>
+                                <Setter TargetName="SectionIcon" Property="Label.TextColor" Value="{StaticResource Brand}"/>
+                                <Setter TargetName="SectionTitle" Property="Label.TextColor" Value="{StaticResource Brand}"/>
+                            </VisualState.Setters>
+                        </VisualState>
+
+                        <VisualState x:Name="Unchecked">
+                            <VisualState.Setters>
+                                <Setter TargetName="Pill" Property="Border.Background" Value="Transparent"/>
+                                <Setter TargetName="Pill" Property="Border.Stroke" Value="Transparent"/>
+                                <Setter TargetName="SectionIcon"
+                                        Property="Label.TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                <Setter TargetName="SectionTitle"
+                                        Property="Label.TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </VisualStateManager.VisualStateGroups>
+
+            <Border x:Name="Pill"
+                    Background="Transparent"
+                    Stroke="Transparent"
+                    StrokeThickness="1"
+                    StrokeShape="{RoundRectangle CornerRadius=12}"
+                    behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}">
+
+                <Grid ColumnDefinitions="Auto,*"
+                      RowDefinitions="Auto,Auto"
+                      ColumnSpacing="12"
+                      RowSpacing="2"
+                      Padding="16,14"
+                      InputTransparent="True">
+                    <Label x:Name="SectionIcon"
+                           Text="{TemplateBinding Glyph}"
+                           Style="{StaticResource Icon}"
+                           Grid.RowSpan="2"
+                           FontSize="16"
+                           WidthRequest="20"
+                           VerticalOptions="Center"/>
+
+                    <Label x:Name="SectionTitle"
+                           Text="{TemplateBinding Content}"
+                           Grid.Column="1"
+                           FontFamily="{StaticResource FontSemibold}"
+                           FontSize="14"
+                           LineBreakMode="TailTruncation"
+                           MaxLines="1"/>
+
+                    <Label Text="{TemplateBinding Description}"
+                           Grid.Column="1"
+                           Grid.Row="1"
+                           Style="{StaticResource Caption}"
+                           LineBreakMode="TailTruncation"
+                           MaxLines="1"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </ControlTemplate>
+
+    <!-- Segmented toggle used by the search/filter sheets -->
+    <ControlTemplate x:Key="SegmentTemplate" x:DataType="RadioButton">
+        <Border x:Name="Segment"
+                Stroke="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"
+                StrokeThickness="1"
+                StrokeShape="{RoundRectangle CornerRadius=999}"
+                Background="Transparent"
+                behaviors:Hover.Cursor="True">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CheckedStates">
+                        <VisualState x:Name="Checked">
+                            <VisualState.Setters>
+                                <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
+                                <Setter Property="Stroke" Value="{StaticResource BrandBrush}"/>
+                                <Setter TargetName="SegmentLabel" Property="Label.TextColor" Value="#FFFFFF"/>
+                                <Setter TargetName="SegmentLabel" Property="Label.FontFamily" Value="{StaticResource FontSemibold}"/>
+                            </VisualState.Setters>
+                        </VisualState>
+
+                        <VisualState x:Name="Unchecked">
+                            <VisualState.Setters>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Stroke"
+                                        Value="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"/>
+                                <Setter TargetName="SegmentLabel"
+                                        Property="Label.TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                <Setter TargetName="SegmentLabel" Property="Label.FontFamily" Value="{StaticResource FontRegular}"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </VisualStateManager.VisualStateGroups>
+
+            <Label x:Name="SegmentLabel"
+                   Text="{TemplateBinding Content}"
+                   Margin="18,9"
+                   FontSize="13"
+                   HorizontalTextAlignment="Center"/>
         </Border>
     </ControlTemplate>
 
-    <ControlTemplate x:Key="ButtonRadioTemplate"
-                     x:DataType="RadioButton">
-        <Border Stroke="{StaticResource SecondaryBrush}"
-            StrokeThickness="1"
-            Background="Transparent">
-            <Border.StrokeShape>
-                <RoundRectangle CornerRadius="8"/>
-            </Border.StrokeShape>
+    <!-- Legacy aliases -->
+    <ControlTemplate x:Key="ButtonRadioTemplate" x:DataType="RadioButton">
+        <Border x:Name="Segment"
+                Stroke="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"
+                StrokeThickness="1"
+                StrokeShape="{RoundRectangle CornerRadius=999}"
+                Background="Transparent"
+                behaviors:Hover.Cursor="True">
             <VisualStateManager.VisualStateGroups>
                 <VisualStateGroupList>
                     <VisualStateGroup x:Name="CheckedStates">
                         <VisualState x:Name="Checked">
                             <VisualState.Setters>
-                                <Setter TargetName="TextLabel"
-                                    Property="Label.TextColor"
-                                    Value="{StaticResource White}"/>
-                                <Setter Property="Background"
-                                    Value="{StaticResource PrimaryBrush}"/>
-                                <Setter Property="Stroke"
-                                    Value="{StaticResource PrimaryBrush}"/>
+                                <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
+                                <Setter Property="Stroke" Value="{StaticResource BrandBrush}"/>
+                                <Setter TargetName="SegmentLabel" Property="Label.TextColor" Value="#FFFFFF"/>
                             </VisualState.Setters>
                         </VisualState>
-
                         <VisualState x:Name="Unchecked">
                             <VisualState.Setters>
-                                <Setter TargetName="TextLabel"
-                                    Property="Label.TextColor"
-                                    Value="{StaticResource Primary}"/>
-                                <Setter Property="Background"
-                                    Value="Transparent"/>
-                                <Setter Property="Stroke"
-                                    Value="{StaticResource SecondaryBrush}"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter TargetName="SegmentLabel"
+                                        Property="Label.TextColor"
+                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>
                 </VisualStateGroupList>
             </VisualStateManager.VisualStateGroups>
-            <Label Text="{TemplateBinding Content}"
-                   Margin="12,7"
-                   HorizontalTextAlignment="{OnPlatform Start, WinUI=Center}"
-                   x:Name="TextLabel" />
-        </Border>
 
+            <Label x:Name="SegmentLabel" Text="{TemplateBinding Content}" Margin="18,9" FontSize="13"/>
+        </Border>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="OptionTemplate" x:DataType="x:String">
+        <Border Background="{AppThemeBinding Light={StaticResource SurfaceAltLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"
+                Stroke="{AppThemeBinding Light={StaticResource BorderLightBrush}, Dark={StaticResource BorderDarkBrush}}"
+                StrokeThickness="1"
+                StrokeShape="{RoundRectangle CornerRadius=10}">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CheckedStates">
+                        <VisualState x:Name="Checked">
+                            <VisualState.Setters>
+                                <Setter Property="Stroke" Value="{StaticResource BrandBrush}"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Unchecked">
+                            <VisualState.Setters>
+                                <Setter Property="Stroke"
+                                        Value="{AppThemeBinding Light={StaticResource BorderLightBrush}, Dark={StaticResource BorderDarkBrush}}"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </VisualStateManager.VisualStateGroups>
+
+            <ContentPresenter/>
+        </Border>
     </ControlTemplate>
 
 </ResourceDictionary>

@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Helpers;
 using Helix.App.Messages;
 using Helix.App.Modals.Drives.Create;
 using Helix.App.Modals.Drives.Delete;
@@ -15,26 +16,34 @@ namespace Helix.App.Pages.Home;
 
 public sealed partial class HomePage : ContentPage
 {
+    private const string CreateDrive = "create-drive";
+    private const string UpdateDrive = "update-drive";
+    private const string DeleteDrive = "delete-drive";
+    private const string SearchDrives = "search-drives";
+
     private static bool _isFirstView = true;
     private bool _isInitializing;
 
-    private static bool _searchDrivesModalOpen = false;
-    private static bool _deleteDriveModalOpen = false;
-    private static bool _createDriveModalOpen = false;
-    private static bool _updateDriveModalOpen = false;
-
     private readonly INasConnector _nasConnector;
     private readonly HomeViewModel _viewModel;
+    private readonly ModalHost _modals;
 
     public HomePage()
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
 
         _viewModel = new HomeViewModel();
 
         BindingContext = _viewModel;
 
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
+
+        _modals = new ModalHost(BlockScreen);
+        _modals.Register(CreateDrive, CreateDriveLayout, CreateDriveView);
+        _modals.Register(UpdateDrive, UpdateDriveLayout, UpdateDriveView);
+        _modals.Register(DeleteDrive, DeleteDriveLayout, DeleteDriveView);
+        _modals.Register(SearchDrives, SearchDrivesLayout, SearchDrivesView);
+        _modals.AttachEscapeToDismiss(this);
 
         RegisterMessages();
     }
@@ -84,155 +93,6 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    private readonly Dictionary<AbsoluteLayout, int> _modalCloseTokens = [];
-
-    private void OpenModalInternal(AbsoluteLayout absoluteLayout, ContentView contentView)
-    {
-        // Invalidate any pending close: its delayed hide would otherwise blank out a
-        // modal that was reopened within the 800 ms close animation.
-        _modalCloseTokens[absoluteLayout] = _modalCloseTokens.GetValueOrDefault(absoluteLayout) + 1;
-
-        absoluteLayout.IsVisible = true;
-        contentView.Opacity = 0;
-        _ = contentView.FadeToAsync(1, 800, Easing.CubicIn);
-        _ = BlockScreen.FadeToAsync(0.8, 800, Easing.CubicOut);
-
-        BlockScreen.InputTransparent = false;
-    }
-
-    private async Task CloseModalInternal(AbsoluteLayout absoluteLayout, ContentView contentView)
-    {
-        int token = _modalCloseTokens.GetValueOrDefault(absoluteLayout) + 1;
-        _modalCloseTokens[absoluteLayout] = token;
-
-        _ = contentView.FadeToAsync(0, 800, Easing.CubicOut);
-        _ = BlockScreen.FadeToAsync(0, 800, Easing.CubicOut);
-        BlockScreen.InputTransparent = true;
-
-        await Task.Delay(800);
-
-        if (_modalCloseTokens.GetValueOrDefault(absoluteLayout) == token)
-        {
-            absoluteLayout.IsVisible = false;
-        }
-    }
-
-    private async Task OpenSearchDrivesModalAsync(bool show) 
-    {
-        if (_createDriveModalOpen)
-        {
-            await OpenCreateDriveModalAsync(false);
-        }
-
-        if (_deleteDriveModalOpen)
-        {
-            await OpenDeleteDriveModalAsync(false);
-        }
-
-        if (_updateDriveModalOpen)
-        {
-            await OpenUpdateDriveModalAsync(false);
-        }
-
-        if (show)
-        {
-            OpenModalInternal(SearchDrivesLayout, SearchDrivesView);
-            _searchDrivesModalOpen = true;
-        }
-        else
-        {
-            await CloseModalInternal(SearchDrivesLayout, SearchDrivesView);
-            _searchDrivesModalOpen = false;
-        }
-    }
-
-    private async Task OpenUpdateDriveModalAsync(bool show)
-    {
-        if (_createDriveModalOpen)
-        {
-            await OpenCreateDriveModalAsync(false);
-        }
-
-        if (_deleteDriveModalOpen)
-        {
-            await OpenDeleteDriveModalAsync(false);
-        }
-
-        if (_searchDrivesModalOpen)
-        {
-            await OpenSearchDrivesModalAsync(false);
-        }
-
-        if (show)
-        {
-            OpenModalInternal(UpdateDriveLayout, UpdateDriveView);
-            _updateDriveModalOpen = true;
-        }
-        else
-        {
-            await CloseModalInternal(UpdateDriveLayout, UpdateDriveView);
-            _updateDriveModalOpen = false;
-        }
-    }
-
-    private async Task OpenDeleteDriveModalAsync(bool show)
-    {
-        if (_createDriveModalOpen)
-        {
-            await OpenCreateDriveModalAsync(false);
-        }
-
-        if (_updateDriveModalOpen)
-        {
-            await OpenUpdateDriveModalAsync(false);
-        }
-
-        if (_searchDrivesModalOpen)
-        {
-            await OpenSearchDrivesModalAsync(false);
-        }
-
-        if (show)
-        {
-            OpenModalInternal(DeleteDriveLayout, DeleteDriveView);
-            _deleteDriveModalOpen = true;
-        }
-        else
-        {
-            await CloseModalInternal(DeleteDriveLayout, DeleteDriveView);
-            _deleteDriveModalOpen = false;
-        }
-    }
-
-    private async Task OpenCreateDriveModalAsync(bool show)
-    {
-        if (_deleteDriveModalOpen)
-        {
-            await OpenDeleteDriveModalAsync(false);
-        }
-
-        if (_updateDriveModalOpen)
-        {
-            await OpenUpdateDriveModalAsync(false);
-        }
-
-        if (_searchDrivesModalOpen)
-        {
-            await OpenSearchDrivesModalAsync(false);
-        }
-
-        if (show)
-        {
-            OpenModalInternal(CreateDriveLayout, CreateDriveView);
-            _createDriveModalOpen = true;
-        }
-        else
-        {
-            await CloseModalInternal(CreateDriveLayout, CreateDriveView);
-            _createDriveModalOpen = false;
-        }
-    }
-
     private async Task InitializeChartAsync(List<Drive>? providedDrives = null)
     {
         // Use the provided drives if they are not null
@@ -242,7 +102,7 @@ public sealed partial class HomePage : ContentPage
         chart.Chart = CreateDonutChart(entries);
     }
 
-    private async Task<List<Drive>> FetchDrivesFromDatabaseAsync()
+    private static async Task<List<Drive>> FetchDrivesFromDatabaseAsync()
     {
         Result<List<Drive>> result = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
         if (result.IsFailure)
@@ -257,39 +117,28 @@ public sealed partial class HomePage : ContentPage
     {
         if (drives.Count == 0)
         {
-            return CreateDisconnectedEntries();
+            return BuildEntries(0, 1);
         }
 
         // Batch lookup — DriveInfo.GetDrives() is enumerated once instead of per drive.
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
         int connected = drives.Count(d => connectedLetters.Contains(d.Letter));
-        int disconnected = drives.Count - connected;
 
-        return
-        [
-            new ChartEntry(connected)
-            {
-                Color = Color.FromArgb("#50D1AA").ToSKColor(),
-            },
-            new ChartEntry(disconnected)
-            {
-                Color = Color.FromArgb("#EA7C69").ToSKColor(),
-            }
-        ];
+        return BuildEntries(connected, drives.Count - connected);
     }
 
-    private static ChartEntry[] CreateDisconnectedEntries()
+    private static ChartEntry[] BuildEntries(int connected, int disconnected)
     {
+        // Fully qualified: `Application` alone binds to the Helix.Application namespace here.
+        bool isLight = Microsoft.Maui.Controls.Application.Current?.RequestedTheme == AppTheme.Light;
+
+        Color connectedColor = Color.FromArgb(isLight ? "#0E9F6E" : "#34D399");
+        Color disconnectedColor = Color.FromArgb(isLight ? "#DC2626" : "#F87171");
+
         return
         [
-            new ChartEntry(0) // 0 connected
-            {
-                Color = Color.FromArgb("#50D1AA").ToSKColor(),
-            },
-            new ChartEntry(1) // 1 disconnected (represents all)
-            {
-                Color = Color.FromArgb("#EA7C69").ToSKColor(),
-            }
+            new ChartEntry(connected) { Color = connectedColor.ToSKColor() },
+            new ChartEntry(disconnected) { Color = disconnectedColor.ToSKColor() }
         ];
     }
 
@@ -299,6 +148,8 @@ public sealed partial class HomePage : ContentPage
         {
             Entries = entries,
             IsAnimated = true,
+            // A thin ring reads as a gauge; the thick default reads as a pie.
+            HoleRadius = 0.68f,
             LabelTextSize = 24,
             BackgroundColor = Colors.Transparent.ToSKColor(),
         };
@@ -306,54 +157,20 @@ public sealed partial class HomePage : ContentPage
 
     private void RegisterMessages()
     {
-        WeakReferenceMessenger.Default.Register<CreateDriveMessage>(this, async (r, m) =>
-        {
-            bool isAlreadyOpen = _createDriveModalOpen && m.Value;
-            if (isAlreadyOpen)
-            {
-                return;
-            }
+        WeakReferenceMessenger.Default.Register<CreateDriveMessage>(
+            this, async (r, m) => await _modals.ToggleAsync(CreateDrive, m.Value));
 
-            await OpenCreateDriveModalAsync(m.Value);
-        });
+        WeakReferenceMessenger.Default.Register<UpdateDriveMessage>(
+            this, async (r, m) => await _modals.ToggleAsync(UpdateDrive, m.Value));
 
-        WeakReferenceMessenger.Default.Register<DeleteDriveMessage>(this, async (r, m) =>
-        {
-            bool isAlreadyOpen = _deleteDriveModalOpen && m.Value;
-            if (isAlreadyOpen)
-            {
-                return;
-            }
+        WeakReferenceMessenger.Default.Register<DeleteDriveMessage>(
+            this, async (r, m) => await _modals.ToggleAsync(DeleteDrive, m.Value));
 
-            await OpenDeleteDriveModalAsync(m.Value);
-        });
+        WeakReferenceMessenger.Default.Register<SearchDrivesMessage>(
+            this, async (r, m) => await _modals.ToggleAsync(SearchDrives, m.Value));
 
-        WeakReferenceMessenger.Default.Register<UpdateDriveMessage>(this, async (r, m) =>
-        {
-            bool isAlreadyOpen = _updateDriveModalOpen && m.Value;
-            if (isAlreadyOpen)
-            {
-                return;
-            }
-
-            await OpenUpdateDriveModalAsync(m.Value);
-        });
-
-        WeakReferenceMessenger.Default.Register<SearchDrivesMessage>(this, async (r, m) =>
-        {
-            bool isAlreadyOpen = _searchDrivesModalOpen && m.Value;
-            if (isAlreadyOpen)
-            {
-                return;
-            }
-
-            await OpenSearchDrivesModalAsync(m.Value);
-        });
-
-        WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(this, async (r, m) =>
-        {
-            await InitializeChartAsync();
-        });
+        WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(
+            this, async (r, m) => await InitializeChartAsync());
     }
 
     private async void Preferences_Clicked(object sender, EventArgs e)

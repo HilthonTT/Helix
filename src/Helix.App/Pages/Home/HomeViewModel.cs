@@ -44,6 +44,13 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [ObservableProperty]
     public partial string TotalConnected { get; set; }
 
+    /// <summary>Backs the connectivity legend beside the donut chart.</summary>
+    [ObservableProperty]
+    public partial int ConnectedCount { get; set; }
+
+    [ObservableProperty]
+    public partial int DisconnectedCount { get; set; }
+
     [RelayCommand]
     private static void OpenCreateDriveModal()
     {
@@ -229,16 +236,19 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         if (connectedDrive is null)
         {
-            return $"0 GB";
+            return "0 TB";
         }
 
-        return StorageUsageHelper.GetStorageUsage(connectedDrive.Letter, "0 GB");
+        return StorageUsageHelper.GetCompactUsage(connectedDrive.Letter);
     }
 
     private string ValidateTotalConnected()
     {
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
         int count = Drives.Count(d => connectedLetters.Contains(d.Letter));
+
+        ConnectedCount = count;
+        DisconnectedCount = Drives.Count - count;
 
         return $"{count} / {Drives.Count}";
     }

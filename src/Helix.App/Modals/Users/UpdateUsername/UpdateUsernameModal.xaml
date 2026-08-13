@@ -2,61 +2,57 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:modals="clr-namespace:Helix.App.Modals.Users.UpdateUsername"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:local="clr-namespace:Helix.App"
              x:DataType="modals:UpdateUsernameViewModel"
              x:Class="Helix.App.Modals.Users.UpdateUsername.UpdateUsernameModal"
-             Background="{StaticResource DarkBg2Brush}">
+             BackgroundColor="Transparent">
 
-    <Grid RowDefinitions="*, 108"
-          ColumnDefinitions="*,*"
-          ColumnSpacing="0">
-        <ScrollView Grid.ColumnSpan="2">
-            <VerticalStackLayout Spacing="20" Margin="24">
-                <Label Text="{local:Translate UpdateYourUsername}" Style="{StaticResource Title1}" />
-                <BoxView Style="{StaticResource HRule}"/>
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,*,Auto">
 
-                <Label Text="{local:Translate YourUsername}" />
-                <Border HeightRequest="48"
-                        HorizontalOptions="Fill"
-                        Background="{StaticResource DarkBg1Brush}"
-                        Stroke="{StaticResource SecondaryBrush}"
-                        StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{local:Translate UpdateYourUsername}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
 
-                    <Entry Background="Transparent"
-                           Placeholder="{local:Translate AddNewUsernamePlaceholder}"
-                           Text="{Binding Username}"
-                           PlaceholderColor="{StaticResource TextSecondary}"
-                           TextColor="White"
-                           HorizontalOptions="Start"
-                           MinimumWidthRequest="800"
-                           Margin="8,0"
-                           FontSize="14"
-                           IsEnabled="{Binding IsNotBusy}"/>
-
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{local:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
                 </Border>
+            </Grid>
 
+            <VerticalStackLayout Grid.Row="1" Spacing="6" Padding="24,4,24,20">
+                <Label Text="{local:Translate YourUsername}" Style="{StaticResource FieldLabel}"/>
+                <Border Style="{StaticResource Field}">
+                    <Entry Placeholder="{local:Translate AddNewUsernamePlaceholder}"
+                           Text="{Binding Username}"
+                           IsEnabled="{Binding IsNotBusy}"/>
+                </Border>
             </VerticalStackLayout>
-        </ScrollView>
 
-        <Button Grid.Row="1"
-                Grid.Column="0"
-                Margin="24,24,12,24"
-                Style="{StaticResource SecondaryButtonOutline}"
-                HorizontalOptions="Fill"
-                Text="{local:Translate Close}"
-                Command="{Binding CloseCommand}"
-                IsEnabled="{Binding IsNotBusy}"/>
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,4,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{local:Translate Cancel}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
 
-        <Button Grid.Row="1"
-                Grid.Column="1"
-                Margin="12,24,24,24"
-                Command="{Binding UpdateUsernameCommand}"
-                HorizontalOptions="Fill"
-                Text="{local:Translate Save}" 
-                IsEnabled="{Binding IsNotBusy}"/>
-    </Grid>
+                <Button Grid.Column="1"
+                        HorizontalOptions="Fill"
+                        Text="{local:Translate Save}"
+                        Command="{Binding UpdateUsernameCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+        </Grid>
+    </Border>
 
 </ContentView>

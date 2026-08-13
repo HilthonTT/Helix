@@ -3,68 +3,114 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Helix.App.Models"
              xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
+             xmlns:local="clr-namespace:Helix.App"
              x:Class="Helix.App.Views.Drives.DriveTemplate"
              x:DataType="models:DriveDisplay">
-    
-    <Grid ColumnDefinitions="100,*, *, 100, 70" ColumnSpacing="5">
-        <Label x:Name="Letter" Text="{Binding Letter}"/>
-        <Label x:Name="Name" Text="{Binding Name}" Grid.Column="1" />
 
-        <!-- Show storage usage -->
-        <Label x:Name="StorageUsage" Grid.Column="2" FontSize="Body" HorizontalOptions="Start" />
+    <Border Style="{StaticResource Row}" IsEnabled="{Binding IsNotBusy}">
+        <Grid ColumnDefinitions="72,*,190,160,Auto" ColumnSpacing="14">
 
-        <!-- Check if the drive is connected and display the status -->
-        <Button x:Name="StatusButton"
-                Grid.Column="3"
-                BackgroundColor="{Binding ButtonColor}"
-                WidthRequest="30"
-                HeightRequest="30"
-                CornerRadius="10"
-                Clicked="ToggleConnect" 
-                IsEnabled="{Binding IsNotBusy}" />
-
-        <Grid Grid.Column="4" ColumnDefinitions="*,*" ColumnSpacing="10">
-            <!-- Add Edit button (pencil icon) -->
-            <Border 
-                Grid.Column="0"
-                Stroke="{StaticResource SecondaryBrush}" 
-                StrokeThickness="1" 
-                Background="Transparent"
-                HorizontalOptions="Center">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8"/>
-                </Border.StrokeShape>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="HandleUpdate" />
-                </Border.GestureRecognizers>
-                <HorizontalStackLayout Padding="5">
-                    <Label Text="{x:Static icons:IconFont.PencilAlt}" 
-                       FontFamily="FontAwesome" 
-                       VerticalOptions="Center" />
-
-                </HorizontalStackLayout>
+            <!-- Drive letter, monospaced so the column stays optically aligned -->
+            <Border Grid.Column="0"
+                    Style="{StaticResource CardInset}"
+                    Padding="10,6"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                <Label Text="{Binding Letter}"
+                       Style="{StaticResource Mono}"
+                       FontSize="13"
+                       HorizontalTextAlignment="Center"/>
             </Border>
 
-            <!-- Add Delete button (trash icon) -->
-            <Border 
-                Grid.Column="1"
-                Stroke="{StaticResource SecondaryBrush}" 
-                StrokeThickness="1" 
-                Background="Transparent"
-                HorizontalOptions="Center">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8"/>
-                </Border.StrokeShape>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="HandleDelete" />
-                </Border.GestureRecognizers>
-                <HorizontalStackLayout Padding="5">
-                    <Label Text="{x:Static icons:IconFont.Trash}" 
-                       FontFamily="FontAwesome"
-                       VerticalOptions="Center" />
-                </HorizontalStackLayout>
-            </Border>
+            <Label Grid.Column="1"
+                   Text="{Binding Name}"
+                   Style="{StaticResource BodyStrong}"
+                   VerticalOptions="Center"
+                   LineBreakMode="TailTruncation"
+                   MaxLines="1"/>
+
+            <Label Grid.Column="2"
+                   Text="{Binding StorageUsage}"
+                   Style="{StaticResource Caption}"
+                   VerticalOptions="Center"
+                   LineBreakMode="TailTruncation"
+                   MaxLines="1"/>
+
+            <!--
+            The status is the toggle. Two pills swap on Connected rather than one pill
+            retinted by a trigger, so the resting colours stay plain style values and
+            the hover animation has a stable colour to return to.
+            -->
+            <Grid Grid.Column="3" VerticalOptions="Center">
+                <Border Style="{StaticResource PillSuccess}"
+                        IsVisible="{Binding Connected}"
+                        ToolTipProperties.Text="{local:Translate Disconnect}"
+                        behaviors:Hover.Cursor="True"
+                        behaviors:Hover.Scale="1.04">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="ToggleConnect"/>
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="8" InputTransparent="True">
+                        <Label Text="{x:Static icons:IconFont.Circle}"
+                               Style="{StaticResource IconSm}"
+                               FontSize="8"
+                               VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                        <Label Text="{local:Translate Connected}"
+                               Style="{StaticResource SuccessText}"
+                               FontSize="12"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource PillDanger}"
+                        IsVisible="{Binding Disconnected}"
+                        ToolTipProperties.Text="{local:Translate Connect}"
+                        behaviors:Hover.Cursor="True"
+                        behaviors:Hover.Scale="1.04">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="ToggleConnect"/>
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="8" InputTransparent="True">
+                        <Label Text="{x:Static icons:IconFont.Circle}"
+                               Style="{StaticResource IconSm}"
+                               FontSize="8"
+                               VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                        <Label Text="{local:Translate Disconnected}"
+                               Style="{StaticResource DangerText}"
+                               FontSize="12"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Row actions -->
+            <HorizontalStackLayout Grid.Column="4" Spacing="8" VerticalOptions="Center">
+                <Border Style="{StaticResource IconChip}"
+                        ToolTipProperties.Text="{local:Translate UpdateDrive}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="HandleUpdate"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.PencilAlt}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+
+                <Border Style="{StaticResource IconChip}"
+                        ToolTipProperties.Text="{local:Translate DeleteDrive}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="HandleDelete"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Trash}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                </Border>
+            </HorizontalStackLayout>
+
         </Grid>
-
-    </Grid>
+    </Border>
 </ContentView>

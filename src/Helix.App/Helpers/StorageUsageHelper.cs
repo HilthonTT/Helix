@@ -43,4 +43,30 @@ public static class StorageUsageHelper
             return $"Error: {ex.Message}";
         }
     }
+
+    /// <summary>
+    /// Short "1.2 / 4.0 TB" form for the dashboard stat tile, where the sentence-length
+    /// <see cref="GetStorageUsage"/> string reads as a paragraph rather than a figure.
+    /// </summary>
+    public static string GetCompactUsage(string driveLetter, string fallback = "0 TB")
+    {
+        try
+        {
+            var driveInfo = new DriveInfo(driveLetter);
+
+            if (!driveInfo.IsReady || driveInfo.TotalSize == 0)
+            {
+                return fallback;
+            }
+
+            double totalSizeInTB = driveInfo.TotalSize * BytesToTB;
+            double usedSpaceInTB = Math.Max(0, totalSizeInTB - (driveInfo.AvailableFreeSpace * BytesToTB));
+
+            return $"{usedSpaceInTB:F1} / {totalSizeInTB:F1} TB";
+        }
+        catch (Exception)
+        {
+            return fallback;
+        }
+    }
 }

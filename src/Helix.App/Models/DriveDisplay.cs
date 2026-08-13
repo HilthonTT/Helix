@@ -14,11 +14,16 @@ internal sealed partial class DriveDisplay : ObservableObject
     [ObservableProperty]
     public partial string Name { get; set; }
 
+    /// <summary>Human-readable capacity line, refreshed whenever connectivity changes.</summary>
     [ObservableProperty]
-    public partial string ButtonColor { get; set; }
+    public partial string StorageUsage { get; set; }
 
+    /// <summary>Drives the status pill in the drive row; bound, so the UI follows it.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Disconnected))]
     public partial bool Connected { get; set; }
+
+    public bool Disconnected => !Connected;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]
@@ -49,6 +54,6 @@ internal sealed partial class DriveDisplay : ObservableObject
         Id = Guid.Empty;
         Letter = string.Empty;
         Name = string.Empty;
-        ButtonColor = "#ff0000";
+        StorageUsage = string.Empty;
     }
 }

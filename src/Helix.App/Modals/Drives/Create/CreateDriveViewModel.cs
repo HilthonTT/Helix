@@ -16,10 +16,19 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
     {
         // Partial properties cannot carry field initializers, so defaults are seeded here.
         Form = new();
+        HideSecrets = true;
     }
 
     [ObservableProperty]
     public partial CreateDriveModel Form { get; set; }
+
+    /// <summary>
+    /// The address, share user and password are masked by default so the form is safe
+    /// to fill in while sharing a screen. One reveal toggle covers all three, because
+    /// checking a typo in the address is otherwise impossible.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool HideSecrets { get; set; }
 
     [RelayCommand]
     private async Task SaveAsync()

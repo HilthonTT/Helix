@@ -15,12 +15,20 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
     {
         // Partial properties cannot carry field initializers, so defaults are seeded here.
         Drive = new();
+        HideSecrets = true;
 
         RegisterMessages();
     }
 
     [ObservableProperty]
     public partial UpdateDriveModel Drive { get; set; }
+
+    /// <summary>
+    /// Masks the address, share user and password by default; one reveal toggle covers
+    /// all three so a typo in the address can still be checked.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool HideSecrets { get; set; }
 
     [RelayCommand]
     private async Task UpdateAsync()

@@ -16,9 +16,6 @@ public abstract partial class BaseViewModel : ObservableObject
     protected BaseViewModel()
     {
         _countdownService = App.ServiceProvider.GetRequiredService<ICountdownService>();
-
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
-        ModalMaximumHeight = 500;
     }
 
     [ObservableProperty]
@@ -38,9 +35,6 @@ public abstract partial class BaseViewModel : ObservableObject
     public partial int SecondsRemaining { get; set; }
 
     public string TimerCount => $"{SecondsRemaining} seconds";
-
-    [ObservableProperty]
-    public partial int ModalMaximumHeight { get; set; }
 
     [RelayCommand]
     public async Task StartTimerAsync()
@@ -71,12 +65,6 @@ public abstract partial class BaseViewModel : ObservableObject
         _countdownService.Stop();
 
         TimerCancelled = true;
-    }
-
-    [RelayCommand]
-    private static async Task NotImplementedAsync()
-    {
-        await Shell.Current.DisplayAlertAsync("Not Implemented", "Maybe some day, or it's just decoration!", "Ok");
     }
 
     public static Task DisplayErrorAsync(Error error)

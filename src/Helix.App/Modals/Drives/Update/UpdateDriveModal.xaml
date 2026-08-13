@@ -2,152 +2,112 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:modals="clr-namespace:Helix.App.Modals.Drives.Update"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:local="clr-namespace:Helix.App"
              x:DataType="modals:UpdateDriveViewModel"
              x:Class="Helix.App.Modals.Drives.Update.UpdateDriveModal"
-             Background="{StaticResource DarkBg2Brush}">
+             BackgroundColor="Transparent">
 
-    <Grid RowDefinitions="*, 108"
-          ColumnDefinitions="*,*"
-          ColumnSpacing="0">
-        <ScrollView Grid.ColumnSpan="2">
-            <VerticalStackLayout Spacing="20" Margin="24">
-                <Label Text="{local:Translate UpdateDrive}" Style="{StaticResource Title1}" />
-                <BoxView Style="{StaticResource HRule}"/>
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,*,Auto">
 
-                <Label Text="{local:Translate Letter}" />
-                <Border HeightRequest="48"
-                        HorizontalOptions="Fill"
-                        Background="{StaticResource DarkBg1Brush}"
-                        Stroke="{StaticResource SecondaryBrush}"
-                        StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{local:Translate UpdateDrive}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
 
-                    <Entry Background="Transparent"
-                           Placeholder="{local:Translate AddNetworkDriveLetterPlaceholder}"
-                           Text="{Binding Drive.Letter}"
-                           PlaceholderColor="{StaticResource TextSecondary}"
-                           TextColor="White"
-                           HorizontalOptions="Start"
-                           MinimumWidthRequest="800"
-                           Margin="8,0"
-                           FontSize="14" 
-                           IsEnabled="{Binding IsNotBusy}"/>
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{local:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
                 </Border>
+            </Grid>
 
-                <Label Text="{local:Translate NasIpAddress}" />
-                <Border HeightRequest="48"
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="14" Padding="24,4,24,20">
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{local:Translate Letter}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{local:Translate AddNetworkDriveLetterPlaceholder}"
+                                   Text="{Binding Drive.Letter}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{local:Translate DriveName}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{local:Translate AddDriveNamePlaceholder}"
+                                   Text="{Binding Drive.Name}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{local:Translate NasIpAddress}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{local:Translate AddNasIpAddressPlaceholder}"
+                                   Text="{Binding Drive.IpAddress}"
+                                   IsPassword="{Binding HideSecrets}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{local:Translate NasUsername}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{local:Translate AddNasUsernamePlaceholder}"
+                                   Text="{Binding Drive.Username}"
+                                   IsPassword="{Binding HideSecrets}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{local:Translate NasPassword}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{local:Translate AddNasPasswordPlaceholder}"
+                                   Text="{Binding Drive.Password}"
+                                   IsPassword="{Binding HideSecrets}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
+                        <Label Text="{local:Translate ShowCredentials}"
+                               Style="{StaticResource Caption}"
+                               VerticalOptions="Center"/>
+                        <Switch Grid.Column="1"
+                                Scale="0.85"
+                                HorizontalOptions="End"
+                                IsToggled="{Binding HideSecrets, Converter={StaticResource InvertedBoolConverter}, Mode=TwoWay}"/>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,16,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
                         HorizontalOptions="Fill"
-                        Background="{StaticResource DarkBg1Brush}"
-                        Stroke="{StaticResource SecondaryBrush}"
-                        StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
+                        Text="{local:Translate Cancel}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
 
-                    <Entry Background="Transparent"
-                           Placeholder="{local:Translate AddNasIpAddressPlaceholder}"
-                           Text="{Binding Drive.IpAddress}"
-                           PlaceholderColor="{StaticResource TextSecondary}"
-                           TextColor="White"
-                           HorizontalOptions="Start"
-                           MinimumWidthRequest="800"
-                           IsPassword="True"
-                           Margin="8,0"
-                           FontSize="14" 
-                           IsEnabled="{Binding IsNotBusy}"/>
-                </Border>
-
-                <Label Text="{local:Translate DriveName}" />
-                <Border HeightRequest="48"
+                <Button Grid.Column="1"
                         HorizontalOptions="Fill"
-                        Background="{StaticResource DarkBg1Brush}"
-                        Stroke="{StaticResource SecondaryBrush}"
-                        StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
-
-                    <Entry Background="Transparent"
-                           Placeholder="{local:Translate AddDriveNamePlaceholder}"
-                           Text="{Binding Drive.Name}"
-                           PlaceholderColor="{StaticResource TextSecondary}"
-                           TextColor="White"
-                           HorizontalOptions="Start"
-                           MinimumWidthRequest="800"
-                           Margin="8,0"
-                           FontSize="14" 
-                           IsEnabled="{Binding IsNotBusy}"/>
-                </Border>
-
-                <Label Text="{local:Translate NasUsername}" />
-                <Border HeightRequest="48"
-                        HorizontalOptions="Fill"
-                        Background="{StaticResource DarkBg1Brush}"
-                        Stroke="{StaticResource SecondaryBrush}"
-                        StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
-
-                    <Entry Background="Transparent"
-                          Placeholder="{local:Translate AddNasUsernamePlaceholder}"
-                           Text="{Binding Drive.Username}"
-                           PlaceholderColor="{StaticResource TextSecondary}"
-                           TextColor="White"
-                           HorizontalOptions="Start"
-                           IsPassword="True"
-                           MinimumWidthRequest="800"
-                           Margin="8,0"
-                           FontSize="14" 
-                           IsEnabled="{Binding IsNotBusy}"/>
-                </Border>
-
-                <Label Text="{local:Translate NasPassword}" />
-                <Border HeightRequest="48"
-                        HorizontalOptions="Fill"
-                        Background="{StaticResource DarkBg1Brush}"
-                        Stroke="{StaticResource SecondaryBrush}"
-                        StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
-
-                    <Entry Background="Transparent"
-                           Placeholder="{local:Translate AddNasPasswordPlaceholder}"
-                           Text="{Binding Drive.Password}"
-                           IsPassword="True"
-                           PlaceholderColor="{StaticResource TextSecondary}"
-                           TextColor="White"
-                           HorizontalOptions="Start"
-                           MinimumWidthRequest="800"
-                           Margin="8,0"
-                           FontSize="14"
-                           IsEnabled="{Binding IsNotBusy}"/>
-
-                </Border>
-            </VerticalStackLayout>
-        </ScrollView>
-
-        <Button Grid.Row="1"
-                Grid.Column="0"
-                Margin="24,24,12,24"
-                Style="{StaticResource SecondaryButtonOutline}"
-                HorizontalOptions="Fill"
-                Text="{local:Translate Close}"
-                Command="{Binding CloseCommand}"
-                IsEnabled="{Binding IsNotBusy}"/>
-
-        <Button Grid.Row="1"
-                Grid.Column="1"
-                Margin="12,24,24,24"
-                Command="{Binding UpdateCommand}"
-                HorizontalOptions="Fill"
-                Text="{local:Translate Save}" 
-                IsEnabled="{Binding IsNotBusy}"/>
-
-    </Grid>
+                        Text="{local:Translate Save}"
+                        Command="{Binding UpdateCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+        </Grid>
+    </Border>
 
 </ContentView>

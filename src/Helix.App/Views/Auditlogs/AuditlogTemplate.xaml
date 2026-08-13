@@ -2,12 +2,31 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
              x:DataType="models:AuditlogDisplay"
              x:Class="Helix.App.Views.Auditlogs.AuditlogTemplate">
 
-    <Grid ColumnDefinitions="*, 250" ColumnSpacing="5">
-        <Label x:Name="Message" HorizontalOptions="Start" />
-        <Label x:Name="Date" Grid.Column="1" HorizontalOptions="End"  />
-    </Grid>
+    <Border Style="{StaticResource Row}">
+        <Grid ColumnDefinitions="Auto,*,200" ColumnSpacing="14">
+            <Label Text="{x:Static icons:IconFont.Circle}"
+                   Style="{StaticResource IconSm}"
+                   FontSize="7"
+                   VerticalOptions="Center"
+                   TextColor="{StaticResource Brand}"/>
+
+            <Label Grid.Column="1"
+                   Text="{Binding Message}"
+                   VerticalOptions="Center"
+                   LineBreakMode="TailTruncation"
+                   MaxLines="1"/>
+
+            <Label Grid.Column="2"
+                   Text="{Binding Timestamp}"
+                   Style="{StaticResource Caption}"
+                   FontFamily="{StaticResource FontMono}"
+                   HorizontalTextAlignment="End"
+                   VerticalOptions="Center"/>
+        </Grid>
+    </Border>
 
 </ContentView>

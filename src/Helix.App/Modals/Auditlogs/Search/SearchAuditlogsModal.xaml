@@ -3,82 +3,97 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:modals="clr-namespace:Helix.App.Modals.Auditlogs.Search"
              xmlns:layouts="clr-namespace:Helix.App.Layouts"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:local="clr-namespace:Helix.App"
              x:DataType="modals:SearchAuditlogsViewModel"
              x:Class="Helix.App.Modals.Auditlogs.Search.SearchAuditlogsModal"
-             Background="{StaticResource DarkBg2Brush}">
+             BackgroundColor="Transparent">
 
     <ContentView.Resources>
         <Style TargetType="RadioButton">
-            <Setter Property="ControlTemplate" Value="{StaticResource ButtonRadioTemplate}" />
+            <Setter Property="ControlTemplate" Value="{StaticResource SegmentTemplate}"/>
         </Style>
     </ContentView.Resources>
 
-    <Grid RowDefinitions="*,108" ColumnDefinitions="*,*"  ColumnSpacing="0">
-        <ScrollView Grid.ColumnSpan="2">
-            <VerticalStackLayout Spacing="20" Margin="24">
-                <Label Text="{local:Translate SearchAuditlogs}" Style="{StaticResource Title1}" />
-                <BoxView Style="{StaticResource HRule}" />
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,*,Auto">
 
-                <Border HeightRequest="48"
-                        HorizontalOptions="Fill"
-                        Background="{StaticResource DarkBg1Brush}"
-                        Stroke="{StaticResource SecondaryBrush}"
-                        StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{local:Translate SearchAuditlogs}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
 
-                    <Entry Background="Transparent"
-                           Placeholder="{local:Translate SearchTermPlaceholder}"
-                           Text="{Binding SearchTerm}"
-                           PlaceholderColor="{StaticResource TextSecondary}"
-                           TextColor="White"
-                           HorizontalOptions="Start"
-                           MinimumWidthRequest="800"
-                           Margin="8,0"
-                           FontSize="14"
-                           IsEnabled="{Binding IsNotBusy}"/>
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{local:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
                 </Border>
+            </Grid>
 
-                <Label Text="{local:Translate YourSortOrder}" />
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16" Padding="24,4,24,20">
 
-                <layouts:HorizontalWrapLayout Spacing="8"
-                        RadioButtonGroup.GroupName="SortOrder"
-                        RadioButtonGroup.SelectedValue="{Binding SortOrderString}">
-                    <BindableLayout.ItemsSource>
-                        <x:Array Type="{x:Type x:String}">
-                            <x:String>Ascending</x:String>
-                            <x:String>Descending</x:String>
-                        </x:Array>
-                    </BindableLayout.ItemsSource>
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="x:String">
-                            <RadioButton Content="{Binding Converter={StaticResource TranslateConverter}}" 
-                                         Value="{Binding}" 
-                                         IsEnabled="{Binding Source={RelativeSource AncestorType={x:Type modals:SearchAuditlogsViewModel}}, Path=IsNotBusy, x:DataType=modals:SearchAuditlogsViewModel}"/>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </layouts:HorizontalWrapLayout>
-            </VerticalStackLayout>
-        </ScrollView>
+                    <Border Style="{StaticResource Field}">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Label Text="{x:Static icons:IconFont.Search}"
+                                   Style="{StaticResource IconSm}"
+                                   Margin="14,0,0,0"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                            <Entry Grid.Column="1"
+                                   Margin="10,0,14,0"
+                                   Placeholder="{local:Translate SearchTermPlaceholder}"
+                                   Text="{Binding SearchTerm}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Grid>
+                    </Border>
 
-        <Button Grid.Row="1"
-                Grid.Column="0"
-                Margin="24,24,12,24"
-                Style="{StaticResource SecondaryButtonOutline}"
-                HorizontalOptions="Fill"
-                Text="{local:Translate Close}"
-                Command="{Binding CloseCommand}" 
-                IsEnabled="{Binding IsNotBusy}"/>
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{local:Translate YourSortOrder}" Style="{StaticResource FieldLabel}"/>
 
-        <Button Grid.Row="1"
-                Grid.Column="1"
-                Margin="12,24,24,24"
-                Command="{Binding SearchCommand}"
-                HorizontalOptions="Fill"
-                Text="{local:Translate Search}" 
-                IsEnabled="{Binding IsNotBusy}"/>
-    </Grid>
+                        <layouts:HorizontalWrapLayout Spacing="8"
+                                                      RadioButtonGroup.GroupName="SortOrder"
+                                                      RadioButtonGroup.SelectedValue="{Binding SortOrderString}">
+                            <BindableLayout.ItemsSource>
+                                <x:Array Type="{x:Type x:String}">
+                                    <x:String>Ascending</x:String>
+                                    <x:String>Descending</x:String>
+                                </x:Array>
+                            </BindableLayout.ItemsSource>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <RadioButton Content="{Binding Converter={StaticResource TranslateConverter}}"
+                                                 Value="{Binding}"
+                                                 IsEnabled="{Binding Source={RelativeSource AncestorType={x:Type modals:SearchAuditlogsViewModel}}, Path=IsNotBusy, x:DataType=modals:SearchAuditlogsViewModel}"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </layouts:HorizontalWrapLayout>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,16,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{local:Translate Cancel}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Grid.Column="1"
+                        HorizontalOptions="Fill"
+                        Text="{local:Translate Search}"
+                        Command="{Binding SearchCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+        </Grid>
+    </Border>
 
 </ContentView>

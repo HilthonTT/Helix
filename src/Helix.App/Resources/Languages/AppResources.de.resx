@@ -17,15 +17,6 @@
     <resheader name="version">2.0</resheader>
     <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
     <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
                 
     There are any number of "resheader" rows that contain simple 
     name/value pairs.
@@ -176,9 +167,6 @@
   </data>
   <data name="Connectivity" xml:space="preserve">
     <value>Konnektivität</value>
-  </data>
-  <data name="Today" xml:space="preserve">
-    <value>Heute</value>
   </data>
   <data name="WelcomeMessage" xml:space="preserve">
     <value>Willkommen zurück bei Helix!</value>
@@ -362,5 +350,53 @@
   </data>
   <data name="Disconnect" xml:space="preserve">
     <value>Trennen</value>
+  </data>
+  <data name="NasManager" xml:space="preserve">
+    <value>NAS-Verwaltung</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menü</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>Angemeldet</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="NoDrivesTitle" xml:space="preserve">
+    <value>Noch keine Laufwerke</value>
+  </data>
+  <data name="NoDrivesMessage" xml:space="preserve">
+    <value>Fügen Sie Ihr erstes Netzlaufwerk hinzu, um Ihr NAS mit einem Klick zu erreichen.</value>
+  </data>
+  <data name="NoAuditlogsTitle" xml:space="preserve">
+    <value>Noch nichts protokolliert</value>
+  </data>
+  <data name="NoAuditlogsMessage" xml:space="preserve">
+    <value>Ihre Aktionen in Helix erscheinen hier.</value>
+  </data>
+  <data name="AutoConnectDescription" xml:space="preserve">
+    <value>Laufwerke verbinden, sobald Helix startet.</value>
+  </data>
+  <data name="AutoMinimizeDescription" xml:space="preserve">
+    <value>Helix nach Ablauf des Timers in die Taskleiste minimieren.</value>
+  </data>
+  <data name="SetOnStartupDescription" xml:space="preserve">
+    <value>Helix bei der Windows-Anmeldung starten.</value>
+  </data>
+  <data name="SetDesktopShortcutDescription" xml:space="preserve">
+    <value>Eine Helix-Verknüpfung auf dem Desktop behalten.</value>
+  </data>
+  <data name="LanguageDescription" xml:space="preserve">
+    <value>Sprache der gesamten App.</value>
+  </data>
+  <data name="TimerCountDescription" xml:space="preserve">
+    <value>Sekunden bis zum Minimieren.</value>
+  </data>
+  <data name="ShowCredentials" xml:space="preserve">
+    <value>Zugangsdaten anzeigen</value>
   </data>
 </root>
