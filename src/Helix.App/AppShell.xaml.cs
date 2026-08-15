@@ -48,15 +48,31 @@ public sealed partial class AppShell : Shell
 
     private string? _selectedRoute;
 
+    /// <summary>
+    /// Route backing the sidebar's radio group. It is the group's selected value, so it
+    /// has to be set for an item to look active — an <c>IsChecked</c> in XAML is cleared
+    /// by the group as soon as the binding applies.
+    /// </summary>
     public string? SelectedRoute
     {
         get { return _selectedRoute; }
         set
         {
+            if (_selectedRoute == value)
+            {
+                return;
+            }
+
             _selectedRoute = value;
             OnPropertyChanged();
         }
     }
+
+    /// <summary>
+    /// Set while the sidebar selection is being brought in line with a navigation that
+    /// already happened, so the resulting <c>CheckedChanged</c> does not navigate again.
+    /// </summary>
+    private bool _syncingSelection;
 
     private string _username = string.Empty;
 
@@ -73,10 +89,27 @@ public sealed partial class AppShell : Shell
 
     private async void OnMenuItemChanged(object? sender, CheckedChangedEventArgs e)
     {
-        if (!string.IsNullOrWhiteSpace(_selectedRoute))
+        if (_syncingSelection)
         {
-            await Current.GoToAsync($"//{_selectedRoute}");
+            return;
         }
+
+        if (string.IsNullOrWhiteSpace(_selectedRoute))
+        {
+            return;
+        }
+
+        Shell? shell = Current;
+
+        // The rail is built lazily the first time the flyout unlocks, and the group
+        // checks the matching item as it appears — navigating again for a page we are
+        // already on would only reload it.
+        if (shell is null || shell.CurrentItem?.Route == _selectedRoute)
+        {
+            return;
+        }
+
+        await shell.GoToAsync($"//{_selectedRoute}");
     }
 
     private async void OnLogout(object? sender, TappedEventArgs e)
@@ -131,11 +164,36 @@ public sealed partial class AppShell : Shell
         {
             FlyoutBehavior = FlyoutBehavior.Locked;
 
+            // The sidebar follows navigation rather than the other way round, so the
+            // item for the page we landed on is highlighted even when we got there
+            // without clicking it — signing in, for instance, which used to leave the
+            // rail with nothing selected until the user clicked Dashboard.
+            SyncSelection(currentItem.Route);
+
             // The shell outlives a sign-out, so refresh rather than caching once.
             Username = _loggedInUser.Username;
         }
 
         OnPropertyChanged();
+    }
+
+    private void SyncSelection(string route)
+    {
+        if (_selectedRoute == route)
+        {
+            return;
+        }
+
+        _syncingSelection = true;
+
+        try
+        {
+            SelectedRoute = route;
+        }
+        finally
+        {
+            _syncingSelection = false;
+        }
     }
 
     private static string FormatVersion(string versionString)

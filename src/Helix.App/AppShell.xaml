@@ -63,8 +63,7 @@
                         <controls:NavItem Value="dashboard"
                                           Glyph="{x:Static icons:IconFont.ThLarge}"
                                           Content="{local:Translate Dashboard}"
-                                          CheckedChanged="OnMenuItemChanged"
-                                          IsChecked="True"/>
+                                          CheckedChanged="OnMenuItemChanged"/>
 
                         <controls:NavItem Value="auditlogs"
                                           Glyph="{x:Static icons:IconFont.History}"
