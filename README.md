@@ -106,9 +106,18 @@ rather than opening a public issue.
 
 ## Requirements
 
+To run Helix:
+
 - Windows 10 build 19041 or later
+
+To build it:
+
 - [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) with the **.NET MAUI** workload
 - [Git](https://git-scm.com/)
+
+There is also a Mac Catalyst head (`net10.0-maccatalyst`), built on macOS with Xcode and the
+`maui` workload. It is compile-verified in CI but not yet released; the packaging and
+codesigning story below covers the Windows build only.
 
 ## Getting Started
 
@@ -147,8 +156,12 @@ To compile the app into a single deployable folder (for example `C:\Helix`) cont
 ```powershell
 Remove-Item C:\Helix -Recurse -Force -ErrorAction SilentlyContinue
 
-dotnet publish src/Helix.App/Helix.App.csproj -c Release -p:RuntimeIdentifierOverride=win-x64 -o C:\Helix
+dotnet publish src/Helix.App/Helix.App.csproj -c Release -f net10.0-windows10.0.19041.0 -p:RuntimeIdentifierOverride=win-x64 -o C:\Helix
 ```
+
+The `dotnet publish` line is a single line on purpose, so it can be pasted into either shell
+unchanged. Only the cleanup differs — in Command Prompt use `rd /s /q C:\Helix` instead of
+`Remove-Item`.
 
 Then start the app with `C:\Helix\Helix.App.exe`.
 
@@ -162,6 +175,11 @@ Then start the app with `C:\Helix\Helix.App.exe`.
   rasterised to scale-qualified files (`logoipsum.scale-100.png`, …) and resolved by name
   through that index, every image in the app silently renders blank.
 - For ARM64 machines, use `-p:RuntimeIdentifierOverride=win-arm64` instead.
+- **`-f` is required.** `Helix.App` targets more than one framework (a Windows head and a
+  Mac Catalyst one), and `dotnet publish` refuses to guess which to produce — omitting it
+  fails with `NETSDK1129: The 'Publish' target is not supported without specifying a target
+  framework`. Only the framework for the machine you are on is available to select:
+  `net10.0-windows10.0.19041.0` on Windows.
 - `-p:RuntimeIdentifierOverride` (rather than the usual `-r`) is required. Passing the runtime
   identifier as a global CLI property would leak into the referenced class libraries and fail
   the Windows App SDK build. The override is read by `Helix.App.csproj` only, which turns it
@@ -170,6 +188,19 @@ Then start the app with `C:\Helix\Helix.App.exe`.
 - **User data is not stored in this folder.** The encrypted database lives in the per-user app
   data directory (`%LOCALAPPDATA%`), so replacing or upgrading the published folder never
   touches your drives, settings, or audit entries.
+
+### On macOS
+
+Folder publishing is a Windows concept — the Catalyst head produces a signed `.app` bundle
+instead, which needs an Apple signing identity. That flow is not set up yet. To compile the
+macOS head on a Mac:
+
+```bash
+dotnet build src/Helix.App/Helix.App.csproj -f net10.0-maccatalyst
+```
+
+Build the app project rather than `Helix.sln`: the solution also contains the test projects,
+which target `net10.0-windows` and cannot be built on macOS.
 
 ## Continuous Integration
 
