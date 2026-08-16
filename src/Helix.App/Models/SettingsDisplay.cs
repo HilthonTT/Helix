@@ -14,6 +14,13 @@ internal sealed partial class SettingsDisplay : ObservableObject
     // properties and the rest still hold half-initialized values (e.g. TimerCount = 0).
     private readonly bool _initialized;
 
+    // Set while a rejected value is being rolled back, so the write-back hook that the
+    // rollback itself fires does not issue a second UpdateSettings call.
+    private bool _rollingBack;
+
+    // Last value the store accepted, so a rejected TimerCount can be put back.
+    private int _persistedTimerCount;
+
     [ObservableProperty]
     public partial Guid Id { get; set; }
 
@@ -30,55 +37,67 @@ internal sealed partial class SettingsDisplay : ObservableObject
     public partial bool AutoConnect { get; set; }
     async partial void OnAutoConnectChanged(bool value)
     {
-        if (!_initialized)
+        if (!_initialized || _rollingBack)
         {
             return;
         }
 
-        await UpdatePropertyAsync(builder => builder.AutoConnect = value);
+        if (!await UpdatePropertyAsync(builder => builder.AutoConnect = value))
+        {
+            RollBack(() => AutoConnect = !value);
+        }
     }
 
     [ObservableProperty]
     public partial bool AutoMinimize { get; set; }
     async partial void OnAutoMinimizeChanged(bool value)
     {
-        if (!_initialized)
+        if (!_initialized || _rollingBack)
         {
             return;
         }
 
-        await UpdatePropertyAsync(builder => builder.AutoMinimize = value);
+        if (!await UpdatePropertyAsync(builder => builder.AutoMinimize = value))
+        {
+            RollBack(() => AutoMinimize = !value);
+        }
     }
 
     [ObservableProperty]
     public partial bool SetOnStartup { get; set; }
     async partial void OnSetOnStartupChanged(bool value)
     {
-        if (!_initialized)
+        if (!_initialized || _rollingBack)
         {
             return;
         }
 
-        await UpdatePropertyAsync(builder => builder.SetOnStartup = value);
+        if (!await UpdatePropertyAsync(builder => builder.SetOnStartup = value))
+        {
+            RollBack(() => SetOnStartup = !value);
+        }
     }
 
     [ObservableProperty]
     public partial bool SetDesktopShortcut { get; set; }
     async partial void OnSetDesktopShortcutChanged(bool value)
     {
-        if (!_initialized)
+        if (!_initialized || _rollingBack)
         {
             return;
         }
 
-        await UpdatePropertyAsync(builder => builder.SetDesktopShortcut = value);
+        if (!await UpdatePropertyAsync(builder => builder.SetDesktopShortcut = value))
+        {
+            RollBack(() => SetDesktopShortcut = !value);
+        }
     }
 
     [ObservableProperty]
     public partial int TimerCount { get; set; }
     partial void OnTimerCountChanged(int value)
     {
-        if (!_initialized)
+        if (!_initialized || _rollingBack)
         {
             return;
         }
@@ -91,7 +110,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
     public partial Language Language { get; set; }
     async partial void OnLanguageChanged(Language value)
     {
-        if (!_initialized)
+        if (!_initialized || _rollingBack)
         {
             return;
         }
@@ -118,13 +137,19 @@ internal sealed partial class SettingsDisplay : ObservableObject
         SetOnStartup = settings.SetOnStartup;
         SetDesktopShortcut = settings.SetDesktopShortcut;
         TimerCount = settings.TimerCount;
+        _persistedTimerCount = settings.TimerCount;
         Language = settings.Language;
 
         // Every seed above is done — from here on the hooks may write back.
         _initialized = true;
     }
 
-    private async Task UpdatePropertyAsync(Action<UpdateSettings.Request.Builder> updateAction)
+    /// <summary>
+    /// Pushes the current state through UpdateSettings. Returns false when the store
+    /// rejected it, so the caller can put the control back where it was — the alert
+    /// alone used to leave a switch showing a setting that had never been saved.
+    /// </summary>
+    private async Task<bool> UpdatePropertyAsync(Action<UpdateSettings.Request.Builder> updateAction)
     {
         try
         {
@@ -150,7 +175,11 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 {
                     await Shell.Current.DisplayAlertAsync("Something went wrong!", result.Error.Description, "Ok");
                 });
+
+                return false;
             }
+
+            return true;
         }
         catch (Exception ex)
         {
@@ -158,6 +187,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
             {
                 await Shell.Current.DisplayAlertAsync("Something went wrong!", ex.Message, "Ok");
             });
+
+            return false;
         }
         finally
         {
@@ -165,8 +196,33 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Restores a rejected value without the restore itself being written back.
+    /// </summary>
+    private void RollBack(Action restore)
+    {
+        _rollingBack = true;
+
+        try
+        {
+            restore();
+        }
+        finally
+        {
+            _rollingBack = false;
+        }
+    }
+
     private async Task DebouncedUpdateTimerCount()
     {
-        await UpdatePropertyAsync(builder => builder.TimerCount = TimerCount);
+        int attempted = TimerCount;
+
+        if (await UpdatePropertyAsync(builder => builder.TimerCount = attempted))
+        {
+            _persistedTimerCount = attempted;
+            return;
+        }
+
+        RollBack(() => TimerCount = _persistedTimerCount);
     }
 }

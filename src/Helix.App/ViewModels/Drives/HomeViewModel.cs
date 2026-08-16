@@ -89,9 +89,14 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         if (drives.Count != 0)
         {
+            // Announce each one rather than adding it to Drives directly: DriveWatchdog
+            // rebuilds its watch set from this message, and adding the rows by hand left
+            // freshly imported drives unmonitored — no connectivity refresh and no
+            // auto-reconnect — until the next sign-in. The registration below is what
+            // puts them on screen.
             foreach (Drive drive in drives)
             {
-                Drives.Add(new DriveDisplay(drive));
+                WeakReferenceMessenger.Default.Send(new DriveCreatedMessage(drive));
             }
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
@@ -299,6 +304,10 @@ internal sealed partial class HomeViewModel : BaseViewModel
             IEnumerable<DriveDisplay> drives = m.SearchedDrives.Select(d => new DriveDisplay(d));
 
             Drives = new(drives);
+
+            // The tiles count the collection that was just replaced, so they have to be
+            // recomputed — otherwise a search left "3 / 5 connected" over a list of one.
+            _ = RefreshTotalsAsync();
         });
     }
 }

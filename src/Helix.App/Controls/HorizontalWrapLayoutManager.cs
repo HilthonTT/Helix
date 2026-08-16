@@ -30,7 +30,7 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
         double top = padding.Top + bounds.Top;
         double left = padding.Left + bounds.Left;
 
-        return ArrangeViews(bounds, top, left, padding);
+        return ArrangeViews(bounds, top, left);
     }
 
     private (double totalWidth, double totalHeight) CalculateDimensions(double widthConstraint, double heightConstraint)
@@ -103,7 +103,7 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
         return new Size(finalWidth, finalHeight);
     }
 
-    private Size ArrangeViews(Rect bounds, double top, double left, Thickness padding)
+    private Size ArrangeViews(Rect bounds, double top, double left)
     {
         double currentRowTop = top;
         double currentX = left;
@@ -121,7 +121,7 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
             if (IsNewRowNeeded(currentX, child.DesiredSize.Width, bounds.Right))
             {
                 maxStackWidth = Math.Max(maxStackWidth, currentX);
-                MoveToNextRow(ref currentX, ref currentRowTop, currentRowHeight, padding);
+                MoveToNextRow(ref currentX, ref currentRowTop, currentRowHeight, left);
                 currentRowHeight = 0;
             }
 
@@ -132,9 +132,14 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
         return CalculateActualSize(maxStackWidth, currentRowTop, currentRowHeight, bounds);
     }
 
-    private void MoveToNextRow(ref double currentX, ref double currentRowTop, double currentRowHeight, Thickness padding)
+    /// <summary>
+    /// Starts the next row back at <paramref name="rowStartX"/> — the same origin the
+    /// first row used. Resetting to the padding alone dropped the bounds' own left
+    /// offset, so every row after the first was arranged that much too far left.
+    /// </summary>
+    private void MoveToNextRow(ref double currentX, ref double currentRowTop, double currentRowHeight, double rowStartX)
     {
-        currentX = padding.Left;
+        currentX = rowStartX;
         currentRowTop += currentRowHeight + _horizontalStackLayout.Spacing;
     }
 

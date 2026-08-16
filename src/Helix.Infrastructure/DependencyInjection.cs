@@ -37,10 +37,15 @@ public static class DependencyInjection
     private static IServiceCollection AddDatabase(this IServiceCollection services)
     {
         services.AddSingleton<InsertAuditLogsInterceptor>();
+        services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
 
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
-            options.AddInterceptors(sp.GetRequiredService<InsertAuditLogsInterceptor>());
+            // Order matters: the audit-log interceptor adds Auditlog rows during the
+            // save, and those rows still need their timestamps stamped afterwards.
+            options.AddInterceptors(
+                sp.GetRequiredService<InsertAuditLogsInterceptor>(),
+                sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>());
         });
 
         services.AddScoped<IDbContext>(sp => sp.GetRequiredService<AppDbContext>());
