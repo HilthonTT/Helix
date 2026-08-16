@@ -3,15 +3,16 @@
     x:Class="Helix.App.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:register="clr-namespace:Helix.App.Pages.Register"
-    xmlns:login="clr-namespace:Helix.App.Pages.Login"
-    xmlns:home="clr-namespace:Helix.App.Pages.Home"
-    xmlns:settings="clr-namespace:Helix.App.Pages.Settings"
-    xmlns:auditlogs="clr-namespace:Helix.App.Pages.Auditlogs"
+    xmlns:register="clr-namespace:Helix.App.Views.Users"
+    xmlns:login="clr-namespace:Helix.App.Views.Users"
+    xmlns:home="clr-namespace:Helix.App.Views.Drives"
+    xmlns:settings="clr-namespace:Helix.App.Views.Settings"
+    xmlns:auditlogs="clr-namespace:Helix.App.Views.Auditlogs"
     xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
     xmlns:controls="clr-namespace:Helix.App.Controls"
     xmlns:icons="clr-namespace:Helix.App.Icons"
     xmlns:local="clr-namespace:Helix.App"
+    xmlns:l10n="clr-namespace:Helix.App.Localization"
     Shell.FlyoutBehavior="Disabled"
     Shell.FlyoutWidth="236">
 
@@ -44,7 +45,7 @@
                                    FontFamily="{StaticResource FontSemibold}"
                                    FontSize="17"
                                    CharacterSpacing="0.4"/>
-                            <Label Text="{local:Translate NasManager}" Style="{StaticResource Faint}"/>
+                            <Label Text="{l10n:Translate NasManager}" Style="{StaticResource Faint}"/>
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
 
@@ -56,23 +57,23 @@
                             </Style>
                         </VerticalStackLayout.Resources>
 
-                        <Label Text="{local:Translate Menu}"
+                        <Label Text="{l10n:Translate Menu}"
                                Style="{StaticResource Overline}"
                                Margin="26,0,0,8"/>
 
                         <controls:NavItem Value="dashboard"
                                           Glyph="{x:Static icons:IconFont.ThLarge}"
-                                          Content="{local:Translate Dashboard}"
+                                          Content="{l10n:Translate Dashboard}"
                                           CheckedChanged="OnMenuItemChanged"/>
 
                         <controls:NavItem Value="auditlogs"
                                           Glyph="{x:Static icons:IconFont.History}"
-                                          Content="{local:Translate Auditlogs}"
+                                          Content="{l10n:Translate Auditlogs}"
                                           CheckedChanged="OnMenuItemChanged"/>
 
                         <controls:NavItem Value="settings"
                                           Glyph="{x:Static icons:IconFont.Cog}"
-                                          Content="{local:Translate Settings}"
+                                          Content="{l10n:Translate Settings}"
                                           CheckedChanged="OnMenuItemChanged"/>
                     </VerticalStackLayout>
 
@@ -91,7 +92,7 @@
                                        Style="{StaticResource Title3}"
                                        LineBreakMode="TailTruncation"
                                        MaxLines="1"/>
-                                <Label Text="{local:Translate SignedIn}" Style="{StaticResource Faint}"/>
+                                <Label Text="{l10n:Translate SignedIn}" Style="{StaticResource Faint}"/>
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
                     </Border>
@@ -104,7 +105,7 @@
                             Stroke="Transparent"
                             StrokeThickness="0"
                             StrokeShape="{RoundRectangle CornerRadius=11}"
-                            ToolTipProperties.Text="{local:Translate Logout}"
+                            ToolTipProperties.Text="{l10n:Translate Logout}"
                             behaviors:Hover.Cursor="True"
                             behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}">
                         <Border.GestureRecognizers>
@@ -116,7 +117,7 @@
                                    FontSize="15"
                                    WidthRequest="20"
                                    TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
-                            <Label Text="{local:Translate Logout}"
+                            <Label Text="{l10n:Translate Logout}"
                                    Style="{StaticResource Muted}"
                                    VerticalOptions="Center"/>
                         </HorizontalStackLayout>

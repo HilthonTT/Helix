@@ -51,6 +51,36 @@ SharedKernel → Helix.Domain → Helix.Application → Helix.Infrastructure →
 
 If an architecture test fails, the fix is the design, not the test.
 
+### Where things live
+
+**Namespaces mirror folders exactly.** When you move a file, move its namespace with it — the
+architecture tests check this for Infrastructure and for Application handlers.
+
+```
+src/SharedKernel/           Abstractions/  Primitives/  Results/
+src/Helix.Domain/           one folder per aggregate: Auditlogs/ Drives/ Settings/ Users/
+src/Helix.Application/      Abstractions/  Core/  Features/<Feature>/{Commands,Queries}
+src/Helix.Infrastructure/   Authentication/ Connector/ Cryptography/ Desktop/ Startup/ Time/
+                            Database/{Configurations,Constants,Interceptors,Repositories,Sqlite}
+src/Helix.App/              Behaviors/ Common/ Controls/ Converters/ Extensions/ Icons/
+                            Localization/ Messaging/ Models/ Services/
+                            Views/<Feature>/  ViewModels/<Feature>/
+tests/                      mirror the layout of the project under test
+```
+
+A view and its viewmodel live in the same feature folder under their respective roots:
+`Views/Drives/HomePage.xaml` pairs with `ViewModels/Drives/HomeViewModel.cs`. Messages published
+through `WeakReferenceMessenger` go in `Messaging/<Feature>/`, never next to the view that raises
+them.
+
+In XAML, use the shared prefixes: `vm:` for the file's viewmodel, `views:` for sibling views,
+`l10n:` for `{l10n:Translate Key}`, and `controls:` / `behaviors:` / `converters:` / `icons:` /
+`models:` for the matching folders.
+
+NuGet versions are centrally managed in `Directory.Packages.props`, and properties shared by every
+project live in `Directory.Build.props` — reference packages without a `Version` attribute, and
+don't re-declare `Nullable` or `ImplicitUsings` in a `.csproj`.
+
 ### Adding a use case
 
 Every use case is a `sealed class` implementing `IHandler`:
@@ -68,7 +98,7 @@ public sealed class CreateDrive(IDriveRepository repo, IUnitOfWork uow, ILoggedI
 ```
 
 - Expected failures flow through `Result` / `Result<T>` — **handlers never throw** for them. Errors come from the static error classes (`DriveErrors`, `AuthenticationErrors`, `ValidationErrors`).
-- Register the new handler in `src/Helix.Application/DependencyInjection.cs`.
+- Put it in `src/Helix.Application/Features/<Feature>/Commands` or `.../Queries`, and register it in `src/Helix.Application/DependencyInjection.cs`.
 - Handlers are **scoped**. Never cache one in a view model or page field — invoke it through `ScopedHandler.HandleAsync((MyHandler h) => h.Handle(request))` so each operation gets a fresh `AppDbContext`. Only the documented singletons may be resolved from `App.ServiceProvider` and stored in fields.
 
 ### Database migrations

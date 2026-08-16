@@ -1,5 +1,4 @@
 ﻿using Helix.Application.Abstractions.Desktop;
-using SharedKernel;
 using System.Runtime.InteropServices;
 
 namespace Helix.Infrastructure.Desktop;

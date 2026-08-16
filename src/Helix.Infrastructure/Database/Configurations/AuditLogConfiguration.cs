@@ -4,7 +4,7 @@ using Helix.Infrastructure.Database.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Helix.Persistence.Configurations;
+namespace Helix.Infrastructure.Database.Configurations;
 
 internal sealed class AuditLogConfiguration : IEntityTypeConfiguration<Auditlog>
 {

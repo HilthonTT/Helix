@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:DataType="vm:DeleteDriveViewModel"
+             x:Class="Helix.App.Views.Drives.DeleteDriveModal"
+             BackgroundColor="Transparent">
+
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="*,Auto">
+
+            <VerticalStackLayout Spacing="14" Padding="24">
+                <!-- A destructive confirmation should look destructive before it is read -->
+                <Border Style="{StaticResource IconTile}"
+                        WidthRequest="48"
+                        HeightRequest="48"
+                        HorizontalOptions="Start"
+                        Background="{AppThemeBinding Light={StaticResource DangerWashLightBrush}, Dark={StaticResource DangerWashDarkBrush}}">
+                    <Label Text="{x:Static icons:IconFont.Trash}"
+                           Style="{StaticResource IconLg}"
+                           TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                </Border>
+
+                <Label Text="{l10n:Translate DeleteDrive}" Style="{StaticResource Title1}"/>
+
+                <Label Text="{Binding Description}" Style="{StaticResource Muted}"/>
+            </VerticalStackLayout>
+
+            <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,4,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Cancel}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Grid.Column="1"
+                        Style="{StaticResource ButtonDanger}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Delete}"
+                        Command="{Binding DeleteCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+        </Grid>
+    </Border>
+
+</ContentView>

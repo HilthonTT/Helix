@@ -32,4 +32,17 @@ public sealed class ApplicationTests
 
         result.IsSuccessful.Should().BeTrue();
     }
+
+    [Fact]
+    public void Handlers_Should_ResideIn_FeaturesNamespace()
+    {
+        TestResult result = Types.InAssembly(ApplicationAssembly.Instance)
+            .That()
+            .ImplementInterface(typeof(IHandler))
+            .Should()
+            .ResideInNamespaceStartingWith("Helix.Application.Features")
+            .GetResult();
+
+        result.IsSuccessful.Should().BeTrue();
+    }
 }

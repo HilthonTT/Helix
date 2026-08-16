@@ -1,6 +1,4 @@
-﻿using SharedKernel;
-
-namespace Helix.Domain.Users;
+﻿namespace Helix.Domain.Users;
 
 public sealed class User : Entity, IAuditable
 {

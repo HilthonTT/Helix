@@ -1,6 +1,5 @@
 using Helix.Application.Abstractions.Security;
 using Helix.Application.Core.Errors;
-using SharedKernel;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;

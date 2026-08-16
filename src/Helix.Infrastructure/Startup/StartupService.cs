@@ -1,5 +1,4 @@
 ﻿using Helix.Application.Abstractions.Startup;
-using SharedKernel;
 using System.Runtime.InteropServices;
 
 namespace Helix.Infrastructure.Startup;

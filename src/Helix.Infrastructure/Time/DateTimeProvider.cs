@@ -1,6 +1,4 @@
-﻿using SharedKernel;
-
-namespace Helix.Infrastructure.Time;
+﻿namespace Helix.Infrastructure.Time;
 
 internal sealed class DateTimeProvider : IDateTimeProvider
 {

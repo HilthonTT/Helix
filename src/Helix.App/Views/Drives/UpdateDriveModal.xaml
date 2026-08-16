@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:DataType="vm:UpdateDriveViewModel"
+             x:Class="Helix.App.Views.Drives.UpdateDriveModal"
+             BackgroundColor="Transparent">
+
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{l10n:Translate UpdateDrive}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{l10n:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+            </Grid>
+
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="14" Padding="24,4,24,20">
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate Letter}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{l10n:Translate AddNetworkDriveLetterPlaceholder}"
+                                   Text="{Binding Drive.Letter}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate DriveName}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{l10n:Translate AddDriveNamePlaceholder}"
+                                   Text="{Binding Drive.Name}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate NasIpAddress}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{l10n:Translate AddNasIpAddressPlaceholder}"
+                                   Text="{Binding Drive.IpAddress}"
+                                   IsPassword="{Binding HideSecrets}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate NasUsername}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{l10n:Translate AddNasUsernamePlaceholder}"
+                                   Text="{Binding Drive.Username}"
+                                   IsPassword="{Binding HideSecrets}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate NasPassword}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{l10n:Translate AddNasPasswordPlaceholder}"
+                                   Text="{Binding Drive.Password}"
+                                   IsPassword="{Binding HideSecrets}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
+                        <Label Text="{l10n:Translate ShowCredentials}"
+                               Style="{StaticResource Caption}"
+                               VerticalOptions="Center"/>
+                        <Switch Grid.Column="1"
+                                Scale="0.85"
+                                HorizontalOptions="End"
+                                IsToggled="{Binding HideSecrets, Converter={StaticResource InvertedBoolConverter}, Mode=TwoWay}"/>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,16,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Cancel}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Grid.Column="1"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Save}"
+                        Command="{Binding UpdateCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+        </Grid>
+    </Border>
+
+</ContentView>

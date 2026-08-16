@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using Helix.Domain;
 using NetArchTest.Rules;
-using SharedKernel;
 using System.Reflection;
 
 namespace ArchitectureTests.Domain;

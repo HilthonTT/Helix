@@ -2,9 +2,8 @@
 using Helix.Domain.Drives;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using SharedKernel;
 
-namespace Helix.Persistence.Interceptors;
+namespace Helix.Infrastructure.Database.Interceptors;
 
 internal sealed class InsertAuditLogsInterceptor : SaveChangesInterceptor
 {
@@ -45,7 +44,6 @@ internal sealed class InsertAuditLogsInterceptor : SaveChangesInterceptor
     private static IEnumerable<Auditlog> GetDrivesAuditLogs(DbContext context)
     {
         DateTime utcNow = DateTime.UtcNow;
-
 
         return context.ChangeTracker
             .Entries<Entity>()

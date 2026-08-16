@@ -5,6 +5,7 @@ using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using Helix.Infrastructure.Cryptography;
 using Helix.Infrastructure.Database.Constants;
+using Helix.Infrastructure.Database.Sqlite;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;

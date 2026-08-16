@@ -1,12 +1,9 @@
 using CommunityToolkit.Mvvm.Messaging;
-using Helix.App.Helpers;
-using Helix.App.Messages;
-using Helix.App.Modals.Drives.Delete;
-using Helix.App.Modals.Drives.Update;
+using Helix.App.Messaging.Drives;
 using Helix.App.Models;
 using Helix.Application.Abstractions.Connector;
-using Helix.Application.Drives;
-using SharedKernel;
+using Helix.Application.Features.Drives.Commands;
+using Helix.Application.Features.Drives.Queries;
 
 namespace Helix.App.Views.Drives;
 

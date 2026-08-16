@@ -1,7 +1,7 @@
 ﻿using Helix.Infrastructure.Database.Constants;
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Logging;
 
 namespace Helix.Infrastructure.Database;

@@ -1,7 +1,9 @@
-﻿using Helix.Application.Auditlogs;
-using Helix.Application.Drives;
-using Helix.Application.Settings;
-using Helix.Application.Users;
+﻿using Helix.Application.Features.Auditlogs.Queries;
+using Helix.Application.Features.Drives.Commands;
+using Helix.Application.Features.Drives.Queries;
+using Helix.Application.Features.Settings.Commands;
+using Helix.Application.Features.Settings.Queries;
+using Helix.Application.Features.Users.Commands;
 
 namespace Helix.Application;
 

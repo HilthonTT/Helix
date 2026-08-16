@@ -1,13 +1,11 @@
 using CommunityToolkit.Mvvm.Messaging;
-using Helix.App.Messages;
-using Helix.App.Modals.Drives.Create;
-using Helix.App.Modals.Drives.Delete;
-using Helix.App.Modals.Drives.Update;
+using Helix.App.Messaging.Drives;
 using Helix.Application.Abstractions.Connector;
-using Helix.Application.Drives;
-using Helix.Application.Settings;
+using Helix.Application.Features.Drives.Commands;
+using Helix.Application.Features.Drives.Queries;
+using Helix.Application.Features.Settings.Commands;
+using Helix.Application.Features.Settings.Queries;
 using Helix.Domain.Drives;
-using SharedKernel;
 using System.Diagnostics;
 using SettingsModel = Helix.Domain.Settings.Settings;
 

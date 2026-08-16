@@ -4,7 +4,7 @@
              xmlns:models="clr-namespace:Helix.App.Models"
              xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
-             xmlns:local="clr-namespace:Helix.App"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
              x:Class="Helix.App.Views.Drives.DriveTemplate"
              x:DataType="models:DriveDisplay">
 
@@ -45,7 +45,7 @@
             <Grid Grid.Column="3" VerticalOptions="Center">
                 <Border Style="{StaticResource PillSuccess}"
                         IsVisible="{Binding Connected}"
-                        ToolTipProperties.Text="{local:Translate Disconnect}"
+                        ToolTipProperties.Text="{l10n:Translate Disconnect}"
                         behaviors:Hover.Cursor="True"
                         behaviors:Hover.Scale="1.04">
                     <Border.GestureRecognizers>
@@ -57,7 +57,7 @@
                                FontSize="8"
                                VerticalOptions="Center"
                                TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
-                        <Label Text="{local:Translate Connected}"
+                        <Label Text="{l10n:Translate Connected}"
                                Style="{StaticResource SuccessText}"
                                FontSize="12"
                                VerticalOptions="Center"/>
@@ -66,7 +66,7 @@
 
                 <Border Style="{StaticResource PillDanger}"
                         IsVisible="{Binding Disconnected}"
-                        ToolTipProperties.Text="{local:Translate Connect}"
+                        ToolTipProperties.Text="{l10n:Translate Connect}"
                         behaviors:Hover.Cursor="True"
                         behaviors:Hover.Scale="1.04">
                     <Border.GestureRecognizers>
@@ -78,7 +78,7 @@
                                FontSize="8"
                                VerticalOptions="Center"
                                TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
-                        <Label Text="{local:Translate Disconnected}"
+                        <Label Text="{l10n:Translate Disconnected}"
                                Style="{StaticResource DangerText}"
                                FontSize="12"
                                VerticalOptions="Center"/>
@@ -89,7 +89,7 @@
             <!-- Row actions -->
             <HorizontalStackLayout Grid.Column="4" Spacing="8" VerticalOptions="Center">
                 <Border Style="{StaticResource IconChip}"
-                        ToolTipProperties.Text="{local:Translate UpdateDrive}">
+                        ToolTipProperties.Text="{l10n:Translate UpdateDrive}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="HandleUpdate"/>
                     </Border.GestureRecognizers>
@@ -100,7 +100,7 @@
                 </Border>
 
                 <Border Style="{StaticResource IconChip}"
-                        ToolTipProperties.Text="{local:Translate DeleteDrive}">
+                        ToolTipProperties.Text="{l10n:Translate DeleteDrive}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="HandleDelete"/>
                     </Border.GestureRecognizers>

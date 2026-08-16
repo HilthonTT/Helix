@@ -1,6 +1,4 @@
-﻿using SharedKernel;
-
-namespace Helix.Domain.Drives;
+﻿namespace Helix.Domain.Drives;
 
 public static class DriveErrors
 {

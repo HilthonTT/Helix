@@ -1,6 +1,4 @@
-﻿using SharedKernel;
-
-namespace Helix.Application.Core.Errors;
+﻿namespace Helix.Application.Core.Errors;
 
 internal static class FolderPickerErrors
 {

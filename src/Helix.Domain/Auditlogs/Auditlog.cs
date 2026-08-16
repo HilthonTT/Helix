@@ -1,6 +1,4 @@
-﻿using SharedKernel;
-
-namespace Helix.Domain.Auditlogs;
+﻿namespace Helix.Domain.Auditlogs;
 
 public sealed class Auditlog : Entity, IAuditable
 {

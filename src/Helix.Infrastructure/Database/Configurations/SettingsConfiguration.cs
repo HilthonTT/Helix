@@ -4,7 +4,7 @@ using Helix.Infrastructure.Database.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Krello.Persistence.Configurations;
+namespace Helix.Infrastructure.Database.Configurations;
 
 internal sealed class SettingsConfiguration : IEntityTypeConfiguration<Settings>
 {

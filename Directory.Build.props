@@ -1,0 +1,13 @@
+<Project>
+
+	<!--
+	Properties shared by every project in the solution. Individual .csproj files carry
+	only what is genuinely specific to them (target framework, packaging, references),
+	so the boilerplate cannot drift apart project by project.
+	-->
+	<PropertyGroup>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+</Project>

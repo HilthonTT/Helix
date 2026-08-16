@@ -1,5 +1,3 @@
-using SharedKernel;
-
 namespace Helix.Application.Abstractions.Security;
 
 /// <summary>

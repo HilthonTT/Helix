@@ -1,17 +1,14 @@
 using CommunityToolkit.Mvvm.Messaging;
-using Helix.App.Constants;
-using Helix.App.Messages;
-using Helix.App.Modals.Users.UpdateUsername;
+using Helix.App.Messaging.Navigation;
+using Helix.App.Messaging.Users;
 using Helix.App.Services;
-using Helix.App.Pages;
-using Helix.App.Pages.Auditlogs;
-using Helix.App.Pages.Home;
-using Helix.App.Pages.Login;
-using Helix.App.Pages.Register;
-using Helix.App.Pages.Settings;
+using Helix.App.ViewModels;
+using Helix.App.Views.Auditlogs;
+using Helix.App.Views.Drives;
+using Helix.App.Views.Settings;
+using Helix.App.Views.Users;
 using Helix.Application.Abstractions.Authentication;
-using Helix.Application.Users;
-using SharedKernel;
+using Helix.Application.Features.Users.Commands;
 using System.Diagnostics;
 
 namespace Helix.App;

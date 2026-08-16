@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
+             xmlns:controls="clr-namespace:Helix.App.Controls"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:DataType="vm:SearchDrivesViewModel"
+             x:Class="Helix.App.Views.Drives.SearchDrivesModal"
+             BackgroundColor="Transparent">
+
+    <ContentView.Resources>
+        <Style TargetType="RadioButton">
+            <Setter Property="ControlTemplate" Value="{StaticResource SegmentTemplate}"/>
+        </Style>
+    </ContentView.Resources>
+
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{l10n:Translate SearchDrives}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{l10n:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+            </Grid>
+
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16" Padding="24,4,24,20">
+
+                    <Border Style="{StaticResource Field}">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Label Text="{x:Static icons:IconFont.Search}"
+                                   Style="{StaticResource IconSm}"
+                                   Margin="14,0,0,0"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                            <Entry Grid.Column="1"
+                                   Margin="10,0,14,0"
+                                   Placeholder="{l10n:Translate SearchTermPlaceholder}"
+                                   Text="{Binding SearchTerm}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Grid>
+                    </Border>
+
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{l10n:Translate YourSortOrder}" Style="{StaticResource FieldLabel}"/>
+
+                        <controls:HorizontalWrapLayout Spacing="8"
+                                                      RadioButtonGroup.GroupName="SortOrder"
+                                                      RadioButtonGroup.SelectedValue="{Binding SortOrderString}">
+                            <BindableLayout.ItemsSource>
+                                <x:Array Type="{x:Type x:String}">
+                                    <x:String>Ascending</x:String>
+                                    <x:String>Descending</x:String>
+                                </x:Array>
+                            </BindableLayout.ItemsSource>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <RadioButton Content="{Binding Converter={StaticResource TranslateConverter}}"
+                                                 Value="{Binding}"
+                                                 IsEnabled="{Binding Source={RelativeSource AncestorType={x:Type vm:SearchDrivesViewModel}}, Path=IsNotBusy, x:DataType=vm:SearchDrivesViewModel}"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </controls:HorizontalWrapLayout>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,16,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Cancel}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Grid.Column="1"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Search}"
+                        Command="{Binding SearchCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+        </Grid>
+    </Border>
+
+</ContentView>

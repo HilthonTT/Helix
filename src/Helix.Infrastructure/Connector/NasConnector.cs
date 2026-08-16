@@ -1,6 +1,5 @@
 using Helix.Application.Abstractions.Connector;
 using Helix.Domain.Drives;
-using SharedKernel;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;

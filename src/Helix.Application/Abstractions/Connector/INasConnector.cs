@@ -1,5 +1,4 @@
 ﻿using Helix.Domain.Drives;
-using SharedKernel;
 
 namespace Helix.Application.Abstractions.Connector;
 

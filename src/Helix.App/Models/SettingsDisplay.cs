@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Helix.Application.Settings;
+using Helix.Application.Features.Settings.Commands;
+using Helix.Application.Features.Settings.Queries;
 using Helix.Domain.Settings;
-using SharedKernel;
 
 namespace Helix.App.Models;
 

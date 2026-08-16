@@ -1,5 +1,3 @@
-using SharedKernel;
-
 namespace Helix.Domain.Drives;
 
 public sealed class Drive : Entity, IAuditable
