@@ -3,8 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using Helix.Application.Abstractions.Time;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
+#if WINDOWS
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
+#endif
 using AppBase = Microsoft.Maui.Controls.Application;
 using SettingsModel = Helix.Domain.Settings.Settings;
 
@@ -106,8 +108,18 @@ public abstract partial class BaseViewModel : ObservableObject
         return Shell.Current.DisplayAlertAsync("Success!", message, "Ok");
     }
 
+    /// <summary>
+    /// Sends the window to the taskbar when the auto-minimize countdown runs out.
+    /// </summary>
+    /// <remarks>
+    /// Windows-only. Mac Catalyst exposes no public API for minimizing a window scene —
+    /// the AppKit route needs a private selector that would fail App Review — so on
+    /// macOS the countdown still runs and still offers its redo chip, it just leaves the
+    /// window where it is. Better a setting that under-delivers than one that crashes.
+    /// </remarks>
     public static void MinimizeApp()
     {
+#if WINDOWS
         // The window list is only safe to read on the UI thread, and this is called from
         // a timer callback — so the checks happen inside the dispatch, not before it,
         // where they would have described a different moment (and dereferenced a null
@@ -135,6 +147,7 @@ public abstract partial class BaseViewModel : ObservableObject
                 presenter.Minimize();
             }
         });
+#endif
     }
 
     /// <summary>

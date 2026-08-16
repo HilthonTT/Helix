@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build-and-test:
-    name: Build & Test
+    name: Build & Test (Windows)
     runs-on: windows-latest
 
     env:
@@ -68,3 +68,45 @@ jobs:
           path: TestResults/*.trx
           if-no-files-found: ignore
           retention-days: 7
+
+  build-maccatalyst:
+    name: Build (macOS)
+    runs-on: macos-latest
+
+    # The Windows head and the whole test suite target net10.0-windows and cannot run
+    # here; this job exists to compile-verify the Mac Catalyst head, which in turn is
+    # the only place Helix.Infrastructure's macOS platform services are built.
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Install .NET MAUI workload
+        run: dotnet workload install maui
+
+      # Only the app project: the solution also holds the Windows-only test projects,
+      # whose target framework cannot be built on macOS.
+      - name: Build Mac Catalyst head
+        run: >-
+          dotnet build src/Helix.App/Helix.App.csproj
+          --configuration Debug
+          -p:EnableCodeSigning=false
+          -p:_RequireCodeSigning=false

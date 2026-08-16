@@ -4,7 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Helix is a .NET MAUI Windows desktop app for managing connections to NAS drives. It targets `net10.0-windows10.0.19041.0` and is Windows-only (uses WinRT/Win32 interop in `Helix.App/MauiProgram.cs` and a `IWshRuntimeLibrary` COM reference in `Helix.Infrastructure`). Open `Helix.sln` in Visual Studio 2022 to build/run.
+Helix is a .NET MAUI desktop app for managing connections to NAS drives. It ships two heads:
+
+- **Windows** — `net10.0-windows10.0.19041.0`. Open `Helix.sln` in Visual Studio 2022 to build/run.
+- **macOS** — `net10.0-maccatalyst`. Build on a Mac with Xcode installed; Catalyst cannot be compiled from Windows.
+
+`Helix.App` and `Helix.Infrastructure` each gate their target frameworks on the host OS, so `dotnet build` produces the right head on either machine without a `-f` switch. Adding a target framework to one of those projects means adding it to both.
 
 ## Commands
 
@@ -31,6 +36,14 @@ dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-pro
 ```
 
 Running the MAUI app itself is normally done via Visual Studio 2022 (`Helix.App` startup project), not `dotnet run`, because of the MAUI/Windows packaging configuration.
+
+The test projects target `net10.0-windows10.0.19041.0`, so the suite only runs on Windows. On a Mac, build the app project on its own — the solution also contains those Windows-only projects:
+
+```bash
+dotnet build src/Helix.App/Helix.App.csproj
+```
+
+CI covers both: a Windows job builds and tests, a macOS job compile-verifies the Catalyst head.
 
 ## Build configuration
 
@@ -105,7 +118,7 @@ Outcomes flow through `Result` / `Result<T>` — handlers never throw for expect
 Concrete implementations, one folder per abstraction group:
 
 ```
-Authentication/  Connector/  Cryptography/  Desktop/  Startup/  Time/
+Authentication/  Connector/  Cryptography/  Desktop/  Platform/  Startup/  Time/
 Database/
     AppDbContext.cs, AppDbContextFactory.cs
     Configurations/   EF entity configurations
@@ -117,6 +130,30 @@ Migrations/
 DependencyInjection.cs
 ```
 
+#### Platform seams
+
+Exactly three abstractions have a genuinely per-OS implementation, and they are bound in
+`AddPlatformServices()` behind `#if WINDOWS` / `#elif MACCATALYST` (with an `#else` that
+throws, so a new head fails at composition rather than at first use):
+
+| Abstraction | Windows | macOS |
+|---|---|---|
+| `INasConnector` | `WindowsNasConnector` — `mpr.dll` WNet, mounts to `Z:` | `MacNasConnector` — `NetFSMountURLSync`, mounts to `~/Helix Drives/Z` |
+| `IStartupService` | `WindowsStartupService` — `.lnk` in the Startup folder | `MacStartupService` — LaunchAgent plist |
+| `IDesktopService` | `WindowsDesktopService` — `.lnk` on the Desktop | `MacDesktopService` — symlink to the `.app` |
+
+Both connectors take the NAS password as a separate credential argument rather than
+putting it in a command line — do not "simplify" either into a `net.exe` or
+`mount_smbfs //user:pass@host` shell-out.
+
+macOS has no drive letters, so `Drive.Letter` names a directory under the mount root
+instead. The persisted domain model is identical on both platforms.
+
+Windows implementations carry `[SupportedOSPlatform("windows")]` and compile on both
+heads; macOS implementations are wrapped in `#if MACCATALYST` because they reference
+Apple BCL types that only exist on that target framework. `Platform/MacBundle` resolves
+the running `.app` bundle for the two shortcut services.
+
 ### Helix.App (presentation)
 
 Standard MAUI layout, feature-foldered inside `Views/` and `ViewModels/`:
@@ -124,7 +161,7 @@ Standard MAUI layout, feature-foldered inside `Views/` and `ViewModels/`:
 ```
 App.xaml, AppShell.xaml, MauiProgram.cs, GlobalUsings.cs
 Behaviors/     attached behaviors used from XAML
-Common/        ScopedHandler, PageNames, PresentationAssembly, StorageUsageHelper
+Common/        ScopedHandler, PageNames, PresentationAssembly, StorageUsageHelper, WindowSizing
 Controls/      custom controls and layouts (NavItem, ChartView, HorizontalWrapLayout)
 Converters/    IValueConverter implementations
 Extensions/    DependencyInjection (AddPresensation)
@@ -143,6 +180,27 @@ Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/,
 A view and its viewmodel sit in the same feature folder under their respective roots — `Views/Drives/HomePage.xaml` pairs with `ViewModels/Drives/HomeViewModel.cs`.
 
 `GlobalUsings.cs` imports `Helix.App.Common` and `Helix.App.Localization` alongside the SharedKernel namespaces, so `ScopedHandler`, `PageNames` and `LocalizationResourceManager` need no per-file using.
+
+#### Platform-specific presentation code
+
+The XAML, viewmodels, converters and behaviours are shared verbatim; only these carry an
+`#if`, and each has a working macOS path or a deliberate no-op:
+
+- `MauiProgram` — the WinUI lifecycle hook, the `EntryHandler` chrome tweak and the
+  SharpHook startup are `#if WINDOWS`.
+- `App.CreateWindow` — Catalyst sizes its window here from `Common/WindowSizing`, the
+  same rule the Windows lifecycle event applies through `AppWindow`. Change the rule in
+  one place and both heads follow.
+- `BaseViewModel.MinimizeApp` — Windows only. Mac Catalyst exposes no public API for
+  minimizing a window scene, so auto-minimize runs its countdown and then does nothing
+  on macOS rather than reaching for a private selector.
+- `Behaviors/Hover` (hand cursor), `Services/ModalHost` (Escape-to-dismiss) and the
+  `LoginPage`/`RegisterPage` Ctrl+Enter shortcut — Windows only, no-ops elsewhere.
+
+The Catalyst head ships with the **App Sandbox disabled** (`Platforms/MacCatalyst/Entitlements.plist`).
+A sandboxed process cannot mount a network filesystem, write a LaunchAgent or touch the
+real Desktop, so sandboxing it would break every platform service at once. That makes the
+macOS build Developer ID / direct distribution, not Mac App Store.
 
 #### XAML conventions
 

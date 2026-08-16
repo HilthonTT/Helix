@@ -19,7 +19,7 @@ namespace Helix.App.Resources.Languages {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class AppResources {
@@ -66,6 +66,15 @@ namespace Helix.App.Resources.Languages {
         internal static string AccountInformation {
             get {
                 return ResourceManager.GetString("AccountInformation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Actions.
+        /// </summary>
+        internal static string Actions {
+            get {
+                return ResourceManager.GetString("Actions", resourceCulture);
             }
         }
         
@@ -187,6 +196,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reconnect your drives as soon as Helix opens..
+        /// </summary>
+        internal static string AutoConnectDescription {
+            get {
+                return ResourceManager.GetString("AutoConnectDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Auto connect drives on launch.
         /// </summary>
         internal static string AutoConnectDrivesOnLaunch {
@@ -201,6 +219,24 @@ namespace Helix.App.Resources.Languages {
         internal static string AutoMinimizeApp {
             get {
                 return ResourceManager.GetString("AutoMinimizeApp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hide Helix to the taskbar once the timer runs out..
+        /// </summary>
+        internal static string AutoMinimizeDescription {
+            get {
+                return ResourceManager.GetString("AutoMinimizeDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        internal static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
             }
         }
         
@@ -403,6 +439,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Language used across the app..
+        /// </summary>
+        internal static string LanguageDescription {
+            get {
+                return ResourceManager.GetString("LanguageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Languages.
         /// </summary>
         internal static string Languages {
@@ -448,6 +493,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Menu.
+        /// </summary>
+        internal static string Menu {
+            get {
+                return ResourceManager.GetString("Menu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Message.
         /// </summary>
         internal static string Message {
@@ -475,6 +529,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to NAS manager.
+        /// </summary>
+        internal static string NasManager {
+            get {
+                return ResourceManager.GetString("NasManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to NAS Password.
         /// </summary>
         internal static string NasPassword {
@@ -489,6 +552,42 @@ namespace Helix.App.Resources.Languages {
         internal static string NasUsername {
             get {
                 return ResourceManager.GetString("NasUsername", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Actions you take in Helix will appear here..
+        /// </summary>
+        internal static string NoAuditlogsMessage {
+            get {
+                return ResourceManager.GetString("NoAuditlogsMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing logged yet.
+        /// </summary>
+        internal static string NoAuditlogsTitle {
+            get {
+                return ResourceManager.GetString("NoAuditlogsTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add your first network drive to reach your NAS in a single click..
+        /// </summary>
+        internal static string NoDrivesMessage {
+            get {
+                return ResourceManager.GetString("NoDrivesMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No drives yet.
+        /// </summary>
+        internal static string NoDrivesTitle {
+            get {
+                return ResourceManager.GetString("NoDrivesTitle", resourceCulture);
             }
         }
         
@@ -601,6 +700,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Keep a Helix shortcut on your desktop..
+        /// </summary>
+        internal static string SetDesktopShortcutDescription {
+            get {
+                return ResourceManager.GetString("SetDesktopShortcutDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Set on startup.
         /// </summary>
         internal static string SetOnStartup {
@@ -610,11 +718,38 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Launch Helix when you sign in to Windows..
+        /// </summary>
+        internal static string SetOnStartupDescription {
+            get {
+                return ResourceManager.GetString("SetOnStartupDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Settings.
         /// </summary>
         internal static string Settings {
             get {
                 return ResourceManager.GetString("Settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show credentials.
+        /// </summary>
+        internal static string ShowCredentials {
+            get {
+                return ResourceManager.GetString("ShowCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Signed in.
+        /// </summary>
+        internal static string SignedIn {
+            get {
+                return ResourceManager.GetString("SignedIn", resourceCulture);
             }
         }
         
@@ -651,6 +786,15 @@ namespace Helix.App.Resources.Languages {
         internal static string Timer {
             get {
                 return ResourceManager.GetString("Timer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Seconds to wait before minimising..
+        /// </summary>
+        internal static string TimerCountDescription {
+            get {
+                return ResourceManager.GetString("TimerCountDescription", resourceCulture);
             }
         }
         

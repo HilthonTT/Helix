@@ -68,14 +68,39 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddSingleton<ICountdownService, CountdownService>();
 
-        // Stateless and cached in viewmodel fields — must survive per-operation scopes.
-        services.AddSingleton<INasConnector, NasConnector>();
-
         // Holds the watched set and the polling loop for the app's lifetime.
         services.AddSingleton<IDriveMonitor, DriveMonitor>();
 
-        services.AddScoped<IStartupService, StartupService>();
-        services.AddScoped<IDesktopService, DesktopService>();
+        services.AddPlatformServices();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Binds the three abstractions whose implementation is genuinely per-OS: mounting a
+    /// share, registering for launch at login, and putting a shortcut on the desktop.
+    /// Everything else in this layer is platform-neutral.
+    /// </summary>
+    private static IServiceCollection AddPlatformServices(this IServiceCollection services)
+    {
+#if WINDOWS
+        // Stateless and cached in viewmodel fields — must survive per-operation scopes.
+        services.AddSingleton<INasConnector, WindowsNasConnector>();
+
+        services.AddScoped<IStartupService, WindowsStartupService>();
+        services.AddScoped<IDesktopService, WindowsDesktopService>();
+#elif MACCATALYST
+        services.AddSingleton<INasConnector, MacNasConnector>();
+
+        services.AddScoped<IStartupService, MacStartupService>();
+        services.AddScoped<IDesktopService, MacDesktopService>();
+#else
+        // Fail at composition rather than at the first drive connection: a head added
+        // without its platform services would otherwise look fine until it was used.
+        throw new PlatformNotSupportedException(
+            "Helix has no platform services for this target framework. Add implementations of " +
+            $"{nameof(INasConnector)}, {nameof(IStartupService)} and {nameof(IDesktopService)} for it.");
+#endif
 
         return services;
     }

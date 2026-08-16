@@ -1,9 +1,15 @@
 ﻿using Helix.Application.Abstractions.Desktop;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace Helix.Infrastructure.Desktop;
 
-internal sealed class DesktopService : IDesktopService
+/// <summary>
+/// Creates and removes the Helix desktop shortcut (.lnk) through late-bound
+/// WScript.Shell, so no COM reference is needed at compile time.
+/// </summary>
+[SupportedOSPlatform("windows")]
+internal sealed class WindowsDesktopService : IDesktopService
 {
     private const string ShortcutName = "Helix.lnk";
     private static readonly string DesktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);

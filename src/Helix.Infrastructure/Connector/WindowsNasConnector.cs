@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Connector;
+﻿using Helix.Application.Abstractions.Connector;
 using Helix.Domain.Drives;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -13,7 +13,7 @@ namespace Helix.Infrastructure.Connector;
 /// passwords.
 /// </summary>
 [SupportedOSPlatform("windows")]
-internal sealed class NasConnector : INasConnector
+internal sealed class WindowsNasConnector : INasConnector
 {
     private const int ConnectionTimeoutMilliseconds = 5_000;
 

@@ -1,9 +1,15 @@
 ﻿using Helix.Application.Abstractions.Startup;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace Helix.Infrastructure.Startup;
 
-internal sealed class StartupService : IStartupService
+/// <summary>
+/// Registers Helix in the per-user Startup folder as a .lnk shortcut, created through
+/// late-bound WScript.Shell so no COM reference is needed at compile time.
+/// </summary>
+[SupportedOSPlatform("windows")]
+internal sealed class WindowsStartupService : IStartupService
 {
     private const string ShortcutName = "Helix.lnk";
 

@@ -60,7 +60,8 @@ architecture tests check this for Infrastructure and for Application handlers.
 src/SharedKernel/           Abstractions/  Primitives/  Results/
 src/Helix.Domain/           one folder per aggregate: Auditlogs/ Drives/ Settings/ Users/
 src/Helix.Application/      Abstractions/  Core/  Features/<Feature>/{Commands,Queries}
-src/Helix.Infrastructure/   Authentication/ Connector/ Cryptography/ Desktop/ Startup/ Time/
+src/Helix.Infrastructure/   Authentication/ Connector/ Cryptography/ Desktop/ Platform/
+                            Startup/ Time/
                             Database/{Configurations,Constants,Interceptors,Repositories,Sqlite}
 src/Helix.App/              Behaviors/ Common/ Controls/ Converters/ Extensions/ Icons/
                             Localization/ Messaging/ Models/ Services/
@@ -80,6 +81,25 @@ In XAML, use the shared prefixes: `vm:` for the file's viewmodel, `views:` for s
 NuGet versions are centrally managed in `Directory.Packages.props`, and properties shared by every
 project live in `Directory.Build.props` — reference packages without a `Version` attribute, and
 don't re-declare `Nullable` or `ImplicitUsings` in a `.csproj`.
+
+### Platform-specific code
+
+Helix ships a Windows head (`net10.0-windows10.0.19041.0`) and a macOS one
+(`net10.0-maccatalyst`). Both are gated on the host OS in `Helix.App.csproj` and
+`Helix.Infrastructure.csproj`, so `dotnet build` does the right thing on either machine —
+but Mac Catalyst needs Xcode, so **the macOS head cannot be compiled from Windows**. CI
+builds it on a macOS runner; that is the check that catches a broken Catalyst build.
+
+Keep the `#if` count low. Only three abstractions are genuinely per-OS —
+`INasConnector`, `IStartupService`, `IDesktopService` — and they are bound once in
+`AddPlatformServices()`. If you need platform behaviour somewhere new, prefer adding it
+to one of those (or a new abstraction beside them) over sprinkling `#if WINDOWS` through
+a viewmodel. Windows implementations use `[SupportedOSPlatform("windows")]` and stay
+compilable everywhere; macOS ones need `#if MACCATALYST` because they reference Apple
+BCL types.
+
+The test projects target `net10.0-windows`, so `dotnet test` is Windows-only. On a Mac,
+build `src/Helix.App/Helix.App.csproj` directly rather than the solution.
 
 ### Adding a use case
 

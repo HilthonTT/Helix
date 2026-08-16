@@ -5,14 +5,16 @@ using Helix.Infrastructure;
 using Helix.Infrastructure.Cryptography;
 using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
+using SkiaSharp.Views.Maui.Controls.Hosting;
+#if WINDOWS
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using SharpHook;
-using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Diagnostics;
 using Windows.Graphics;
+#endif
 
 namespace Helix.App;
 
@@ -38,7 +40,9 @@ public static class MauiProgram
             })
             .ConfigureMauiHandlers(handlers =>
             {
+#if WINDOWS
                 ModifyEntry();
+#endif
             });
 
 #if DEBUG
@@ -50,6 +54,9 @@ public static class MauiProgram
             .AddInfrastructure()
             .AddPresensation();
 
+#if WINDOWS
+        // Catalyst has no AppWindow/DisplayArea; it sizes its window in App.CreateWindow
+        // from the same WindowSizing rule.
         builder.ConfigureLifecycleEvents(events =>
         {
             events.AddWindows(wndLifeCycleBuilder =>
@@ -64,36 +71,13 @@ public static class MauiProgram
                     DisplayArea displayArea = DisplayArea.GetFromWindowId(win32WindowId, DisplayAreaFallback.Primary);
                     RectInt32 displayBounds = displayArea.WorkArea;
 
-                    int screenWidth = displayBounds.Width;
-                    int screenHeight = displayBounds.Height;
+                    WindowBounds bounds = WindowSizing.Calculate(displayBounds.Width, displayBounds.Height);
 
-                    // Determine scaling factor based on resolution
-                    double scalingFactor =
-                        (screenWidth >= 3456 && screenWidth <= 4224) ||
-                        (screenHeight >= 1944 && screenHeight <= 2376)
-                            ? 0.9
-                            : 0.8;
-
-                    // Calculate the window size to maintain a 16:9 aspect ratio
-                    const double targetAspectRatio = 16.0 / 9.0;
-                    int windowWidth = (int)(screenWidth * scalingFactor);
-                    int windowHeight = (int)(windowWidth / targetAspectRatio);
-
-                    // Ensure the window height fits within the screen's height
-                    if (windowHeight > screenHeight * scalingFactor)
-                    {
-                        windowHeight = (int)(screenHeight * scalingFactor);
-                        windowWidth = (int)(windowHeight * targetAspectRatio);
-                    }
-
-                    // Center the window on the screen
-                    int posX = (screenWidth - windowWidth) / 2;
-                    int posY = (screenHeight - windowHeight) / 2;
-
-                    appWindow.MoveAndResize(new RectInt32(posX, posY, windowWidth, windowHeight));
+                    appWindow.MoveAndResize(new RectInt32(bounds.X, bounds.Y, bounds.Width, bounds.Height));
                 });
             });
         });
+#endif
 
         MauiApp app = builder.Build();
 
@@ -102,6 +86,10 @@ public static class MauiProgram
         // is captured by the underlying SecureStorage call.
         Task.Run(static () => PasswordGenerator.InitializeAsync()).GetAwaiter().GetResult();
 
+#if WINDOWS
+        // The global hook backs the Ctrl+Enter shortcut on the sign-in pages. libuiohook
+        // ships no maccatalyst native and macOS would gate it behind an Accessibility
+        // prompt, so the Catalyst head goes without it.
         var hook = app.Services.GetRequiredService<IGlobalHook>();
 
         // Single fire-and-forget launch of the global hook; observe faults so they
@@ -111,10 +99,12 @@ public static class MauiProgram
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default);
+#endif
 
         return app;
     }
 
+#if WINDOWS
     private static void ModifyEntry()
     {
         // Entries sit inside our own bordered Field container, so the platform chrome
@@ -128,4 +118,5 @@ public static class MauiProgram
             handler.PlatformView.Padding = new Microsoft.UI.Xaml.Thickness(0);
         });
     }
+#endif
 }

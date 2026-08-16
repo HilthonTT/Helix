@@ -1,4 +1,4 @@
-using CommunityToolkit.Maui.Storage;
+﻿using CommunityToolkit.Maui.Storage;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Security;
@@ -24,9 +24,10 @@ public sealed class ExportDrives(
         WriteIndented = false,
     };
 
-    // FolderPicker is not available on every platform this assembly's TFM allows, and Helix
-    // only ever runs on Windows, so the call site is narrowed to match.
+    // FolderPicker is not available on every platform this assembly's neutral TFM allows,
+    // so the call site is narrowed to the desktop heads Helix actually ships.
     [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("maccatalyst14.0")]
     public async Task<Result> Handle(CancellationToken cancellationToken = default)
     {
         if (!loggedInUser.IsLoggedIn)

@@ -68,6 +68,26 @@ public sealed partial class App : AppBase
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        return new Window(new AppShell());
+        var window = new Window(new AppShell());
+
+#if MACCATALYST
+        // Windows sizes its window through AppWindow in a lifecycle event; Catalyst has
+        // no equivalent, so the same WindowSizing rule is applied to MAUI's own window
+        // geometry. DisplayInfo reports physical pixels and these properties take
+        // device-independent units, hence the density divide.
+        DisplayInfo display = DeviceDisplay.Current.MainDisplayInfo;
+        double density = display.Density > 0 ? display.Density : 1;
+
+        WindowBounds bounds = WindowSizing.Calculate(
+            (int)(display.Width / density),
+            (int)(display.Height / density));
+
+        window.X = bounds.X;
+        window.Y = bounds.Y;
+        window.Width = bounds.Width;
+        window.Height = bounds.Height;
+#endif
+
+        return window;
     }
 }

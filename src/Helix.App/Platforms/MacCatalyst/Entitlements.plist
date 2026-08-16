@@ -3,12 +3,35 @@
 <plist version="1.0">
     <!-- See https://aka.ms/maui-publish-app-store#add-entitlements for more information about adding entitlements.-->
     <dict>
-        <!-- App Sandbox must be enabled to distribute a MacCatalyst app through the Mac App Store. -->
+        <!--
+        The App Sandbox is deliberately OFF.
+
+        Helix's entire purpose is mounting NAS shares, and a sandboxed process cannot
+        mount a network filesystem, write a LaunchAgent into ~/Library/LaunchAgents, or
+        create a link on the real Desktop — each of those paths is redirected into the
+        app's container. Enabling the sandbox therefore produces a build where the core
+        feature fails silently, which is worse than not shipping it.
+
+        The consequence is that the Catalyst head is for Developer ID / direct
+        distribution, not the Mac App Store. If App Store distribution is ever needed,
+        the drive-mounting feature has to be redesigned around user-selected volumes
+        (com.apple.security.files.user-selected.read-write) and security-scoped
+        bookmarks, which changes the UX rather than just the entitlements.
+        -->
         <key>com.apple.security.app-sandbox</key>
-        <true/>
-        <!-- When App Sandbox is enabled, this value is required to open outgoing network connections. -->
+        <false/>
+
+        <!-- Reaching the NAS at all. -->
         <key>com.apple.security.network.client</key>
+        <true/>
+
+        <!--
+        The hardened runtime blocks the JIT and library loads that MAUI's Catalyst head
+        and the SQLCipher native bundle rely on unless these are granted.
+        -->
+        <key>com.apple.security.cs.allow-jit</key>
+        <true/>
+        <key>com.apple.security.cs.disable-library-validation</key>
         <true/>
     </dict>
 </plist>
-
