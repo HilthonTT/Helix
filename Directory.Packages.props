@@ -25,7 +25,7 @@
 	</ItemGroup>
 
 	<ItemGroup Label="Data">
-		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
 		<!--
 		Sqlite.Core deliberately, not Sqlite: the full package bundles SQLitePCLRaw.bundle_e_sqlite3,
 		which ships a second native SQLite (flagged by GHSA-2m69-gcr7-jv3q) and competes with
