@@ -21,6 +21,10 @@ internal sealed partial class SettingsDisplay : ObservableObject
     // Last value the store accepted, so a rejected TimerCount can be put back.
     private int _persistedTimerCount;
 
+    // Same again for the retention box, which is typed into the same way.
+    private readonly System.Timers.Timer _retentionDebounceTimer;
+    private int _persistedRetentionDays;
+
     [ObservableProperty]
     public partial Guid Id { get; set; }
 
@@ -106,6 +110,24 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _debounceTimer.Start();
     }
 
+    /// <summary>
+    /// Days of audit history to keep; 0 keeps everything. Debounced like
+    /// <see cref="TimerCount"/> — it is typed into digit by digit, and "9" on the way to
+    /// "90" must not be saved and acted on.
+    /// </summary>
+    [ObservableProperty]
+    public partial int AuditlogRetentionDays { get; set; }
+    partial void OnAuditlogRetentionDaysChanged(int value)
+    {
+        if (!_initialized || _rollingBack)
+        {
+            return;
+        }
+
+        _retentionDebounceTimer.Stop();
+        _retentionDebounceTimer.Start();
+    }
+
     [ObservableProperty]
     public partial Language Language { get; set; }
     async partial void OnLanguageChanged(Language value)
@@ -130,6 +152,14 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _debounceTimer.Elapsed += (_, _) =>
             MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateTimerCount());
 
+        _retentionDebounceTimer = new(500)
+        {
+            AutoReset = false
+        };
+
+        _retentionDebounceTimer.Elapsed += (_, _) =>
+            MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateRetentionDays());
+
         Id = settings.Id;
         UserId = settings.UserId;
         AutoConnect = settings.AutoConnect;
@@ -139,6 +169,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
         TimerCount = settings.TimerCount;
         _persistedTimerCount = settings.TimerCount;
         Language = settings.Language;
+        AuditlogRetentionDays = settings.AuditlogRetentionDays;
+        _persistedRetentionDays = settings.AuditlogRetentionDays;
 
         // Every seed above is done — from here on the hooks may write back.
         _initialized = true;
@@ -161,7 +193,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 SetOnStartup,
                 SetDesktopShortcut,
                 TimerCount,
-                Language);
+                Language,
+                AuditlogRetentionDays);
 
             // Apply the specific update.
             updateAction(requestBuilder);
@@ -224,5 +257,18 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
 
         RollBack(() => TimerCount = _persistedTimerCount);
+    }
+
+    private async Task DebouncedUpdateRetentionDays()
+    {
+        int attempted = AuditlogRetentionDays;
+
+        if (await UpdatePropertyAsync(builder => builder.AuditlogRetentionDays = attempted))
+        {
+            _persistedRetentionDays = attempted;
+            return;
+        }
+
+        RollBack(() => AuditlogRetentionDays = _persistedRetentionDays);
     }
 }

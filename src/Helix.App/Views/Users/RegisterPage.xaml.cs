@@ -1,8 +1,8 @@
 ﻿using Helix.App.ViewModels.Users;
+using Microsoft.Extensions.Logging;
 #if WINDOWS
 using SharpHook;
 using SharpHook.Native;
-using System.Diagnostics;
 #endif
 
 namespace Helix.App.Views.Users;
@@ -65,7 +65,7 @@ public sealed partial class RegisterPage : ContentPage
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Helix: RegisterCommand failed: {ex}");
+                AppLog.For<RegisterPage>().LogError(ex, "The register shortcut failed.");
             }
         });
     }

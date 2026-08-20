@@ -31,7 +31,31 @@ public static class StorageUsageHelper
         return ProbeAsync(() => GetCompactUsage(driveLetter, fallback), fallback);
     }
 
-    private static async Task<string> ProbeAsync(Func<string> probe, string fallback)
+    /// <summary>
+    /// Renders an already-totalled pair of byte counts as the compact "1.2 / 4.0 TB"
+    /// form the dashboard tile uses.
+    /// </summary>
+    /// <remarks>
+    /// Formatting only. Working out which drives to add up is deliberately not done
+    /// here: several mapped drives are often shares of one NAS pool and each reports
+    /// that pool's whole size, so adding letters together triple-counts a server mapped
+    /// three times. Deciding what counts as one volume needs the platform, and lives
+    /// behind <c>IStorageProbe</c> in Infrastructure.
+    /// </remarks>
+    public static string FormatCombined(long usedBytes, long totalBytes, string fallback = "0 TB")
+    {
+        if (totalBytes <= 0)
+        {
+            return fallback;
+        }
+
+        double total = totalBytes * BytesToTB;
+        double used = Math.Max(0, usedBytes * BytesToTB);
+
+        return $"{used:F1} / {total:F1} TB";
+    }
+
+    private static async Task<T> ProbeAsync<T>(Func<T> probe, T fallback)
     {
         try
         {

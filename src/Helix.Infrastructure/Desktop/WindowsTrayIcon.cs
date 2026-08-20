@@ -1,6 +1,6 @@
 #if WINDOWS
 using Helix.Application.Abstractions.Desktop;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -31,6 +31,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 {
     private const uint IconId = 1;
 
+    private readonly ILogger<WindowsTrayIcon> _logger;
     private readonly Lock _gate = new();
     private readonly ManualResetEventSlim _ready = new(false);
 
@@ -53,6 +54,11 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
     /// <summary>Sent by the shell when Explorer restarts and every tray icon is lost.</summary>
     private uint _taskbarCreatedMessage;
+
+    public WindowsTrayIcon(ILogger<WindowsTrayIcon> logger)
+    {
+        _logger = logger;
+    }
 
     public bool IsSupported => true;
 
@@ -87,7 +93,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         // needs its handle. Bounded, so a failure to create it cannot hang sign-in.
         if (!_ready.Wait(TimeSpan.FromSeconds(5)))
         {
-            Debug.WriteLine("Helix: the tray icon window did not come up in time.");
+            _logger.LogWarning("The tray icon window did not come up within the timeout; no icon will be shown.");
             return;
         }
 
@@ -117,7 +123,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
         if (!Shell_NotifyIconW(NIM_MODIFY, ref data))
         {
-            Debug.WriteLine("Helix: the tray notification was rejected by the shell.");
+            _logger.LogWarning("The shell rejected a tray notification.");
         }
     }
 
@@ -182,7 +188,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         catch (Exception ex)
         {
             // The tray is a convenience. A failure here must never take the app with it.
-            Debug.WriteLine($"Helix: the tray icon loop faulted: {ex}");
+            _logger.LogError(ex, "The tray icon message loop faulted; the icon is gone for this session.");
         }
         finally
         {
@@ -209,7 +215,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
         if (RegisterClassExW(ref windowClass) == 0)
         {
-            Debug.WriteLine($"Helix: could not register the tray window class ({Marshal.GetLastWin32Error()}).");
+            _logger.LogError("Could not register the tray window class (Win32 error {Error}).", Marshal.GetLastWin32Error());
             return false;
         }
 
@@ -228,7 +234,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
         if (_windowHandle == IntPtr.Zero)
         {
-            Debug.WriteLine($"Helix: could not create the tray window ({Marshal.GetLastWin32Error()}).");
+            _logger.LogError("Could not create the tray window (Win32 error {Error}).", Marshal.GetLastWin32Error());
             return false;
         }
 
@@ -374,7 +380,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
         if (!_iconAdded)
         {
-            Debug.WriteLine($"Helix: the shell refused the tray icon ({Marshal.GetLastWin32Error()}).");
+            _logger.LogError("The shell refused the tray icon (Win32 error {Error}).", Marshal.GetLastWin32Error());
         }
     }
 
@@ -420,7 +426,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
     /// taskbar. Falls back to the generic application icon rather than showing nothing —
     /// an icon-less entry is a blank gap the user cannot click with any confidence.
     /// </summary>
-    private static IntPtr LoadApplicationIcon()
+    private IntPtr LoadApplicationIcon()
     {
         try
         {
@@ -439,7 +445,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Helix: could not read the application icon: {ex.Message}");
+            _logger.LogWarning(ex, "Could not read the application icon; falling back to the generic one.");
         }
 
         return LoadIconW(IntPtr.Zero, IDI_APPLICATION);
@@ -455,7 +461,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         ThreadPool.QueueUserWorkItem(_ => SafeInvoke(() => handler(this, EventArgs.Empty)));
     }
 
-    private static void SafeInvoke(Action action)
+    private void SafeInvoke(Action action)
     {
         try
         {
@@ -463,7 +469,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Helix: a tray icon handler threw: {ex}");
+            _logger.LogError(ex, "A tray icon event handler threw.");
         }
     }
 

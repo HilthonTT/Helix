@@ -1,8 +1,8 @@
 ﻿using Helix.App.ViewModels.Users;
+using Microsoft.Extensions.Logging;
 #if WINDOWS
 using SharpHook;
 using SharpHook.Native;
-using System.Diagnostics;
 #endif
 
 namespace Helix.App.Views.Users;
@@ -69,7 +69,7 @@ public sealed partial class LoginPage : ContentPage
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Helix: LoginCommand failed: {ex}");
+                AppLog.For<LoginPage>().LogError(ex, "The sign-in shortcut failed.");
             }
         });
     }

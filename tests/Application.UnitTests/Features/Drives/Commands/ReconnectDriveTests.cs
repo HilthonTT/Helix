@@ -3,7 +3,6 @@ using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Features.Drives.Commands;
-using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Auditlogs;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
@@ -14,6 +13,7 @@ namespace Application.UnitTests.Features.Drives.Commands;
 public class ReconnectDriveTests
 {
     private static readonly Guid UserId = Guid.NewGuid();
+    private static readonly DateTime Now = new(2026, 8, 20, 12, 0, 0, DateTimeKind.Utc);
 
     private readonly ReconnectDrive _reconnectDrive;
 
@@ -22,6 +22,7 @@ public class ReconnectDriveTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly ILoggedInUser _loggedInUserMock;
     private readonly INasConnector _nasConnectorMock;
+    private readonly IDateTimeProvider _dateTimeProviderMock;
 
     private readonly Drive _drive;
 
@@ -32,31 +33,41 @@ public class ReconnectDriveTests
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _loggedInUserMock = Substitute.For<ILoggedInUser>();
         _nasConnectorMock = Substitute.For<INasConnector>();
+        _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
+
+        _dateTimeProviderMock.UtcNow.Returns(Now);
 
         _reconnectDrive = new(
             _driveRepositoryMock,
             _auditlogRepositoryMock,
             _unitOfWorkMock,
             _loggedInUserMock,
-            _nasConnectorMock);
+            _nasConnectorMock,
+            _dateTimeProviderMock);
 
         _drive = Drive.Create(UserId, "Z", "192.168.0.1", "Media Vault", "Username", "Password");
 
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
-        _driveRepositoryMock.GetByIdAsNoTrackingAsync(_drive.Id).Returns(_drive);
+        // Tracked, because a successful reconnect stamps LastConnectedOnUtc on the drive.
+        _driveRepositoryMock.GetByIdAsync(_drive.Id).Returns(_drive);
     }
 
-    private List<string> CapturedMessages()
+    /// <summary>
+    /// Captures the entries as they are written. Asserted on by action and entity rather
+    /// than by prose — the sentence no longer exists at this layer, which is the point of
+    /// the structured log.
+    /// </summary>
+    private List<Auditlog> CapturedEntries()
     {
-        List<string> messages = [];
+        List<Auditlog> entries = [];
 
         _auditlogRepositoryMock
             .When(r => r.Insert(Arg.Any<Auditlog>()))
-            .Do(call => messages.Add(call.Arg<Auditlog>().Message));
+            .Do(call => entries.Add(call.Arg<Auditlog>()));
 
-        return messages;
+        return entries;
     }
 
     [Fact]
@@ -91,7 +102,7 @@ public class ReconnectDriveTests
     {
         // Arrange
         var missing = Guid.NewGuid();
-        _driveRepositoryMock.GetByIdAsNoTrackingAsync(missing).Returns((Drive?)null);
+        _driveRepositoryMock.GetByIdAsync(missing).Returns((Drive?)null);
 
         // Act
         Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(missing, true));
@@ -104,7 +115,7 @@ public class ReconnectDriveTests
     public async Task Handle_Should_RecordTheDrop_WithoutReconnecting_WhenAutoConnectIsOff()
     {
         // Arrange
-        List<string> messages = CapturedMessages();
+        List<Auditlog> entries = CapturedEntries();
 
         // Act
         Result result = await _reconnectDrive.Handle(
@@ -112,7 +123,7 @@ public class ReconnectDriveTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        messages.Should().ContainSingle().Which.Should().Contain("lost its connection");
+        entries.Should().ContainSingle().Which.Action.Should().Be(AuditAction.DriveDisconnected);
 
         await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
         await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -124,16 +135,43 @@ public class ReconnectDriveTests
         // Arrange
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
 
-        List<string> messages = CapturedMessages();
+        List<Auditlog> entries = CapturedEntries();
 
         // Act
         Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        messages.Should().HaveCount(2);
-        messages[0].Should().Contain("lost its connection");
-        messages[1].Should().Contain("reconnected automatically");
+        entries.Should().HaveCount(2);
+        entries[0].Action.Should().Be(AuditAction.DriveDisconnected);
+        entries[1].Action.Should().Be(AuditAction.DriveReconnected);
+    }
+
+    [Fact]
+    public async Task Handle_Should_StampTheDrive_WhenReconnectSucceeds()
+    {
+        // Arrange
+        _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
+
+        // Act
+        await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
+
+        // Assert — this is what lets the dashboard say when a drive was last reachable.
+        _drive.LastConnectedOnUtc.Should().Be(Now);
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotStampTheDrive_WhenReconnectFails()
+    {
+        // Arrange
+        _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>())
+            .Returns(Result.Failure(DriveErrors.FailedToConnect("Still down.")));
+
+        // Act
+        await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
+
+        // Assert
+        _drive.LastConnectedOnUtc.Should().BeNull();
     }
 
     [Fact]
@@ -143,16 +181,19 @@ public class ReconnectDriveTests
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>())
             .Returns(Result.Failure(DriveErrors.FailedToConnect("The network path was not found.")));
 
-        List<string> messages = CapturedMessages();
+        List<Auditlog> entries = CapturedEntries();
 
         // Act
         Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        messages.Should().HaveCount(2);
-        messages[1].Should().Contain("could not be reconnected")
-            .And.Contain("The network path was not found.");
+        entries.Should().HaveCount(2);
+        entries[1].Action.Should().Be(AuditAction.DriveReconnectFailed);
+
+        // The reason is carried as detail, so the rendered sentence can name it in any
+        // language without the reason itself having to be translated.
+        entries[1].Detail.Should().Be("The network path was not found.");
     }
 
     [Fact]
@@ -163,7 +204,7 @@ public class ReconnectDriveTests
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>())
             .Returns(Result.Failure(DriveErrors.FailedToConnect("Still down.")));
 
-        List<string> messages = CapturedMessages();
+        List<Auditlog> entries = CapturedEntries();
 
         // Act
         Result result = await _reconnectDrive.Handle(
@@ -171,7 +212,7 @@ public class ReconnectDriveTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        messages.Should().BeEmpty();
+        entries.Should().BeEmpty();
     }
 
     [Fact]
@@ -180,7 +221,7 @@ public class ReconnectDriveTests
         // Arrange
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
 
-        List<string> messages = CapturedMessages();
+        List<Auditlog> entries = CapturedEntries();
 
         // Act
         Result result = await _reconnectDrive.Handle(
@@ -188,7 +229,7 @@ public class ReconnectDriveTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        messages.Should().ContainSingle().Which.Should().Contain("reconnected automatically");
+        entries.Should().ContainSingle().Which.Action.Should().Be(AuditAction.DriveReconnected);
     }
 
     [Fact]
@@ -197,13 +238,19 @@ public class ReconnectDriveTests
         // Arrange
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
 
-        List<string> messages = CapturedMessages();
+        List<Auditlog> entries = CapturedEntries();
 
         // Act
         await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
         // Assert — the log is the only trace of what happened while the app was hidden,
-        // so it has to identify which drive it is talking about.
-        messages.Should().AllSatisfy(m => m.Should().Contain("Media Vault").And.Contain("(Z:)"));
+        // so every entry has to identify which drive it is talking about. The name and
+        // letter are copied, not looked up, so a later rename cannot rewrite history.
+        entries.Should().AllSatisfy(entry =>
+        {
+            entry.EntityId.Should().Be(_drive.Id);
+            entry.EntityName.Should().Be("Media Vault");
+            entry.EntityLetter.Should().Be("Z");
+        });
     }
 }

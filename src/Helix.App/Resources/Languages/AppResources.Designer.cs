@@ -1030,5 +1030,131 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("TrayStillRunning", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to {0} was added.
+        /// </summary>
+        internal static string AuditDriveCreated {
+            get {
+                return ResourceManager.GetString("AuditDriveCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} was removed.
+        /// </summary>
+        internal static string AuditDriveDeleted {
+            get {
+                return ResourceManager.GetString("AuditDriveDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} lost its connection.
+        /// </summary>
+        internal static string AuditDriveDisconnected {
+            get {
+                return ResourceManager.GetString("AuditDriveDisconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} could not be reconnected: {1}.
+        /// </summary>
+        internal static string AuditDriveReconnectFailed {
+            get {
+                return ResourceManager.GetString("AuditDriveReconnectFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} was reconnected automatically.
+        /// </summary>
+        internal static string AuditDriveReconnected {
+            get {
+                return ResourceManager.GetString("AuditDriveReconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} was changed.
+        /// </summary>
+        internal static string AuditDriveUpdated {
+            get {
+                return ResourceManager.GetString("AuditDriveUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Audit log retention.
+        /// </summary>
+        internal static string AuditlogRetention {
+            get {
+                return ResourceManager.GetString("AuditlogRetention", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Days of history to keep. 0 keeps every entry.
+        /// </summary>
+        internal static string AuditlogRetentionDescription {
+            get {
+                return ResourceManager.GetString("AuditlogRetentionDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The logs were saved to:.
+        /// </summary>
+        internal static string DiagnosticsExported {
+            get {
+                return ResourceManager.GetString("DiagnosticsExported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export.
+        /// </summary>
+        internal static string Export {
+            get {
+                return ResourceManager.GetString("Export", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Diagnostic logs.
+        /// </summary>
+        internal static string ExportDiagnostics {
+            get {
+                return ResourceManager.GetString("ExportDiagnostics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save Helix's log files to a folder, to attach to a bug report.
+        /// </summary>
+        internal static string ExportDiagnosticsDescription {
+            get {
+                return ResourceManager.GetString("ExportDiagnosticsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last connected {0}.
+        /// </summary>
+        internal static string LastConnectedAt {
+            get {
+                return ResourceManager.GetString("LastConnectedAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Never connected.
+        /// </summary>
+        internal static string NeverConnected {
+            get {
+                return ResourceManager.GetString("NeverConnected", resourceCulture);
+            }
+        }
+        
     }
 }

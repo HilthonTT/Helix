@@ -432,4 +432,46 @@
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix masih berjalan di area notifikasi.</value>
   </data>
+  <data name="AuditDriveCreated" xml:space="preserve">
+    <value>{0} telah ditambahkan.</value>
+  </data>
+  <data name="AuditDriveUpdated" xml:space="preserve">
+    <value>{0} telah diubah.</value>
+  </data>
+  <data name="AuditDriveDeleted" xml:space="preserve">
+    <value>{0} telah dihapus.</value>
+  </data>
+  <data name="AuditDriveDisconnected" xml:space="preserve">
+    <value>{0} kehilangan koneksinya.</value>
+  </data>
+  <data name="AuditDriveReconnected" xml:space="preserve">
+    <value>{0} tersambung kembali secara otomatis.</value>
+  </data>
+  <data name="AuditDriveReconnectFailed" xml:space="preserve">
+    <value>{0} tidak dapat disambungkan kembali: {1}</value>
+  </data>
+  <data name="AuditlogRetention" xml:space="preserve">
+    <value>Penyimpanan log audit</value>
+  </data>
+  <data name="AuditlogRetentionDescription" xml:space="preserve">
+    <value>Jumlah hari riwayat yang disimpan. 0 menyimpan semua entri.</value>
+  </data>
+  <data name="ExportDiagnostics" xml:space="preserve">
+    <value>Log diagnostik</value>
+  </data>
+  <data name="ExportDiagnosticsDescription" xml:space="preserve">
+    <value>Simpan berkas log Helix ke folder, untuk dilampirkan pada laporan bug.</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Ekspor</value>
+  </data>
+  <data name="DiagnosticsExported" xml:space="preserve">
+    <value>Log disimpan ke:</value>
+  </data>
+  <data name="LastConnectedAt" xml:space="preserve">
+    <value>Terakhir tersambung {0}</value>
+  </data>
+  <data name="NeverConnected" xml:space="preserve">
+    <value>Belum pernah tersambung</value>
+  </data>
 </root>

@@ -1,4 +1,5 @@
 ﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
@@ -11,7 +12,8 @@ namespace Helix.Application.Features.Drives.Commands;
 public sealed class UpdateDrive(
     IDriveRepository driveRepository,
     IUnitOfWork unitOfWork,
-    ILoggedInUser loggedInUser) : IHandler
+    ILoggedInUser loggedInUser,
+    INasConnector nasConnector) : IHandler
 {
     public sealed record Request(
         Guid DriveId,
@@ -50,9 +52,20 @@ public sealed class UpdateDrive(
         // Letters are stored uppercase, so compare case-insensitively — otherwise
         // re-saving your own drive with a lowercase letter is falsely rejected.
         bool isSameLetter = string.Equals(drive.Letter, request.Letter, StringComparison.OrdinalIgnoreCase);
-        if (!isSameLetter && !await driveRepository.IsLetterUniqueAsync(request.Letter, loggedInUser.UserId, cancellationToken))
+        if (!isSameLetter)
         {
-            return Result.Failure(DriveErrors.LetterNotUnique(request.Letter));
+            if (!await driveRepository.IsLetterUniqueAsync(request.Letter, loggedInUser.UserId, cancellationToken))
+            {
+                return Result.Failure(DriveErrors.LetterNotUnique(request.Letter));
+            }
+
+            // Only when the letter is actually changing. This drive's own letter is in
+            // use by this drive whenever it is connected, and rejecting that would make
+            // an edit to any other field impossible while the share was mounted.
+            if (nasConnector.GetConnectedLetters().Contains(request.Letter.ToUpperInvariant()))
+            {
+                return Result.Failure(DriveErrors.LetterInUse(request.Letter));
+            }
         }
 
         drive.Update(

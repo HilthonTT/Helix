@@ -1,4 +1,4 @@
-﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Handlers;
@@ -12,17 +12,18 @@ namespace Helix.Application.Features.Settings.Commands;
 public sealed class UpdateSettings(
     ISettingsRepository settingsRepository,
     IUnitOfWork unitOfWork,
-    ILoggedInUser loggedInUser, 
+    ILoggedInUser loggedInUser,
     IStartupService startupService,
     IDesktopService desktopService) : IHandler
 {
     public sealed record Request(
-        bool AutoConnect, 
-        bool AutoMinimize, 
-        bool SetOnStartup, 
+        bool AutoConnect,
+        bool AutoMinimize,
+        bool SetOnStartup,
         bool SetDesktopShortcut,
-        int TimerCount, 
-        Language Language)
+        int TimerCount,
+        Language Language,
+        int AuditlogRetentionDays)
     {
         public sealed class Builder(
             bool autoConnect,
@@ -30,7 +31,8 @@ public sealed class UpdateSettings(
             bool setOnStartup,
             bool setDesktopShortcut,
             int timerCount,
-            Language language)
+            Language language,
+            int auditlogRetentionDays)
         {
             public bool AutoConnect { get; set; } = autoConnect;
 
@@ -44,8 +46,16 @@ public sealed class UpdateSettings(
 
             public Language Language { get; set; } = language;
 
-            public Request Build() =>
-                new(AutoConnect, AutoMinimize, SetOnStartup, SetDesktopShortcut, TimerCount, Language);
+            public int AuditlogRetentionDays { get; set; } = auditlogRetentionDays;
+
+            public Request Build() => new(
+                AutoConnect,
+                AutoMinimize,
+                SetOnStartup,
+                SetDesktopShortcut,
+                TimerCount,
+                Language,
+                AuditlogRetentionDays);
         }
     }
 
@@ -74,7 +84,8 @@ public sealed class UpdateSettings(
             request.SetOnStartup,
             request.SetDesktopShortcut,
             request.TimerCount,
-            request.Language);
+            request.Language,
+            request.AuditlogRetentionDays);
 
         // The shortcut services throw IOException on failure (e.g. the startup folder
         // is locked down by policy). Handlers must never throw for expected failures —
@@ -100,6 +111,13 @@ public sealed class UpdateSettings(
         if (request.TimerCount <= 0)
         {
             return Result.Failure(SettingsErrors.TimerCountMustBePositive);
+        }
+
+        // Zero is legal and means "keep everything"; negative is not a shorter retention,
+        // it is a typo that would delete entries dated in the future.
+        if (request.AuditlogRetentionDays < 0)
+        {
+            return Result.Failure(SettingsErrors.RetentionMustNotBeNegative);
         }
 
         return Result.Success();

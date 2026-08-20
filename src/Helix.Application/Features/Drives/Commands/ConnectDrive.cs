@@ -1,5 +1,6 @@
-﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
+using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
@@ -8,8 +9,10 @@ namespace Helix.Application.Features.Drives.Commands;
 
 public sealed class ConnectDrive(
     IDriveRepository driveRepository,
+    IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
-    INasConnector nasConnector) : IHandler
+    INasConnector nasConnector,
+    IDateTimeProvider dateTimeProvider) : IHandler
 {
     public sealed record Request(Guid DriveId);
 
@@ -20,7 +23,9 @@ public sealed class ConnectDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        Drive? drive = await driveRepository.GetByIdAsNoTrackingAsync(request.DriveId, cancellationToken);
+        // Tracked, not AsNoTracking: a successful connect stamps the drive so the
+        // dashboard can say when it was last up.
+        Drive? drive = await driveRepository.GetByIdAsync(request.DriveId, cancellationToken);
         if (drive is null)
         {
             return Result.Failure(DriveErrors.NotFound(request.DriveId));
@@ -32,7 +37,15 @@ public sealed class ConnectDrive(
         }
 
         Result result = await nasConnector.ConnectAsync(drive, cancellationToken);
+        if (result.IsFailure)
+        {
+            return result;
+        }
 
-        return result;
+        drive.MarkConnected(dateTimeProvider.UtcNow);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 }

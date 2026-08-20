@@ -51,10 +51,24 @@ public static class Ensure
     }
 
     public static void MustBePositive(
-        int value, 
+        int value,
         [CallerArgumentExpression("value")] string? paramName = default)
     {
         if (!int.IsPositive(value))
+        {
+            throw new InvalidOperationException(paramName);
+        }
+    }
+
+    /// <summary>
+    /// Zero or above. For the settings where zero is a meaningful choice rather than an
+    /// unset value — a retention period of zero means "keep everything".
+    /// </summary>
+    public static void MustNotBeNegative(
+        int value,
+        [CallerArgumentExpression("value")] string? paramName = default)
+    {
+        if (int.IsNegative(value))
         {
             throw new InvalidOperationException(paramName);
         }

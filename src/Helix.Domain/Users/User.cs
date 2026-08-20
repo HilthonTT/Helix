@@ -36,7 +36,7 @@ public sealed class User : Entity, IAuditable
 
     public static User Create(string username, string passwordHash)
     {
-        var user = new User(Guid.NewGuid(), username, passwordHash);
+        var user = new User(Guid.CreateVersion7(), username, passwordHash);
 
         return user;
     }

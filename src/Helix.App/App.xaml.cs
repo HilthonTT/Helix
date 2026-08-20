@@ -1,6 +1,6 @@
 ﻿using Helix.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using AppBase = Microsoft.Maui.Controls.Application;
 
 namespace Helix.App;
@@ -30,18 +30,18 @@ public sealed partial class App : AppBase
     private static void RegisterGlobalExceptionHandlers()
     {
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
-            Debug.WriteLine($"Helix: unhandled domain exception: {e.ExceptionObject}");
+            AppLog.For<App>().LogCritical("Unhandled domain exception: {Exception}", e.ExceptionObject);
 
         TaskScheduler.UnobservedTaskException += (_, e) =>
         {
-            Debug.WriteLine($"Helix: unobserved task exception: {e.Exception}");
+            AppLog.For<App>().LogError(e.Exception, "Unobserved task exception.");
             e.SetObserved();
         };
 
 #if WINDOWS
         Microsoft.UI.Xaml.Application.Current.UnhandledException += (_, e) =>
         {
-            Debug.WriteLine($"Helix: unhandled WinUI exception: {e.Exception}");
+            AppLog.For<App>().LogError(e.Exception, "Unhandled WinUI exception; the app was kept alive.");
 
             // Keep the app alive; surface the failure without killing the process.
             e.Handled = true;
@@ -59,7 +59,7 @@ public sealed partial class App : AppBase
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Helix: failed to show crash alert: {ex}");
+                    AppLog.For<App>().LogError(ex, "Failed to show the crash alert.");
                 }
             });
         };

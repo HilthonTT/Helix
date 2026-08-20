@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Helix.Application.Abstractions.Connector;
 using Helix.Infrastructure.Connector;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Infrastructure.UnitTests.Connector;
@@ -16,7 +17,7 @@ public sealed class DriveMonitorTests
     {
         Connected(connected);
 
-        return new DriveMonitor(_nasConnector);
+        return new DriveMonitor(_nasConnector, NullLogger<DriveMonitor>.Instance);
     }
 
     private void Connected(params string[] letters)

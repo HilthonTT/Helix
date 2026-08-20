@@ -9,7 +9,7 @@ using Helix.App.Views.Settings;
 using Helix.App.Views.Users;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Features.Users.Commands;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.App;
 
@@ -144,7 +144,7 @@ public sealed partial class AppShell : Shell
         catch (Exception ex)
         {
             // A missing browser association is not worth an alert over.
-            Debug.WriteLine($"Helix: failed to open the repository: {ex}");
+            AppLog.For<AppShell>().LogWarning(ex, "Could not open the repository URL.");
         }
     }
 

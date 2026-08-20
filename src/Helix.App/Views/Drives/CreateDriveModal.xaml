@@ -37,10 +37,23 @@
 
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate Letter}" Style="{StaticResource FieldLabel}"/>
+                        <!--
+                        A picker rather than a free-text box: it can only offer letters
+                        that are actually free, which is the whole point of asking the
+                        operating system what it already has mounted.
+
+                        No Title: on Windows that maps to the ComboBox's Header, which
+                        renders above the control rather than inside it, and the Field
+                        border it sits in is a fixed 46px — so the picker itself was
+                        squeezed into whatever was left. The label above already names
+                        this field, the same way the language picker in Settings does.
+                        -->
                         <Border Style="{StaticResource Field}">
-                            <Entry Placeholder="{l10n:Translate AddNetworkDriveLetterPlaceholder}"
-                                   Text="{Binding Form.Letter}"
-                                   IsEnabled="{Binding IsNotBusy}"/>
+                            <Picker Margin="8,0"
+                                    BackgroundColor="Transparent"
+                                    ItemsSource="{Binding AvailableLetters}"
+                                    SelectedItem="{Binding Form.Letter}"
+                                    IsEnabled="{Binding IsNotBusy}"/>
                         </Border>
                     </VerticalStackLayout>
 
@@ -119,8 +132,13 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <!-- Footer -->
-            <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="12" Padding="24,16,24,24">
+            <!--
+            Footer. The middle column is Auto, not a third share: "Test connection" is
+            longer than the other two labels and three equal columns clipped it to
+            "Test connectio". Auto lets it take the width its own text needs, in whatever
+            language that text happens to be, and the other two split the remainder.
+            -->
+            <Grid Grid.Row="2" ColumnDefinitions="*,Auto,*" ColumnSpacing="12" Padding="24,16,24,24">
                 <Button Style="{StaticResource ButtonSecondary}"
                         HorizontalOptions="Fill"
                         Text="{l10n:Translate Cancel}"

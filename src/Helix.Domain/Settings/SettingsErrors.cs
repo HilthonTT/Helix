@@ -10,6 +10,10 @@ public static class SettingsErrors
         "Settings.TimerCountMustBePositive",
         "The timer count must a positive number.");
 
+    public static readonly Error RetentionMustNotBeNegative = Error.Problem(
+        "Settings.RetentionMustNotBeNegative",
+        "The audit log retention must be zero or more days. Zero keeps every entry.");
+
     public static Error ShortcutUpdateFailed(string message) => Error.Problem(
         "Settings.ShortcutUpdateFailed",
         $"Failed to update the startup/desktop shortcut: {message}");

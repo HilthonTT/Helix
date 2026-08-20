@@ -1,5 +1,5 @@
 using Helix.Application.Abstractions.Connector;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.Infrastructure.Connector;
 
@@ -16,6 +16,7 @@ namespace Helix.Infrastructure.Connector;
 internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 {
     private readonly INasConnector _nasConnector;
+    private readonly ILogger<DriveMonitor> _logger;
     private readonly Lock _gate = new();
 
     /// <summary>Watched drives, keyed by uppercase letter.</summary>
@@ -27,9 +28,10 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
     private CancellationTokenSource? _cancellation;
     private Task? _loop;
 
-    public DriveMonitor(INasConnector nasConnector)
+    public DriveMonitor(INasConnector nasConnector, ILogger<DriveMonitor> logger)
     {
         _nasConnector = nasConnector;
+        _logger = logger;
     }
 
     public event EventHandler<IReadOnlyList<DriveConnectivityChange>>? ConnectivityChanged;
@@ -116,7 +118,7 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         catch (Exception ex)
         {
             // The loop is fire-and-forget; never let a fault reach the finalizer thread.
-            Debug.WriteLine($"Helix: drive monitor loop faulted: {ex}");
+            _logger.LogError(ex, "The drive monitor loop faulted and has stopped polling.");
         }
     }
 

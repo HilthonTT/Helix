@@ -27,7 +27,8 @@ public sealed class ReconnectDrive(
     IAuditlogRepository auditlogRepository,
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
-    INasConnector nasConnector) : IHandler
+    INasConnector nasConnector,
+    IDateTimeProvider dateTimeProvider) : IHandler
 {
     /// <param name="DriveId">The drive observed dropping.</param>
     /// <param name="AttemptReconnect">False when auto-connect is off — record only.</param>
@@ -43,7 +44,8 @@ public sealed class ReconnectDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        Drive? drive = await driveRepository.GetByIdAsNoTrackingAsync(request.DriveId, cancellationToken);
+        // Tracked: a successful reconnect stamps the drive alongside its audit entry.
+        Drive? drive = await driveRepository.GetByIdAsync(request.DriveId, cancellationToken);
         if (drive is null)
         {
             return Result.Failure(DriveErrors.NotFound(request.DriveId));
@@ -54,11 +56,9 @@ public sealed class ReconnectDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        string label = $"Drive '{drive.Name}' ({drive.Letter}:)";
-
         if (request.RecordDrop)
         {
-            Log($"{label} lost its connection.");
+            Log(AuditAction.DriveDisconnected);
         }
 
         if (!request.AttemptReconnect)
@@ -72,11 +72,13 @@ public sealed class ReconnectDrive(
 
         if (result.IsSuccess)
         {
-            Log($"{label} was reconnected automatically.");
+            drive.MarkConnected(dateTimeProvider.UtcNow);
+
+            Log(AuditAction.DriveReconnected);
         }
         else if (request.RecordDrop)
         {
-            Log($"{label} could not be reconnected: {result.Error.Description}");
+            Log(AuditAction.DriveReconnectFailed, result.Error.Description);
         }
 
         // Saved whichever way it went: the audit entry is the point of this handler.
@@ -85,7 +87,13 @@ public sealed class ReconnectDrive(
 
         return result;
 
-        void Log(string message) =>
-            auditlogRepository.Insert(Auditlog.Create(loggedInUser.UserId, message));
+        void Log(AuditAction action, string? detail = null) =>
+            auditlogRepository.Insert(Auditlog.ForDrive(
+                loggedInUser.UserId,
+                action,
+                drive.Id,
+                drive.Name,
+                drive.Letter,
+                detail));
     }
 }

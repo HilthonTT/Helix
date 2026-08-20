@@ -2,10 +2,12 @@ using FluentAssertions;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Startup;
+using Helix.Application.Abstractions.Storage;
 using Helix.Infrastructure;
 using Helix.Infrastructure.Connector;
 using Helix.Infrastructure.Desktop;
 using Helix.Infrastructure.Startup;
+using Helix.Infrastructure.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.UnitTests;
@@ -24,7 +26,11 @@ public sealed class PlatformServicesTests
 {
     private static ServiceProvider BuildProvider()
     {
+        // Logging is normally brought in by the MAUI host, and several of these services
+        // take an ILogger<T>. Added here so the container under test is the same shape as
+        // the real one.
         return new ServiceCollection()
+            .AddLogging()
             .AddInfrastructure()
             .BuildServiceProvider();
     }
@@ -67,6 +73,14 @@ public sealed class PlatformServicesTests
         // second icon in the tray.
         provider.GetRequiredService<ITrayIcon>()
             .Should().BeSameAs(provider.GetRequiredService<ITrayIcon>());
+    }
+
+    [Fact]
+    public void AddInfrastructure_Should_BindTheWindowsStorageProbe()
+    {
+        using ServiceProvider provider = BuildProvider();
+
+        provider.GetRequiredService<IStorageProbe>().Should().BeOfType<WindowsStorageProbe>();
     }
 
     [Fact]

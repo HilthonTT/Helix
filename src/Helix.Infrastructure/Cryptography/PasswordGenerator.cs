@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 
 namespace Helix.Infrastructure.Cryptography;
@@ -18,7 +18,7 @@ public static class PasswordGenerator
     /// and persisting a fresh one if none exists. Safe to call multiple times; subsequent
     /// calls are no-ops. Must be awaited before <see cref="GetOrCreatePassword"/> is read.
     /// </summary>
-    public static async Task InitializeAsync(CancellationToken cancellationToken = default)
+    public static async Task InitializeAsync(ILogger? logger = null, CancellationToken cancellationToken = default)
     {
         if (_cachedPassword is not null)
         {
@@ -33,7 +33,7 @@ public static class PasswordGenerator
                 return;
             }
 
-            string? existing = await TryReadFromSecureStorageAsync().ConfigureAwait(false);
+            string? existing = await TryReadFromSecureStorageAsync(logger).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(existing))
             {
                 _cachedPassword = existing;
@@ -41,12 +41,12 @@ public static class PasswordGenerator
             }
 
             string fresh = GenerateRandomPassword(PasswordLength);
-            await TryWriteToSecureStorageAsync(fresh).ConfigureAwait(false);
+            await TryWriteToSecureStorageAsync(fresh, logger).ConfigureAwait(false);
 
             // If the key was not actually persisted, refuse to continue: creating the
             // database with an in-memory-only key means it can never be reopened after
             // a restart — silent, unrecoverable loss of all user data.
-            string? persisted = await TryReadFromSecureStorageAsync().ConfigureAwait(false);
+            string? persisted = await TryReadFromSecureStorageAsync(logger).ConfigureAwait(false);
             if (!string.Equals(persisted, fresh, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(
@@ -73,7 +73,7 @@ public static class PasswordGenerator
                 $"{nameof(PasswordGenerator)}.{nameof(InitializeAsync)} must be awaited before the database is opened.");
     }
 
-    private static async Task<string?> TryReadFromSecureStorageAsync()
+    private static async Task<string?> TryReadFromSecureStorageAsync(ILogger? logger)
     {
         try
         {
@@ -81,12 +81,12 @@ public static class PasswordGenerator
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Helix: SecureStorage read failed ({ex.GetType().Name}).");
+            logger?.LogError(ex, "Reading the database key from secure storage failed.");
             return null;
         }
     }
 
-    private static async Task TryWriteToSecureStorageAsync(string password)
+    private static async Task TryWriteToSecureStorageAsync(string password, ILogger? logger)
     {
         try
         {
@@ -94,7 +94,7 @@ public static class PasswordGenerator
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Helix: SecureStorage write failed ({ex.GetType().Name}).");
+            logger?.LogError(ex, "Writing the database key to secure storage failed.");
         }
     }
 

@@ -432,4 +432,46 @@
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix is still running in the notification area.</value>
   </data>
+  <data name="AuditDriveCreated" xml:space="preserve">
+    <value>{0} was added.</value>
+  </data>
+  <data name="AuditDriveUpdated" xml:space="preserve">
+    <value>{0} was changed.</value>
+  </data>
+  <data name="AuditDriveDeleted" xml:space="preserve">
+    <value>{0} was removed.</value>
+  </data>
+  <data name="AuditDriveDisconnected" xml:space="preserve">
+    <value>{0} lost its connection.</value>
+  </data>
+  <data name="AuditDriveReconnected" xml:space="preserve">
+    <value>{0} was reconnected automatically.</value>
+  </data>
+  <data name="AuditDriveReconnectFailed" xml:space="preserve">
+    <value>{0} could not be reconnected: {1}</value>
+  </data>
+  <data name="AuditlogRetention" xml:space="preserve">
+    <value>Audit log retention</value>
+  </data>
+  <data name="AuditlogRetentionDescription" xml:space="preserve">
+    <value>Days of history to keep. 0 keeps every entry.</value>
+  </data>
+  <data name="ExportDiagnostics" xml:space="preserve">
+    <value>Diagnostic logs</value>
+  </data>
+  <data name="ExportDiagnosticsDescription" xml:space="preserve">
+    <value>Save Helix's log files to a folder, to attach to a bug report.</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="DiagnosticsExported" xml:space="preserve">
+    <value>The logs were saved to:</value>
+  </data>
+  <data name="LastConnectedAt" xml:space="preserve">
+    <value>Last connected {0}</value>
+  </data>
+  <data name="NeverConnected" xml:space="preserve">
+    <value>Never connected</value>
+  </data>
 </root>

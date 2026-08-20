@@ -432,4 +432,46 @@
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix は通知領域で実行中です。</value>
   </data>
+  <data name="AuditDriveCreated" xml:space="preserve">
+    <value>{0} を追加しました。</value>
+  </data>
+  <data name="AuditDriveUpdated" xml:space="preserve">
+    <value>{0} を変更しました。</value>
+  </data>
+  <data name="AuditDriveDeleted" xml:space="preserve">
+    <value>{0} を削除しました。</value>
+  </data>
+  <data name="AuditDriveDisconnected" xml:space="preserve">
+    <value>{0} の接続が切断されました。</value>
+  </data>
+  <data name="AuditDriveReconnected" xml:space="preserve">
+    <value>{0} が自動的に再接続されました。</value>
+  </data>
+  <data name="AuditDriveReconnectFailed" xml:space="preserve">
+    <value>{0} を再接続できませんでした: {1}</value>
+  </data>
+  <data name="AuditlogRetention" xml:space="preserve">
+    <value>監査ログの保持期間</value>
+  </data>
+  <data name="AuditlogRetentionDescription" xml:space="preserve">
+    <value>保持する履歴の日数。0 はすべて保持します。</value>
+  </data>
+  <data name="ExportDiagnostics" xml:space="preserve">
+    <value>診断ログ</value>
+  </data>
+  <data name="ExportDiagnosticsDescription" xml:space="preserve">
+    <value>Helix のログファイルをフォルダーに保存し、バグ報告に添付できます。</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>エクスポート</value>
+  </data>
+  <data name="DiagnosticsExported" xml:space="preserve">
+    <value>ログの保存先:</value>
+  </data>
+  <data name="LastConnectedAt" xml:space="preserve">
+    <value>最終接続 {0}</value>
+  </data>
+  <data name="NeverConnected" xml:space="preserve">
+    <value>未接続</value>
+  </data>
 </root>

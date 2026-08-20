@@ -3,7 +3,9 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Users;
 using Helix.App.Models;
+using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Features.Diagnostics.Commands;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
 using Helix.Domain.Settings;
@@ -76,10 +78,44 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Send(new UpdateUsernameMessage(true, _loggedInUser.Username));
     }
 
-    [RelayCommand]  
+    [RelayCommand]
     private static void EditPassword()
     {
         WeakReferenceMessenger.Default.Send(new UpdatePasswordMessage(true));
+    }
+
+    /// <summary>
+    /// Writes the log files to a folder the user picks, so they have something concrete
+    /// to attach to a bug report.
+    /// </summary>
+    [RelayCommand]
+    private async Task ExportDiagnosticsAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            Result<string> result = await ScopedHandler.HandleAsync((ExportDiagnostics h) => h.Handle());
+            if (result.IsFailure)
+            {
+                // Cancelling the folder picker reports itself as a failure here, the same
+                // way the drive export does; both surface it as a plain message.
+                await DisplayErrorAsync(result.Error);
+                return;
+            }
+
+            // The path is the useful part — the user has to go and find the file.
+            await DisplaySuccessAsync($"{AppResources.DiagnosticsExported}{Environment.NewLine}{result.Value}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     public async Task LoadSettingsAsync(CancellationToken cancellationToken = default)

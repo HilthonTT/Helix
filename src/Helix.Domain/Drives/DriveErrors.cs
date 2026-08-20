@@ -18,6 +18,10 @@ public static class DriveErrors
         "Drive.LetterNotFound",
         $"The drive with the letter = '{letter}' was not found.");
 
+    public static Error LetterInUse(string letter) => Error.Conflict(
+        "Drive.LetterInUse",
+        $"The drive letter '{letter}' is already in use on this computer. Choose a free one.");
+
     public static readonly Error NotALetter = Error.Problem(
         "Drive.NotALetter",
         "The 'letter' you've provided is not a single character.");

@@ -8,6 +8,7 @@ using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
+using System.Collections.ObjectModel;
 
 namespace Helix.App.ViewModels.Drives;
 
@@ -18,10 +19,21 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
         // Partial properties cannot carry field initializers, so defaults are seeded here.
         Form = new();
         HideSecrets = true;
+        AvailableLetters = [];
+
+        RegisterMessages();
     }
 
     [ObservableProperty]
     public partial CreateDriveModel Form { get; set; }
+
+    /// <summary>
+    /// The letters the form is allowed to offer — free on this machine and not already
+    /// taken by one of this user's drives. Refreshed each time the modal opens, because
+    /// a USB stick plugged in since the last time changes the answer.
+    /// </summary>
+    [ObservableProperty]
+    public partial ObservableCollection<string> AvailableLetters { get; set; }
 
     /// <summary>
     /// The address, share user and password are masked by default so the form is safe
@@ -122,5 +134,36 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
     {
         Form = new();
         WeakReferenceMessenger.Default.Send(new CreateDriveMessage(false));
+    }
+
+    private void RegisterMessages()
+    {
+        WeakReferenceMessenger.Default.Register<CreateDriveMessage>(this, async (r, m) =>
+        {
+            if (!m.Value)
+            {
+                return;
+            }
+
+            await LoadAvailableLettersAsync();
+        });
+    }
+
+    private async Task LoadAvailableLettersAsync()
+    {
+        Result<List<string>> result = await ScopedHandler.HandleAsync(
+            (GetAvailableDriveLetters h) => h.Handle());
+        if (result.IsFailure)
+        {
+            return;
+        }
+
+        AvailableLetters = new(result.Value);
+
+        // Preselect the first free letter so the common case is one less decision.
+        if (string.IsNullOrEmpty(Form.Letter) && AvailableLetters.Count > 0)
+        {
+            Form.Letter = AvailableLetters[0];
+        }
     }
 }

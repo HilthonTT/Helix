@@ -6,7 +6,7 @@ using Helix.Application.Features.Drives.Queries;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
 using Helix.Domain.Drives;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.App.Services;
@@ -41,6 +41,7 @@ internal sealed class DriveWatchdog
 
     private readonly IDriveMonitor _monitor;
     private readonly INasConnector _nasConnector;
+    private readonly ILogger<DriveWatchdog> _logger;
     private readonly Lock _gate = new();
 
     /// <summary>Drives awaiting another reconnect attempt, keyed by drive id.</summary>
@@ -52,10 +53,11 @@ internal sealed class DriveWatchdog
     private CancellationTokenSource? _retryCancellation;
     private bool _subscribed;
 
-    public DriveWatchdog(IDriveMonitor monitor, INasConnector nasConnector)
+    public DriveWatchdog(IDriveMonitor monitor, INasConnector nasConnector, ILogger<DriveWatchdog> logger)
     {
         _monitor = monitor;
         _nasConnector = nasConnector;
+        _logger = logger;
     }
 
     /// <summary>Begins watching. Safe to call on every dashboard appearance.</summary>
@@ -154,7 +156,7 @@ internal sealed class DriveWatchdog
         catch (Exception ex)
         {
             // Fire-and-forget from an event handler: never let this reach the app.
-            Debug.WriteLine($"Helix: drive watchdog failed to handle a change: {ex}");
+            _logger.LogError(ex, "The drive watchdog failed to handle a connectivity change.");
         }
     }
 
@@ -187,7 +189,7 @@ internal sealed class DriveWatchdog
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Helix: drive watchdog retry loop faulted: {ex}");
+            _logger.LogError(ex, "The drive watchdog retry loop faulted; drives will no longer be retried this session.");
         }
     }
 
@@ -254,6 +256,8 @@ internal sealed class DriveWatchdog
 
             if (result.IsSuccess)
             {
+                _logger.LogInformation("Reconnected drive {Letter}: automatically.", letter);
+
                 Forget(driveId);
 
                 // Re-poll so the monitor's baseline and the UI both catch up now rather
@@ -264,6 +268,13 @@ internal sealed class DriveWatchdog
 
                 return;
             }
+
+            // The one line that makes an unattended failure diagnosable after the fact:
+            // the reason the share refused, and how many times it has now refused.
+            _logger.LogWarning(
+                "Could not reconnect drive {Letter}: — {Reason}",
+                letter,
+                result.Error.Description);
 
             ScheduleRetry(driveId, letter);
         }

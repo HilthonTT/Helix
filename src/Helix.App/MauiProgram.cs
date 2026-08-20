@@ -81,10 +81,14 @@ public static class MauiProgram
 
         MauiApp app = builder.Build();
 
+        ILogger startupLogger = app.Services
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("Helix.Startup");
+
         // Resolve the SQLCipher key from SecureStorage on a background thread before
         // any DbContext is constructed. Wrapped in Task.Run so no UI/MAUI sync context
         // is captured by the underlying SecureStorage call.
-        Task.Run(static () => PasswordGenerator.InitializeAsync()).GetAwaiter().GetResult();
+        Task.Run(() => PasswordGenerator.InitializeAsync(startupLogger)).GetAwaiter().GetResult();
 
 #if WINDOWS
         // The global hook backs the Ctrl+Enter shortcut on the sign-in pages. libuiohook
@@ -95,7 +99,7 @@ public static class MauiProgram
         // Single fire-and-forget launch of the global hook; observe faults so they
         // are not silently swallowed.
         hook.RunAsync().ContinueWith(
-            static t => Debug.WriteLine($"Helix: global hook faulted: {t.Exception}"),
+            t => startupLogger.LogError(t.Exception, "The global keyboard hook faulted; the Ctrl+Enter shortcut is dead for this session."),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default);

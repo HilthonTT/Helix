@@ -15,7 +15,7 @@
                    TextColor="{StaticResource Brand}"/>
 
             <Label Grid.Column="1"
-                   Text="{Binding Message}"
+                   Text="{Binding Description}"
                    VerticalOptions="Center"
                    LineBreakMode="TailTruncation"
                    MaxLines="1"/>

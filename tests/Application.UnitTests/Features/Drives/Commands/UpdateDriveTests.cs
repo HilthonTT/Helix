@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Core.Errors;
 using Helix.Application.Features.Drives.Commands;
@@ -33,6 +34,7 @@ public sealed class UpdateDriveTests
     private readonly IDriveRepository _driveRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly ILoggedInUser _loggedInUserMock;
+    private readonly INasConnector _nasConnectorMock;
 
     public UpdateDriveTests()
     {
@@ -40,7 +42,10 @@ public sealed class UpdateDriveTests
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _loggedInUserMock = Substitute.For<ILoggedInUser>();
 
-        _updateDrive = new(_driveRepositoryMock, _unitOfWorkMock, _loggedInUserMock);
+        _nasConnectorMock = Substitute.For<INasConnector>();
+        _nasConnectorMock.GetConnectedLetters().Returns([]);
+
+        _updateDrive = new(_driveRepositoryMock, _unitOfWorkMock, _loggedInUserMock, _nasConnectorMock);
     }
 
     [Fact]

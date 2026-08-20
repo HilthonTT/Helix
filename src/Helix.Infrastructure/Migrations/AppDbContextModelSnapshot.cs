@@ -23,11 +23,25 @@ namespace Helix.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Action")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Detail")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("EntityId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EntityLetter")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EntityName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ModifiedOnUtc")
@@ -59,6 +73,9 @@ namespace Helix.Infrastructure.Migrations
 
                     b.Property<string>("Host")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastConnectedOnUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Letter")
@@ -106,6 +123,9 @@ namespace Helix.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("AuditlogRetentionDays")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("AutoConnect")
                         .HasColumnType("INTEGER");

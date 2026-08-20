@@ -1,4 +1,5 @@
 ﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
@@ -9,9 +10,10 @@ using Helix.Domain.Users;
 namespace Helix.Application.Features.Drives.Commands;
 
 public sealed class CreateDrive(
-    IDriveRepository driveRepository, 
+    IDriveRepository driveRepository,
     IUnitOfWork unitOfWork,
-    ILoggedInUser loggedInUser) : IHandler
+    ILoggedInUser loggedInUser,
+    INasConnector nasConnector) : IHandler
 {
     /// <param name="AutoConnect">
     /// Whether the drive joins the unattended connect passes. Defaults to true so a
@@ -48,6 +50,14 @@ public sealed class CreateDrive(
         if (!await driveRepository.IsLetterUniqueAsync(request.Letter, loggedInUser.UserId, cancellationToken))
         {
             return Result.Failure<Drive>(DriveErrors.LetterNotUnique(request.Letter));
+        }
+
+        // The repository only knows about this user's drives. A letter taken by a USB
+        // stick, an optical drive or another account's mapping used to save fine and then
+        // fail at connect time with a Windows error that named no field.
+        if (nasConnector.GetConnectedLetters().Contains(request.Letter.ToUpperInvariant()))
+        {
+            return Result.Failure<Drive>(DriveErrors.LetterInUse(request.Letter));
         }
 
         var drive = Drive.Create(

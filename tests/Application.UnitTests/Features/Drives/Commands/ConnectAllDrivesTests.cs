@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
+using Helix.Application.Abstractions.Data;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Domain.Drives;
 using NSubstitute;
@@ -20,12 +21,16 @@ public class ConnectAllDrivesTests
     private readonly IDriveRepository _driveRepositoryMock;
     private readonly ILoggedInUser _loggedInUserMock;
     private readonly INasConnector _nasConnectorMock;
+    private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly IDateTimeProvider _dateTimeProviderMock;
 
     public ConnectAllDrivesTests()
     {
         _driveRepositoryMock = Substitute.For<IDriveRepository>();
         _loggedInUserMock = Substitute.For<ILoggedInUser>();
         _nasConnectorMock = Substitute.For<INasConnector>();
+        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+        _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
@@ -35,7 +40,12 @@ public class ConnectAllDrivesTests
         _nasConnectorMock.ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>())
             .Returns(Result.Success());
 
-        _connectAllDrives = new(_driveRepositoryMock, _loggedInUserMock, _nasConnectorMock);
+        _connectAllDrives = new(
+            _driveRepositoryMock,
+            _unitOfWorkMock,
+            _loggedInUserMock,
+            _nasConnectorMock,
+            _dateTimeProviderMock);
     }
 
     private static Drive Automatic { get; } =
@@ -45,7 +55,7 @@ public class ConnectAllDrivesTests
         Drive.Create(UserId, "Y", "nas.local", "Backup", "user", "password", autoConnect: false);
 
     private void HaveDrives(params Drive[] drives) =>
-        _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>())
+        _driveRepositoryMock.GetAsync(UserId, Arg.Any<CancellationToken>())
             .Returns([.. drives]);
 
     [Fact]

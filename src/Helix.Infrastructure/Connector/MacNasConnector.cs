@@ -2,7 +2,7 @@
 using Foundation;
 using Helix.Application.Abstractions.Connector;
 using Helix.Domain.Drives;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -37,6 +37,13 @@ internal sealed class MacNasConnector : INasConnector
     private static readonly string MountRoot = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
         "Helix Drives");
+
+    private readonly ILogger<MacNasConnector> _logger;
+
+    public MacNasConnector(ILogger<MacNasConnector> logger)
+    {
+        _logger = logger;
+    }
 
     public Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
         RunWithTimeoutAsync(
@@ -123,7 +130,7 @@ internal sealed class MacNasConnector : INasConnector
     /// and is torn down immediately, which keeps a test on a half-finished form from
     /// disturbing whatever is currently mounted at the drive's own letter.
     /// </remarks>
-    private static Result Test(Drive drive)
+    private Result Test(Drive drive)
     {
         string mountPoint = Path.Combine(MountRoot, $".test-{Guid.NewGuid():N}");
 
@@ -142,7 +149,7 @@ internal sealed class MacNasConnector : INasConnector
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Helix: could not remove the test mount point: {ex.Message}");
+                _logger.LogWarning(ex, "Could not remove the test mount point {MountPoint}.", mountPoint);
             }
         }
     }

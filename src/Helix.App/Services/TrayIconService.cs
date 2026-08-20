@@ -6,7 +6,7 @@ using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.App.Services;
 
@@ -35,6 +35,7 @@ internal sealed class TrayIconService
     private readonly ITrayIcon _trayIcon;
     private readonly INasConnector _nasConnector;
     private readonly IDriveMonitor _monitor;
+    private readonly ILogger<TrayIconService> _logger;
     private readonly Lock _gate = new();
 
     /// <summary>The drives the menu was last built from, for turning an id into a name.</summary>
@@ -44,11 +45,16 @@ internal sealed class TrayIconService
     private bool _running;
     private bool _announcedHiding;
 
-    public TrayIconService(ITrayIcon trayIcon, INasConnector nasConnector, IDriveMonitor monitor)
+    public TrayIconService(
+        ITrayIcon trayIcon,
+        INasConnector nasConnector,
+        IDriveMonitor monitor,
+        ILogger<TrayIconService> logger)
     {
         _trayIcon = trayIcon;
         _nasConnector = nasConnector;
         _monitor = monitor;
+        _logger = logger;
     }
 
     /// <summary>Whether the running platform has a tray at all.</summary>
@@ -246,7 +252,7 @@ internal sealed class TrayIconService
         {
             // Raised from a tray thread with nowhere to report to — a dialog behind a
             // hidden window would be worse than the failure itself.
-            Debug.WriteLine($"Helix: the tray icon failed to handle '{id}': {ex}");
+            _logger.LogError(ex, "The tray icon failed to handle the menu selection {MenuItemId}.", id);
         }
     }
 

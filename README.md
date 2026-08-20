@@ -79,7 +79,13 @@ and edit dialogs. Nothing is mounted and no drive letter is claimed, so a test i
 run against a half-finished form.
 
 **Connection dashboard.** See which drives are connected, total storage usage, and a live
-status chart, all on one screen.
+status chart, all on one screen. Each drive row shows when it was last reachable, so an
+offline drive tells you whether it dropped minutes or months ago. The storage total counts
+each NAS volume once, however many of its shares you have mapped.
+
+**Free drive letters only.** The letter picker offers what is actually available, asking
+Windows as well as Helix — so a letter already taken by a USB stick is never offered and
+then rejected at connect time.
 
 **Runs from the notification area.** A tray icon shows how many drives are up, connects or
 disconnects any of them from its menu, and raises a notification when one drops or comes
@@ -96,7 +102,13 @@ brings it back without Helix running. Windows only; macOS has no equivalent.
 `.helixvault` file (AES-256-GCM) and restore them on any machine.
 
 **Audit log.** Every drive change is recorded automatically, so you can see what happened
-and when.
+and when — including drops and automatic reconnects that happened while the window was
+away. Entries are shown in your own language, and can be trimmed to a retention period you
+choose in Settings (0 keeps everything).
+
+**Diagnostic logs.** Helix keeps a rolling log of what it did unattended, in your app data
+folder for 14 days. Settings has an **Export** button that saves them as a zip to attach to
+a bug report.
 
 **Multi-user.** Each account sees only its own drives, settings, and audit entries.
 

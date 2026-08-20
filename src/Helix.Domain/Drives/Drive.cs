@@ -1,4 +1,4 @@
-namespace Helix.Domain.Drives;
+﻿namespace Helix.Domain.Drives;
 
 public sealed class Drive : Entity, IAuditable
 {
@@ -95,9 +95,31 @@ public sealed class Drive : Entity, IAuditable
     /// </summary>
     public bool Persistent { get; private set; }
 
+    /// <summary>
+    /// When this drive last connected successfully, or null if it never has.
+    /// </summary>
+    /// <remarks>
+    /// The dashboard could previously only say whether a drive was up right now, which
+    /// answers nothing useful about one that is down: "offline" reads very differently
+    /// depending on whether it was last seen ten minutes or three months ago.
+    /// </remarks>
+    public DateTime? LastConnectedOnUtc { get; private set; }
+
     public DateTime CreatedOnUtc { get; set; }
 
     public DateTime? ModifiedOnUtc { get; set; }
+
+    /// <summary>Stamps a successful connection.</summary>
+    /// <remarks>
+    /// Deliberately the only mutation that is not part of <see cref="Update"/>: it
+    /// records something that happened rather than something the user chose, and the
+    /// audit interceptor skips a save that changes nothing else — otherwise every
+    /// connect would file a "drive was changed" entry.
+    /// </remarks>
+    public void MarkConnected(DateTime utcNow)
+    {
+        LastConnectedOnUtc = utcNow;
+    }
 
     public static Drive Create(
         Guid userId,
@@ -110,7 +132,7 @@ public sealed class Drive : Entity, IAuditable
         bool persistent = false)
     {
         var drive = new Drive(
-            Guid.NewGuid(),
+            Guid.CreateVersion7(),
             userId,
             letter.ToUpperInvariant(),
             host,

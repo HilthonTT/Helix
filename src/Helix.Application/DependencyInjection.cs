@@ -1,4 +1,6 @@
-﻿using Helix.Application.Features.Auditlogs.Queries;
+﻿using Helix.Application.Features.Auditlogs.Commands;
+using Helix.Application.Features.Auditlogs.Queries;
+using Helix.Application.Features.Diagnostics.Commands;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Application.Features.Settings.Commands;
@@ -13,6 +15,7 @@ public static class DependencyInjection
     {
         services
             .AddAuditlogsHandlers()
+            .AddDiagnosticsHandlers()
             .AddDrivesHandlers()
             .AddSettingsHandlers()
             .AddUsersHandlers();
@@ -23,7 +26,15 @@ public static class DependencyInjection
     private static IServiceCollection AddAuditlogsHandlers(this IServiceCollection services)
     {
         services.AddScoped<GetAuditlogs>();
+        services.AddScoped<PruneAuditlogs>();
         services.AddScoped<SearchAuditlogs>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDiagnosticsHandlers(this IServiceCollection services)
+    {
+        services.AddScoped<ExportDiagnostics>();
 
         return services;
     }
@@ -35,6 +46,7 @@ public static class DependencyInjection
 
         services.AddScoped<CreateDrive>();
         services.AddScoped<DeleteDrive>();
+        services.AddScoped<GetAvailableDriveLetters>();
         services.AddScoped<GetDriveById>();
         services.AddScoped<GetDrives>();
         services.AddScoped<SearchDrives>();

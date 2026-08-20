@@ -432,4 +432,46 @@
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix draait nog steeds in het systeemvak.</value>
   </data>
+  <data name="AuditDriveCreated" xml:space="preserve">
+    <value>{0} is toegevoegd.</value>
+  </data>
+  <data name="AuditDriveUpdated" xml:space="preserve">
+    <value>{0} is gewijzigd.</value>
+  </data>
+  <data name="AuditDriveDeleted" xml:space="preserve">
+    <value>{0} is verwijderd.</value>
+  </data>
+  <data name="AuditDriveDisconnected" xml:space="preserve">
+    <value>{0} heeft de verbinding verloren.</value>
+  </data>
+  <data name="AuditDriveReconnected" xml:space="preserve">
+    <value>{0} is automatisch opnieuw verbonden.</value>
+  </data>
+  <data name="AuditDriveReconnectFailed" xml:space="preserve">
+    <value>{0} kon niet opnieuw worden verbonden: {1}</value>
+  </data>
+  <data name="AuditlogRetention" xml:space="preserve">
+    <value>Bewaartermijn logboek</value>
+  </data>
+  <data name="AuditlogRetentionDescription" xml:space="preserve">
+    <value>Aantal dagen geschiedenis om te bewaren. 0 bewaart alles.</value>
+  </data>
+  <data name="ExportDiagnostics" xml:space="preserve">
+    <value>Diagnostische logboeken</value>
+  </data>
+  <data name="ExportDiagnosticsDescription" xml:space="preserve">
+    <value>Sla de logbestanden van Helix op in een map, om bij een bugmelding te voegen.</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Exporteren</value>
+  </data>
+  <data name="DiagnosticsExported" xml:space="preserve">
+    <value>De logboeken zijn opgeslagen in:</value>
+  </data>
+  <data name="LastConnectedAt" xml:space="preserve">
+    <value>Laatst verbonden {0}</value>
+  </data>
+  <data name="NeverConnected" xml:space="preserve">
+    <value>Nooit verbonden</value>
+  </data>
 </root>

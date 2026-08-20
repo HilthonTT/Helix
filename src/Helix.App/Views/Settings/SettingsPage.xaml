@@ -213,6 +213,35 @@
                                    IsEnabled="{Binding Settings.IsNotBusy}"/>
                         </Border>
                     </Grid>
+
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{l10n:Translate AuditlogRetention}" Style="{StaticResource Title3}"/>
+                            <Label Text="{l10n:Translate AuditlogRetentionDescription}" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
+                            <Entry Placeholder="90"
+                                   Keyboard="Numeric"
+                                   Text="{Binding Settings.AuditlogRetentionDays}"
+                                   IsEnabled="{Binding Settings.IsNotBusy}"/>
+                        </Border>
+                    </Grid>
+
+                    <BoxView Style="{StaticResource Divider}"/>
+
+                    <Grid Style="{StaticResource PreferenceRow}">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{l10n:Translate ExportDiagnostics}" Style="{StaticResource Title3}"/>
+                            <Label Text="{l10n:Translate ExportDiagnosticsDescription}" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1"
+                                Style="{StaticResource ButtonSecondary}"
+                                WidthRequest="200"
+                                VerticalOptions="Center"
+                                Text="{l10n:Translate Export}"
+                                Command="{Binding ExportDiagnosticsCommand}"
+                                IsEnabled="{Binding IsNotBusy}"/>
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 

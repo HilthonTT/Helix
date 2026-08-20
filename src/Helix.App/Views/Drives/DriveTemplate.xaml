@@ -23,12 +23,22 @@
                        HorizontalTextAlignment="Center"/>
             </Border>
 
-            <Label Grid.Column="1"
-                   Text="{Binding Name}"
-                   Style="{StaticResource BodyStrong}"
-                   VerticalOptions="Center"
-                   LineBreakMode="TailTruncation"
-                   MaxLines="1"/>
+            <!--
+            Name over last-connected: "offline" alone says nothing about whether the
+            share dropped a minute ago or has never been reachable.
+            -->
+            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                <Label Text="{Binding Name}"
+                       Style="{StaticResource BodyStrong}"
+                       LineBreakMode="TailTruncation"
+                       MaxLines="1"/>
+
+                <Label Text="{Binding LastConnected}"
+                       Style="{StaticResource Caption}"
+                       FontSize="11"
+                       LineBreakMode="TailTruncation"
+                       MaxLines="1"/>
+            </VerticalStackLayout>
 
             <Label Grid.Column="2"
                    Text="{Binding StorageUsage}"

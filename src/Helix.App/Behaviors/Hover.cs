@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace Helix.App.Behaviors;
@@ -250,7 +251,7 @@ public static class Hover
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Helix: could not set hand cursor: {ex.Message}");
+            AppLog.For(typeof(Hover)).LogDebug(ex, "Could not set the hand cursor.");
         }
     }
 #else

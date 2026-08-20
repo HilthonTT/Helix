@@ -35,10 +35,14 @@
 
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate Letter}" Style="{StaticResource FieldLabel}"/>
+                        <!-- Free letters plus this drive's own; see the create modal,
+                             including why this carries no Title. -->
                         <Border Style="{StaticResource Field}">
-                            <Entry Placeholder="{l10n:Translate AddNetworkDriveLetterPlaceholder}"
-                                   Text="{Binding Drive.Letter}"
-                                   IsEnabled="{Binding IsNotBusy}"/>
+                            <Picker Margin="8,0"
+                                    BackgroundColor="Transparent"
+                                    ItemsSource="{Binding AvailableLetters}"
+                                    SelectedItem="{Binding Drive.Letter}"
+                                    IsEnabled="{Binding IsNotBusy}"/>
                         </Border>
                     </VerticalStackLayout>
 
@@ -117,7 +121,8 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="12" Padding="24,16,24,24">
+            <!-- Auto middle column so "Test connection" is not clipped; see the create modal. -->
+            <Grid Grid.Row="2" ColumnDefinitions="*,Auto,*" ColumnSpacing="12" Padding="24,16,24,24">
                 <Button Style="{StaticResource ButtonSecondary}"
                         HorizontalOptions="Fill"
                         Text="{l10n:Translate Cancel}"

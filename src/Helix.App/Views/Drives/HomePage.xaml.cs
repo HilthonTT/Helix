@@ -3,10 +3,12 @@ using Helix.App.Messaging.Drives;
 using Helix.App.Services;
 using Helix.App.ViewModels.Drives;
 using Helix.Application.Abstractions.Connector;
+using Helix.Application.Features.Auditlogs.Commands;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
 using Microcharts;
+using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui;
 
 namespace Helix.App.Views.Drives;
@@ -19,6 +21,7 @@ public sealed partial class HomePage : ContentPage
     private const string SearchDrives = "search-drives";
 
     private static bool _isFirstView = true;
+    private static bool _prunedAuditlogs;
     private bool _isInitializing;
 
     private readonly INasConnector _nasConnector;
@@ -75,6 +78,8 @@ public sealed partial class HomePage : ContentPage
 
             // Same reason — the tray menu lists the signed-in user's drives.
             await _tray.StartAsync();
+
+            await PruneAuditlogsAsync();
         }
         catch (Exception ex)
         {
@@ -94,6 +99,40 @@ public sealed partial class HomePage : ContentPage
     internal static void ResetSessionState()
     {
         _isFirstView = true;
+        _prunedAuditlogs = false;
+    }
+
+    /// <summary>
+    /// Trims the audit log to the user's retention setting, once per sign-in.
+    /// </summary>
+    /// <remarks>
+    /// Here rather than on a timer because the log is only ever read from the audit page,
+    /// so trimming it more often than a person can look at it buys nothing. Failures are
+    /// logged and swallowed: housekeeping must never keep the dashboard off screen.
+    /// </remarks>
+    private static async Task PruneAuditlogsAsync()
+    {
+        if (_prunedAuditlogs)
+        {
+            return;
+        }
+
+        _prunedAuditlogs = true;
+
+        Result<int> result = await ScopedHandler.HandleAsync((PruneAuditlogs h) => h.Handle());
+        if (result.IsFailure)
+        {
+            AppLog.For<HomePage>().LogWarning(
+                "Could not prune the audit log: {Reason}",
+                result.Error.Description);
+
+            return;
+        }
+
+        if (result.Value > 0)
+        {
+            AppLog.For<HomePage>().LogInformation("Pruned {Count} expired audit entries.", result.Value);
+        }
     }
 
     private async Task HandleConnectDrivesOnStartupAsync()

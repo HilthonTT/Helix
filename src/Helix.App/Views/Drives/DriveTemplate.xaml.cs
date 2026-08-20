@@ -4,6 +4,7 @@ using Helix.App.Models;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.App.Views.Drives;
 
@@ -95,6 +96,13 @@ public sealed partial class DriveTemplate : ContentView
                 return;
             }
 
+            // Mirrors what ConnectDrive just persisted, so the row's "last connected"
+            // line is right without refetching the drive to read it back.
+            if (request is ConnectDrive.Request)
+            {
+                drive.LastConnectedOnUtc = DateTime.UtcNow;
+            }
+
             RefreshStatus(drive);
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
@@ -134,7 +142,7 @@ public sealed partial class DriveTemplate : ContentView
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Helix: failed to show error alert: {ex}");
+                AppLog.For<DriveTemplate>().LogWarning(ex, "Failed to show the error alert.");
             }
         });
     }

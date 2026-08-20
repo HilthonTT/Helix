@@ -8,6 +8,7 @@ using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
+using System.Collections.ObjectModel;
 
 namespace Helix.App.ViewModels.Drives;
 
@@ -18,12 +19,20 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
         // Partial properties cannot carry field initializers, so defaults are seeded here.
         Drive = new();
         HideSecrets = true;
+        AvailableLetters = [];
 
         RegisterMessages();
     }
 
     [ObservableProperty]
     public partial UpdateDriveModel Drive { get; set; }
+
+    /// <summary>
+    /// Free letters, plus this drive's own — see
+    /// <see cref="GetAvailableDriveLetters.Request.ExcludeDriveId"/>.
+    /// </summary>
+    [ObservableProperty]
+    public partial ObservableCollection<string> AvailableLetters { get; set; }
 
     /// <summary>
     /// Masks the address, share user and password by default; one reveal toggle covers
@@ -122,6 +131,20 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Send(new UpdateDriveMessage(false, Guid.Empty));
     }
 
+    private async Task LoadAvailableLettersAsync(Guid driveId)
+    {
+        var request = new GetAvailableDriveLetters.Request(driveId);
+
+        Result<List<string>> result = await ScopedHandler.HandleAsync(
+            (GetAvailableDriveLetters h) => h.Handle(request));
+        if (result.IsFailure)
+        {
+            return;
+        }
+
+        AvailableLetters = new(result.Value);
+    }
+
     private void RegisterMessages()
     {
         WeakReferenceMessenger.Default.Register<UpdateDriveMessage>(this, async (r, m) =>
@@ -139,6 +162,12 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 Close();
                 return;
             }
+
+            // Letters first, then the drive. The picker's SelectedItem is bound two-way,
+            // so assigning a drive whose letter is not yet in ItemsSource makes the
+            // control fall back to "nothing selected" and write that emptiness straight
+            // back into Drive.Letter — the modal opened blank and refused to save.
+            await LoadAvailableLettersAsync(m.DriveId);
 
             Drive = new UpdateDriveModel(result.Value);
         });

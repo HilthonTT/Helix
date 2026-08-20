@@ -77,11 +77,12 @@ Entities, domain errors and repository **interfaces**, one folder per aggregate 
 ### Helix.Application
 
 ```
-Abstractions/   Authentication, Connector, Cryptography, Data, Desktop,
-                Handlers, Security, Startup, Time — interfaces only
+Abstractions/   Authentication, Connector, Cryptography, Data, Desktop, Diagnostics,
+                Handlers, Security, Startup, Storage, Time — interfaces only
 Core/           Errors, Sorting, Validation — cross-feature helpers
 Features/       one folder per feature, split into Commands / Queries
-                Auditlogs/Queries
+                Auditlogs/{Commands,Queries}
+                Diagnostics/Commands
                 Drives/{Commands,Queries,Contracts}
                 Settings/{Commands,Queries}
                 Users/Commands
@@ -113,12 +114,41 @@ public sealed class CreateDrive(IDriveRepository repo, IUnitOfWork uow, ...) : I
 
 Outcomes flow through `Result` / `Result<T>` — handlers never throw for expected failures. Errors come from static error classes (e.g. `DriveErrors`, `AuthenticationErrors`, `ValidationErrors`).
 
+### Logging
+
+Use `ILogger<T>` — **never `Debug.WriteLine`**, which no released build writes anywhere and
+which left every unattended reconnect failure unreportable. A `FileLoggerProvider` in
+`Infrastructure/Diagnostics` writes a dated file under `%LOCALAPPDATA%/.../logs`, kept for
+14 days, and the settings page exports them as a zip through `IDiagnosticsLog`.
+
+Anything the container constructs takes `ILogger<T>` as a constructor dependency. Pages,
+viewmodels and static helpers are built by MAUI rather than DI and use `AppLog.For<T>()`
+instead — that is the only reason it exists, so do not reach for it from a type that could
+have taken the dependency properly.
+
+Release builds log Information and above; Debug builds also log Debug. Keep credentials,
+hosts and share names out of log messages beyond what a drive letter already reveals — the
+user is expected to send these files to a stranger.
+
+### The audit log
+
+`Auditlog` stores an `AuditAction` plus the drive's id, name and letter **as they were at
+the time** — never a composed sentence. The sentence is built in `AuditlogDisplay` from
+localized format strings, so the page reads in the user's language and a later rename
+cannot rewrite history. `AuditAction.Legacy` marks rows written before this and renders
+their stored `Message` verbatim.
+
+`InsertAuditLogsInterceptor` deliberately skips a save whose only modified properties are
+`LastConnectedOnUtc` and `ModifiedOnUtc`: connecting a drive stamps it, and without that
+filter every connect would file a "the drive was changed" entry.
+
 ### Helix.Infrastructure
 
 Concrete implementations, one folder per abstraction group:
 
 ```
-Authentication/  Connector/  Cryptography/  Desktop/  Platform/  Startup/  Time/
+Authentication/  Connector/  Cryptography/  Desktop/  Diagnostics/  Platform/
+Startup/  Storage/  Time/
 Database/
     AppDbContext.cs, AppDbContextFactory.cs
     Configurations/   EF entity configurations
@@ -132,7 +162,7 @@ DependencyInjection.cs
 
 #### Platform seams
 
-Exactly four abstractions have a genuinely per-OS implementation, and they are bound in
+Exactly five abstractions have a genuinely per-OS implementation, and they are bound in
 `AddPlatformServices()` behind `#if WINDOWS` / `#elif MACCATALYST` (with an `#else` that
 throws, so a new head fails at composition rather than at first use):
 
@@ -142,6 +172,33 @@ throws, so a new head fails at composition rather than at first use):
 | `IStartupService` | `WindowsStartupService` — `.lnk` in the Startup folder | `MacStartupService` — LaunchAgent plist |
 | `IDesktopService` | `WindowsDesktopService` — `.lnk` on the Desktop | `MacDesktopService` — symlink to the `.app` |
 | `ITrayIcon` | `WindowsTrayIcon` — `Shell_NotifyIcon`, hidden window on its own message loop | `UnsupportedTrayIcon` — no-op, `IsSupported` is false |
+| `IStorageProbe` | `WindowsStorageProbe` — mounts are `Z:\` | `MacStorageProbe` — mounts are `~/Helix Drives/Z` |
+
+Both storage probes derive from `StorageProbe`, which holds the part that matters: **one
+reading per volume, not per drive**. Several mapped drives are usually several shares of
+one NAS pool, and each reports that pool's entire size, so adding the letters up read a
+43.2 TB QNAP mapped thirteen times as 562 TB.
+
+Two mounts are treated as one volume when they report the **same total size, to the byte**.
+That is a property of the filesystem: it is identical across every share of a pool and it
+does not move while the probe runs. Three other ideas were tried against that real
+thirteen-share NAS and all failed — do not reintroduce them:
+
+- **The volume serial number** (`GetVolumeInformation`). Looks precise, is not, for SMB:
+  Samba and most NAS firmware derive it per share, so thirteen shares gave thirteen
+  serials and nothing merged. Volume labels are per-share for the same reason.
+- **The free byte count**, as part of the key. Free space drifts continuously on a NAS
+  anything is writing to — across those thirteen shares it spanned ~12 MB with no two
+  readings equal — so requiring it to match merged nothing either.
+- **The host**, as part of the key. It splits one NAS added twice under two spellings (by
+  IP and by name), and that fails in the damaging direction: over-counting.
+
+The accepted cost is that two volumes of byte-identical size are counted once. Real volume
+sizes are not round numbers, so that means two identically built volumes, and it
+understates rather than multiplies. The smallest free reading in a group is the one kept,
+so the figure does not flicker as parallel probes finish in a different order.
+
+Do not "simplify" the dashboard total back into a sum over drive letters.
 
 Both connectors take the NAS password as a separate credential argument rather than
 putting it in a command line — do not "simplify" either into a `net.exe` or
@@ -174,7 +231,7 @@ Standard MAUI layout, feature-foldered inside `Views/` and `ViewModels/`:
 App.xaml, AppShell.xaml, MauiProgram.cs, GlobalUsings.cs
 Behaviors/     attached behaviors used from XAML
 Common/        ScopedHandler, PageNames, PresentationAssembly, StorageUsageHelper, WindowSizing,
-               MainWindow, DrivePlatform
+               MainWindow, DrivePlatform, AppLog
 Controls/      custom controls and layouts (NavItem, ChartView, HorizontalWrapLayout)
 Converters/    IValueConverter implementations
 Extensions/    DependencyInjection (AddPresensation)

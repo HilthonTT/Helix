@@ -4,7 +4,9 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
 using Helix.App.Messaging.Navigation;
 using Helix.App.Models;
+using Microsoft.Extensions.Logging;
 using Helix.Application.Abstractions.Connector;
+using Helix.Application.Abstractions.Storage;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Application.Features.Settings.Commands;
@@ -18,10 +20,12 @@ namespace Helix.App.ViewModels.Drives;
 internal sealed partial class HomeViewModel : BaseViewModel
 {
     private readonly INasConnector _nasConnector;
+    private readonly IStorageProbe _storageProbe;
 
     public HomeViewModel()
     {
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
+        _storageProbe = App.ServiceProvider.GetRequiredService<IStorageProbe>();
 
         // Partial properties cannot carry field initializers, so defaults are seeded here.
         Drives = [];
@@ -250,21 +254,34 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Helix: failed to refresh dashboard totals: {ex}");
+            AppLog.For<HomeViewModel>().LogError(ex, "Failed to refresh the dashboard totals.");
         }
     }
 
-    private Task<string> ValidateTotalStorageAsync()
+    /// <summary>
+    /// Capacity across every connected drive, counting each underlying volume once.
+    /// </summary>
+    /// <remarks>
+    /// The tile has always been labelled total storage but used to read a single drive,
+    /// so a second NAS simply did not appear in the figure. Summing the letters instead
+    /// is just as wrong the other way: mapped drives are usually several shares of one
+    /// NAS, each reporting that one pool's full size, so a 43 TB server mapped three
+    /// times read as 129 TB. <see cref="IStorageProbe"/> resolves what each mount is
+    /// actually on and returns one reading per volume; this only has to add them up.
+    /// </remarks>
+    private async Task<string> ValidateTotalStorageAsync()
     {
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
-        DriveDisplay? connectedDrive = Drives.FirstOrDefault(d => connectedLetters.Contains(d.Letter));
 
-        if (connectedDrive is null)
-        {
-            return Task.FromResult("0 TB");
-        }
+        string[] connected = [.. Drives
+            .Where(d => connectedLetters.Contains(d.Letter))
+            .Select(d => d.Letter)];
 
-        return StorageUsageHelper.GetCompactUsageAsync(connectedDrive.Letter);
+        IReadOnlyList<VolumeUsage> volumes = await _storageProbe.ProbeAsync(connected);
+
+        return StorageUsageHelper.FormatCombined(
+            volumes.Sum(volume => volume.UsedBytes),
+            volumes.Sum(volume => volume.TotalBytes));
     }
 
     private string ValidateTotalConnected()
