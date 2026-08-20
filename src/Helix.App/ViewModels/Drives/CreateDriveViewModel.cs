@@ -8,6 +8,7 @@ using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
+using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 
 namespace Helix.App.ViewModels.Drives;
@@ -138,6 +139,9 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 
     private void RegisterMessages()
     {
+        // The body is guarded because the messenger's handler returns void, making this an
+        // async void: anything thrown past the first await lands on the thread pool with
+        // nothing to observe it and takes the process down.
         WeakReferenceMessenger.Default.Register<CreateDriveMessage>(this, async (r, m) =>
         {
             if (!m.Value)
@@ -145,7 +149,15 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 return;
             }
 
-            await LoadAvailableLettersAsync();
+            try
+            {
+                await LoadAvailableLettersAsync();
+            }
+            catch (Exception ex)
+            {
+                // The modal still opens; it just opens without a preselected letter.
+                AppLog.For<CreateDriveViewModel>().LogError(ex, "Could not load the available drive letters.");
+            }
         });
     }
 
@@ -160,10 +172,14 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 
         AvailableLetters = new(result.Value);
 
-        // Preselect the first free letter so the common case is one less decision.
+        // Preselect the *highest* free letter, not the lowest, so the common case is one
+        // less decision. Lowest-first meant the form opened on A: — the legacy floppy
+        // slot, which is free on every modern machine — and a user who filled in the rest
+        // and pressed Save got their NAS mapped there without ever touching the field.
+        // Highest-first is also what the Windows "Map network drive" dialog does.
         if (string.IsNullOrEmpty(Form.Letter) && AvailableLetters.Count > 0)
         {
-            Form.Letter = AvailableLetters[0];
+            Form.Letter = AvailableLetters[^1];
         }
     }
 }

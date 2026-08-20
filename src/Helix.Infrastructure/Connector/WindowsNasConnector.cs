@@ -105,12 +105,16 @@ internal sealed class WindowsNasConnector : INasConnector
     {
         string local = $"{drive.Letter.ToUpperInvariant()}:";
 
-        // A persistent mapping has to be cancelled with the same flag it was made with.
-        // Without it only the live connection drops and Windows re-creates the mapping at
-        // the next sign-in, so the drive the user just disconnected is back tomorrow.
-        uint flags = drive.Persistent ? CONNECT_UPDATE_PROFILE : 0;
-
-        int code = WNetCancelConnection2W(local, flags, fForce: true);
+        // Always CONNECT_UPDATE_PROFILE, never conditional on drive.Persistent. A
+        // persistent mapping has to be cancelled with the same flag it was made with, or
+        // only the live connection drops and Windows re-creates it at the next sign-in —
+        // but the flag on the drive describes what it is *now*, not what was written to
+        // the profile. Turn the setting off and disconnect, and a conditional flag would
+        // leave the profile entry behind to resurrect the drive tomorrow.
+        //
+        // Passing it unconditionally is safe: for a drive that was never persistent there
+        // is no profile entry, and removing one that does not exist does nothing.
+        int code = WNetCancelConnection2W(local, CONNECT_UPDATE_PROFILE, fForce: true);
 
         return code == NO_ERROR
             ? Result.Success()

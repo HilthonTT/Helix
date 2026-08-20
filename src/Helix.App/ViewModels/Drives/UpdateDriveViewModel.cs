@@ -8,6 +8,7 @@ using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
+using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 
 namespace Helix.App.ViewModels.Drives;
@@ -147,6 +148,9 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
 
     private void RegisterMessages()
     {
+        // The body is guarded because the messenger's handler returns void, making this an
+        // async void: anything thrown past the first await lands on the thread pool with
+        // nothing to observe it and takes the process down.
         WeakReferenceMessenger.Default.Register<UpdateDriveMessage>(this, async (r, m) =>
         {
             if (m.DriveId == Guid.Empty)
@@ -154,22 +158,32 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 return;
             }
 
-            var request = new GetDriveById.Request(m.DriveId);
-
-            Result<Drive> result = await ScopedHandler.HandleAsync((GetDriveById h) => h.Handle(request));
-            if (result.IsFailure)
+            try
             {
-                Close();
-                return;
+                var request = new GetDriveById.Request(m.DriveId);
+
+                Result<Drive> result = await ScopedHandler.HandleAsync((GetDriveById h) => h.Handle(request));
+                if (result.IsFailure)
+                {
+                    Close();
+                    return;
+                }
+
+                // Letters first, then the drive. The picker's SelectedItem is bound
+                // two-way, so assigning a drive whose letter is not yet in ItemsSource
+                // makes the control fall back to "nothing selected" and write that
+                // emptiness straight back into Drive.Letter — the modal opened blank and
+                // refused to save.
+                await LoadAvailableLettersAsync(m.DriveId);
+
+                Drive = new UpdateDriveModel(result.Value);
             }
+            catch (Exception ex)
+            {
+                AppLog.For<UpdateDriveViewModel>().LogError(ex, "Could not open the drive for editing.");
 
-            // Letters first, then the drive. The picker's SelectedItem is bound two-way,
-            // so assigning a drive whose letter is not yet in ItemsSource makes the
-            // control fall back to "nothing selected" and write that emptiness straight
-            // back into Drive.Letter — the modal opened blank and refused to save.
-            await LoadAvailableLettersAsync(m.DriveId);
-
-            Drive = new UpdateDriveModel(result.Value);
+                Close();
+            }
         });
     }
 }

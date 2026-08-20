@@ -85,8 +85,17 @@ internal sealed class TrayIconService
             _subscribed = true;
         }
 
-        _trayIcon.Show(AppInfo.Current.Name);
-        _running = true;
+        // Driven by whether the icon actually appeared, never assumed. IsRunning is what
+        // permits the window to be hidden, and hiding it when there is no icon leaves the
+        // user with no way back short of the task manager.
+        _running = _trayIcon.Show(AppInfo.Current.Name);
+
+        if (!_running)
+        {
+            _logger.LogWarning("The tray icon is unavailable; the window will minimize to the taskbar instead.");
+
+            return;
+        }
 
         await RefreshAsync();
     }
@@ -162,7 +171,10 @@ internal sealed class TrayIconService
         HashSet<string> connected = _nasConnector.GetConnectedLetters();
 
         _trayIcon.SetMenu(BuildMenu(drives, connected));
-        _trayIcon.Show($"{AppInfo.Current.Name} — {CountConnected(drives, connected)}/{drives.Count}");
+
+        // Also re-checks that the icon is still there — Explorer can restart and refuse
+        // it — so the window stops being hidable the moment the way back disappears.
+        _running = _trayIcon.Show($"{AppInfo.Current.Name} — {CountConnected(drives, connected)}/{drives.Count}");
     }
 
     private static int CountConnected(List<Drive> drives, HashSet<string> connected) =>
@@ -329,8 +341,27 @@ internal sealed class TrayIconService
     private void RegisterMessages()
     {
         // The menu is only as good as the drive list it was built from.
-        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(this, async (r, m) => await RefreshAsync());
-        WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, async (r, m) => await RefreshAsync());
-        WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, async (r, m) => await RefreshAsync());
+        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(this, (r, m) => RefreshSafely());
+        WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, (r, m) => RefreshSafely());
+        WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) => RefreshSafely());
+    }
+
+    /// <summary>
+    /// Refreshes without letting a failure escape as an unhandled exception.
+    /// </summary>
+    /// <remarks>
+    /// The messenger's handler delegate returns void, so an <c>async</c> lambda here is
+    /// an async void: anything thrown after the first await is rethrown on the thread
+    /// pool, where <c>TaskScheduler.UnobservedTaskException</c> does not reach it and the
+    /// process goes down. A locked database during a refresh is enough to trigger it, so
+    /// the continuation swallows and logs instead.
+    /// </remarks>
+    private void RefreshSafely()
+    {
+        _ = RefreshAsync().ContinueWith(
+            task => _logger.LogError(task.Exception, "The tray icon failed to refresh its menu."),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 }

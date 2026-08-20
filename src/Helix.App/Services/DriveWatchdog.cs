@@ -340,14 +340,27 @@ internal sealed class DriveWatchdog
     private void RegisterMessages()
     {
         // The watched set is only as good as the drive list it came from.
-        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(
-            this, async (r, m) => await RefreshWatchedDrivesAsync());
+        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(this, (r, m) => RefreshWatchedDrivesSafely());
+        WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, (r, m) => RefreshWatchedDrivesSafely());
+        WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) => RefreshWatchedDrivesSafely());
+    }
 
-        WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(
-            this, async (r, m) => await RefreshWatchedDrivesAsync());
-
-        WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(
-            this, async (r, m) => await RefreshWatchedDrivesAsync());
+    /// <summary>
+    /// Re-reads the watch set without letting a failure escape as an unhandled exception.
+    /// </summary>
+    /// <remarks>
+    /// The messenger's handler delegate returns void, so an <c>async</c> lambda here is
+    /// an async void: anything thrown after the first await is rethrown on the thread
+    /// pool, out of reach of <c>TaskScheduler.UnobservedTaskException</c>, and takes the
+    /// process down. A locked database is enough to trigger it.
+    /// </remarks>
+    private void RefreshWatchedDrivesSafely()
+    {
+        _ = RefreshWatchedDrivesAsync().ContinueWith(
+            task => _logger.LogError(task.Exception, "The drive watchdog failed to refresh its watch set."),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 
     private sealed record PendingReconnect(Guid DriveId, string Letter, int Failures, DateTime NextAttemptUtc);

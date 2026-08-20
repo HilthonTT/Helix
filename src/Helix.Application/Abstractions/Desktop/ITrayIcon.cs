@@ -44,8 +44,20 @@ public interface ITrayIcon
     /// <summary>Raised with the <see cref="TrayMenuItem.Id"/> of the entry clicked.</summary>
     event EventHandler<string>? MenuItemSelected;
 
-    /// <summary>Shows the icon, or updates its tooltip if it is already showing.</summary>
-    void Show(string tooltip);
+    /// <summary>
+    /// Shows the icon, or updates its tooltip if it is already showing.
+    /// </summary>
+    /// <returns>
+    /// Whether the icon is actually up. False when the platform has no tray, when the
+    /// shell refused the icon, or when it could not be created in time.
+    /// </returns>
+    /// <remarks>
+    /// The return value is not decoration. Callers hide the app window on the strength of
+    /// the tray being there to bring it back, so an icon that silently failed to appear
+    /// would leave the user with a window they cannot reach and no way out but the task
+    /// manager. Anything that hides the window must check this first.
+    /// </remarks>
+    bool Show(string tooltip);
 
     /// <summary>Replaces the context menu. Safe to call as often as the state changes.</summary>
     void SetMenu(IReadOnlyList<TrayMenuItem> items);

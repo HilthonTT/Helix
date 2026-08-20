@@ -32,9 +32,11 @@ internal sealed class UnsupportedTrayIcon : ITrayIcon
         remove { }
     }
 
-    public void Show(string tooltip)
-    {
-    }
+    /// <returns>
+    /// Always false — there is no icon, and callers must not hide the window believing
+    /// there is one to restore it from.
+    /// </returns>
+    public bool Show(string tooltip) => false;
 
     public void SetMenu(IReadOnlyList<TrayMenuItem> items)
     {

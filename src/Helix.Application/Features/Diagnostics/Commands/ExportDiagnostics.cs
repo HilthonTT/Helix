@@ -19,6 +19,7 @@ public sealed class ExportDiagnostics(
     // Helix only ever runs on desktop, so the call site is narrowed to match — the same
     // treatment ExportDrives gets.
     [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("maccatalyst14.0")]
     public async Task<Result<string>> Handle(CancellationToken cancellationToken = default)
     {
         if (!loggedInUser.IsLoggedIn)

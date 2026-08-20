@@ -45,11 +45,22 @@ internal sealed class DiagnosticsLog : IDiagnosticsLog
 
         string path = Path.Combine(targetDirectory, $"{ExportPrefix}{DateTime.UtcNow:yyyyMMdd-HHmmss}.zip");
 
+        // Tracked so the cleanup below can tell a half-written archive of ours from a
+        // file that was already there. CreateNew throws when the name is taken — two
+        // exports inside the same second will do it — and deleting on that failure would
+        // destroy the export the user had just made.
+        bool created = false;
+
         try
         {
-            using var archive = new ZipArchive(
-                new FileStream(path, FileMode.CreateNew, FileAccess.Write),
-                ZipArchiveMode.Create);
+            // CreateNew throws if the name is taken, so reaching the next line is what
+            // proves this call is the one that created the archive.
+            var destination = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
+
+            created = true;
+
+            // The archive takes ownership of the stream and closes it on dispose.
+            using var archive = new ZipArchive(destination, ZipArchiveMode.Create);
 
             foreach (string file in files)
             {
@@ -67,7 +78,7 @@ internal sealed class DiagnosticsLog : IDiagnosticsLog
         }
         catch (OperationCanceledException)
         {
-            TryDeletePartialExport(path);
+            TryDeletePartialExport(path, created);
 
             return Result.Failure<string>(DiagnosticsErrors.ExportFailed("The export was cancelled."));
         }
@@ -78,7 +89,7 @@ internal sealed class DiagnosticsLog : IDiagnosticsLog
         }
         catch (Exception ex)
         {
-            TryDeletePartialExport(path);
+            TryDeletePartialExport(path, created);
 
             return Result.Failure<string>(DiagnosticsErrors.ExportFailed(ex.Message));
         }
@@ -88,8 +99,18 @@ internal sealed class DiagnosticsLog : IDiagnosticsLog
     /// Removes a zip that was only partly written, so the user is never handed a
     /// truncated archive that looks like a finished one.
     /// </summary>
-    private static void TryDeletePartialExport(string path)
+    /// <param name="created">
+    /// Whether this call is the one that created the file. False means the name was
+    /// already taken and the archive on disk belongs to someone else — deleting it would
+    /// turn a failed export into the loss of a previous one.
+    /// </param>
+    private static void TryDeletePartialExport(string path, bool created)
     {
+        if (!created)
+        {
+            return;
+        }
+
         try
         {
             if (File.Exists(path))

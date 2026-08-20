@@ -1,4 +1,5 @@
 ﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
@@ -10,7 +11,8 @@ namespace Helix.Application.Features.Drives.Commands;
 public sealed class DeleteDrive(
     IDriveRepository driveRepository,
     IUnitOfWork unitOfWork,
-    ILoggedInUser loggedInUser) : IHandler
+    ILoggedInUser loggedInUser,
+    INasConnector nasConnector) : IHandler
 {
     public sealed record Request(Guid DriveId);
 
@@ -36,6 +38,18 @@ public sealed class DeleteDrive(
         if (drive.UserId != loggedInUser.UserId)
         {
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
+        }
+
+        // A persistent mapping lives in the Windows user profile, not in this database.
+        // Deleting the row without cancelling it leaves Explorer restoring a share at
+        // every sign-in that Helix no longer knows anything about — and no way to be rid
+        // of it from inside the app, since the drive it belonged to is gone.
+        //
+        // Best effort on purpose: the deletion is what the user asked for, and a share
+        // that is unreachable right now must not stand in the way of it.
+        if (drive.Persistent)
+        {
+            await nasConnector.DisconnectAsync(drive, cancellationToken);
         }
 
         driveRepository.Remove(drive);
