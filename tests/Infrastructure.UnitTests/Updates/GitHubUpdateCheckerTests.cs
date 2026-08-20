@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Helix.Application.Abstractions.Updates;
 using Helix.Infrastructure.Updates;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -13,7 +13,14 @@ namespace Infrastructure.UnitTests.Updates;
 /// </summary>
 public sealed class GitHubUpdateCheckerTests
 {
-    private const string CurrentVersion = "2.0.0.0";
+    /// <summary>
+    /// The shape Windows reports for the running build: <c>ApplicationDisplayVersion</c>
+    /// with <c>ApplicationVersion</c> as a fourth component, which no release is tagged
+    /// with. It is compared in full and shown three-part.
+    /// </summary>
+    private const string CurrentVersion = "2.0.0.3";
+
+    private const string CurrentVersionDisplayed = "2.0.0";
 
     /// <summary>Answers every request with a canned response, or throws.</summary>
     private sealed class StubHandler(Func<HttpResponseMessage> respond) : HttpMessageHandler
@@ -53,7 +60,7 @@ public sealed class GitHubUpdateCheckerTests
         result.IsSuccess.Should().BeTrue();
         result.Value.IsUpdateAvailable.Should().BeTrue();
         result.Value.LatestVersion.Should().Be("v2.1.0");
-        result.Value.CurrentVersion.Should().Be(CurrentVersion);
+        result.Value.CurrentVersion.Should().Be(CurrentVersionDisplayed);
         result.Value.ReleaseUrl.Should().Be("https://github.com/HilthonTT/Helix/releases/tag/v2.1.0");
     }
 

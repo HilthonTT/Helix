@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Helix.Infrastructure.Updates;
 
@@ -67,6 +67,23 @@ internal static class ReleaseVersion
         version.Minor,
         Math.Max(0, version.Build),
         Math.Max(0, version.Revision));
+
+    /// <summary>
+    /// The three-part form the releases are tagged with, for showing back to the user.
+    /// </summary>
+    /// <remarks>
+    /// What Windows reports for the running build has four components - the fourth is
+    /// <c>ApplicationVersion</c>, which is a build counter and not part of any tag - so
+    /// the raw string would name a version that appears nowhere on the releases page.
+    /// Anything that cannot be read is handed back untouched rather than blanked, on the
+    /// same reasoning as the sidebar's formatter.
+    /// </remarks>
+    public static string ToDisplayString(string? value)
+    {
+        return TryParse(value, out Version? version)
+            ? $"{version.Major}.{version.Minor}.{version.Build}"
+            : value ?? string.Empty;
+    }
 
     /// <summary>
     /// Whether <paramref name="latestTag"/> names a version newer than

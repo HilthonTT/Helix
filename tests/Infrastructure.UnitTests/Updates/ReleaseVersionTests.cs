@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Helix.Infrastructure.Updates;
 
 namespace Infrastructure.UnitTests.Updates;
@@ -69,6 +69,34 @@ public sealed class ReleaseVersionTests
     public void IsNewerThan_Should_ReportNothing_WhenTheReleaseIsBehind(string tag, string current)
     {
         ReleaseVersion.IsNewerThan(tag, current).Should().BeFalse();
+    }
+
+    /// <summary>
+    /// What the user is shown must be the number on the releases page, so the build
+    /// counter Windows appends is dropped and a missing component reads as the zero it
+    /// stands for.
+    /// </summary>
+    [Theory]
+    [InlineData("2.1.0.3", "2.1.0")]
+    [InlineData("2.1.0.0", "2.1.0")]
+    [InlineData("2.1", "2.1.0")]
+    [InlineData("v2.1.0", "2.1.0")]
+    [InlineData("2.1.0+9e9038a", "2.1.0")]
+    public void ToDisplayString_Should_ReduceToTheTaggedForm(string value, string expected)
+    {
+        ReleaseVersion.ToDisplayString(value).Should().Be(expected);
+    }
+
+    /// <summary>
+    /// A version that cannot be read is handed back rather than blanked: showing nothing
+    /// where a version belongs looks like a bug, and the raw string is at least a clue.
+    /// </summary>
+    [Theory]
+    [InlineData("nightly", "nightly")]
+    [InlineData(null, "")]
+    public void ToDisplayString_Should_KeepWhatItCannotRead(string? value, string expected)
+    {
+        ReleaseVersion.ToDisplayString(value).Should().Be(expected);
     }
 
     /// <summary>

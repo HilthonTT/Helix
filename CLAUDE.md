@@ -145,6 +145,19 @@ unnormalized compare makes the running build "older" than the release it was bui
 announces an update to itself. Both sides are widened to four components first. A tag that
 is not a version (`nightly`) is refused rather than guessed at.
 
+`ApplicationDisplayVersion` is not, on Windows, where the running version comes from.
+The resizetizer targets XmlPeek `Identity/@Version` out of
+`Platforms/Windows/Package.appxmanifest` into
+`[AssemblyMetadata("Microsoft.Maui.ApplicationModel.AppInfo.Version")]`, and that is what
+`AppInfo.Current.VersionString` returns for an unpackaged build — the sidebar and the
+update check both read it. MAUI only stamps `ApplicationDisplayVersion` into that
+attribute when it is empty or the literal `0.0.0.0`, so **leave the manifest on the
+placeholder**: a real number written there wins over the `.csproj` and the app announces
+an update to itself. The stamped value is `ApplicationDisplayVersion` with
+`ApplicationVersion` as a fourth component (`2.1.0.3`), which is why what is compared is
+four-part and what is shown is not — `ReleaseVersion.ToDisplayString` reduces it for the
+update dialog.
+
 `AppShell.FormatVersion` reduces the same string back to three components for the sidebar
 footer, so what the footer shows is exactly the tag on the releases page. It also strips a
 `+<commit>` suffix first: the build emits both a file version and an informational one, and

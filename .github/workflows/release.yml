@@ -90,7 +90,10 @@ jobs:
 
       # One universal .app covering both Intel and Apple Silicon, rather than a build per
       # architecture: the RuntimeIdentifiers the project already declares are lipo'd
-      # together into a single bundle.
+      # together into a single bundle. They are deliberately not repeated as a -p: switch
+      # here - MSBuild splits a -p: argument on ';' into several properties, so
+      # -p:RuntimeIdentifiers="a;b" reaches it as a property 'a' and a stray switch 'b'
+      # (MSB1006), quotes or no quotes.
       #
       # Unsigned on purpose. Signing needs a Developer ID certificate and an Apple
       # Developer account, which cannot live in a public repository without secrets — see
@@ -100,7 +103,6 @@ jobs:
           dotnet publish src/Helix.App/Helix.App.csproj
           -f net10.0-maccatalyst
           -c Release
-          -p:RuntimeIdentifiers="maccatalyst-x64;maccatalyst-arm64"
           -p:CreatePackage=false
           -p:EnableCodeSigning=false
           -o publish/maccatalyst

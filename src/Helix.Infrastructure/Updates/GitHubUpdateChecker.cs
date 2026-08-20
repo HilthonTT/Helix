@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Updates;
+﻿using Helix.Application.Abstractions.Updates;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
@@ -120,7 +120,13 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
                 ? UpdateConfiguration.ReleasesPageUrl
                 : release.HtmlUrl;
 
-            return new UpdateCheck(isNewer, current, release.TagName, url);
+            // Compared as reported, shown three-part: the comparison wants every
+            // component Windows gives it, the user wants the number on the releases page.
+            return new UpdateCheck(
+                isNewer,
+                ReleaseVersion.ToDisplayString(current),
+                release.TagName,
+                url);
         }
     }
 
