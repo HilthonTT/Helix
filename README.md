@@ -110,6 +110,10 @@ choose in Settings (0 keeps everything).
 folder for 14 days. Settings has an **Export** button that saves them as a zip to attach to
 a bug report.
 
+**Check for updates.** Settings has a **Check for updates** button that compares your build
+against the latest release on GitHub and offers to open its page. It only ever reads and
+reports — nothing is downloaded or installed, and pre-releases are ignored.
+
 **Multi-user.** Each account sees only its own drives, settings, and audit entries.
 
 **Light and dark themes.** The interface follows the Windows system theme.

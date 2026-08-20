@@ -5,6 +5,7 @@ using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
+using Helix.Application.Features.Updates.Queries;
 using Helix.Application.Features.Users.Commands;
 
 namespace Helix.Application;
@@ -18,6 +19,7 @@ public static class DependencyInjection
             .AddDiagnosticsHandlers()
             .AddDrivesHandlers()
             .AddSettingsHandlers()
+            .AddUpdatesHandlers()
             .AddUsersHandlers();
 
         return services;
@@ -67,6 +69,13 @@ public static class DependencyInjection
     {
         services.AddScoped<GetSettings>();
         services.AddScoped<UpdateSettings>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddUpdatesHandlers(this IServiceCollection services)
+    {
+        services.AddScoped<CheckForUpdates>();
 
         return services;
     }

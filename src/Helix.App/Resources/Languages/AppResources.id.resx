@@ -474,4 +474,22 @@
   <data name="NeverConnected" xml:space="preserve">
     <value>Belum pernah tersambung</value>
   </data>
+  <data name="Updates" xml:space="preserve">
+    <value>Pembaruan</value>
+  </data>
+  <data name="UpdatesDescription" xml:space="preserve">
+    <value>Periksa GitHub untuk versi Helix yang lebih baru.</value>
+  </data>
+  <data name="CheckForUpdates" xml:space="preserve">
+    <value>Periksa pembaruan</value>
+  </data>
+  <data name="UpdateAvailable" xml:space="preserve">
+    <value>Helix {0} tersedia. Anda menggunakan {1}.</value>
+  </data>
+  <data name="UpToDate" xml:space="preserve">
+    <value>Anda menggunakan versi terbaru ({0}).</value>
+  </data>
+  <data name="OpenReleasePage" xml:space="preserve">
+    <value>Buka halaman rilis</value>
+  </data>
 </root>

@@ -1156,5 +1156,59 @@ namespace Helix.App.Resources.Languages {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Check for updates.
+        /// </summary>
+        internal static string CheckForUpdates {
+            get {
+                return ResourceManager.GetString("CheckForUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open release page.
+        /// </summary>
+        internal static string OpenReleasePage {
+            get {
+                return ResourceManager.GetString("OpenReleasePage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You are running the latest version ({0}).
+        /// </summary>
+        internal static string UpToDate {
+            get {
+                return ResourceManager.GetString("UpToDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Helix {0} is available. You are running {1}.
+        /// </summary>
+        internal static string UpdateAvailable {
+            get {
+                return ResourceManager.GetString("UpdateAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updates.
+        /// </summary>
+        internal static string Updates {
+            get {
+                return ResourceManager.GetString("Updates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check GitHub for a newer release of Helix.
+        /// </summary>
+        internal static string UpdatesDescription {
+            get {
+                return ResourceManager.GetString("UpdatesDescription", resourceCulture);
+            }
+        }
+        
     }
 }

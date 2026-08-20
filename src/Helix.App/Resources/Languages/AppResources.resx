@@ -474,4 +474,22 @@
   <data name="NeverConnected" xml:space="preserve">
     <value>Never connected</value>
   </data>
+  <data name="Updates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="UpdatesDescription" xml:space="preserve">
+    <value>Check GitHub for a newer release of Helix.</value>
+  </data>
+  <data name="CheckForUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="UpdateAvailable" xml:space="preserve">
+    <value>Helix {0} is available. You are running {1}.</value>
+  </data>
+  <data name="UpToDate" xml:space="preserve">
+    <value>You are running the latest version ({0}).</value>
+  </data>
+  <data name="OpenReleasePage" xml:space="preserve">
+    <value>Open release page</value>
+  </data>
 </root>

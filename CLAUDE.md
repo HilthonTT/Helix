@@ -78,13 +78,14 @@ Entities, domain errors and repository **interfaces**, one folder per aggregate 
 
 ```
 Abstractions/   Authentication, Connector, Cryptography, Data, Desktop, Diagnostics,
-                Handlers, Security, Startup, Storage, Time — interfaces only
+                Handlers, Security, Startup, Storage, Time, Updates — interfaces only
 Core/           Errors, Sorting, Validation — cross-feature helpers
 Features/       one folder per feature, split into Commands / Queries
                 Auditlogs/{Commands,Queries}
                 Diagnostics/Commands
                 Drives/{Commands,Queries,Contracts}
                 Settings/{Commands,Queries}
+                Updates/Queries
                 Users/Commands
 DependencyInjection.cs
 ```
@@ -130,6 +131,19 @@ Release builds log Information and above; Debug builds also log Debug. Keep cred
 hosts and share names out of log messages beyond what a drive letter already reveals — the
 user is expected to send these files to a stranger.
 
+### The update check
+
+`GitHubUpdateChecker` reads `/releases/latest` — unauthenticated, read-only, nothing
+downloaded or installed. `/releases/latest` rather than the tag list on purpose: tags exist
+for things never released, and it excludes pre-releases, which an unattended NAS tool
+should not be nudging people onto.
+
+Version comparison goes through `ReleaseVersion`, and it must. `ApplicationDisplayVersion`
+is `2.0` while releases are tagged `v2.0.0`, and `Version` treats a missing component as
+**-1, not 0** — so an unnormalized compare makes the running build "older" than the release
+it was built from and announces an update to itself. Both sides are widened to four
+components first. A tag that is not a version (`nightly`) is refused rather than guessed at.
+
 ### The audit log
 
 `Auditlog` stores an `AuditAction` plus the drive's id, name and letter **as they were at
@@ -148,7 +162,7 @@ Concrete implementations, one folder per abstraction group:
 
 ```
 Authentication/  Connector/  Cryptography/  Desktop/  Diagnostics/  Platform/
-Startup/  Storage/  Time/
+Startup/  Storage/  Time/  Updates/
 Database/
     AppDbContext.cs, AppDbContextFactory.cs
     Configurations/   EF entity configurations

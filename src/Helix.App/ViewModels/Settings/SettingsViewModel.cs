@@ -5,10 +5,13 @@ using Helix.App.Messaging.Users;
 using Helix.App.Models;
 using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Updates;
 using Helix.Application.Features.Diagnostics.Commands;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
+using Helix.Application.Features.Updates.Queries;
 using Helix.Domain.Settings;
+using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using SettingsModel = Helix.Domain.Settings.Settings;
 
@@ -115,6 +118,72 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Asks GitHub whether a newer Helix has been released, and offers to open it.
+    /// </summary>
+    /// <remarks>
+    /// Manual, and it downloads nothing. Helix ships as a folder the user unzips
+    /// themselves, so the most this can usefully do is tell them a newer version exists
+    /// and take them to it.
+    /// </remarks>
+    [RelayCommand]
+    private async Task CheckForUpdatesAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            Result<UpdateCheck> result = await ScopedHandler.HandleAsync((CheckForUpdates h) => h.Handle());
+            if (result.IsFailure)
+            {
+                await DisplayErrorAsync(result.Error);
+                return;
+            }
+
+            UpdateCheck check = result.Value;
+
+            if (!check.IsUpdateAvailable)
+            {
+                await DisplaySuccessAsync(string.Format(AppResources.UpToDate, check.CurrentVersion));
+                return;
+            }
+
+            bool open = await Shell.Current.DisplayAlertAsync(
+                AppResources.Updates,
+                string.Format(AppResources.UpdateAvailable, check.LatestVersion, check.CurrentVersion),
+                AppResources.OpenReleasePage,
+                AppResources.Cancel);
+
+            if (open)
+            {
+                await OpenReleasePageAsync(check.ReleaseUrl);
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private static async Task OpenReleasePageAsync(string releaseUrl)
+    {
+        try
+        {
+            await Launcher.Default.OpenAsync(releaseUrl);
+        }
+        catch (Exception ex)
+        {
+            // A missing browser association is not worth an alert over — the same
+            // treatment the repository link in the sidebar gets.
+            AppLog.For<SettingsViewModel>().LogWarning(ex, "Could not open the release page.");
         }
     }
 

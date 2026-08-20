@@ -7,6 +7,7 @@ using Helix.Application.Abstractions.Diagnostics;
 using Helix.Application.Abstractions.Security;
 using Helix.Application.Abstractions.Startup;
 using Helix.Application.Abstractions.Storage;
+using Helix.Application.Abstractions.Updates;
 using Helix.Application.Abstractions.Time;
 using Helix.Domain.Auditlogs;
 using Helix.Domain.Drives;
@@ -23,6 +24,7 @@ using Helix.Infrastructure.Diagnostics;
 using Helix.Infrastructure.Startup;
 using Helix.Infrastructure.Storage;
 using Helix.Infrastructure.Time;
+using Helix.Infrastructure.Updates;
 using Microsoft.Extensions.Logging;
 
 namespace Helix.Infrastructure;
@@ -105,6 +107,14 @@ public static class DependencyInjection
 
         // Holds the watched set and the polling loop for the app's lifetime.
         services.AddSingleton<IDriveMonitor, DriveMonitor>();
+
+        // One client for the app's lifetime, as HttpClient is meant to be used. The
+        // current version is read through a delegate so the checker stays testable
+        // without a MAUI host behind AppInfo.
+        services.AddSingleton<IUpdateChecker>(sp => new GitHubUpdateChecker(
+            UpdateConfiguration.CreateHttpClient(),
+            sp.GetRequiredService<ILogger<GitHubUpdateChecker>>(),
+            () => AppInfo.Current.VersionString));
 
         services.AddPlatformServices();
 
