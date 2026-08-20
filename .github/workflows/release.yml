@@ -105,7 +105,6 @@ jobs:
           -c Release
           -p:CreatePackage=false
           -p:EnableCodeSigning=false
-          -o publish/maccatalyst
 
       # ditto, not zip: a .app is a bundle of symlinks, permissions and extended
       # attributes, and a plain zip flattens the ones that make it launchable.
@@ -113,8 +112,30 @@ jobs:
         run: |
           TAG="${{ inputs.tag }}"
           if [ -z "$TAG" ]; then TAG="${{ github.ref_name }}"; fi
-          APP=$(find publish/maccatalyst -maxdepth 1 -name '*.app' -print -quit)
-          if [ -z "$APP" ]; then echo "No .app bundle was produced."; exit 1; fi
+
+          # The publish above deliberately has no -o. On Apple targets -o sets PublishDir,
+          # and the bundle's *contents* are written into it rather than a .app wrapper, so
+          # the wrapper stays at its default path and the archive step finds nothing.
+          BIN="src/Helix.App/bin/Release/net10.0-maccatalyst"
+
+          # The universal bundle sits at the top; the per-RID folder below it is where a
+          # single-architecture build would land, and is worth archiving over failing.
+          APP="$(find "$BIN" -maxdepth 1 -type d -name '*.app' -print -quit)"
+          if [ -z "$APP" ]; then
+            APP="$(find "$BIN" -maxdepth 2 -type d -name '*.app' -print -quit)"
+          fi
+
+          if [ -z "$APP" ]; then
+            echo "No .app bundle was produced. $BIN holds:"
+            find "$BIN" -maxdepth 2 -print | head -50
+            exit 1
+          fi
+
+          # Both architectures or one is worth knowing in the log: an unnoticed
+          # single-architecture build is a bundle half the Macs out there cannot run.
+          echo "Archiving $APP"
+          file "$APP/Contents/MacOS/"* | head -5
+
           mkdir -p artifacts
           ditto -c -k --sequesterRsrc --keepParent "$APP" "artifacts/Helix-$TAG-macos.zip"
 
