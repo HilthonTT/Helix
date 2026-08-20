@@ -139,10 +139,16 @@ for things never released, and it excludes pre-releases, which an unattended NAS
 should not be nudging people onto.
 
 Version comparison goes through `ReleaseVersion`, and it must. `ApplicationDisplayVersion`
-is `2.0` while releases are tagged `v2.0.0`, and `Version` treats a missing component as
-**-1, not 0** — so an unnormalized compare makes the running build "older" than the release
-it was built from and announces an update to itself. Both sides are widened to four
-components first. A tag that is not a version (`nightly`) is refused rather than guessed at.
+carries as many components as the release needed (`2.0`, then `2.0.1`) while Windows
+reports the running build padded to four (`2.0.1.0`), and `Version` treats a missing
+component as **-1, not 0** — so an unnormalized compare makes the running build "older"
+than the release it was built from and announces an update to itself. Both sides are
+widened to four components first. A tag that is not a version (`nightly`) is refused rather
+than guessed at.
+
+`AppShell.FormatVersion` trims the same four-part string back for the sidebar footer, and
+keeps the patch component when it is non-zero — otherwise a patch release still displays as
+the version it replaced.
 
 ### The audit log
 

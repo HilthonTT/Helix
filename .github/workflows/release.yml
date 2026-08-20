@@ -65,9 +65,67 @@ jobs:
           path: artifacts/*.zip
           if-no-files-found: error
 
+  publish-macos:
+    name: Publish maccatalyst
+    # Catalyst compilation needs Xcode, so this half cannot run on the Windows runner.
+    runs-on: macos-latest
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install .NET MAUI workload
+        run: dotnet workload install maui
+
+      # One universal .app covering both Intel and Apple Silicon, rather than a build per
+      # architecture: the RuntimeIdentifiers the project already declares are lipo'd
+      # together into a single bundle.
+      #
+      # Unsigned on purpose. Signing needs a Developer ID certificate and an Apple
+      # Developer account, which cannot live in a public repository without secrets — see
+      # the release notes for what that means for anyone downloading it.
+      - name: Publish (maccatalyst)
+        run: >
+          dotnet publish src/Helix.App/Helix.App.csproj
+          -f net10.0-maccatalyst
+          -c Release
+          -p:RuntimeIdentifiers="maccatalyst-x64;maccatalyst-arm64"
+          -p:CreatePackage=false
+          -p:EnableCodeSigning=false
+          -o publish/maccatalyst
+
+      # ditto, not zip: a .app is a bundle of symlinks, permissions and extended
+      # attributes, and a plain zip flattens the ones that make it launchable.
+      - name: Create archive
+        run: |
+          TAG="${{ inputs.tag }}"
+          if [ -z "$TAG" ]; then TAG="${{ github.ref_name }}"; fi
+          APP=$(find publish/maccatalyst -maxdepth 1 -name '*.app' -print -quit)
+          if [ -z "$APP" ]; then echo "No .app bundle was produced."; exit 1; fi
+          mkdir -p artifacts
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "artifacts/Helix-$TAG-macos.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Helix-macos
+          path: artifacts/*.zip
+          if-no-files-found: error
+
   release:
     name: Create GitHub release
-    needs: publish
+    needs: [publish, publish-macos]
     runs-on: ubuntu-latest
 
     permissions:

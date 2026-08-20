@@ -197,11 +197,25 @@ public sealed partial class AppShell : Shell
         }
     }
 
+    /// <summary>
+    /// Trims the four-part version Windows reports for an unpackaged app back to what the
+    /// release is actually named after — <c>2.0.0.0</c> reads as <c>2.0</c>.
+    /// </summary>
+    /// <remarks>
+    /// The patch component is kept when it is not zero, so a patch release is
+    /// distinguishable here. Dropping it unconditionally meant 2.0.1 still showed as
+    /// "v2.0", leaving the footer claiming the version the user had before updating.
+    /// </remarks>
     private static string FormatVersion(string versionString)
     {
-        return Version.TryParse(versionString, out Version? version)
-            ? $"{version.Major}.{version.Minor}"
-            : versionString;
+        if (!Version.TryParse(versionString, out Version? version))
+        {
+            return versionString;
+        }
+
+        return version.Build > 0
+            ? $"{version.Major}.{version.Minor}.{version.Build}"
+            : $"{version.Major}.{version.Minor}";
     }
 
     private static void InitRoutes()
