@@ -139,16 +139,16 @@ for things never released, and it excludes pre-releases, which an unattended NAS
 should not be nudging people onto.
 
 Version comparison goes through `ReleaseVersion`, and it must. `ApplicationDisplayVersion`
-carries as many components as the release needed (`2.0`, then `2.0.1`) while Windows
-reports the running build padded to four (`2.0.1.0`), and `Version` treats a missing
-component as **-1, not 0** — so an unnormalized compare makes the running build "older"
-than the release it was built from and announces an update to itself. Both sides are
-widened to four components first. A tag that is not a version (`nightly`) is refused rather
-than guessed at.
+is three-part (`2.1.0`) to match the release tags, Windows reports the running build padded
+to four (`2.1.0.0`), and `Version` treats a missing component as **-1, not 0** — so an
+unnormalized compare makes the running build "older" than the release it was built from and
+announces an update to itself. Both sides are widened to four components first. A tag that
+is not a version (`nightly`) is refused rather than guessed at.
 
-`AppShell.FormatVersion` trims the same four-part string back for the sidebar footer, and
-keeps the patch component when it is non-zero — otherwise a patch release still displays as
-the version it replaced.
+`AppShell.FormatVersion` reduces the same string back to three components for the sidebar
+footer, so what the footer shows is exactly the tag on the releases page. It also strips a
+`+<commit>` suffix first: the build emits both a file version and an informational one, and
+`Version.TryParse` rejects the latter, which would otherwise put a commit hash in the UI.
 
 ### The audit log
 

@@ -27,7 +27,7 @@
 		<ApplicationId>com.companyname.myappname</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>2.0.1</ApplicationDisplayVersion>
+		<ApplicationDisplayVersion>2.1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>3</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>

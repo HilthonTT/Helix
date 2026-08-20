@@ -198,24 +198,38 @@ public sealed partial class AppShell : Shell
     }
 
     /// <summary>
-    /// Trims the four-part version Windows reports for an unpackaged app back to what the
-    /// release is actually named after — <c>2.0.0.0</c> reads as <c>2.0</c>.
+    /// Reduces whatever version string the platform reports to the three-part form the
+    /// releases are tagged with — <c>2.1.0.0</c> reads as <c>2.1.0</c>.
     /// </summary>
     /// <remarks>
-    /// The patch component is kept when it is not zero, so a patch release is
-    /// distinguishable here. Dropping it unconditionally meant 2.0.1 still showed as
-    /// "v2.0", leaving the footer claiming the version the user had before updating.
+    /// Always three components, so the footer matches the tag on the releases page
+    /// exactly and can be compared against it at a glance. Trimming to major.minor showed
+    /// 2.1.0 as "v2.1" and 2.0.1 as "v2.0" — in the second case still naming the version
+    /// the user had before updating.
     /// </remarks>
     private static string FormatVersion(string versionString)
     {
-        if (!Version.TryParse(versionString, out Version? version))
+        ReadOnlySpan<char> candidate = versionString.AsSpan().Trim();
+
+        // The build carries two version strings — a four-part file version (2.1.0.0) and
+        // an informational one with the commit appended (2.1.0+23d2862...) — and which of
+        // them AppInfo hands back depends on how the app was packaged. Version.TryParse
+        // rejects the second outright, which would drop the raw string, commit hash and
+        // all, into the sidebar. Trimmed here so either shape reads the same.
+        int suffix = candidate.IndexOfAny('+', '-');
+        if (suffix >= 0)
+        {
+            candidate = candidate[..suffix];
+        }
+
+        if (!Version.TryParse(candidate, out Version? version))
         {
             return versionString;
         }
 
-        return version.Build > 0
-            ? $"{version.Major}.{version.Minor}.{version.Build}"
-            : $"{version.Major}.{version.Minor}";
+        // Build is -1 when the string had only two components; a release is always
+        // tagged with three, so it reads as the zero it stands for.
+        return $"{version.Major}.{version.Minor}.{Math.Max(0, version.Build)}";
     }
 
     private static void InitRoutes()
