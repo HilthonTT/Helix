@@ -11,12 +11,22 @@ public sealed class ConnectAllDrives(
     ILoggedInUser loggedInUser, 
     INasConnector nasConnector) : IHandler
 {
-    public async Task<Result> Handle(CancellationToken cancellationToken = default)
+    /// <param name="OnlyAutoConnect">
+    /// True for the unattended passes — the startup connect and the watchdog — which
+    /// must respect each drive's own <see cref="Drive.AutoConnect"/> flag. False when
+    /// the user pressed "connect all", which is an explicit instruction covering every
+    /// drive on screen, including the ones held back from the automatic passes.
+    /// </param>
+    public sealed record Request(bool OnlyAutoConnect = false);
+
+    public async Task<Result> Handle(Request? request = null, CancellationToken cancellationToken = default)
     {
         if (!loggedInUser.IsLoggedIn)
         {
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
+
+        bool onlyAutoConnect = request?.OnlyAutoConnect ?? false;
 
         List<Drive> drives = await driveRepository.GetAsNoTrackingAsync(loggedInUser.UserId, cancellationToken);
         if (drives.Count == 0)
@@ -30,6 +40,7 @@ public sealed class ConnectAllDrives(
 
         Drive[] disconnectedDrives = drives
             .Where(d => !connectedLetters.Contains(d.Letter))
+            .Where(d => !onlyAutoConnect || d.AutoConnect)
             .ToArray();
 
         if (disconnectedDrives.Length == 0)

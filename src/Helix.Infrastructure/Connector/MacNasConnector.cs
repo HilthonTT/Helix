@@ -2,6 +2,9 @@
 using Foundation;
 using Helix.Application.Abstractions.Connector;
 using Helix.Domain.Drives;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -47,6 +50,13 @@ internal sealed class MacNasConnector : INasConnector
             () => Disconnect(drive),
             timeoutError: () => Result.Failure(DriveErrors.FailedToDisconnect("Disconnection timed out.")),
             failure: message => Result.Failure(DriveErrors.FailedToDisconnect(message)),
+            cancellationToken);
+
+    public Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default) =>
+        RunWithTimeoutAsync(
+            () => Test(drive),
+            timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+            failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
             cancellationToken);
 
     public bool IsConnected(string letter)
@@ -100,10 +110,45 @@ internal sealed class MacNasConnector : INasConnector
             : null;
     }
 
-    private static Result Connect(Drive drive)
-    {
-        string mountPoint = MountPointFor(drive.Letter);
+    private static Result Connect(Drive drive) => Mount(drive, MountPointFor(drive.Letter));
 
+    /// <summary>
+    /// Mounts the share, checks it, and unmounts it again — leaving neither the volume
+    /// mounted nor the drive letter's own mount point touched.
+    /// </summary>
+    /// <remarks>
+    /// The Windows side answers this with a deviceless WNet connection, which has no
+    /// NetFS equivalent: the only way to know NetFS accepts the host, share and password
+    /// is to let it mount. So the mount goes to a scratch directory beside the real ones
+    /// and is torn down immediately, which keeps a test on a half-finished form from
+    /// disturbing whatever is currently mounted at the drive's own letter.
+    /// </remarks>
+    private static Result Test(Drive drive)
+    {
+        string mountPoint = Path.Combine(MountRoot, $".test-{Guid.NewGuid():N}");
+
+        try
+        {
+            return Mount(drive, mountPoint);
+        }
+        finally
+        {
+            // Best-effort teardown; the caller already has its answer either way.
+            unmount(mountPoint, MntForce);
+
+            try
+            {
+                Directory.Delete(mountPoint);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Helix: could not remove the test mount point: {ex.Message}");
+            }
+        }
+    }
+
+    private static Result Mount(Drive drive, string mountPoint)
+    {
         try
         {
             Directory.CreateDirectory(mountPoint);
@@ -114,8 +159,8 @@ internal sealed class MacNasConnector : INasConnector
                 $"Could not prepare the mount point '{mountPoint}': {ex.Message}"));
         }
 
-        // The share name is the drive's Name, matching the Windows side's \\ip\name.
-        var url = new NSUrl($"smb://{drive.IpAddress}/{Uri.EscapeDataString(drive.Name)}");
+        // The share name is the drive's Name, matching the Windows side's \\host\name.
+        var url = new NSUrl($"smb://{ToUrlHost(drive.Host)}/{Uri.EscapeDataString(drive.Name)}");
         var mountPath = NSUrl.FromFilename(mountPoint);
         var user = new NSString(drive.Username);
         var password = new NSString(drive.Password);
@@ -174,6 +219,31 @@ internal sealed class MacNasConnector : INasConnector
     private static string MountPointFor(string letter) => Path.Combine(MountRoot, Normalize(letter));
 
     private static string Normalize(string letter) => letter.Trim().ToUpperInvariant();
+
+    /// <summary>
+    /// Renders a host into the authority of an <c>smb://</c> URL.
+    /// </summary>
+    /// <remarks>
+    /// IPv4 addresses and hostnames go in as they are. An IPv6 literal has to be
+    /// bracketed, or the colons in the address are read as the port separator and the URL
+    /// silently addresses the wrong thing. Where Windows needs <c>ipv6-literal.net</c>
+    /// because a UNC path cannot hold a colon, a URL only needs the brackets.
+    /// </remarks>
+    internal static string ToUrlHost(string host)
+    {
+        string candidate = host.Trim();
+
+        if (candidate.Length > 2 && candidate[0] == '[' && candidate[^1] == ']')
+        {
+            return candidate;
+        }
+
+        bool isIpv6 = candidate.Contains(':', StringComparison.Ordinal) &&
+                      IPAddress.TryParse(candidate, out IPAddress? address) &&
+                      address.AddressFamily == AddressFamily.InterNetworkV6;
+
+        return isIpv6 ? $"[{candidate}]" : candidate;
+    }
 
     private static async Task<Result> RunWithTimeoutAsync(
         Func<Result> work,

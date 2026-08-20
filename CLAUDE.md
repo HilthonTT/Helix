@@ -132,7 +132,7 @@ DependencyInjection.cs
 
 #### Platform seams
 
-Exactly three abstractions have a genuinely per-OS implementation, and they are bound in
+Exactly four abstractions have a genuinely per-OS implementation, and they are bound in
 `AddPlatformServices()` behind `#if WINDOWS` / `#elif MACCATALYST` (with an `#else` that
 throws, so a new head fails at composition rather than at first use):
 
@@ -141,6 +141,7 @@ throws, so a new head fails at composition rather than at first use):
 | `INasConnector` | `WindowsNasConnector` — `mpr.dll` WNet, mounts to `Z:` | `MacNasConnector` — `NetFSMountURLSync`, mounts to `~/Helix Drives/Z` |
 | `IStartupService` | `WindowsStartupService` — `.lnk` in the Startup folder | `MacStartupService` — LaunchAgent plist |
 | `IDesktopService` | `WindowsDesktopService` — `.lnk` on the Desktop | `MacDesktopService` — symlink to the `.app` |
+| `ITrayIcon` | `WindowsTrayIcon` — `Shell_NotifyIcon`, hidden window on its own message loop | `UnsupportedTrayIcon` — no-op, `IsSupported` is false |
 
 Both connectors take the NAS password as a separate credential argument rather than
 putting it in a command line — do not "simplify" either into a `net.exe` or
@@ -148,6 +149,17 @@ putting it in a command line — do not "simplify" either into a `net.exe` or
 
 macOS has no drive letters, so `Drive.Letter` names a directory under the mount root
 instead. The persisted domain model is identical on both platforms.
+
+`Drive.Host` accepts an IPv4 address, an IPv6 address or a hostname, so each connector
+renders it into its own platform's form: Windows encodes IPv6 as `ipv6-literal.net`
+because a UNC path cannot contain a colon, macOS brackets it for the `smb://` URL.
+`Drive.Persistent` is Windows-only — it selects `CONNECT_UPDATE_PROFILE` over
+`CONNECT_TEMPORARY`, and the Mac connector ignores it because NetFS has no equivalent.
+
+`ITrayIcon` renders labels and reports which one was clicked, and knows nothing about
+drives. Deciding what the menu says and what a click means is `TrayIconService`'s job in
+the presentation layer, which is the only layer that can open a DI scope and reach a use
+case — the same split as `IDriveMonitor` and `DriveWatchdog`.
 
 Windows implementations carry `[SupportedOSPlatform("windows")]` and compile on both
 heads; macOS implementations are wrapped in `#if MACCATALYST` because they reference
@@ -161,7 +173,8 @@ Standard MAUI layout, feature-foldered inside `Views/` and `ViewModels/`:
 ```
 App.xaml, AppShell.xaml, MauiProgram.cs, GlobalUsings.cs
 Behaviors/     attached behaviors used from XAML
-Common/        ScopedHandler, PageNames, PresentationAssembly, StorageUsageHelper, WindowSizing
+Common/        ScopedHandler, PageNames, PresentationAssembly, StorageUsageHelper, WindowSizing,
+               MainWindow, DrivePlatform
 Controls/      custom controls and layouts (NavItem, ChartView, HorizontalWrapLayout)
 Converters/    IValueConverter implementations
 Extensions/    DependencyInjection (AddPresensation)
@@ -172,7 +185,7 @@ Messaging/     CommunityToolkit.Mvvm messages, by feature
 Models/        observable display models bound by the views
 Platforms/     MAUI platform heads
 Resources/     AppIcon, Fonts, Images, Languages, Splash, Styles
-Services/      DriveWatchdog, ModalHost, PassphrasePromptService
+Services/      DriveWatchdog, TrayIconService, ModalHost, PassphrasePromptService
 ViewModels/    BaseViewModel + Auditlogs/, Drives/, Settings/, Users/
 Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/, Users/
 ```
@@ -191,9 +204,13 @@ The XAML, viewmodels, converters and behaviours are shared verbatim; only these 
 - `App.CreateWindow` — Catalyst sizes its window here from `Common/WindowSizing`, the
   same rule the Windows lifecycle event applies through `AppWindow`. Change the rule in
   one place and both heads follow.
-- `BaseViewModel.MinimizeApp` — Windows only. Mac Catalyst exposes no public API for
-  minimizing a window scene, so auto-minimize runs its countdown and then does nothing
-  on macOS rather than reaching for a private selector.
+- `Common/MainWindow` — hides, minimizes and restores the app window; Windows only. Mac
+  Catalyst exposes no public API for a window scene, so `BaseViewModel.MinimizeApp` runs
+  its countdown and then does nothing on macOS rather than reaching for a private
+  selector. On Windows it hides to the tray while `TrayIconService` is running, because
+  the icon is then the way back, and falls back to a plain minimize when it is not.
+- `Common/DrivePlatform` — the one flag the shared drive modals bind to, so the
+  "reconnect at sign-in" switch is hidden rather than shown-and-ignored on macOS.
 - `Behaviors/Hover` (hand cursor), `Services/ModalHost` (Escape-to-dismiss) and the
   `LoginPage`/`RegisterPage` Ctrl+Enter shortcut — Windows only, no-ops elsewhere.
 

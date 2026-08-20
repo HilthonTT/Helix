@@ -122,6 +122,10 @@ public sealed partial class AppShell : Shell
         // the signed-in user, so leaving it running would work on the next one's behalf.
         App.ServiceProvider.GetRequiredService<DriveWatchdog>().Stop();
 
+        // The tray menu lists that user's drives and its commands run as them, so it
+        // comes down with the session rather than lingering over the login page.
+        App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
+
         // Same reasoning for the two pieces of once-per-session state: the countdown
         // would otherwise keep running and minimize the window over the login page, and
         // the dashboard's startup pass would never run again for the next user.

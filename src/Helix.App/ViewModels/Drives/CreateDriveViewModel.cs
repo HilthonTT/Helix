@@ -1,8 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
 using Helix.App.Models;
+using Helix.App.Resources.Languages;
 using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
@@ -30,6 +31,15 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool HideSecrets { get; set; }
 
+    /// <summary>
+    /// Hides the "remember at sign-in" switch on platforms that cannot honour it.
+    /// </summary>
+    /// <remarks>
+    /// macOS has no equivalent of a remembered drive mapping, so the switch is not shown
+    /// there at all rather than offered and quietly ignored.
+    /// </remarks>
+    public bool SupportsPersistentMappings => DrivePlatform.SupportsPersistentMappings;
+
     [RelayCommand]
     private async Task SaveAsync()
     {
@@ -42,7 +52,14 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            var request = new CreateDrive.Request(Form.Letter, Form.IpAddress, Form.Name, Form.Username, Form.Password);
+            var request = new CreateDrive.Request(
+                Form.Letter,
+                Form.Host,
+                Form.Name,
+                Form.Username,
+                Form.Password,
+                Form.AutoConnect,
+                Form.Persistent);
 
             Result<Drive> result = await ScopedHandler.HandleAsync((CreateDrive h) => h.Handle(request));
             if (result.IsFailure)
@@ -55,6 +72,44 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
             Close();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Verifies the details against the server without saving them, so a wrong password
+    /// is reported here rather than at the first connect long after the modal is gone.
+    /// </summary>
+    [RelayCommand]
+    private async Task TestConnectionAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            var request = new TestDriveConnection.Request(
+                Form.Letter,
+                Form.Host,
+                Form.Name,
+                Form.Username,
+                Form.Password);
+
+            Result result = await ScopedHandler.HandleAsync((TestDriveConnection h) => h.Handle(request));
+            if (result.IsFailure)
+            {
+                await DisplayErrorAsync(result.Error);
+                return;
+            }
+
+            await DisplaySuccessAsync(AppResources.ConnectionTestSucceeded);
         }
         finally
         {

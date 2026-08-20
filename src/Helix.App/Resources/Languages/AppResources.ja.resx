@@ -261,11 +261,11 @@
   <data name="AddNetworkDriveLetterPlaceholder" xml:space="preserve">
     <value>ネットワークのドライブ文字を追加する</value>
   </data>
-  <data name="NasIpAddress" xml:space="preserve">
-    <value>NAS IPアドレス</value>
+  <data name="NasHost" xml:space="preserve">
+    <value>NAS アドレス</value>
   </data>
-  <data name="AddNasIpAddressPlaceholder" xml:space="preserve">
-    <value>NASのIPアドレスを追加</value>
+  <data name="AddNasHostPlaceholder" xml:space="preserve">
+    <value>IP アドレスまたはホスト名</value>
   </data>
   <data name="DriveName" xml:space="preserve">
     <value>ドライブの名前</value>
@@ -398,5 +398,38 @@
   </data>
   <data name="ShowCredentials" xml:space="preserve">
     <value>認証情報を表示</value>
+  </data>
+  <data name="TestConnection" xml:space="preserve">
+    <value>接続をテスト</value>
+  </data>
+  <data name="ConnectionTestSucceeded" xml:space="preserve">
+    <value>接続に成功しました。</value>
+  </data>
+  <data name="AutoConnectDrive" xml:space="preserve">
+    <value>自動的に接続する</value>
+  </data>
+  <data name="PersistentMapping" xml:space="preserve">
+    <value>Windows サインイン時に再接続する</value>
+  </data>
+  <data name="TrayOpen" xml:space="preserve">
+    <value>Helix を開く</value>
+  </data>
+  <data name="TrayConnectAll" xml:space="preserve">
+    <value>すべてのドライブを接続</value>
+  </data>
+  <data name="TrayDisconnectAll" xml:space="preserve">
+    <value>すべてのドライブを切断</value>
+  </data>
+  <data name="TrayExit" xml:space="preserve">
+    <value>Helix を終了</value>
+  </data>
+  <data name="TrayDriveDisconnected" xml:space="preserve">
+    <value>ドライブが切断されました</value>
+  </data>
+  <data name="TrayDriveReconnected" xml:space="preserve">
+    <value>ドライブが再接続されました</value>
+  </data>
+  <data name="TrayStillRunning" xml:space="preserve">
+    <value>Helix は通知領域で実行中です。</value>
   </data>
 </root>

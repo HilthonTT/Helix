@@ -1,10 +1,19 @@
 namespace Helix.Application.Abstractions.Connector;
 
 /// <summary>A drive whose connectivity is being watched.</summary>
-public sealed record WatchedDrive(Guid Id, string Letter);
+/// <param name="AutoConnect">
+/// Carried through the monitor so the reaction to a drop can tell a drive that wants
+/// chasing from one the user asked to leave alone, without another database round trip
+/// on a background thread.
+/// </param>
+public sealed record WatchedDrive(Guid Id, string Letter, bool AutoConnect = true);
 
 /// <summary>A watched drive that has changed connectivity since the last poll.</summary>
-public sealed record DriveConnectivityChange(Guid DriveId, string Letter, bool IsConnected);
+public sealed record DriveConnectivityChange(
+    Guid DriveId,
+    string Letter,
+    bool IsConnected,
+    bool AutoConnect = true);
 
 /// <summary>
 /// Polls the connectivity of the watched drives in the background and reports

@@ -1,6 +1,8 @@
 ﻿using Helix.Application.Abstractions.Connector;
 using Helix.Domain.Drives;
 using System.ComponentModel;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -29,6 +31,13 @@ internal sealed class WindowsNasConnector : INasConnector
             () => Disconnect(drive),
             timeoutError: () => Result.Failure(DriveErrors.FailedToDisconnect("Disconnection timed out.")),
             failure: message => Result.Failure(DriveErrors.FailedToDisconnect(message)),
+            cancellationToken);
+
+    public Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default) =>
+        RunWithTimeoutAsync(
+            () => Test(drive),
+            timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+            failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
             cancellationToken);
 
     public bool IsConnected(string letter)
@@ -77,11 +86,16 @@ internal sealed class WindowsNasConnector : INasConnector
         {
             dwType = RESOURCETYPE_DISK,
             lpLocalName = $"{drive.Letter.ToUpperInvariant()}:",
-            lpRemoteName = $@"\\{drive.IpAddress}\{drive.Name}",
+            lpRemoteName = RemoteNameFor(drive),
             lpProvider = null,
         };
 
-        int code = WNetAddConnection2W(ref resource, drive.Password, drive.Username, CONNECT_TEMPORARY);
+        // CONNECT_UPDATE_PROFILE writes the mapping into the user profile, so Explorer
+        // restores it at sign-in without Helix running. CONNECT_TEMPORARY is the opposite
+        // and stays the default: the mapping lives exactly as long as the Windows session.
+        uint flags = drive.Persistent ? CONNECT_UPDATE_PROFILE : CONNECT_TEMPORARY;
+
+        int code = WNetAddConnection2W(ref resource, drive.Password, drive.Username, flags);
         return code == NO_ERROR
             ? Result.Success()
             : Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code)));
@@ -90,11 +104,90 @@ internal sealed class WindowsNasConnector : INasConnector
     private static Result Disconnect(Drive drive)
     {
         string local = $"{drive.Letter.ToUpperInvariant()}:";
-        int code = WNetCancelConnection2W(local, 0, fForce: true);
+
+        // A persistent mapping has to be cancelled with the same flag it was made with.
+        // Without it only the live connection drops and Windows re-creates the mapping at
+        // the next sign-in, so the drive the user just disconnected is back tomorrow.
+        uint flags = drive.Persistent ? CONNECT_UPDATE_PROFILE : 0;
+
+        int code = WNetCancelConnection2W(local, flags, fForce: true);
 
         return code == NO_ERROR
             ? Result.Success()
             : Result.Failure(DriveErrors.FailedToDisconnect(DescribeWNetError(code)));
+    }
+
+    /// <summary>
+    /// Authenticates against the share without mapping it to a letter.
+    /// </summary>
+    /// <remarks>
+    /// A null <c>lpLocalName</c> makes this a "deviceless" connection: Windows resolves
+    /// the host, finds the share and checks the credentials, but claims no drive letter.
+    /// That is what makes it safe to run against a half-finished form — the letter may
+    /// still be in use, and the test deliberately says nothing about it either way. The
+    /// session is dropped again straight afterwards so the test leaves nothing behind.
+    /// </remarks>
+    private static Result Test(Drive drive)
+    {
+        string remoteName = RemoteNameFor(drive);
+
+        var resource = new NETRESOURCE
+        {
+            dwType = RESOURCETYPE_DISK,
+            lpLocalName = null,
+            lpRemoteName = remoteName,
+            lpProvider = null,
+        };
+
+        int code = WNetAddConnection2W(ref resource, drive.Password, drive.Username, CONNECT_TEMPORARY);
+        if (code != NO_ERROR)
+        {
+            return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code)));
+        }
+
+        // Best-effort teardown. The question the user asked has already been answered by
+        // this point, and a lingering deviceless session costs nothing and goes away at
+        // sign-out — failing the test over it would misreport working credentials.
+        WNetCancelConnection2W(remoteName, 0, fForce: false);
+
+        return Result.Success();
+    }
+
+    private static string RemoteNameFor(Drive drive) => $@"\\{ToUncHost(drive.Host)}\{drive.Name}";
+
+    /// <summary>
+    /// Renders a host into the form a UNC path accepts.
+    /// </summary>
+    /// <remarks>
+    /// IPv4 addresses and hostnames pass through untouched. An IPv6 literal cannot: a UNC
+    /// path is a filesystem path and a colon is illegal in one. The Windows answer is the
+    /// <c>ipv6-literal.net</c> encoding — colons become hyphens, the scope separator
+    /// <c>%</c> becomes <c>s</c> — which the SMB redirector resolves without a DNS lookup.
+    /// </remarks>
+    internal static string ToUncHost(string host)
+    {
+        string candidate = host.Trim();
+
+        // Accept the bracketed URL form too; that is how an IPv6 address is usually pasted.
+        if (candidate.Length > 2 && candidate[0] == '[' && candidate[^1] == ']')
+        {
+            candidate = candidate[1..^1];
+        }
+
+        if (!candidate.Contains(':', StringComparison.Ordinal) ||
+            !IPAddress.TryParse(candidate, out IPAddress? address) ||
+            address.AddressFamily != AddressFamily.InterNetworkV6)
+        {
+            return candidate;
+        }
+
+        // Rendered from the parsed address rather than the typed text, so that the many
+        // spellings of one address (FD00::5, fd00:0:0:0:0:0:0:5) map to a single literal.
+        string literal = address.ToString()
+            .Replace(':', '-')
+            .Replace('%', 's');
+
+        return $"{literal}.ipv6-literal.net";
     }
 
     private static async Task<Result> RunWithTimeoutAsync(
@@ -141,6 +234,7 @@ internal sealed class WindowsNasConnector : INasConnector
     // --- Win32 P/Invoke ---------------------------------------------------
 
     private const uint RESOURCETYPE_DISK = 0x00000001;
+    private const uint CONNECT_UPDATE_PROFILE = 0x00000001;
     private const uint CONNECT_TEMPORARY = 0x00000004;
 
     private const int NO_ERROR = 0;

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Helix.Domain.Drives;
 
 namespace Helix.App.Models;
@@ -12,7 +12,7 @@ internal sealed partial class UpdateDriveModel : ObservableObject
     public partial string Letter { get; set; }
 
     [ObservableProperty]
-    public partial string IpAddress { get; set; }
+    public partial string Host { get; set; }
 
     [ObservableProperty]
     public partial string Name { get; set; }
@@ -23,14 +23,22 @@ internal sealed partial class UpdateDriveModel : ObservableObject
     [ObservableProperty]
     public partial string Password { get; set; }
 
+    [ObservableProperty]
+    public partial bool AutoConnect { get; set; }
+
+    [ObservableProperty]
+    public partial bool Persistent { get; set; }
+
     public UpdateDriveModel()
     {
         // Partial properties cannot carry field initializers, so defaults are seeded here.
         Letter = string.Empty;
-        IpAddress = string.Empty;
+        Host = string.Empty;
         Name = string.Empty;
         Username = string.Empty;
         Password = string.Empty;
+        AutoConnect = true;
+        Persistent = false;
     }
 
     public UpdateDriveModel(Drive drive)
@@ -38,9 +46,11 @@ internal sealed partial class UpdateDriveModel : ObservableObject
     {
         Id = drive.Id;
         Letter = drive.Letter;
-        IpAddress = drive.IpAddress;
+        Host = drive.Host;
         Name = drive.Name;
         Username = drive.Username;
         Password = drive.Password;
+        AutoConnect = drive.AutoConnect;
+        Persistent = drive.Persistent;
     }
 }

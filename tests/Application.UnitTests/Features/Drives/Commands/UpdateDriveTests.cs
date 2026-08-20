@@ -86,12 +86,16 @@ public sealed class UpdateDriveTests
 
     [Theory]
     [InlineData("")]
-    [InlineData("999.999.999.999")] // Out of range
-    [InlineData("256.256.256.256")] // Out of range
-    [InlineData("192.168.1.1.1")]   // Too many segments
-    [InlineData("192.168.1")]       // Too few segments
-    [InlineData("abc.def.ghi.jkl")] // Non-numeric values
-    public async Task Handle_Should_ReturnError_WhenIpAddressFormatIsInvalid(string invalidIpAddress)
+    [InlineData("999.999.999.999")]  // Dotted-numeric, but out of range
+    [InlineData("256.256.256.256")]  // Dotted-numeric, but out of range
+    [InlineData("192.168.1.1.1")]    // Dotted-numeric with too many segments
+    [InlineData("192.168.1")]        // Dotted-numeric with too few segments
+    [InlineData("nas local")]        // A space is not legal in a hostname
+    [InlineData("-nas")]             // A label may not start with a hyphen
+    [InlineData("nas-")]             // ...nor end with one
+    [InlineData("nas..local")]       // Empty label
+    [InlineData("fd00:::5")]         // Not a parseable IPv6 address
+    public async Task Handle_Should_ReturnError_WhenHostFormatIsInvalid(string invalidHost)
     {
         // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
@@ -103,13 +107,13 @@ public sealed class UpdateDriveTests
         _driveRepositoryMock.IsLetterUniqueAsync(Arg.Is<string>(e => e == Request.Letter), _loggedInUserMock.UserId)
             .Returns(true);
 
-        UpdateDrive.Request invalidRequest = Request with { IpAddress = invalidIpAddress };
+        UpdateDrive.Request invalidRequest = Request with { Host = invalidHost };
 
         // Act
         Result result = await _updateDrive.Handle(invalidRequest);
 
         // Assert
-        result.Error.Should().Be(ValidationErrors.InvalidIpAddress);
+        result.Error.Should().Be(ValidationErrors.InvalidHost);
     }
 
     [Theory]
@@ -119,7 +123,13 @@ public sealed class UpdateDriveTests
     [InlineData("8.8.8.8")]
     [InlineData("255.255.255.255")]
     [InlineData("0.0.0.0")]
-    public async Task Handle_Should_ReturnSuccess_WhenIpAddressFormatIsValid(string validIpAddress)
+    [InlineData("nas.local")]        // The usual way a NAS is reached on a home network
+    [InlineData("MYNAS")]            // Single-label NetBIOS name
+    [InlineData("nas_01.example.com")] // Underscores are legal in a Windows computer name
+    [InlineData("abc.def.ghi.jkl")]  // Not an IP address, but a perfectly good hostname
+    [InlineData("fd00::5")]          // IPv6
+    [InlineData("[fd00::5]")]        // IPv6 in the bracketed form other tools print
+    public async Task Handle_Should_ReturnSuccess_WhenHostFormatIsValid(string validHost)
     {
         // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
@@ -131,7 +141,7 @@ public sealed class UpdateDriveTests
         _driveRepositoryMock.IsLetterUniqueAsync(Arg.Is<string>(e => e == Request.Letter), _loggedInUserMock.UserId)
             .Returns(true);
 
-        UpdateDrive.Request validRequest = Request with { IpAddress = validIpAddress };
+        UpdateDrive.Request validRequest = Request with { Host = validHost };
 
         // Act
         Result result = await _updateDrive.Handle(validRequest);

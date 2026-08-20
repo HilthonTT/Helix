@@ -48,6 +48,28 @@ public sealed class PlatformServicesTests
     }
 
     [Fact]
+    public void AddInfrastructure_Should_BindTheWindowsTrayIcon()
+    {
+        using ServiceProvider provider = BuildProvider();
+
+        ITrayIcon trayIcon = provider.GetRequiredService<ITrayIcon>();
+
+        trayIcon.Should().BeOfType<WindowsTrayIcon>();
+        trayIcon.IsSupported.Should().BeTrue();
+    }
+
+    [Fact]
+    public void AddInfrastructure_Should_KeepTheTrayIconASingleton()
+    {
+        using ServiceProvider provider = BuildProvider();
+
+        // It owns a window and a message-loop thread; a second instance would put a
+        // second icon in the tray.
+        provider.GetRequiredService<ITrayIcon>()
+            .Should().BeSameAs(provider.GetRequiredService<ITrayIcon>());
+    }
+
+    [Fact]
     public void AddInfrastructure_Should_KeepTheNasConnectorASingleton()
     {
         using ServiceProvider provider = BuildProvider();

@@ -48,7 +48,14 @@ public sealed class ExportDrives(
         }
 
         List<DriveImportDto> exportable = drives
-            .Select(d => new DriveImportDto(d.Letter, d.IpAddress, d.Name, d.Username, d.Password))
+            .Select(d => new DriveImportDto(
+                d.Letter,
+                d.Host,
+                d.Name,
+                d.Username,
+                d.Password,
+                d.AutoConnect,
+                d.Persistent))
             .ToList();
 
         string plaintext = JsonSerializer.Serialize(exportable, JsonSerializerOptions);

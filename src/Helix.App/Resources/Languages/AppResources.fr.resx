@@ -261,11 +261,11 @@
   <data name="AddNetworkDriveLetterPlaceholder" xml:space="preserve">
     <value>Ajouter la lettre de lecteur du réseau</value>
   </data>
-  <data name="NasIpAddress" xml:space="preserve">
-    <value>Adresse IP du NAS</value>
+  <data name="NasHost" xml:space="preserve">
+    <value>Adresse du NAS</value>
   </data>
-  <data name="AddNasIpAddressPlaceholder" xml:space="preserve">
-    <value>Ajouter l'adresse IP de votre NAS</value>
+  <data name="AddNasHostPlaceholder" xml:space="preserve">
+    <value>Adresse IP ou nom d'hôte</value>
   </data>
   <data name="DriveName" xml:space="preserve">
     <value>Nom du disque</value>
@@ -398,5 +398,38 @@
   </data>
   <data name="ShowCredentials" xml:space="preserve">
     <value>Afficher les identifiants</value>
+  </data>
+  <data name="TestConnection" xml:space="preserve">
+    <value>Tester la connexion</value>
+  </data>
+  <data name="ConnectionTestSucceeded" xml:space="preserve">
+    <value>La connexion fonctionne.</value>
+  </data>
+  <data name="AutoConnectDrive" xml:space="preserve">
+    <value>Connexion automatique</value>
+  </data>
+  <data name="PersistentMapping" xml:space="preserve">
+    <value>Reconnecter à l'ouverture de session Windows</value>
+  </data>
+  <data name="TrayOpen" xml:space="preserve">
+    <value>Ouvrir Helix</value>
+  </data>
+  <data name="TrayConnectAll" xml:space="preserve">
+    <value>Connecter tous les lecteurs</value>
+  </data>
+  <data name="TrayDisconnectAll" xml:space="preserve">
+    <value>Déconnecter tous les lecteurs</value>
+  </data>
+  <data name="TrayExit" xml:space="preserve">
+    <value>Quitter Helix</value>
+  </data>
+  <data name="TrayDriveDisconnected" xml:space="preserve">
+    <value>Lecteur déconnecté</value>
+  </data>
+  <data name="TrayDriveReconnected" xml:space="preserve">
+    <value>Lecteur reconnecté</value>
+  </data>
+  <data name="TrayStillRunning" xml:space="preserve">
+    <value>Helix continue de fonctionner dans la zone de notification.</value>
   </data>
 </root>

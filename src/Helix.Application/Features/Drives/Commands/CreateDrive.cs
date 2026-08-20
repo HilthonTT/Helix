@@ -13,7 +13,24 @@ public sealed class CreateDrive(
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser) : IHandler
 {
-    public sealed record Request(string Letter, string IpAddress, string Name, string Username, string Password);
+    /// <param name="AutoConnect">
+    /// Whether the drive joins the unattended connect passes. Defaults to true so a
+    /// drive added without thinking about it behaves the way every drive did before
+    /// the flag existed.
+    /// </param>
+    /// <param name="Persistent">
+    /// Whether Windows should remember the mapping across sign-ins. Defaults to false:
+    /// a mapping that outlives the app is a change to the user machine, so it is opted
+    /// into rather than out of.
+    /// </param>
+    public sealed record Request(
+        string Letter,
+        string Host,
+        string Name,
+        string Username,
+        string Password,
+        bool AutoConnect = true,
+        bool Persistent = false);
 
     public async Task<Result<Drive>> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -36,10 +53,12 @@ public sealed class CreateDrive(
         var drive = Drive.Create(
             loggedInUser.UserId,
             request.Letter, 
-            request.IpAddress, 
-            request.Name, 
-            request.Username, 
-            request.Password);
+            request.Host, 
+            request.Name,
+            request.Username,
+            request.Password,
+            request.AutoConnect,
+            request.Persistent);
 
         driveRepository.Insert(drive);
 
@@ -55,12 +74,12 @@ public sealed class CreateDrive(
             return Result.Failure(DriveErrors.NotALetter);
         }
 
-        if (!GeneralValidation.IsValidIpAddress(request.IpAddress))
+        if (!GeneralValidation.IsValidHost(request.Host))
         {
-            return Result.Failure(ValidationErrors.InvalidIpAddress);
+            return Result.Failure(ValidationErrors.InvalidHost);
         }
 
-        string[] properties = [request.Letter, request.IpAddress, request.Name, request.Username, request.Password];
+        string[] properties = [request.Letter, request.Host, request.Name, request.Username, request.Password];
 
         return properties.Any(string.IsNullOrWhiteSpace)
             ? Result.Failure(ValidationErrors.MissingFields)

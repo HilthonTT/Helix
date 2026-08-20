@@ -115,11 +115,11 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add your NAS&apos; IP Address.
+        ///   Looks up a localized string similar to IP address or hostname.
         /// </summary>
-        internal static string AddNasIpAddressPlaceholder {
+        internal static string AddNasHostPlaceholder {
             get {
-                return ResourceManager.GetString("AddNasIpAddressPlaceholder", resourceCulture);
+                return ResourceManager.GetString("AddNasHostPlaceholder", resourceCulture);
             }
         }
         
@@ -520,11 +520,11 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NAS IP Address.
+        ///   Looks up a localized string similar to NAS address.
         /// </summary>
-        internal static string NasIpAddress {
+        internal static string NasHost {
             get {
-                return ResourceManager.GetString("NasIpAddress", resourceCulture);
+                return ResourceManager.GetString("NasHost", resourceCulture);
             }
         }
         
@@ -930,6 +930,104 @@ namespace Helix.App.Resources.Languages {
         internal static string YourUsername {
             get {
                 return ResourceManager.GetString("YourUsername", resourceCulture);
+            }
+        }
+        /// <summary>
+        ///   Looks up a localized string similar to Connect automatically.
+        /// </summary>
+        internal static string AutoConnectDrive {
+            get {
+                return ResourceManager.GetString("AutoConnectDrive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The connection works.
+        /// </summary>
+        internal static string ConnectionTestSucceeded {
+            get {
+                return ResourceManager.GetString("ConnectionTestSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reconnect at Windows sign-in.
+        /// </summary>
+        internal static string PersistentMapping {
+            get {
+                return ResourceManager.GetString("PersistentMapping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test connection.
+        /// </summary>
+        internal static string TestConnection {
+            get {
+                return ResourceManager.GetString("TestConnection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect all drives.
+        /// </summary>
+        internal static string TrayConnectAll {
+            get {
+                return ResourceManager.GetString("TrayConnectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect all drives.
+        /// </summary>
+        internal static string TrayDisconnectAll {
+            get {
+                return ResourceManager.GetString("TrayDisconnectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drive disconnected.
+        /// </summary>
+        internal static string TrayDriveDisconnected {
+            get {
+                return ResourceManager.GetString("TrayDriveDisconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drive reconnected.
+        /// </summary>
+        internal static string TrayDriveReconnected {
+            get {
+                return ResourceManager.GetString("TrayDriveReconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exit Helix.
+        /// </summary>
+        internal static string TrayExit {
+            get {
+                return ResourceManager.GetString("TrayExit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open Helix.
+        /// </summary>
+        internal static string TrayOpen {
+            get {
+                return ResourceManager.GetString("TrayOpen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Helix is still running in the notification area.
+        /// </summary>
+        internal static string TrayStillRunning {
+            get {
+                return ResourceManager.GetString("TrayStillRunning", resourceCulture);
             }
         }
     }

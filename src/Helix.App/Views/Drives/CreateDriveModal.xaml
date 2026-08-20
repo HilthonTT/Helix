@@ -54,10 +54,10 @@
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="{l10n:Translate NasIpAddress}" Style="{StaticResource FieldLabel}"/>
+                        <Label Text="{l10n:Translate NasHost}" Style="{StaticResource FieldLabel}"/>
                         <Border Style="{StaticResource Field}">
-                            <Entry Placeholder="{l10n:Translate AddNasIpAddressPlaceholder}"
-                                   Text="{Binding Form.IpAddress}"
+                            <Entry Placeholder="{l10n:Translate AddNasHostPlaceholder}"
+                                   Text="{Binding Form.Host}"
                                    IsPassword="{Binding HideSecrets}"
                                    IsEnabled="{Binding IsNotBusy}"/>
                         </Border>
@@ -93,11 +93,34 @@
                                 IsToggled="{Binding HideSecrets, Converter={StaticResource InvertedBoolConverter}, Mode=TwoWay}"/>
                     </Grid>
 
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
+                        <Label Text="{l10n:Translate AutoConnectDrive}"
+                               Style="{StaticResource Caption}"
+                               VerticalOptions="Center"/>
+                        <Switch Grid.Column="1"
+                                Scale="0.85"
+                                HorizontalOptions="End"
+                                IsToggled="{Binding Form.AutoConnect, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <!-- Hidden on macOS, which has no remembered-mapping equivalent. -->
+                    <Grid ColumnDefinitions="*,Auto"
+                          Margin="0,2,0,0"
+                          IsVisible="{Binding SupportsPersistentMappings}">
+                        <Label Text="{l10n:Translate PersistentMapping}"
+                               Style="{StaticResource Caption}"
+                               VerticalOptions="Center"/>
+                        <Switch Grid.Column="1"
+                                Scale="0.85"
+                                HorizontalOptions="End"
+                                IsToggled="{Binding Form.Persistent, Mode=TwoWay}"/>
+                    </Grid>
+
                 </VerticalStackLayout>
             </ScrollView>
 
             <!-- Footer -->
-            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,16,24,24">
+            <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="12" Padding="24,16,24,24">
                 <Button Style="{StaticResource ButtonSecondary}"
                         HorizontalOptions="Fill"
                         Text="{l10n:Translate Cancel}"
@@ -105,6 +128,13 @@
                         IsEnabled="{Binding IsNotBusy}"/>
 
                 <Button Grid.Column="1"
+                        Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate TestConnection}"
+                        Command="{Binding TestConnectionCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Grid.Column="2"
                         HorizontalOptions="Fill"
                         Text="{l10n:Translate Save}"
                         Command="{Binding SaveCommand}"

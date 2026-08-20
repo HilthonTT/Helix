@@ -261,11 +261,11 @@
   <data name="AddNetworkDriveLetterPlaceholder" xml:space="preserve">
     <value>Hinzufügen des Laufwerksbuchstabens des Netzwerks</value>
   </data>
-  <data name="NasIpAddress" xml:space="preserve">
-    <value>NAS-IP-Adresse</value>
+  <data name="NasHost" xml:space="preserve">
+    <value>NAS-Adresse</value>
   </data>
-  <data name="AddNasIpAddressPlaceholder" xml:space="preserve">
-    <value>Fügen Sie die IP-Adresse Ihres NAS hinzu</value>
+  <data name="AddNasHostPlaceholder" xml:space="preserve">
+    <value>IP-Adresse oder Hostname</value>
   </data>
   <data name="DriveName" xml:space="preserve">
     <value>Name des Laufwerks</value>
@@ -398,5 +398,38 @@
   </data>
   <data name="ShowCredentials" xml:space="preserve">
     <value>Zugangsdaten anzeigen</value>
+  </data>
+  <data name="TestConnection" xml:space="preserve">
+    <value>Verbindung testen</value>
+  </data>
+  <data name="ConnectionTestSucceeded" xml:space="preserve">
+    <value>Die Verbindung funktioniert.</value>
+  </data>
+  <data name="AutoConnectDrive" xml:space="preserve">
+    <value>Automatisch verbinden</value>
+  </data>
+  <data name="PersistentMapping" xml:space="preserve">
+    <value>Bei der Windows-Anmeldung wiederherstellen</value>
+  </data>
+  <data name="TrayOpen" xml:space="preserve">
+    <value>Helix öffnen</value>
+  </data>
+  <data name="TrayConnectAll" xml:space="preserve">
+    <value>Alle Laufwerke verbinden</value>
+  </data>
+  <data name="TrayDisconnectAll" xml:space="preserve">
+    <value>Alle Laufwerke trennen</value>
+  </data>
+  <data name="TrayExit" xml:space="preserve">
+    <value>Helix beenden</value>
+  </data>
+  <data name="TrayDriveDisconnected" xml:space="preserve">
+    <value>Laufwerk getrennt</value>
+  </data>
+  <data name="TrayDriveReconnected" xml:space="preserve">
+    <value>Laufwerk wieder verbunden</value>
+  </data>
+  <data name="TrayStillRunning" xml:space="preserve">
+    <value>Helix läuft weiterhin im Infobereich.</value>
   </data>
 </root>

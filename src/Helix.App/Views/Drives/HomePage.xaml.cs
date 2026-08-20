@@ -25,6 +25,7 @@ public sealed partial class HomePage : ContentPage
     private readonly HomeViewModel _viewModel;
     private readonly ModalHost _modals;
     private readonly DriveWatchdog _watchdog;
+    private readonly TrayIconService _tray;
 
     public HomePage()
     {
@@ -36,6 +37,7 @@ public sealed partial class HomePage : ContentPage
 
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
         _watchdog = App.ServiceProvider.GetRequiredService<DriveWatchdog>();
+        _tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
 
         _modals = new ModalHost(BlockScreen);
         _modals.Register(CreateDrive, CreateDriveLayout, CreateDriveView);
@@ -70,6 +72,9 @@ public sealed partial class HomePage : ContentPage
             // Started here rather than at app start: the watch set comes from GetDrives,
             // which requires a signed-in user.
             await _watchdog.StartAsync();
+
+            // Same reason — the tray menu lists the signed-in user's drives.
+            await _tray.StartAsync();
         }
         catch (Exception ex)
         {

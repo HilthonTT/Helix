@@ -1,13 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Helix.Application.Abstractions.Time;
+using Helix.App.Services;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
-#if WINDOWS
-using Microsoft.UI;
-using Microsoft.UI.Windowing;
-#endif
-using AppBase = Microsoft.Maui.Controls.Application;
 using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.App.ViewModels;
@@ -109,45 +105,32 @@ public abstract partial class BaseViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Sends the window to the taskbar when the auto-minimize countdown runs out.
+    /// Puts the window away when the auto-minimize countdown runs out — into the tray
+    /// where there is one, otherwise onto the taskbar.
     /// </summary>
     /// <remarks>
-    /// Windows-only. Mac Catalyst exposes no public API for minimizing a window scene —
-    /// the AppKit route needs a private selector that would fail App Review — so on
-    /// macOS the countdown still runs and still offers its redo chip, it just leaves the
-    /// window where it is. Better a setting that under-delivers than one that crashes.
+    /// Hiding is only offered while the tray icon is up, because the icon is then the
+    /// way back. Without it the window would go somewhere with no route to return, so
+    /// the old plain-minimize behaviour stands.
+    ///
+    /// Mac Catalyst exposes no public API for either — the AppKit route needs a private
+    /// selector that would fail App Review — so there the countdown still runs and still
+    /// offers its redo chip, it just leaves the window where it is. Better a setting
+    /// that under-delivers than one that crashes.
     /// </remarks>
     public static void MinimizeApp()
     {
-#if WINDOWS
-        // The window list is only safe to read on the UI thread, and this is called from
-        // a timer callback — so the checks happen inside the dispatch, not before it,
-        // where they would have described a different moment (and dereferenced a null
-        // App.Current on the way out of the process).
-        MainThread.BeginInvokeOnMainThread(() =>
+        TrayIconService tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
+
+        if (tray.IsRunning)
         {
-            AppBase? app = App.Current;
-            if (app is null || app.Windows.Count == 0)
-            {
-                return;
-            }
+            MainWindow.HideToTray();
+            tray.NotifyHiddenToTray();
 
-            object? nativeWindow = app.Windows[0].Handler?.PlatformView;
-            if (nativeWindow is null)
-            {
-                return;
-            }
+            return;
+        }
 
-            IntPtr windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(nativeWindow);
-            WindowId windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
-            AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
-
-            if (appWindow.Presenter is OverlappedPresenter presenter)
-            {
-                presenter.Minimize();
-            }
-        });
-#endif
+        MainWindow.Minimize();
     }
 
     /// <summary>

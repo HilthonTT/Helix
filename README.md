@@ -70,11 +70,27 @@ your drive configurations in an encrypted local database.
 at once. Failed connections — an incorrect username or password, for example — are reported
 with a clear per-drive message instead of interrupting the app.
 
+**Address a NAS however you reach it.** An IPv4 address, an IPv6 address or a hostname —
+`192.168.0.10`, `fd00::5`, `nas.local` or plain `MYNAS`. A name keeps working when the
+server's DHCP lease moves.
+
+**Test before you save.** Check a host, share and password against the server from the add
+and edit dialogs. Nothing is mounted and no drive letter is claimed, so a test is safe to
+run against a half-finished form.
+
 **Connection dashboard.** See which drives are connected, total storage usage, and a live
 status chart, all on one screen.
 
-**Auto-connect on startup.** Optionally reconnect every drive when the app launches, and
-start Helix with Windows.
+**Runs from the notification area.** A tray icon shows how many drives are up, connects or
+disconnects any of them from its menu, and raises a notification when one drops or comes
+back. Auto-minimize puts the window away there rather than onto the taskbar.
+
+**Auto-connect on startup.** Optionally reconnect drives when the app launches, and start
+Helix with Windows. Auto-connect can be turned off per drive, so the ones you only want on
+demand stay down until you ask — "connect all" still connects everything.
+
+**Remembered mappings.** Mark a drive to be restored at Windows sign-in, and Explorer
+brings it back without Helix running. Windows only; macOS has no equivalent.
 
 **Encrypted import and export.** Back up your drive configurations to a passphrase-protected
 `.helixvault` file (AES-256-GCM) and restore them on any machine.

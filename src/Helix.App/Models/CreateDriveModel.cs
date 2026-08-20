@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Helix.App.Models;
 
@@ -8,17 +8,22 @@ internal sealed partial class CreateDriveModel : ObservableObject
     {
         // Partial properties cannot carry field initializers, so defaults are seeded here.
         Letter = string.Empty;
-        IpAddress = string.Empty;
+        Host = string.Empty;
         Name = string.Empty;
         Username = string.Empty;
         Password = string.Empty;
+
+        // Matches the handler's own default: a drive added without touching the switch
+        // takes part in the automatic passes, the way every drive did before the flag.
+        AutoConnect = true;
+        Persistent = false;
     }
 
     [ObservableProperty]
     public partial string Letter { get; set; }
 
     [ObservableProperty]
-    public partial string IpAddress { get; set; }
+    public partial string Host { get; set; }
 
     [ObservableProperty]
     public partial string Name { get; set; }
@@ -28,4 +33,10 @@ internal sealed partial class CreateDriveModel : ObservableObject
 
     [ObservableProperty]
     public partial string Password { get; set; }
+
+    [ObservableProperty]
+    public partial bool AutoConnect { get; set; }
+
+    [ObservableProperty]
+    public partial bool Persistent { get; set; }
 }

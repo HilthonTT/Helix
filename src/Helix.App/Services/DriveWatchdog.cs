@@ -117,7 +117,7 @@ internal sealed class DriveWatchdog
             return;
         }
 
-        _monitor.Watch([.. result.Value.Select(drive => new WatchedDrive(drive.Id, drive.Letter))]);
+        _monitor.Watch([.. result.Value.Select(drive => new WatchedDrive(drive.Id, drive.Letter, drive.AutoConnect))]);
     }
 
     private void OnConnectivityChanged(object? sender, IReadOnlyList<DriveConnectivityChange> changes)
@@ -131,7 +131,7 @@ internal sealed class DriveWatchdog
     {
         try
         {
-            bool reconnect = await IsAutoConnectEnabledAsync();
+            bool autoConnectEnabled = await IsAutoConnectEnabledAsync();
 
             foreach (DriveConnectivityChange change in changes)
             {
@@ -141,6 +141,12 @@ internal sealed class DriveWatchdog
                     Forget(change.DriveId);
                     continue;
                 }
+
+                // Both switches have to be on: the user-level setting turns unattended
+                // reconnecting on at all, the drive's own flag says whether this one
+                // takes part. A drive excluded here still gets its drop recorded, which
+                // is the other half of what this handler is for.
+                bool reconnect = autoConnectEnabled && change.AutoConnect;
 
                 await AttemptAsync(change.DriveId, change.Letter, reconnect, recordDrop: true);
             }

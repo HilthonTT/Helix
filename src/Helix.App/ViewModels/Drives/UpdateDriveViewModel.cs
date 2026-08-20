@@ -1,8 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
 using Helix.App.Models;
+using Helix.App.Resources.Languages;
 using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
@@ -31,6 +32,12 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool HideSecrets { get; set; }
 
+    /// <summary>
+    /// Hides the "remember at sign-in" switch on platforms that cannot honour it — see
+    /// <see cref="DrivePlatform.SupportsPersistentMappings"/>.
+    /// </summary>
+    public bool SupportsPersistentMappings => DrivePlatform.SupportsPersistentMappings;
+
     [RelayCommand]
     private async Task UpdateAsync()
     {
@@ -43,7 +50,15 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            var request = new UpdateDrive.Request(Drive.Id, Drive.Letter, Drive.IpAddress, Drive.Name, Drive.Username, Drive.Password);
+            var request = new UpdateDrive.Request(
+                Drive.Id,
+                Drive.Letter,
+                Drive.Host,
+                Drive.Name,
+                Drive.Username,
+                Drive.Password,
+                Drive.AutoConnect,
+                Drive.Persistent);
 
             Result result = await ScopedHandler.HandleAsync((UpdateDrive h) => h.Handle(request));
             if (result.IsFailure)
@@ -56,6 +71,44 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
             WeakReferenceMessenger.Default.Send(new DriveUpdatedMessage(driveDisplay));
 
             Close();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Verifies the details on screen against the server without saving them, so an
+    /// edit that breaks the connection is caught before it replaces a working one.
+    /// </summary>
+    [RelayCommand]
+    private async Task TestConnectionAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            var request = new TestDriveConnection.Request(
+                Drive.Letter,
+                Drive.Host,
+                Drive.Name,
+                Drive.Username,
+                Drive.Password);
+
+            Result result = await ScopedHandler.HandleAsync((TestDriveConnection h) => h.Handle(request));
+            if (result.IsFailure)
+            {
+                await DisplayErrorAsync(result.Error);
+                return;
+            }
+
+            await DisplaySuccessAsync(AppResources.ConnectionTestSucceeded);
         }
         finally
         {
@@ -87,7 +140,7 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 return;
             }
 
-            Drive = new UpdateDriveModel(result.Value);;
+            Drive = new UpdateDriveModel(result.Value);
         });
     }
 }

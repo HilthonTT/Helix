@@ -22,6 +22,10 @@ public static class DependencyInjection
         // Owns the reaction to connectivity changes for the app's lifetime.
         services.AddSingleton<DriveWatchdog>();
 
+        // Owns the tray icon's menu and the commands behind it, likewise for the app's
+        // lifetime — the icon it drives is a singleton and outlives every page.
+        services.AddSingleton<TrayIconService>();
+
         services.AddScoped<HomePage>();
 
         return services;

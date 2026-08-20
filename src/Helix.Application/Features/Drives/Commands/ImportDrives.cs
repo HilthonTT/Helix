@@ -87,7 +87,15 @@ public sealed class ImportDrives(
         // Build candidate Drive entities (with fresh Ids + correct UserId) so that
         // the existing-letter check can use the same repository method.
         List<Drive> candidates = distinct
-            .Select(d => Drive.Create(loggedInUser.UserId, d.Letter, d.IpAddress, d.Name, d.Username, d.Password))
+            .Select(d => Drive.Create(
+                loggedInUser.UserId,
+                d.Letter,
+                d.EffectiveHost,
+                d.Name,
+                d.Username,
+                d.Password,
+                d.AutoConnect,
+                d.Persistent))
             .ToList();
 
         List<string> existingDriveLetters = await driveRepository.GetExistingDriveLettersAsync(
@@ -123,7 +131,7 @@ public sealed class ImportDrives(
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(dto.IpAddress) || !GeneralValidation.IsValidIpAddress(dto.IpAddress))
+        if (!GeneralValidation.IsValidHost(dto.EffectiveHost))
         {
             return false;
         }

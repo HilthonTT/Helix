@@ -89,17 +89,24 @@ public static class DependencyInjection
 
         services.AddScoped<IStartupService, WindowsStartupService>();
         services.AddScoped<IDesktopService, WindowsDesktopService>();
+
+        // Owns a window and a thread for the app's lifetime, so it can only be a singleton.
+        services.AddSingleton<ITrayIcon, WindowsTrayIcon>();
 #elif MACCATALYST
         services.AddSingleton<INasConnector, MacNasConnector>();
 
         services.AddScoped<IStartupService, MacStartupService>();
         services.AddScoped<IDesktopService, MacDesktopService>();
+
+        // No menu-bar status item from a Catalyst process; the callers check IsSupported.
+        services.AddSingleton<ITrayIcon, UnsupportedTrayIcon>();
 #else
         // Fail at composition rather than at the first drive connection: a head added
         // without its platform services would otherwise look fine until it was used.
         throw new PlatformNotSupportedException(
             "Helix has no platform services for this target framework. Add implementations of " +
-            $"{nameof(INasConnector)}, {nameof(IStartupService)} and {nameof(IDesktopService)} for it.");
+            $"{nameof(INasConnector)}, {nameof(IStartupService)}, {nameof(IDesktopService)} and " +
+            $"{nameof(ITrayIcon)} for it.");
 #endif
 
         return services;

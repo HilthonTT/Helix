@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<DisconnectDrive>();
         services.AddScoped<DisconnectAllDrives>();
         services.AddScoped<ReconnectDrive>();
+        services.AddScoped<TestDriveConnection>();
 
         services.AddScoped<ExportDrives>();
         services.AddScoped<ImportDrives>();

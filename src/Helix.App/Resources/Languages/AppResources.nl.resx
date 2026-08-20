@@ -261,11 +261,11 @@
   <data name="AddNetworkDriveLetterPlaceholder" xml:space="preserve">
     <value>De stationsletter van het netwerk toevoegen</value>
   </data>
-  <data name="NasIpAddress" xml:space="preserve">
-    <value>IP-adres van de NAS</value>
+  <data name="NasHost" xml:space="preserve">
+    <value>NAS-adres</value>
   </data>
-  <data name="AddNasIpAddressPlaceholder" xml:space="preserve">
-    <value>Voeg het IP-adres van uw NAS toe</value>
+  <data name="AddNasHostPlaceholder" xml:space="preserve">
+    <value>IP-adres of hostnaam</value>
   </data>
   <data name="DriveName" xml:space="preserve">
     <value>De naam van Drive</value>
@@ -398,5 +398,38 @@
   </data>
   <data name="ShowCredentials" xml:space="preserve">
     <value>Inloggegevens tonen</value>
+  </data>
+  <data name="TestConnection" xml:space="preserve">
+    <value>Verbinding testen</value>
+  </data>
+  <data name="ConnectionTestSucceeded" xml:space="preserve">
+    <value>De verbinding werkt.</value>
+  </data>
+  <data name="AutoConnectDrive" xml:space="preserve">
+    <value>Automatisch verbinden</value>
+  </data>
+  <data name="PersistentMapping" xml:space="preserve">
+    <value>Opnieuw verbinden bij Windows-aanmelding</value>
+  </data>
+  <data name="TrayOpen" xml:space="preserve">
+    <value>Helix openen</value>
+  </data>
+  <data name="TrayConnectAll" xml:space="preserve">
+    <value>Alle schijven verbinden</value>
+  </data>
+  <data name="TrayDisconnectAll" xml:space="preserve">
+    <value>Alle schijven loskoppelen</value>
+  </data>
+  <data name="TrayExit" xml:space="preserve">
+    <value>Helix afsluiten</value>
+  </data>
+  <data name="TrayDriveDisconnected" xml:space="preserve">
+    <value>Schijf losgekoppeld</value>
+  </data>
+  <data name="TrayDriveReconnected" xml:space="preserve">
+    <value>Schijf opnieuw verbonden</value>
+  </data>
+  <data name="TrayStillRunning" xml:space="preserve">
+    <value>Helix draait nog steeds in het systeemvak.</value>
   </data>
 </root>

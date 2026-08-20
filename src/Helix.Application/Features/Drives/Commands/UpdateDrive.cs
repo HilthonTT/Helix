@@ -14,12 +14,14 @@ public sealed class UpdateDrive(
     ILoggedInUser loggedInUser) : IHandler
 {
     public sealed record Request(
-        Guid DriveId, 
-        string Letter, 
-        string IpAddress, 
-        string Name, 
-        string Username, 
-        string Password);
+        Guid DriveId,
+        string Letter,
+        string Host,
+        string Name,
+        string Username,
+        string Password,
+        bool AutoConnect = true,
+        bool Persistent = false);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -53,7 +55,14 @@ public sealed class UpdateDrive(
             return Result.Failure(DriveErrors.LetterNotUnique(request.Letter));
         }
 
-        drive.Update(request.Letter, request.IpAddress, request.Name, request.Username, request.Password);
+        drive.Update(
+            request.Letter,
+            request.Host,
+            request.Name,
+            request.Username,
+            request.Password,
+            request.AutoConnect,
+            request.Persistent);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -67,12 +76,12 @@ public sealed class UpdateDrive(
             return Result.Failure(DriveErrors.NotALetter);
         }
 
-        if (!GeneralValidation.IsValidIpAddress(request.IpAddress))
+        if (!GeneralValidation.IsValidHost(request.Host))
         {
-            return Result.Failure(ValidationErrors.InvalidIpAddress);
+            return Result.Failure(ValidationErrors.InvalidHost);
         }
 
-        string[] properties = [request.Letter, request.IpAddress, request.Name, request.Username, request.Password];
+        string[] properties = [request.Letter, request.Host, request.Name, request.Username, request.Password];
 
         return properties.Any(string.IsNullOrWhiteSpace)
             ? Result.Failure(ValidationErrors.MissingFields)

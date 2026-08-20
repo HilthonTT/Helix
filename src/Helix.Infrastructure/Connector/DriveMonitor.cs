@@ -138,7 +138,7 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
                 }
 
                 _baseline[letter] = isConnected;
-                changes.Add(new DriveConnectivityChange(drive.Id, drive.Letter, isConnected));
+                changes.Add(new DriveConnectivityChange(drive.Id, drive.Letter, isConnected, drive.AutoConnect));
             }
         }
 

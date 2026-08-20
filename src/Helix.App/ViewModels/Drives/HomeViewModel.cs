@@ -124,6 +124,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
             IsBusy = true;
 
             // ConnectAllDrives.Handle is already fully async — no need to offload via Task.Run.
+            // No OnlyAutoConnect here: the user pressed the button, so drives held back
+            // from the automatic passes are still meant to come up.
             Result result = await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle());
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
@@ -198,7 +200,10 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         // ConnectAllDrives.Handle internally runs Task.WhenAll across all disconnected
         // drives — much faster than the previous serial per-drive message dispatch.
-        Result connectResult = await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle());
+        // OnlyAutoConnect: this pass is unattended, so each drive's own flag decides
+        // whether it takes part.
+        Result connectResult = await ScopedHandler.HandleAsync(
+            (ConnectAllDrives h) => h.Handle(new ConnectAllDrives.Request(OnlyAutoConnect: true)));
 
         WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
