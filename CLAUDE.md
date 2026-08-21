@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Helix is a .NET MAUI desktop app for managing connections to NAS drives. It ships two heads:
 
-- **Windows** — `net10.0-windows10.0.19041.0`. Open `Helix.sln` in Visual Studio 2022 to build/run.
+- **Windows** — `net10.0-windows10.0.19041.0`. Open `Helix.slnx` in Visual Studio 2022 to build/run.
 - **macOS** — `net10.0-maccatalyst`. Build on a Mac with Xcode installed; Catalyst cannot be compiled from Windows.
 
 `Helix.App` and `Helix.Infrastructure` each gate their target frameworks on the host OS, so `dotnet build` produces the right head on either machine without a `-f` switch. Adding a target framework to one of those projects means adding it to both.
@@ -16,8 +16,8 @@ Helix is a .NET MAUI desktop app for managing connections to NAS drives. It ship
 Build and test from the repo root:
 
 ```bash
-dotnet build Helix.sln
-dotnet test Helix.sln
+dotnet build Helix.slnx
+dotnet test Helix.slnx
 dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
 dotnet test tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj
 dotnet test tests/ArchitectureTests/ArchitectureTests.csproj

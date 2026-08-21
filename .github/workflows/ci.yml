@@ -46,10 +46,10 @@ jobs:
         run: dotnet workload install maui
 
       - name: Restore
-        run: dotnet restore Helix.sln
+        run: dotnet restore Helix.slnx
 
       - name: Build
-        run: dotnet build Helix.sln --configuration Release --no-restore
+        run: dotnet build Helix.slnx --configuration Release --no-restore
 
       - name: Test (Application)
         run: dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=application.trx" --results-directory TestResults

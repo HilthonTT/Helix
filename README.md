@@ -200,17 +200,17 @@ You will need:
 ```bash
 git clone https://github.com/HilthonTT/Helix.git
 cd Helix
-dotnet build Helix.sln
+dotnet build Helix.slnx
 ```
 
 `Helix.App` and `Helix.Infrastructure` gate their target frameworks on the host OS, so the
 build produces the right head on either machine without a `-f` switch.
 
-On Windows, open `Helix.sln` in Visual Studio 2022, set `Helix.App` as the startup project
+On Windows, open `Helix.slnx` in Visual Studio 2022, set `Helix.App` as the startup project
 and press F5 — the app is launched from the IDE rather than with `dotnet run` because of its
 Windows packaging configuration.
 
-On macOS, build the app project on its own. `Helix.sln` also contains the test projects,
+On macOS, build the app project on its own. `Helix.slnx` also contains the test projects,
 which target `net10.0-windows` and cannot be built there:
 
 ```bash
@@ -222,7 +222,7 @@ dotnet build src/Helix.App/Helix.App.csproj
 The suite targets `net10.0-windows10.0.19041.0`, so it runs on Windows.
 
 ```bash
-dotnet test Helix.sln
+dotnet test Helix.slnx
 
 dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
 dotnet test tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj
@@ -336,7 +336,7 @@ the pattern in full; `CLAUDE.md` records the reasoning behind the sharper edges.
 Every push and pull request to `main` runs the [CI workflow](.github/workflows/ci.yml):
 
 - **Build & Test (Windows)** — installs the .NET 10 SDK and the MAUI workload, builds
-  `Helix.sln` in Release, and runs the Application, Infrastructure and Architecture suites.
+  `Helix.slnx` in Release, and runs the Application, Infrastructure and Architecture suites.
 - **Build (macOS)** — compile-verifies the Mac Catalyst head, which is the only place
   Infrastructure's macOS platform services get built at all.
 

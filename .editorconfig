@@ -1,6 +1,6 @@
 # EditorConfig — https://editorconfig.org
 # Formatting and C# style rules for Helix. Applied automatically by Visual Studio
-# and by `dotnet format Helix.sln`.
+# and by `dotnet format Helix.slnx`.
 root = true
 
 [*]
@@ -21,8 +21,8 @@ trim_trailing_whitespace = false
 [*.{csproj,props,targets,config,nuspec,resx,xaml,xml}]
 indent_size = 2
 
-[*.sln]
-indent_style = tab
+[*.slnx]
+indent_size = 2
 
 ##########################################
 # C#

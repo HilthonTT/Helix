@@ -14,17 +14,17 @@ By participating you agree to abide by the [Code of Conduct](CODE_OF_CONDUCT.md)
 ```bash
 git clone https://github.com/HilthonTT/Helix.git
 cd Helix
-dotnet build Helix.sln
+dotnet build Helix.slnx
 ```
 
-Open `Helix.sln`, set `Helix.App` as the startup project, and run. The app is normally launched from Visual Studio rather than `dotnet run` because of its Windows packaging configuration.
+Open `Helix.slnx`, set `Helix.App` as the startup project, and run. The app is normally launched from Visual Studio rather than `dotnet run` because of its Windows packaging configuration.
 
 ## Before you open a pull request
 
 Run the full check locally — this is exactly what CI runs:
 
 ```bash
-dotnet build Helix.sln
+dotnet build Helix.slnx
 dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
 dotnet test tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj
 dotnet test tests/ArchitectureTests/ArchitectureTests.csproj
@@ -138,7 +138,7 @@ User-facing strings belong in `src/Helix.App/Resources/Languages/AppResources.re
 `.editorconfig` at the repository root defines the formatting and C# style rules. Visual Studio applies them automatically; from the CLI:
 
 ```bash
-dotnet format Helix.sln
+dotnet format Helix.slnx
 ```
 
 Conventions used throughout the codebase:
