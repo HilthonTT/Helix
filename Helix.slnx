@@ -1,0 +1,24 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/Helix.App/Helix.App.csproj">
+      <BuildType Solution="Debug|Any CPU" Project="Release" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="Debug|x86" Project="x86" />
+      <Deploy />
+    </Project>
+    <Project Path="src/Helix.Application/Helix.Application.csproj" />
+    <Project Path="src/Helix.Domain/Helix.Domain.csproj" />
+    <Project Path="src/Helix.Infrastructure/Helix.Infrastructure.csproj" />
+    <Project Path="src/SharedKernel/SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Application.UnitTests/Application.UnitTests.csproj" />
+    <Project Path="tests/ArchitectureTests/ArchitectureTests.csproj" />
+    <Project Path="tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj" />
+  </Folder>
+</Solution>
