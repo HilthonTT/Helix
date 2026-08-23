@@ -193,6 +193,36 @@ public sealed class UpdateInstallerTests : IDisposable
     }
 
     [Fact]
+    public async Task StageAsync_Should_KeepTheDownloadInsideTheStagingFolder_WhateverTheAssetIsCalled()
+    {
+        // The asset name is whatever the release carries. Combined into a path unchecked,
+        // a name with a parent-directory segment in it writes outside the staging folder.
+        //
+        // Staged from something that will not unpack on purpose: that is the one path
+        // that leaves the downloaded file on disk to be found, where a run that succeeds
+        // or fails to download deletes it and would hide where it had been written.
+        UpdateInstaller installer = Installer(() => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("not an archive", Encoding.UTF8),
+        });
+
+        var update = new UpdateCheck(
+            true,
+            "2.0.0",
+            "v2.2.0",
+            "https://example.invalid/release",
+            "https://example.invalid/helix.zip",
+            "../../escaped.zip");
+
+        Result<string> result = await installer.StageAsync(update);
+
+        result.Error.Should().Be(UpdateErrors.UnreadableDownload);
+
+        File.Exists(Path.Combine(_root, "escaped.zip")).Should().BeFalse();
+        Directory.GetFiles(StagingRoot, "escaped.zip", SearchOption.AllDirectories).Should().ContainSingle();
+    }
+
+    [Fact]
     public void Apply_Should_Refuse_AStagedFolderThatIsNotThere()
     {
         UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));

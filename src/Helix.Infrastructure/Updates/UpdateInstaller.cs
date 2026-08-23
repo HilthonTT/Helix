@@ -128,7 +128,11 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             return Result.Failure<string>(UpdateErrors.DownloadFailed);
         }
 
-        string archivePath = Path.Combine(releaseDirectory, update.AssetName ?? "update.zip");
+        // Named after the asset for the log's sake, but never trusted as a path: the
+        // name is whatever the release carries, and Path.Combine with something holding
+        // a separator or a parent-directory segment would write outside the staging
+        // folder.
+        string archivePath = Path.Combine(releaseDirectory, ArchiveFileName(update.AssetName));
 
         Result download = await DownloadAsync(update.DownloadUrl, archivePath, progress, cancellationToken);
         if (download.IsFailure)
@@ -462,6 +466,23 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 #else
         path.Replace("\"", "\\\"");
 #endif
+
+    /// <summary>
+    /// A safe file name for the downloaded archive, whatever the release called it.
+    /// </summary>
+    private static string ArchiveFileName(string? assetName)
+    {
+        if (string.IsNullOrWhiteSpace(assetName))
+        {
+            return "update.zip";
+        }
+
+        // GetFileName strips any directory part; Sanitize deals with the rest, and a
+        // name that was nothing but a path separator leaves nothing behind.
+        string name = Sanitize(Path.GetFileName(assetName));
+
+        return string.IsNullOrWhiteSpace(name) ? "update.zip" : name;
+    }
 
     private static string Sanitize(string version) =>
         string.Concat(version.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));

@@ -1,4 +1,4 @@
-namespace Helix.App.Common;
+﻿namespace Helix.App.Common;
 
 /// <summary>
 /// The running version, in the three-part form the releases are tagged with.
@@ -11,7 +11,7 @@ namespace Helix.App.Common;
 /// </remarks>
 internal static class VersionInfo
 {
-    /// <summary>The running version as "2.1.0", ready to put in front of the user.</summary>
+    /// <summary>The running version as "2.2.0", ready to put in front of the user.</summary>
     public static string Display => Format(AppInfo.Current.VersionString);
 
     /// <summary>
@@ -19,16 +19,16 @@ internal static class VersionInfo
     /// </summary>
     /// <remarks>
     /// Always three, so what is shown matches the tag on the releases page exactly and
-    /// can be compared against it at a glance. Trimming to major.minor showed 2.1.0 as
-    /// "2.1" and 2.0.1 as "2.0" — in the second case still naming the version the user
+    /// can be compared against it at a glance. Trimming to major.minor showed 2.2.0 as
+    /// "2.2" and 2.0.1 as "2.0" — in the second case still naming the version the user
     /// had before updating.
     /// </remarks>
     public static string Format(string versionString)
     {
         ReadOnlySpan<char> candidate = versionString.AsSpan().Trim();
 
-        // The build carries two version strings — a four-part file version (2.1.0.0) and
-        // an informational one with the commit appended (2.1.0+23d2862...) — and which of
+        // The build carries two version strings — a four-part file version (2.2.0.0) and
+        // an informational one with the commit appended (2.2.0+23d2862...) — and which of
         // them AppInfo hands back depends on how the app was packaged. Version.TryParse
         // rejects the second outright, which would drop the raw string, commit hash and
         // all, into the UI. Trimmed here so either shape reads the same.

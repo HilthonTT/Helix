@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Security;
@@ -103,8 +103,15 @@ public sealed class ImportDrives(
             loggedInUser.UserId,
             cancellationToken);
 
+        // Case-insensitively, like every other comparison of a drive letter in the app.
+        // A plain Contains is ordinal, and this one silently depended on Drive.Create
+        // having uppercased both sides: any row that ever reached the table with a
+        // lowercase letter would not match its candidate and would be imported a second
+        // time, under a letter already in use.
+        var taken = new HashSet<string>(existingDriveLetters, StringComparer.OrdinalIgnoreCase);
+
         List<Drive> newDrives = candidates
-            .Where(drive => !existingDriveLetters.Contains(drive.Letter))
+            .Where(drive => !taken.Contains(drive.Letter))
             .ToList();
 
         if (newDrives.Count == 0)

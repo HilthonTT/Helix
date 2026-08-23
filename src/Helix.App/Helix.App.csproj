@@ -27,7 +27,7 @@
 		<ApplicationId>com.companyname.myappname</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>2.1.0</ApplicationDisplayVersion>
+		<ApplicationDisplayVersion>2.2.0</ApplicationDisplayVersion>
 		<ApplicationVersion>3</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
@@ -176,4 +176,36 @@
 	    <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
 	</ItemGroup>
+	<!--
+	  Windows reports the running version from [AssemblyMetadata("...AppInfo.Version")],
+	  which MAUI stamps out of the Package.appxmanifest it generates under obj rather than
+	  out of ApplicationDisplayVersion directly. That generated manifest is incremental on
+	  the manifest in Platforms/Windows, which deliberately never carries a version - so
+	  bumping ApplicationDisplayVersion did not invalidate it, and the app went on reporting
+	  the previous version in the sidebar, on the sign-in pages and to the update check
+	  until somebody deleted obj. Deleting the stale copy here makes the build regenerate it.
+
+	  A mismatch is the only thing that triggers the delete, so an ordinary build does no
+	  extra work; if the composed version below ever stops matching MAUI's format, the cost
+	  is a manifest regenerated on every build rather than a wrong version shipped.
+	-->
+	<Target Name="_HelixRefreshStampedAppxManifest"
+	        BeforeTargets="BeforeBuild;PrepareForBuild"
+	        Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' == 'windows'">
+
+		<PropertyGroup>
+			<_HelixStampedManifest>$(IntermediateOutputPath)resizetizer\m\Package.appxmanifest</_HelixStampedManifest>
+			<_HelixExpectedVersion>$(ApplicationDisplayVersion).$(ApplicationVersion)</_HelixExpectedVersion>
+		</PropertyGroup>
+
+		<XmlPeek XmlInputPath="$(_HelixStampedManifest)"
+		         Query="/*[local-name()='Package']/*[local-name()='Identity']/@Version"
+		         Condition="Exists('$(_HelixStampedManifest)')">
+			<Output TaskParameter="Result" PropertyName="_HelixStampedVersion" />
+		</XmlPeek>
+
+		<Delete Files="$(_HelixStampedManifest)"
+		        Condition="Exists('$(_HelixStampedManifest)') AND '$(_HelixStampedVersion)' != '$(_HelixExpectedVersion)'" />
+	</Target>
+
 </Project>

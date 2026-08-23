@@ -141,11 +141,22 @@ for things never released, and it excludes pre-releases, which an unattended NAS
 should not be nudging people onto.
 
 Version comparison goes through `ReleaseVersion`, and it must. `ApplicationDisplayVersion`
-is three-part (`2.1.0`) to match the release tags, Windows reports the running build padded
-to four (`2.1.0.0`), and `Version` treats a missing component as **-1, not 0** — so an
+is three-part (`2.2.0`) to match the release tags, Windows reports the running build padded
+to four (`2.2.0.0`), and `Version` treats a missing component as **-1, not 0** — so an
 unnormalized compare makes the running build "older" than the release it was built from and
 announces an update to itself. Both sides are widened to four components first. A tag that
 is not a version (`nightly`) is refused rather than guessed at.
+
+Bumping `ApplicationDisplayVersion` is **not** enough on its own. What Windows reports is
+stamped out of the `Package.appxmanifest` MAUI generates under `obj`, and that generated
+copy is incremental on the manifest in `Platforms/Windows` — which deliberately never
+carries a version, so a version bump does not invalidate it. Left alone, the app goes on
+reporting the previous version in the sidebar, on the sign-in pages and to the update
+check until somebody deletes `obj`; the giveaway is an `AssemblyInfo.cs` whose
+`AssemblyFileVersion` is the new number while its `AppInfo.Version` metadata is the old
+one. The `_HelixRefreshStampedAppxManifest` target in `Helix.App.csproj` deletes the stale
+copy when its version no longer matches `ApplicationDisplayVersion.ApplicationVersion`, so
+the build regenerates it — do not remove it, and expect to bump nothing but the `.csproj`.
 
 `ApplicationDisplayVersion` is not, on Windows, where the running version comes from.
 The resizetizer targets XmlPeek `Identity/@Version` out of
@@ -156,7 +167,7 @@ update check both read it. MAUI only stamps `ApplicationDisplayVersion` into tha
 attribute when it is empty or the literal `0.0.0.0`, so **leave the manifest on the
 placeholder**: a real number written there wins over the `.csproj` and the app announces
 an update to itself. The stamped value is `ApplicationDisplayVersion` with
-`ApplicationVersion` as a fourth component (`2.1.0.3`), which is why what is compared is
+`ApplicationVersion` as a fourth component (`2.2.0.3`), which is why what is compared is
 four-part and what is shown is not — `ReleaseVersion.ToDisplayString` reduces it for the
 update dialog.
 

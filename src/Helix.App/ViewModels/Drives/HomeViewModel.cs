@@ -350,6 +350,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
                 Drives.Remove(existingDrive);
 
                 _ = RefreshTotalsAsync();
+
+                // A group that named it is now one drive smaller. Without this the chip
+                // goes on claiming a drive that no longer exists until the page is
+                // reloaded, and connecting the group quietly does less than it says.
+                _ = FetchDriveGroupsAsync();
             }
         });
 
@@ -359,6 +364,10 @@ internal sealed partial class HomeViewModel : BaseViewModel
             Drives.Add(driveDisplay);
 
             _ = RefreshTotalsAsync();
+
+            // Counted against the drives on screen, so a drive arriving changes what an
+            // existing group can resolve — an import is the case that matters.
+            _ = FetchDriveGroupsAsync();
         });
 
         WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(this, (r, m) =>
