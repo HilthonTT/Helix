@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Users"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:Class="Helix.App.Views.Users.LockPage"
+             x:DataType="vm:LockViewModel"
+             Title=""
+             Shell.NavBarIsVisible="False">
+
+    <Grid Background="{StaticResource BrandGradientBrush}">
+        <Image Source="orange_background.png"
+               Aspect="AspectFill"
+               HorizontalOptions="Fill"
+               VerticalOptions="Fill"/>
+
+        <Border Style="{StaticResource Sheet}"
+                WidthRequest="380"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+            <VerticalStackLayout Spacing="0" Padding="28">
+
+                <Border Style="{StaticResource IconTile}"
+                        WidthRequest="48"
+                        HeightRequest="48"
+                        HorizontalOptions="Start">
+                    <Label Text="{x:Static icons:IconFont.Lock}"
+                           Style="{StaticResource IconLg}"
+                           TextColor="{StaticResource Brand}"/>
+                </Border>
+
+                <Label Text="{l10n:Translate LockTitle}"
+                       Style="{StaticResource Title1}"
+                       Margin="0,16,0,4"/>
+
+                <!-- Names the account, so a shared machine says whose session this is -->
+                <Label Text="{Binding Username}" Style="{StaticResource Muted}"/>
+
+                <Label Text="{l10n:Translate LockMessage}"
+                       Style="{StaticResource Caption}"
+                       Margin="0,10,0,0"/>
+
+                <Label Text="{l10n:Translate Password}"
+                       Style="{StaticResource FieldLabel}"
+                       Margin="0,20,0,6"/>
+
+                <Border Style="{StaticResource Field}">
+                    <Entry x:Name="PasswordEntry"
+                           Placeholder="{l10n:Translate Password}"
+                           IsPassword="True"
+                           Text="{Binding Password}"
+                           Margin="14,0,0,0"
+                           ReturnType="Go"
+                           Completed="Password_Completed"
+                           IsEnabled="{Binding IsNotBusy}"/>
+                </Border>
+
+                <Label Text="{Binding Error}"
+                       Style="{StaticResource DangerText}"
+                       FontSize="12"
+                       Margin="0,8,0,0"
+                       IsVisible="{Binding HasError}"/>
+
+                <Button Text="{l10n:Translate LockUnlock}"
+                        Margin="0,20,0,0"
+                        HorizontalOptions="Fill"
+                        Command="{Binding UnlockCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Text="{l10n:Translate Logout}"
+                        Style="{StaticResource ButtonSecondary}"
+                        Margin="0,10,0,0"
+                        HorizontalOptions="Fill"
+                        Command="{Binding SignOutCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+
+</ContentPage>

@@ -42,13 +42,88 @@ public sealed class GitHubUpdateCheckerTests
         Content = new StringContent(body, Encoding.UTF8, "application/json"),
     };
 
-    private static GitHubUpdateChecker Checker(StubHandler handler, string current = CurrentVersion) =>
-        new(new HttpClient(handler), NullLogger<GitHubUpdateChecker>.Instance, () => current);
+    private static GitHubUpdateChecker Checker(
+        StubHandler handler,
+        string current = CurrentVersion,
+        string moniker = "win-x64") =>
+        new(new HttpClient(handler), NullLogger<GitHubUpdateChecker>.Instance, () => current, () => moniker);
 
     private static string ReleaseJson(string tag, string? url = "https://github.com/HilthonTT/Helix/releases/tag/v2.1.0") =>
         $$"""
         { "tag_name": "{{tag}}", "html_url": "{{url}}", "name": "Helix {{tag}}" }
         """;
+
+    /// <summary>A release carrying the three archives the release workflow publishes.</summary>
+    private static string ReleaseWithAssetsJson(string tag) =>
+        $$"""
+        {
+          "tag_name": "{{tag}}",
+          "html_url": "https://github.com/HilthonTT/Helix/releases/tag/{{tag}}",
+          "assets": [
+            { "name": "Helix-{{tag}}-win-arm64.zip", "browser_download_url": "https://example.invalid/arm64" },
+            { "name": "Helix-{{tag}}-win-x64.zip", "browser_download_url": "https://example.invalid/x64" },
+            { "name": "Helix-{{tag}}-macos.zip", "browser_download_url": "https://example.invalid/macos" }
+          ]
+        }
+        """;
+
+    [Fact]
+    public async Task CheckAsync_Should_PickTheAssetBuiltForThisMachine()
+    {
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithAssetsJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler, moniker: "win-x64").CheckAsync();
+
+        result.Value.DownloadUrl.Should().Be("https://example.invalid/x64");
+        result.Value.AssetName.Should().Be("Helix-v2.1.0-win-x64.zip");
+        result.Value.CanInstall.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CheckAsync_Should_NotHandAnArmMachineTheX64Build()
+    {
+        // The failure this guards is quiet and total: the wrong architecture installs
+        // perfectly and then will not start.
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithAssetsJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler, moniker: "win-arm64").CheckAsync();
+
+        result.Value.DownloadUrl.Should().Be("https://example.invalid/arm64");
+    }
+
+    [Fact]
+    public async Task CheckAsync_Should_PickTheMacBundle_OnMac()
+    {
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithAssetsJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler, moniker: "macos").CheckAsync();
+
+        result.Value.DownloadUrl.Should().Be("https://example.invalid/macos");
+    }
+
+    [Fact]
+    public async Task CheckAsync_Should_StillReportTheUpdate_WhenTheReleaseHasNoAssetForThisMachine()
+    {
+        // A release published before its build finished uploading, or an old one named
+        // differently. The release page is still somewhere to send the user.
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler).CheckAsync();
+
+        result.Value.IsUpdateAvailable.Should().BeTrue();
+        result.Value.DownloadUrl.Should().BeNull();
+        result.Value.CanInstall.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task CheckAsync_Should_OfferNothingToInstall_WhenTheArchitectureHasNoBuild()
+    {
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithAssetsJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler, moniker: string.Empty).CheckAsync();
+
+        result.Value.CanInstall.Should().BeFalse();
+    }
 
     [Fact]
     public async Task CheckAsync_Should_ReportAnUpdate_WhenTheReleaseIsNewer()

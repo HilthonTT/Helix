@@ -441,6 +441,78 @@
   <data name="TrayStorageLowMessage" xml:space="preserve">
     <value>{0} tinggal {1}% ruang kosong.</value>
   </data>
+  <data name="DriveGroups" xml:space="preserve">
+    <value>Grup</value>
+  </data>
+  <data name="YourGroups" xml:space="preserve">
+    <value>Grup Anda</value>
+  </data>
+  <data name="NewGroup" xml:space="preserve">
+    <value>Grup baru</value>
+  </data>
+  <data name="EditGroup" xml:space="preserve">
+    <value>Ubah grup</value>
+  </data>
+  <data name="DeleteGroup" xml:space="preserve">
+    <value>Hapus grup</value>
+  </data>
+  <data name="DeleteGroupConfirm" xml:space="preserve">
+    <value>Yakin ingin menghapus '{0}'? Drive di dalamnya tidak terpengaruh.</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>Nama grup</value>
+  </data>
+  <data name="GroupNamePlaceholder" xml:space="preserve">
+    <value>Rumah, Kantor, Cadangan…</value>
+  </data>
+  <data name="GroupDrives" xml:space="preserve">
+    <value>Drive dalam grup ini</value>
+  </data>
+  <data name="NoDrivesForGroup" xml:space="preserve">
+    <value>Tambahkan drive dulu — grup adalah kumpulan drive yang sudah ada.</value>
+  </data>
+  <data name="ConnectGroup" xml:space="preserve">
+    <value>Hubungkan grup</value>
+  </data>
+  <data name="DisconnectGroup" xml:space="preserve">
+    <value>Putuskan grup</value>
+  </data>
+  <data name="TrayConnectGroup" xml:space="preserve">
+    <value>Hubungkan {0}</value>
+  </data>
+  <data name="UpdateInstall" xml:space="preserve">
+    <value>Unduh dan pasang</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Mengunduh… {0}%</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Siap dipasang</value>
+  </data>
+  <data name="UpdateReadyMessage" xml:space="preserve">
+    <value>Helix {0} telah diunduh. Helix akan menutup, mengganti dirinya, lalu berjalan lagi. Drive dan pengaturan Anda tetap tersimpan.</value>
+  </data>
+  <data name="UpdateInstallNow" xml:space="preserve">
+    <value>Pasang dan mulai ulang</value>
+  </data>
+  <data name="IdleLock" xml:space="preserve">
+    <value>Kunci saat menganggur</value>
+  </data>
+  <data name="IdleLockDescription" xml:space="preserve">
+    <value>Minta kata sandi lagi setelah sekian menit tanpa aktivitas. 0 tidak pernah mengunci. Drive tetap terhubung.</value>
+  </data>
+  <data name="LockTitle" xml:space="preserve">
+    <value>Terkunci</value>
+  </data>
+  <data name="LockMessage" xml:space="preserve">
+    <value>Helix mengunci diri setelah beberapa saat tanpa aktivitas. Drive Anda tetap terhubung.</value>
+  </data>
+  <data name="LockUnlock" xml:space="preserve">
+    <value>Buka kunci</value>
+  </data>
+  <data name="LockWrongPassword" xml:space="preserve">
+    <value>Kata sandi itu tidak benar.</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix masih berjalan di area notifikasi.</value>
   </data>

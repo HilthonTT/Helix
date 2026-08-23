@@ -32,6 +32,19 @@ public sealed class Settings : Entity
     /// <summary>The largest threshold that still means anything; see the constant above.</summary>
     public const int MaximumStorageAlertThresholdPercent = 99;
 
+    /// <summary>
+    /// Minutes of no input after which Helix asks for the password again. Zero never
+    /// locks.
+    /// </summary>
+    /// <remarks>
+    /// Off by default, including for a new account. Everything Helix guards is already
+    /// behind an encrypted database and a sign-in; the lock is for the machine someone
+    /// else can walk up to, which is a thing the user knows about their own desk and
+    /// Helix does not. A NAS tool that surprises people by locking is a NAS tool people
+    /// turn off.
+    /// </remarks>
+    public const int DefaultIdleLockMinutes = 0;
+
     [JsonConstructor]
     private Settings(
         Guid id,
@@ -43,7 +56,8 @@ public sealed class Settings : Entity
         int timerCount,
         Language language,
         int auditlogRetentionDays,
-        int storageAlertThresholdPercent)
+        int storageAlertThresholdPercent,
+        int idleLockMinutes)
         : base(id)
     {
         Ensure.NotNullOrEmpty(id, nameof(id));
@@ -56,6 +70,7 @@ public sealed class Settings : Entity
         Ensure.NotNull(language, nameof(language));
         Ensure.MustNotBeNegative(auditlogRetentionDays, nameof(auditlogRetentionDays));
         Ensure.MustNotBeNegative(storageAlertThresholdPercent, nameof(storageAlertThresholdPercent));
+        Ensure.MustNotBeNegative(idleLockMinutes, nameof(idleLockMinutes));
 
         UserId = userId;
         AutoConnect = autoConnect;
@@ -66,6 +81,7 @@ public sealed class Settings : Entity
         Language = language;
         AuditlogRetentionDays = auditlogRetentionDays;
         StorageAlertThresholdPercent = storageAlertThresholdPercent;
+        IdleLockMinutes = idleLockMinutes;
     }
 
     /// <summary>
@@ -109,6 +125,17 @@ public sealed class Settings : Entity
     /// </remarks>
     public int StorageAlertThresholdPercent { get; private set; }
 
+    /// <summary>
+    /// Minutes of no input before the app locks itself; 0 never locks — see
+    /// <see cref="DefaultIdleLockMinutes"/>.
+    /// </summary>
+    /// <remarks>
+    /// A lock, not a sign-out: the drives stay mounted and the watchdog keeps
+    /// reconnecting them behind it. An unattended tool that stopped doing its job the
+    /// moment nobody was at the keyboard would be a tool that only works while watched.
+    /// </remarks>
+    public int IdleLockMinutes { get; private set; }
+
     public static Settings Create(
         Guid userId,
         bool autoConnect,
@@ -118,7 +145,8 @@ public sealed class Settings : Entity
         int timerCount,
         Language language,
         int auditlogRetentionDays = DefaultAuditlogRetentionDays,
-        int storageAlertThresholdPercent = DefaultStorageAlertThresholdPercent)
+        int storageAlertThresholdPercent = DefaultStorageAlertThresholdPercent,
+        int idleLockMinutes = DefaultIdleLockMinutes)
     {
         var settings = new Settings(
             Guid.CreateVersion7(),
@@ -130,7 +158,8 @@ public sealed class Settings : Entity
             timerCount,
             language,
             auditlogRetentionDays,
-            storageAlertThresholdPercent);
+            storageAlertThresholdPercent,
+            idleLockMinutes);
 
         return settings;
     }
@@ -143,7 +172,8 @@ public sealed class Settings : Entity
         int timerCount,
         Language language,
         int auditlogRetentionDays,
-        int storageAlertThresholdPercent)
+        int storageAlertThresholdPercent,
+        int idleLockMinutes)
     {
         AutoConnect = autoConnect;
         AutoMinimize = autoMinimize;
@@ -153,5 +183,6 @@ public sealed class Settings : Entity
         Language = language;
         AuditlogRetentionDays = auditlogRetentionDays;
         StorageAlertThresholdPercent = storageAlertThresholdPercent;
+        IdleLockMinutes = idleLockMinutes;
     }
 }

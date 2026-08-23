@@ -4,6 +4,8 @@ internal static class TableNames
 {
     public const string Drives = nameof(Drives);
 
+    public const string DriveGroups = nameof(DriveGroups);
+
     public const string Users = nameof(Users);
 
     public const string Settings = nameof(Settings);

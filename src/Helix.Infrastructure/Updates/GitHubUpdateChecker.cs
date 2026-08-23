@@ -20,19 +20,28 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
     private readonly HttpClient _httpClient;
     private readonly ILogger<GitHubUpdateChecker> _logger;
     private readonly Func<string> _currentVersion;
+    private readonly Func<string> _assetMoniker;
 
     /// <param name="currentVersion">
     /// Injected rather than read inline so the comparison can be tested without a MAUI
     /// host, which is where <c>AppInfo</c> comes from.
     /// </param>
+    /// <param name="assetMoniker">
+    /// The fragment a release asset's name must contain to be the one for this machine —
+    /// <c>win-x64</c>, <c>win-arm64</c> or <c>macos</c>, matching what the release
+    /// workflow names its archives. Injected for the same reason the version is: so the
+    /// selection can be tested without being on the platform it selects for.
+    /// </param>
     public GitHubUpdateChecker(
         HttpClient httpClient,
         ILogger<GitHubUpdateChecker> logger,
-        Func<string> currentVersion)
+        Func<string> currentVersion,
+        Func<string> assetMoniker)
     {
         _httpClient = httpClient;
         _logger = logger;
         _currentVersion = currentVersion;
+        _assetMoniker = assetMoniker;
     }
 
     public async Task<Result<UpdateCheck>> CheckAsync(CancellationToken cancellationToken = default)
@@ -120,14 +129,61 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
                 ? UpdateConfiguration.ReleasesPageUrl
                 : release.HtmlUrl;
 
+            GitHubAsset? asset = SelectAsset(release);
+
+            if (isNewer && asset is null)
+            {
+                // Worth a line: the difference between "no update" and "an update nobody
+                // can install from in here" is invisible from the dialog otherwise.
+                _logger.LogInformation(
+                    "Release {Tag} carries no asset for {Moniker}; the release page is the only route.",
+                    release.TagName,
+                    _assetMoniker());
+            }
+
             // Compared as reported, shown three-part: the comparison wants every
             // component Windows gives it, the user wants the number on the releases page.
             return new UpdateCheck(
                 isNewer,
                 ReleaseVersion.ToDisplayString(current),
                 release.TagName,
-                url);
+                url,
+                asset?.BrowserDownloadUrl,
+                asset?.Name);
         }
+    }
+
+    /// <summary>
+    /// The one asset built for this machine, or null if the release has none.
+    /// </summary>
+    /// <remarks>
+    /// Matched on the file name rather than on any field GitHub provides, because there
+    /// is no such field — the release workflow encodes the target in the archive's name
+    /// (<c>Helix-v2.1.0-win-x64.zip</c>) and that is the only thing to go on.
+    ///
+    /// <c>win-x64</c> is a substring of nothing else, but the arm64 name would match a
+    /// naive contains-check for x64 in neither direction — so the comparison is exact
+    /// enough to be safe: an x64 machine must never be handed the arm64 build, which
+    /// would install cleanly and then refuse to start.
+    /// </remarks>
+    private GitHubAsset? SelectAsset(GitHubRelease release)
+    {
+        if (release.Assets is null || release.Assets.Count == 0)
+        {
+            return null;
+        }
+
+        string moniker = _assetMoniker();
+
+        if (string.IsNullOrWhiteSpace(moniker))
+        {
+            return null;
+        }
+
+        return release.Assets.FirstOrDefault(asset =>
+            !string.IsNullOrWhiteSpace(asset.Name) &&
+            !string.IsNullOrWhiteSpace(asset.BrowserDownloadUrl) &&
+            asset.Name.Contains($"-{moniker}.", StringComparison.OrdinalIgnoreCase));
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -135,7 +191,7 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
         PropertyNameCaseInsensitive = true,
     };
 
-    /// <summary>Only the three fields of the release payload that are used.</summary>
+    /// <summary>Only the fields of the release payload that are used.</summary>
     private sealed record GitHubRelease
     {
         [JsonPropertyName("tag_name")]
@@ -146,5 +202,17 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
 
         [JsonPropertyName("name")]
         public string? Name { get; init; }
+
+        [JsonPropertyName("assets")]
+        public List<GitHubAsset>? Assets { get; init; }
+    }
+
+    private sealed record GitHubAsset
+    {
+        [JsonPropertyName("name")]
+        public string? Name { get; init; }
+
+        [JsonPropertyName("browser_download_url")]
+        public string? BrowserDownloadUrl { get; init; }
     }
 }

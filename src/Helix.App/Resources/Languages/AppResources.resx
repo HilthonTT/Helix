@@ -441,6 +441,78 @@
   <data name="TrayStorageLowMessage" xml:space="preserve">
     <value>{0} has {1}% free space left.</value>
   </data>
+  <data name="DriveGroups" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="YourGroups" xml:space="preserve">
+    <value>Your groups</value>
+  </data>
+  <data name="NewGroup" xml:space="preserve">
+    <value>New group</value>
+  </data>
+  <data name="EditGroup" xml:space="preserve">
+    <value>Edit group</value>
+  </data>
+  <data name="DeleteGroup" xml:space="preserve">
+    <value>Delete group</value>
+  </data>
+  <data name="DeleteGroupConfirm" xml:space="preserve">
+    <value>Are you sure you want to delete '{0}'? The drives in it are not affected.</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>Group name</value>
+  </data>
+  <data name="GroupNamePlaceholder" xml:space="preserve">
+    <value>Home, Office, Backup run…</value>
+  </data>
+  <data name="GroupDrives" xml:space="preserve">
+    <value>Drives in this group</value>
+  </data>
+  <data name="NoDrivesForGroup" xml:space="preserve">
+    <value>Add a drive first — a group is a set of drives you already have.</value>
+  </data>
+  <data name="ConnectGroup" xml:space="preserve">
+    <value>Connect group</value>
+  </data>
+  <data name="DisconnectGroup" xml:space="preserve">
+    <value>Disconnect group</value>
+  </data>
+  <data name="TrayConnectGroup" xml:space="preserve">
+    <value>Connect {0}</value>
+  </data>
+  <data name="UpdateInstall" xml:space="preserve">
+    <value>Download and install</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Downloading… {0}%</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Ready to install</value>
+  </data>
+  <data name="UpdateReadyMessage" xml:space="preserve">
+    <value>Helix {0} has been downloaded. Helix will close, replace itself and start again. Your drives and settings are kept.</value>
+  </data>
+  <data name="UpdateInstallNow" xml:space="preserve">
+    <value>Install and restart</value>
+  </data>
+  <data name="IdleLock" xml:space="preserve">
+    <value>Lock when idle</value>
+  </data>
+  <data name="IdleLockDescription" xml:space="preserve">
+    <value>Ask for the password again after this many minutes without input. 0 never locks. Drives stay connected while locked.</value>
+  </data>
+  <data name="LockTitle" xml:space="preserve">
+    <value>Locked</value>
+  </data>
+  <data name="LockMessage" xml:space="preserve">
+    <value>Helix locked itself after a while without input. Your drives stayed connected.</value>
+  </data>
+  <data name="LockUnlock" xml:space="preserve">
+    <value>Unlock</value>
+  </data>
+  <data name="LockWrongPassword" xml:space="preserve">
+    <value>That password was not right.</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix is still running in the notification area.</value>
   </data>

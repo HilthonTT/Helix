@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
 using Helix.App.Services;
 using Helix.App.ViewModels.Drives;
@@ -19,6 +20,7 @@ public sealed partial class HomePage : ContentPage
     private const string UpdateDrive = "update-drive";
     private const string DeleteDrive = "delete-drive";
     private const string SearchDrives = "search-drives";
+    private const string DriveGroups = "drive-groups";
 
     private static bool _isFirstView = true;
     private static bool _prunedAuditlogs;
@@ -30,6 +32,7 @@ public sealed partial class HomePage : ContentPage
     private readonly DriveWatchdog _watchdog;
     private readonly TrayIconService _tray;
     private readonly StorageAlertService _storageAlerts;
+    private readonly IdleLockService _idleLock;
 
     public HomePage()
     {
@@ -43,12 +46,14 @@ public sealed partial class HomePage : ContentPage
         _watchdog = App.ServiceProvider.GetRequiredService<DriveWatchdog>();
         _tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
         _storageAlerts = App.ServiceProvider.GetRequiredService<StorageAlertService>();
+        _idleLock = App.ServiceProvider.GetRequiredService<IdleLockService>();
 
         _modals = new ModalHost(BlockScreen);
         _modals.Register(CreateDrive, CreateDriveLayout, CreateDriveView);
         _modals.Register(UpdateDrive, UpdateDriveLayout, UpdateDriveView);
         _modals.Register(DeleteDrive, DeleteDriveLayout, DeleteDriveView);
         _modals.Register(SearchDrives, SearchDrivesLayout, SearchDrivesView);
+        _modals.Register(DriveGroups, DriveGroupsLayout, DriveGroupsView);
         _modals.AttachEscapeToDismiss(this);
 
         RegisterMessages();
@@ -70,6 +75,9 @@ public sealed partial class HomePage : ContentPage
 
             await InitializeChartAsync(drives);
 
+            // After the drives, because a group counts what is on screen.
+            await _viewModel.FetchDriveGroupsAsync();
+
             await HandleConnectDrivesOnStartupAsync();
 
             await _viewModel.InitializeCountdownAsync();
@@ -83,6 +91,10 @@ public sealed partial class HomePage : ContentPage
 
             // Started after the tray, because the tray is where its warnings come out.
             _storageAlerts.Start();
+
+            // Reads the user's own lock setting on every tick, so it starts here with
+            // the rest of the per-session services and needs nothing from them.
+            _idleLock.Start();
 
             await PruneAuditlogsAsync();
         }
@@ -231,6 +243,9 @@ public sealed partial class HomePage : ContentPage
         WeakReferenceMessenger.Default.Register<SearchDrivesMessage>(
             this, async (r, m) => await _modals.ToggleAsync(SearchDrives, m.Value));
 
+        WeakReferenceMessenger.Default.Register<DriveGroupsMessage>(
+            this, async (r, m) => await _modals.ToggleAsync(DriveGroups, m.Show));
+
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(
             this, async (r, m) => await InitializeChartAsync());
     }
@@ -248,6 +263,14 @@ public sealed partial class HomePage : ContentPage
         if (_viewModel.OpenCreateDriveModalCommand.CanExecute(null))
         {
             _viewModel.OpenCreateDriveModalCommand.Execute(null);
+        }
+    }
+
+    private void DriveGroups_Clicked(object sender, EventArgs e)
+    {
+        if (_viewModel.OpenDriveGroupsModalCommand.CanExecute(null))
+        {
+            _viewModel.OpenDriveGroupsModalCommand.Execute(null);
         }
     }
 

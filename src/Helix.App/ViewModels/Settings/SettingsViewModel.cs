@@ -3,12 +3,14 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Users;
 using Helix.App.Models;
+using Helix.App.Services;
 using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Updates;
 using Helix.Application.Features.Diagnostics.Commands;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
+using Helix.Application.Features.Updates.Commands;
 using Helix.Application.Features.Updates.Queries;
 using Helix.Domain.Settings;
 using Microsoft.Extensions.Logging;
@@ -32,6 +34,7 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         Languages = [];
         SelectedLanguage = string.Empty;
         CurrentSection = AccountSection;
+        UpdateStatus = string.Empty;
 
         Username = _loggedInUser.Username;
 
@@ -41,6 +44,19 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial SettingsDisplay? Settings { get; set; }
+
+    /// <summary>
+    /// What the updater is doing, or empty while it is doing nothing.
+    /// </summary>
+    /// <remarks>
+    /// A release is a couple of hundred megabytes, which is long enough that a button
+    /// that merely goes disabled reads as a button that did nothing.
+    /// </remarks>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUpdateStatus))]
+    public partial string UpdateStatus { get; set; }
+
+    public bool HasUpdateStatus => !string.IsNullOrEmpty(UpdateStatus);
 
     [ObservableProperty]
     public partial ObservableCollection<string> Languages { get; set; }
@@ -122,12 +138,15 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Asks GitHub whether a newer Helix has been released, and offers to open it.
+    /// Asks GitHub whether a newer Helix has been released, and offers to install it.
     /// </summary>
     /// <remarks>
-    /// Manual, and it downloads nothing. Helix ships as a folder the user unzips
-    /// themselves, so the most this can usefully do is tell them a newer version exists
-    /// and take them to it.
+    /// Manual on purpose: replacing the app is not something to do behind the user's
+    /// back, and the check itself is one HTTP call they can make when it suits them.
+    ///
+    /// Opening the release page stays as the other option, and is the only one where a
+    /// release carries no build for this machine, where the app was put somewhere the
+    /// user cannot write to, or where they would simply rather do it themselves.
     /// </remarks>
     [RelayCommand]
     private async Task CheckForUpdatesAsync()
@@ -156,21 +175,124 @@ internal sealed partial class SettingsViewModel : BaseViewModel
                 return;
             }
 
-            bool open = await Shell.Current.DisplayAlertAsync(
-                AppResources.Updates,
-                string.Format(AppResources.UpdateAvailable, check.LatestVersion, check.CurrentVersion),
-                AppResources.OpenReleasePage,
-                AppResources.Cancel);
+            string message = string.Format(
+                AppResources.UpdateAvailable,
+                check.LatestVersion,
+                check.CurrentVersion);
 
-            if (open)
+            // Only offered where it can actually be carried out: an install button that
+            // fails on the last step is worse than not offering one.
+            bool canInstall = check.CanInstall &&
+                App.ServiceProvider.GetRequiredService<IUpdateInstaller>().IsSupported;
+
+            if (!canInstall)
+            {
+                bool open = await Shell.Current.DisplayAlertAsync(
+                    AppResources.Updates,
+                    message,
+                    AppResources.OpenReleasePage,
+                    AppResources.Cancel);
+
+                if (open)
+                {
+                    await OpenReleasePageAsync(check.ReleaseUrl);
+                }
+
+                return;
+            }
+
+            string choice = await Shell.Current.DisplayActionSheetAsync(
+                message,
+                AppResources.Cancel,
+                null,
+                AppResources.UpdateInstall,
+                AppResources.OpenReleasePage);
+
+            if (choice == AppResources.OpenReleasePage)
             {
                 await OpenReleasePageAsync(check.ReleaseUrl);
+                return;
+            }
+
+            if (choice == AppResources.UpdateInstall)
+            {
+                await InstallAsync(check);
             }
         }
         finally
         {
             IsBusy = false;
+            UpdateStatus = string.Empty;
         }
+    }
+
+    /// <summary>
+    /// Downloads the release, asks once more, and hands the swap over.
+    /// </summary>
+    /// <remarks>
+    /// The confirmation comes after the download rather than before it, so what the user
+    /// is agreeing to is a file that is already on disk and already looks like Helix.
+    /// Everything up to that point leaves the install untouched and can be abandoned at
+    /// no cost; everything after it happens in a helper process that outlives this one.
+    /// </remarks>
+    private async Task InstallAsync(UpdateCheck check)
+    {
+        // Created here so its callbacks land on the UI thread, which is where the bound
+        // status text has to be written.
+        var progress = new Progress<double>(fraction =>
+            UpdateStatus = string.Format(AppResources.UpdateDownloading, (int)(fraction * 100)));
+
+        UpdateStatus = string.Format(AppResources.UpdateDownloading, 0);
+
+        Result<string> staged = await ScopedHandler.HandleAsync(
+            (StageUpdate h) => h.Handle(new StageUpdate.Request(check, progress)));
+
+        if (staged.IsFailure)
+        {
+            UpdateStatus = string.Empty;
+
+            await DisplayErrorAsync(staged.Error);
+            return;
+        }
+
+        UpdateStatus = AppResources.UpdateReady;
+
+        bool install = await Shell.Current.DisplayAlertAsync(
+            AppResources.UpdateReady,
+            string.Format(AppResources.UpdateReadyMessage, check.LatestVersion),
+            AppResources.UpdateInstallNow,
+            AppResources.Cancel);
+
+        if (!install)
+        {
+            // The staged copy is left where it is: they may come back to it, and the next
+            // attempt at this version clears the folder before using it again.
+            return;
+        }
+
+        Result applied = await ScopedHandler.HandleAsync(
+            (ApplyUpdate h) => h.Handle(new ApplyUpdate.Request(staged.Value)));
+
+        if (applied.IsFailure)
+        {
+            UpdateStatus = string.Empty;
+
+            await DisplayErrorAsync(applied.Error);
+            return;
+        }
+
+        AppLog.For<SettingsViewModel>().LogInformation(
+            "Quitting to let the update to {Version} be applied.",
+            check.LatestVersion);
+
+        // Taken down first: an icon whose process has gone stays in the tray until the
+        // user happens to mouse over it, and this one would sit there through the swap.
+        App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
+
+        // The helper is waiting on this process to exit before it moves anything, so
+        // there is nothing to do here but go — and go without the close button putting
+        // the window away instead of closing it.
+        MainWindow.Exit();
     }
 
     private static async Task OpenReleasePageAsync(string releaseUrl)

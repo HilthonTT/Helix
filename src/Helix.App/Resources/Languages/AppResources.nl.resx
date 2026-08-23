@@ -441,6 +441,78 @@
   <data name="TrayStorageLowMessage" xml:space="preserve">
     <value>{0} heeft nog {1}% vrije ruimte.</value>
   </data>
+  <data name="DriveGroups" xml:space="preserve">
+    <value>Groepen</value>
+  </data>
+  <data name="YourGroups" xml:space="preserve">
+    <value>Je groepen</value>
+  </data>
+  <data name="NewGroup" xml:space="preserve">
+    <value>Nieuwe groep</value>
+  </data>
+  <data name="EditGroup" xml:space="preserve">
+    <value>Groep bewerken</value>
+  </data>
+  <data name="DeleteGroup" xml:space="preserve">
+    <value>Groep verwijderen</value>
+  </data>
+  <data name="DeleteGroupConfirm" xml:space="preserve">
+    <value>Weet je zeker dat je '{0}' wilt verwijderen? De schijven erin blijven bestaan.</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>Groepsnaam</value>
+  </data>
+  <data name="GroupNamePlaceholder" xml:space="preserve">
+    <value>Thuis, Kantoor, Back-up…</value>
+  </data>
+  <data name="GroupDrives" xml:space="preserve">
+    <value>Schijven in deze groep</value>
+  </data>
+  <data name="NoDrivesForGroup" xml:space="preserve">
+    <value>Voeg eerst een schijf toe — een groep is een set bestaande schijven.</value>
+  </data>
+  <data name="ConnectGroup" xml:space="preserve">
+    <value>Groep verbinden</value>
+  </data>
+  <data name="DisconnectGroup" xml:space="preserve">
+    <value>Groep loskoppelen</value>
+  </data>
+  <data name="TrayConnectGroup" xml:space="preserve">
+    <value>{0} verbinden</value>
+  </data>
+  <data name="UpdateInstall" xml:space="preserve">
+    <value>Downloaden en installeren</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Downloaden… {0}%</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Klaar om te installeren</value>
+  </data>
+  <data name="UpdateReadyMessage" xml:space="preserve">
+    <value>Helix {0} is gedownload. Helix sluit af, vervangt zichzelf en start opnieuw. Je schijven en instellingen blijven behouden.</value>
+  </data>
+  <data name="UpdateInstallNow" xml:space="preserve">
+    <value>Installeren en herstarten</value>
+  </data>
+  <data name="IdleLock" xml:space="preserve">
+    <value>Vergrendelen bij inactiviteit</value>
+  </data>
+  <data name="IdleLockDescription" xml:space="preserve">
+    <value>Vraag na dit aantal minuten zonder invoer opnieuw om het wachtwoord. 0 vergrendelt nooit. Schijven blijven verbonden.</value>
+  </data>
+  <data name="LockTitle" xml:space="preserve">
+    <value>Vergrendeld</value>
+  </data>
+  <data name="LockMessage" xml:space="preserve">
+    <value>Helix heeft zichzelf vergrendeld na een tijd zonder invoer. Je schijven bleven verbonden.</value>
+  </data>
+  <data name="LockUnlock" xml:space="preserve">
+    <value>Ontgrendelen</value>
+  </data>
+  <data name="LockWrongPassword" xml:space="preserve">
+    <value>Dat wachtwoord klopt niet.</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix draait nog steeds in het systeemvak.</value>
   </data>

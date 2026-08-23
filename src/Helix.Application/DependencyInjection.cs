@@ -1,11 +1,14 @@
 ﻿using Helix.Application.Features.Auditlogs.Commands;
 using Helix.Application.Features.Auditlogs.Queries;
 using Helix.Application.Features.Diagnostics.Commands;
+using Helix.Application.Features.DriveGroups.Commands;
+using Helix.Application.Features.DriveGroups.Queries;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
 using Helix.Application.Features.Storage.Queries;
+using Helix.Application.Features.Updates.Commands;
 using Helix.Application.Features.Updates.Queries;
 using Helix.Application.Features.Users.Commands;
 
@@ -18,6 +21,7 @@ public static class DependencyInjection
         services
             .AddAuditlogsHandlers()
             .AddDiagnosticsHandlers()
+            .AddDriveGroupsHandlers()
             .AddDrivesHandlers()
             .AddSettingsHandlers()
             .AddStorageHandlers()
@@ -39,6 +43,18 @@ public static class DependencyInjection
     private static IServiceCollection AddDiagnosticsHandlers(this IServiceCollection services)
     {
         services.AddScoped<ExportDiagnostics>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDriveGroupsHandlers(this IServiceCollection services)
+    {
+        services.AddScoped<ConnectDriveGroup>();
+        services.AddScoped<CreateDriveGroup>();
+        services.AddScoped<DeleteDriveGroup>();
+        services.AddScoped<GetDriveGroupById>();
+        services.AddScoped<GetDriveGroups>();
+        services.AddScoped<UpdateDriveGroup>();
 
         return services;
     }
@@ -84,7 +100,9 @@ public static class DependencyInjection
 
     private static IServiceCollection AddUpdatesHandlers(this IServiceCollection services)
     {
+        services.AddScoped<ApplyUpdate>();
         services.AddScoped<CheckForUpdates>();
+        services.AddScoped<StageUpdate>();
 
         return services;
     }
@@ -95,6 +113,7 @@ public static class DependencyInjection
         services.AddScoped<LoginUser>();
         services.AddScoped<LogoutUser>();
         services.AddScoped<RegisterUser>();
+        services.AddScoped<UnlockSession>();
         services.AddScoped<UpdateUser>();
 
         return services;

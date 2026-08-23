@@ -129,6 +129,10 @@ public sealed partial class AppShell : Shell
         // The threshold, and the drives measured against it, belong to that user too.
         App.ServiceProvider.GetRequiredService<StorageAlertService>().Stop();
 
+        // Nothing left to lock, and the idle watch would otherwise put the lock screen
+        // over the login page.
+        App.ServiceProvider.GetRequiredService<IdleLockService>().Stop();
+
         // Same reasoning for the two pieces of once-per-session state: the countdown
         // would otherwise keep running and minimize the window over the login page, and
         // the dashboard's startup pass would never run again for the next user.
@@ -160,7 +164,10 @@ public sealed partial class AppShell : Shell
 
         ShellItem currentItem = Current.CurrentItem;
 
-        if (currentItem.Route == PageNames.LoginPage || currentItem.Route == PageNames.RegisterPage)
+        // The lock screen belongs with the sign-in pages here, not with the pages behind
+        // it: a locked session that still shows the sidebar is a locked session anyone
+        // can click straight past, into the drive list it was put up to cover.
+        if (currentItem.Route is PageNames.LoginPage or PageNames.RegisterPage or PageNames.LockPage)
         {
             FlyoutBehavior = FlyoutBehavior.Disabled;
         }
@@ -204,6 +211,7 @@ public sealed partial class AppShell : Shell
     {
         Routing.RegisterRoute(PageNames.LoginPage, typeof(LoginPage));
         Routing.RegisterRoute(PageNames.RegisterPage, typeof(RegisterPage));
+        Routing.RegisterRoute(PageNames.LockPage, typeof(LockPage));
         Routing.RegisterRoute(PageNames.HomePage, typeof(HomePage));
         Routing.RegisterRoute(PageNames.SettingsPage, typeof(SettingsPage));
         Routing.RegisterRoute(PageNames.AuditlogsPage, typeof(AuditlogsPage));

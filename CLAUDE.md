@@ -72,7 +72,7 @@ All three are imported through a `GlobalUsings.cs` in every consuming project, s
 
 ### Helix.Domain
 
-Entities, domain errors and repository **interfaces**, one folder per aggregate (`Auditlogs/`, `Drives/`, `Settings/`, `Users/`). Also framework-free: no MAUI, no EF Core, no Application/Infrastructure dependency. Error classes are plural (`DriveErrors`, `UserErrors`, `SettingsErrors`, `AuthenticationErrors`).
+Entities, domain errors and repository **interfaces**, one folder per aggregate (`Auditlogs/`, `DriveGroups/`, `Drives/`, `Settings/`, `Users/`). Also framework-free: no MAUI, no EF Core, no Application/Infrastructure dependency. Error classes are plural (`DriveErrors`, `UserErrors`, `SettingsErrors`, `AuthenticationErrors`).
 
 ### Helix.Application
 
@@ -83,10 +83,11 @@ Core/           Errors, Sorting, Validation — cross-feature helpers
 Features/       one folder per feature, split into Commands / Queries
                 Auditlogs/{Commands,Queries}
                 Diagnostics/Commands
+                DriveGroups/{Commands,Queries}
                 Drives/{Commands,Queries,Contracts}
                 Settings/{Commands,Queries}
                 Storage/{Queries,Contracts}
-                Updates/Queries
+                Updates/{Commands,Queries}
                 Users/Commands
 DependencyInjection.cs
 ```
@@ -209,6 +210,69 @@ already warned about, so a full pool is reported once rather than every quarter 
 A volume that recovers is forgotten, so it can warn again months later. It starts a minute
 after the dashboard does, because the drives are still being connected at that moment.
 
+### Drive groups
+
+A `DriveGroup` is a named set of drives — "Home", "Office" — connected or disconnected in
+one action from the dashboard strip, the group manager sheet or the tray menu.
+`ConnectDriveGroup` does both directions, because everything around the mount is identical
+either way and only the call in the middle differs. A drive's own `AutoConnect` flag does
+**not** apply: that flag holds a drive back from the *unattended* passes, and pressing a
+group button is as deliberate as it gets.
+
+Membership is a list of drive ids on the group, stored as a **primitive collection** (one
+JSON column) rather than a join table to `Drives`. A group does not own its drives: several
+groups may name the same one, and deleting a drive must not delete the groups it was in.
+Readers resolve the ids against the drives that exist, so an id left behind by a deleted
+drive disappears from the group rather than becoming an error — `DeleteDrive` prunes them
+anyway, to stop a long-lived install accumulating ids that name nothing.
+
+### Installing an update
+
+`GitHubUpdateChecker` also reads the release's `assets` and picks the archive whose name
+carries this machine's moniker — `win-x64`, `win-arm64`, `macos`, matching what the release
+workflow publishes. The match is on `-{moniker}.` and has to stay exact enough that an x64
+machine can never be handed the arm64 build, which installs cleanly and then will not
+start. A release with no asset for this machine still reports the update; only the release
+page is offered.
+
+`UpdateInstaller` splits the work at the point it stops being undoable. `StageAsync`
+downloads, unpacks and checks that what came down contains `Helix.App.exe` (or a
+`.app` bundle), all while Helix runs and with the install untouched — every failure before
+this point costs nothing. `Apply` writes a helper script, starts it and returns; the caller
+**must quit immediately**, because the helper is waiting on this process to exit before it
+moves anything. The helper moves the install aside rather than writing over it, so a
+failure halfway puts back exactly what was there; the moved-aside copy is deleted only once
+the copy has finished.
+
+Neither script carries a comment of its own and both are built line by line rather than as
+raw string literals. Each lives in a branch excluded on the other platform, and the
+preprocessor still scans excluded regions for directives: any line starting with `#` — a
+shell comment, a shebang — reads as one and fails the other head's build.
+
+Nothing verifies a signature, because the release archives are unsigned and there is
+nothing to verify against. What there is: TLS to github.com, and the check that the archive
+holds the executable it claims to.
+
+### The idle lock
+
+`Settings.IdleLockMinutes` asks for the password again after that many minutes without
+input; 0 never locks, and that is the default for new accounts and existing ones alike.
+
+It is a **lock, not a sign-out**, and the distinction is the whole design. Signing out stops
+`DriveWatchdog`, `TrayIconService` and `StorageAlertService`, because all three act as the
+signed-in user. Locking stops none of them: the session stays live, the drives stay mounted
+and the watchdog keeps reconnecting them behind the lock screen. An unattended NAS tool
+that stopped working the moment nobody was at the keyboard would have it exactly backwards.
+`UnlockSession` therefore only reads `ILoggedInUser` — it establishes nothing.
+
+`IIdleTimeProvider` reports **system-wide** idle time, not this app's: someone working in
+another window is at their desk. Where it cannot tell, it answers zero — "someone is here" —
+because a lock nobody asked for is worse than one that failed to happen.
+
+`LockPage` is its own Shell route, and `AppShell.OnNavigated` groups it with the sign-in
+pages when it disables the flyout. A locked session that still showed the sidebar would be
+one anyone could click straight past, into the drive list it was put up to cover.
+
 ### The audit log
 
 `Auditlog` stores an `AuditAction` plus the drive's id, name and letter **as they were at
@@ -241,7 +305,7 @@ DependencyInjection.cs
 
 #### Platform seams
 
-Exactly five abstractions have a genuinely per-OS implementation, and they are bound in
+Exactly six abstractions have a genuinely per-OS implementation, and they are bound in
 `AddPlatformServices()` behind `#if WINDOWS` / `#elif MACCATALYST` (with an `#else` that
 throws, so a new head fails at composition rather than at first use):
 
@@ -252,6 +316,7 @@ throws, so a new head fails at composition rather than at first use):
 | `IDesktopService` | `WindowsDesktopService` — `.lnk` on the Desktop | `MacDesktopService` — symlink to the `.app` |
 | `ITrayIcon` | `WindowsTrayIcon` — `Shell_NotifyIcon`, hidden window on its own message loop | `UnsupportedTrayIcon` — no-op, `IsSupported` is false |
 | `IStorageProbe` | `WindowsStorageProbe` — mounts are `Z:\` | `MacStorageProbe` — mounts are `~/Helix Drives/Z` |
+| `IIdleTimeProvider` | `WindowsIdleTimeProvider` — `GetLastInputInfo` | `MacIdleTimeProvider` — `CGEventSourceSecondsSinceLastEventType` |
 
 Both storage probes derive from `StorageProbe`, which holds the part that matters: **one
 reading per volume, not per drive**. Several mapped drives are usually several shares of
@@ -321,8 +386,8 @@ Messaging/     CommunityToolkit.Mvvm messages, by feature
 Models/        observable display models bound by the views
 Platforms/     MAUI platform heads
 Resources/     AppIcon, Fonts, Images, Languages, Splash, Styles
-Services/      DriveWatchdog, TrayIconService, StorageAlertService, ModalHost,
-               PassphrasePromptService
+Services/      DriveWatchdog, TrayIconService, StorageAlertService, IdleLockService,
+               ModalHost, PassphrasePromptService
 ViewModels/    BaseViewModel + Auditlogs/, Drives/, Settings/, Users/
 Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/, Users/
 ```

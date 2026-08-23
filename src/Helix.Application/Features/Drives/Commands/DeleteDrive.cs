@@ -3,6 +3,7 @@ using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
+using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 
@@ -10,6 +11,7 @@ namespace Helix.Application.Features.Drives.Commands;
 
 public sealed class DeleteDrive(
     IDriveRepository driveRepository,
+    IDriveGroupRepository driveGroupRepository,
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
     INasConnector nasConnector) : IHandler
@@ -53,6 +55,17 @@ public sealed class DeleteDrive(
         }
 
         driveRepository.Remove(drive);
+
+        // Groups hold drive ids rather than a foreign key, so nothing else would clear
+        // this. A group would still read correctly — an id naming nothing resolves to
+        // nothing — but an install rearranged over a year should not accumulate a list of
+        // ids that point at drives the user deleted.
+        List<DriveGroup> groups = await driveGroupRepository.GetAsync(loggedInUser.UserId, cancellationToken);
+
+        foreach (DriveGroup group in groups)
+        {
+            group.Remove(drive.Id);
+        }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

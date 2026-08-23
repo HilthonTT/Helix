@@ -1121,6 +1121,96 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New group.
+        /// </summary>
+        internal static string NewGroup {
+            get {
+                return ResourceManager.GetString("NewGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete group.
+        /// </summary>
+        internal static string DeleteGroup {
+            get {
+                return ResourceManager.GetString("DeleteGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to delete '{0}'? The drives in it are not affected..
+        /// </summary>
+        internal static string DeleteGroupConfirm {
+            get {
+                return ResourceManager.GetString("DeleteGroupConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect {0}.
+        /// </summary>
+        internal static string TrayConnectGroup {
+            get {
+                return ResourceManager.GetString("TrayConnectGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Download and install.
+        /// </summary>
+        internal static string UpdateInstall {
+            get {
+                return ResourceManager.GetString("UpdateInstall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Downloading… {0}%.
+        /// </summary>
+        internal static string UpdateDownloading {
+            get {
+                return ResourceManager.GetString("UpdateDownloading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ready to install.
+        /// </summary>
+        internal static string UpdateReady {
+            get {
+                return ResourceManager.GetString("UpdateReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Helix {0} has been downloaded..
+        /// </summary>
+        internal static string UpdateReadyMessage {
+            get {
+                return ResourceManager.GetString("UpdateReadyMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Install and restart.
+        /// </summary>
+        internal static string UpdateInstallNow {
+            get {
+                return ResourceManager.GetString("UpdateInstallNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That password was not right..
+        /// </summary>
+        internal static string LockWrongPassword {
+            get {
+                return ResourceManager.GetString("LockWrongPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Audit log retention.
         /// </summary>
         internal static string AuditlogRetention {

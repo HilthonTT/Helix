@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:Class="Helix.App.Views.Drives.DriveGroupTemplate"
+             x:DataType="models:DriveGroupDisplay">
+
+    <!--
+    One chip per group: the name, how many drives are in it, and the two things anyone
+    ever wants to do to a group. Editing lives in the manager sheet rather than here —
+    a chip with three actions on it is a chip that gets misclicked.
+    -->
+    <Border Style="{StaticResource Chip}" IsEnabled="{Binding IsNotBusy}">
+        <HorizontalStackLayout Spacing="10">
+            <Label Text="{Binding Name}"
+                   FontSize="13"
+                   VerticalOptions="Center"
+                   LineBreakMode="TailTruncation"
+                   MaxLines="1"
+                   MaximumWidthRequest="160"/>
+
+            <Border Style="{StaticResource PillNeutral}" Padding="7,2" VerticalOptions="Center">
+                <Label Text="{Binding MemberCount}"
+                       Style="{StaticResource Caption}"
+                       FontFamily="{StaticResource FontMonoBold}"
+                       FontSize="11"/>
+            </Border>
+
+            <Border Style="{StaticResource IconChip}"
+                    behaviors:Hover.Cursor="True"
+                    ToolTipProperties.Text="{l10n:Translate ConnectGroup}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="Connect"/>
+                </Border.GestureRecognizers>
+                <Label Text="{x:Static icons:IconFont.Link}"
+                       Style="{StaticResource IconSm}"
+                       InputTransparent="True"
+                       TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+            </Border>
+
+            <Border Style="{StaticResource IconChip}"
+                    behaviors:Hover.Cursor="True"
+                    ToolTipProperties.Text="{l10n:Translate DisconnectGroup}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="Disconnect"/>
+                </Border.GestureRecognizers>
+                <Label Text="{x:Static icons:IconFont.Unlink}"
+                       Style="{StaticResource IconSm}"
+                       InputTransparent="True"
+                       TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+            </Border>
+        </HorizontalStackLayout>
+    </Border>
+
+</ContentView>

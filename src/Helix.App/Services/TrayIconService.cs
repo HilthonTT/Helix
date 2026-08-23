@@ -1,10 +1,14 @@
 using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
 using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Desktop;
+using Helix.Application.Features.DriveGroups.Commands;
+using Helix.Application.Features.DriveGroups.Queries;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
+using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 
@@ -31,6 +35,7 @@ internal sealed class TrayIconService
     private const string DisconnectAllId = "disconnect-all";
     private const string ExitId = "exit";
     private const string DriveIdPrefix = "drive:";
+    private const string GroupIdPrefix = "group:";
 
     private readonly ITrayIcon _trayIcon;
     private readonly INasConnector _nasConnector;
@@ -40,6 +45,9 @@ internal sealed class TrayIconService
 
     /// <summary>The drives the menu was last built from, for turning an id into a name.</summary>
     private List<Drive> _drives = [];
+
+    /// <summary>The groups the menu was last built from.</summary>
+    private List<DriveGroup> _groups = [];
 
     private bool _subscribed;
     private bool _running;
@@ -119,6 +127,7 @@ internal sealed class TrayIconService
         lock (_gate)
         {
             _drives = [];
+            _groups = [];
         }
 
         _trayIcon.SetMenu([]);
@@ -182,14 +191,21 @@ internal sealed class TrayIconService
 
         List<Drive> drives = result.Value;
 
+        // A group that cannot be read is a group the menu goes without, rather than a
+        // menu that fails to rebuild and leaves the last one on screen.
+        Result<List<DriveGroup>> groupsResult = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
+
+        List<DriveGroup> groups = groupsResult.IsSuccess ? groupsResult.Value : [];
+
         lock (_gate)
         {
             _drives = drives;
+            _groups = groups;
         }
 
         HashSet<string> connected = _nasConnector.GetConnectedLetters();
 
-        _trayIcon.SetMenu(BuildMenu(drives, connected));
+        _trayIcon.SetMenu(BuildMenu(drives, groups, connected));
 
         // Also re-checks that the icon is still there — Explorer can restart and refuse
         // it — so the window stops being hidable the moment the way back disappears.
@@ -199,7 +215,10 @@ internal sealed class TrayIconService
     private static int CountConnected(List<Drive> drives, HashSet<string> connected) =>
         drives.Count(drive => connected.Contains(drive.Letter));
 
-    private static List<TrayMenuItem> BuildMenu(List<Drive> drives, HashSet<string> connected)
+    private static List<TrayMenuItem> BuildMenu(
+        List<Drive> drives,
+        List<DriveGroup> groups,
+        HashSet<string> connected)
     {
         List<TrayMenuItem> items =
         [
@@ -225,6 +244,21 @@ internal sealed class TrayIconService
             items.Add(TrayMenuItem.Separator);
             items.Add(new TrayMenuItem(ConnectAllId, AppResources.TrayConnectAll));
             items.Add(new TrayMenuItem(DisconnectAllId, AppResources.TrayDisconnectAll));
+        }
+
+        // Groups sit below the drives rather than above them: the tray's job is one
+        // drive at a time first, and a list of groups at the top would push the thing
+        // most people opened the menu for off the end of it.
+        if (groups.Count > 0)
+        {
+            items.Add(TrayMenuItem.Separator);
+
+            foreach (DriveGroup group in groups)
+            {
+                items.Add(new TrayMenuItem(
+                    $"{GroupIdPrefix}{group.Id}",
+                    string.Format(AppResources.TrayConnectGroup, group.Name)));
+            }
         }
 
         items.Add(TrayMenuItem.Separator);
@@ -263,6 +297,12 @@ internal sealed class TrayIconService
                     break;
 
                 default:
+                    if (id.StartsWith(GroupIdPrefix, StringComparison.Ordinal))
+                    {
+                        await ConnectGroupAsync(id[GroupIdPrefix.Length..]);
+                        break;
+                    }
+
                     if (!id.StartsWith(DriveIdPrefix, StringComparison.Ordinal))
                     {
                         return;
@@ -285,6 +325,24 @@ internal sealed class TrayIconService
             // hidden window would be worse than the failure itself.
             _logger.LogError(ex, "The tray icon failed to handle the menu selection {MenuItemId}.", id);
         }
+    }
+
+    /// <summary>
+    /// Connects a whole group from the menu.
+    /// </summary>
+    /// <remarks>
+    /// Connect only, with no disconnect twin: the drive entries above already toggle, and
+    /// a menu carrying both directions for every group is a menu nobody reads. Taking a
+    /// group down is a deliberate act that belongs on the dashboard.
+    /// </remarks>
+    private async Task ConnectGroupAsync(string rawGroupId)
+    {
+        if (!Guid.TryParse(rawGroupId, out Guid groupId))
+        {
+            return;
+        }
+
+        await ScopedHandler.HandleAsync((ConnectDriveGroup h) => h.Handle(new ConnectDriveGroup.Request(groupId)));
     }
 
     private async Task ToggleDriveAsync(string rawDriveId)
@@ -363,6 +421,7 @@ internal sealed class TrayIconService
         WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(this, (r, m) => RefreshSafely());
         WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, (r, m) => RefreshSafely());
         WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) => RefreshSafely());
+        WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(this, (r, m) => RefreshSafely());
     }
 
     /// <summary>

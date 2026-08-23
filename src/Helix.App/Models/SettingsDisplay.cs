@@ -29,6 +29,10 @@ internal sealed partial class SettingsDisplay : ObservableObject
     private readonly System.Timers.Timer _storageAlertDebounceTimer;
     private int _persistedStorageAlertThresholdPercent;
 
+    // And the idle lock, where a stray intermediate value would lock the screen.
+    private readonly System.Timers.Timer _idleLockDebounceTimer;
+    private int _persistedIdleLockMinutes;
+
     [ObservableProperty]
     public partial Guid Id { get; set; }
 
@@ -150,6 +154,24 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _storageAlertDebounceTimer.Start();
     }
 
+    /// <summary>
+    /// Minutes of no input before the app locks; 0 never locks. Debounced hardest of the
+    /// three: "1" on the way to "15" would lock the screen a minute later, over the
+    /// settings page the user is still typing on.
+    /// </summary>
+    [ObservableProperty]
+    public partial int IdleLockMinutes { get; set; }
+    partial void OnIdleLockMinutesChanged(int value)
+    {
+        if (!_initialized || _rollingBack)
+        {
+            return;
+        }
+
+        _idleLockDebounceTimer.Stop();
+        _idleLockDebounceTimer.Start();
+    }
+
     [ObservableProperty]
     public partial Language Language { get; set; }
     async partial void OnLanguageChanged(Language value)
@@ -190,6 +212,14 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _storageAlertDebounceTimer.Elapsed += (_, _) =>
             MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateStorageAlertThreshold());
 
+        _idleLockDebounceTimer = new(500)
+        {
+            AutoReset = false
+        };
+
+        _idleLockDebounceTimer.Elapsed += (_, _) =>
+            MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateIdleLockMinutes());
+
         Id = settings.Id;
         UserId = settings.UserId;
         AutoConnect = settings.AutoConnect;
@@ -203,6 +233,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _persistedRetentionDays = settings.AuditlogRetentionDays;
         StorageAlertThresholdPercent = settings.StorageAlertThresholdPercent;
         _persistedStorageAlertThresholdPercent = settings.StorageAlertThresholdPercent;
+        IdleLockMinutes = settings.IdleLockMinutes;
+        _persistedIdleLockMinutes = settings.IdleLockMinutes;
 
         // Every seed above is done — from here on the hooks may write back.
         _initialized = true;
@@ -227,7 +259,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 TimerCount,
                 Language,
                 AuditlogRetentionDays,
-                StorageAlertThresholdPercent);
+                StorageAlertThresholdPercent,
+                IdleLockMinutes);
 
             // Apply the specific update.
             updateAction(requestBuilder);
@@ -316,5 +349,18 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
 
         RollBack(() => StorageAlertThresholdPercent = _persistedStorageAlertThresholdPercent);
+    }
+
+    private async Task DebouncedUpdateIdleLockMinutes()
+    {
+        int attempted = IdleLockMinutes;
+
+        if (await UpdatePropertyAsync(builder => builder.IdleLockMinutes = attempted))
+        {
+            _persistedIdleLockMinutes = attempted;
+            return;
+        }
+
+        RollBack(() => IdleLockMinutes = _persistedIdleLockMinutes);
     }
 }

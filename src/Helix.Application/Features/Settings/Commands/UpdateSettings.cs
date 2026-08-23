@@ -24,7 +24,8 @@ public sealed class UpdateSettings(
         int TimerCount,
         Language Language,
         int AuditlogRetentionDays,
-        int StorageAlertThresholdPercent)
+        int StorageAlertThresholdPercent,
+        int IdleLockMinutes)
     {
         public sealed class Builder(
             bool autoConnect,
@@ -34,7 +35,8 @@ public sealed class UpdateSettings(
             int timerCount,
             Language language,
             int auditlogRetentionDays,
-            int storageAlertThresholdPercent)
+            int storageAlertThresholdPercent,
+            int idleLockMinutes)
         {
             public bool AutoConnect { get; set; } = autoConnect;
 
@@ -52,6 +54,8 @@ public sealed class UpdateSettings(
 
             public int StorageAlertThresholdPercent { get; set; } = storageAlertThresholdPercent;
 
+            public int IdleLockMinutes { get; set; } = idleLockMinutes;
+
             public Request Build() => new(
                 AutoConnect,
                 AutoMinimize,
@@ -60,7 +64,8 @@ public sealed class UpdateSettings(
                 TimerCount,
                 Language,
                 AuditlogRetentionDays,
-                StorageAlertThresholdPercent);
+                StorageAlertThresholdPercent,
+                IdleLockMinutes);
         }
     }
 
@@ -91,7 +96,8 @@ public sealed class UpdateSettings(
             request.TimerCount,
             request.Language,
             request.AuditlogRetentionDays,
-            request.StorageAlertThresholdPercent);
+            request.StorageAlertThresholdPercent,
+            request.IdleLockMinutes);
 
         // The shortcut services throw IOException on failure (e.g. the startup folder
         // is locked down by policy). Handlers must never throw for expected failures —
@@ -133,6 +139,12 @@ public sealed class UpdateSettings(
             request.StorageAlertThresholdPercent > SettingsModel.MaximumStorageAlertThresholdPercent)
         {
             return Result.Failure(SettingsErrors.StorageAlertThresholdOutOfRange);
+        }
+
+        // Zero is legal and means "never lock".
+        if (request.IdleLockMinutes < 0)
+        {
+            return Result.Failure(SettingsErrors.IdleLockMustNotBeNegative);
         }
 
         return Result.Success();

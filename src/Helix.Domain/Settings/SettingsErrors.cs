@@ -19,6 +19,10 @@ public static class SettingsErrors
         $"The low-space warning must be between 0 and {Settings.MaximumStorageAlertThresholdPercent} percent. " +
         "Zero turns it off.");
 
+    public static readonly Error IdleLockMustNotBeNegative = Error.Problem(
+        "Settings.IdleLockMustNotBeNegative",
+        "The idle lock must be zero minutes or more. Zero never locks.");
+
     public static Error ShortcutUpdateFailed(string message) => Error.Problem(
         "Settings.ShortcutUpdateFailed",
         $"Failed to update the startup/desktop shortcut: {message}");

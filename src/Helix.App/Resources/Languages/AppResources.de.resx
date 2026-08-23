@@ -441,6 +441,78 @@
   <data name="TrayStorageLowMessage" xml:space="preserve">
     <value>{0} hat noch {1} % freien Speicher.</value>
   </data>
+  <data name="DriveGroups" xml:space="preserve">
+    <value>Gruppen</value>
+  </data>
+  <data name="YourGroups" xml:space="preserve">
+    <value>Deine Gruppen</value>
+  </data>
+  <data name="NewGroup" xml:space="preserve">
+    <value>Neue Gruppe</value>
+  </data>
+  <data name="EditGroup" xml:space="preserve">
+    <value>Gruppe bearbeiten</value>
+  </data>
+  <data name="DeleteGroup" xml:space="preserve">
+    <value>Gruppe löschen</value>
+  </data>
+  <data name="DeleteGroupConfirm" xml:space="preserve">
+    <value>Soll '{0}' wirklich gelöscht werden? Die enthaltenen Laufwerke bleiben bestehen.</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>Gruppenname</value>
+  </data>
+  <data name="GroupNamePlaceholder" xml:space="preserve">
+    <value>Zuhause, Büro, Backup-Lauf…</value>
+  </data>
+  <data name="GroupDrives" xml:space="preserve">
+    <value>Laufwerke in dieser Gruppe</value>
+  </data>
+  <data name="NoDrivesForGroup" xml:space="preserve">
+    <value>Lege zuerst ein Laufwerk an — eine Gruppe fasst vorhandene Laufwerke zusammen.</value>
+  </data>
+  <data name="ConnectGroup" xml:space="preserve">
+    <value>Gruppe verbinden</value>
+  </data>
+  <data name="DisconnectGroup" xml:space="preserve">
+    <value>Gruppe trennen</value>
+  </data>
+  <data name="TrayConnectGroup" xml:space="preserve">
+    <value>{0} verbinden</value>
+  </data>
+  <data name="UpdateInstall" xml:space="preserve">
+    <value>Herunterladen und installieren</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Wird heruntergeladen… {0} %</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Bereit zur Installation</value>
+  </data>
+  <data name="UpdateReadyMessage" xml:space="preserve">
+    <value>Helix {0} wurde heruntergeladen. Helix wird beendet, ersetzt sich selbst und startet neu. Laufwerke und Einstellungen bleiben erhalten.</value>
+  </data>
+  <data name="UpdateInstallNow" xml:space="preserve">
+    <value>Installieren und neu starten</value>
+  </data>
+  <data name="IdleLock" xml:space="preserve">
+    <value>Bei Inaktivität sperren</value>
+  </data>
+  <data name="IdleLockDescription" xml:space="preserve">
+    <value>Nach so vielen Minuten ohne Eingabe erneut nach dem Passwort fragen. 0 sperrt nie. Laufwerke bleiben währenddessen verbunden.</value>
+  </data>
+  <data name="LockTitle" xml:space="preserve">
+    <value>Gesperrt</value>
+  </data>
+  <data name="LockMessage" xml:space="preserve">
+    <value>Helix hat sich nach einer Weile ohne Eingabe gesperrt. Die Laufwerke blieben verbunden.</value>
+  </data>
+  <data name="LockUnlock" xml:space="preserve">
+    <value>Entsperren</value>
+  </data>
+  <data name="LockWrongPassword" xml:space="preserve">
+    <value>Das Passwort war nicht richtig.</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix läuft weiterhin im Infobereich.</value>
   </data>

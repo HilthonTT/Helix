@@ -59,6 +59,39 @@ namespace Helix.Infrastructure.Migrations
                     b.ToTable("AuditLogs", (string)null);
                 });
 
+            modelBuilder.Entity("Helix.Domain.DriveGroups.DriveGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("DriveIds")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ModifiedOnUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedOnUtc");
+
+                    b.HasIndex("UserId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("DriveGroups", (string)null);
+                });
+
             modelBuilder.Entity("Helix.Domain.Drives.Drive", b =>
                 {
                     b.Property<Guid>("Id")
@@ -133,6 +166,9 @@ namespace Helix.Infrastructure.Migrations
                     b.Property<bool>("AutoMinimize")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("IdleLockMinutes")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Language")
                         .HasColumnType("INTEGER");
 
@@ -190,6 +226,15 @@ namespace Helix.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Helix.Domain.Auditlogs.Auditlog", b =>
+                {
+                    b.HasOne("Helix.Domain.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Helix.Domain.DriveGroups.DriveGroup", b =>
                 {
                     b.HasOne("Helix.Domain.Users.User", null)
                         .WithMany()

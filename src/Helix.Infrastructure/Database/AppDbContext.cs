@@ -1,5 +1,6 @@
 ﻿using Helix.Application.Abstractions.Data;
 using Helix.Domain.Auditlogs;
+using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Helix.Domain.Settings;
 using Helix.Domain.Users;
@@ -22,6 +23,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork, IDbContext
     public DbSet<User> Users { get; init; }
 
     public DbSet<Drive> Drives { get; init; }
+
+    public DbSet<DriveGroup> DriveGroups { get; init; }
 
     public DbSet<Settings> Settings { get; init; }
 

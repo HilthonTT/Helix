@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
@@ -21,6 +21,12 @@
             <MenuFlyoutItem Text="{l10n:Translate AddDrive}" Clicked="AddDrive_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="A" Modifiers="Ctrl"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutItem Text="{l10n:Translate DriveGroups}" Clicked="DriveGroups_Clicked">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="G" Modifiers="Ctrl"/>
                 </MenuFlyoutItem.KeyboardAccelerators>
             </MenuFlyoutItem>
 
@@ -75,7 +81,7 @@
             </Grid>
 
             <!-- ===== Left column: stats over the drive list ===== -->
-            <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="20">
+            <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" RowSpacing="20">
 
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
 
@@ -183,8 +189,33 @@
                     </Border>
                 </Grid>
 
+                <!-- ===== Groups ===== -->
+                <!-- Only when there are any: an empty strip is a band of nothing above
+                     the list, and the manager is reachable from the card header and the
+                     Drives menu regardless. -->
+                <Border Grid.Row="1"
+                        Style="{StaticResource Card}"
+                        Padding="20,14"
+                        IsVisible="{Binding DriveGroups.Count, Converter={StaticResource CountToBoolConverter}}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <Label Text="{l10n:Translate DriveGroups}"
+                               Style="{StaticResource Overline}"
+                               VerticalOptions="Center"/>
+
+                        <controls:HorizontalWrapLayout Grid.Column="1"
+                                                       Spacing="8"
+                                                       BindableLayout.ItemsSource="{Binding DriveGroups}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:DriveGroupDisplay">
+                                    <views:DriveGroupTemplate BindingContext="{Binding .}"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </controls:HorizontalWrapLayout>
+                    </Grid>
+                </Border>
+
                 <!-- ===== Drive list ===== -->
-                <Border Grid.Row="1" Style="{StaticResource Card}">
+                <Border Grid.Row="2" Style="{StaticResource Card}">
                     <Grid RowDefinitions="Auto,Auto,*" Padding="20">
 
                         <!-- Card header -->
@@ -235,6 +266,19 @@
                                                Style="{StaticResource IconSm}"
                                                TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
                                         <Label Text="{l10n:Translate Disconnect}" FontSize="13" VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <Border Style="{StaticResource Chip}"
+                                        SemanticProperties.Description="Opens the drive group manager">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenDriveGroupsModalCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                        <Label Text="{x:Static icons:IconFont.LayerGroup}"
+                                               Style="{StaticResource IconSm}"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                        <Label Text="{l10n:Translate DriveGroups}" FontSize="13" VerticalOptions="Center"/>
                                     </HorizontalStackLayout>
                                 </Border>
 
@@ -390,6 +434,14 @@
 
         <AbsoluteLayout x:Name="UpdateDriveLayout" IsVisible="False">
             <views:UpdateDriveModal x:Name="UpdateDriveView"
+                                          WidthRequest="480"
+                                          MaximumHeightRequest="600"
+                                          AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                          AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="DriveGroupsLayout" IsVisible="False">
+            <views:DriveGroupsModal x:Name="DriveGroupsView"
                                           WidthRequest="480"
                                           MaximumHeightRequest="600"
                                           AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"

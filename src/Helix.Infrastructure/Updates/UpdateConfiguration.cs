@@ -1,4 +1,5 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 
 namespace Helix.Infrastructure.Updates;
 
@@ -25,6 +26,54 @@ internal static class UpdateConfiguration
 
     /// <summary>Where to send the user when there is something newer.</summary>
     public static string ReleasesPageUrl => $"https://github.com/{Owner}/{Repository}/releases";
+
+    /// <summary>
+    /// The fragment that identifies this machine's build in a release asset's name.
+    /// </summary>
+    /// <remarks>
+    /// Matches how the release workflow names its archives — <c>Helix-v2.1.0-win-x64.zip</c>,
+    /// <c>-win-arm64</c>, <c>-macos</c>. An architecture with no published build answers
+    /// empty rather than guessing, which reads downstream as "no download for this
+    /// computer" and leaves the release page as the route.
+    /// </remarks>
+    public static string AssetMoniker
+    {
+        get
+        {
+#if MACCATALYST
+            return "macos";
+#else
+            return RuntimeInformation.ProcessArchitecture switch
+            {
+                Architecture.Arm64 => "win-arm64",
+                Architecture.X64 => "win-x64",
+                _ => string.Empty,
+            };
+#endif
+        }
+    }
+
+    /// <summary>
+    /// A client for pulling down a release archive, as opposed to reading the API.
+    /// </summary>
+    /// <remarks>
+    /// Its own client because the two want opposite things from a timeout: the API call
+    /// hangs off a button and must give up quickly, while this moves a couple of hundred
+    /// megabytes over whatever connection the user has. The timeout here bounds the whole
+    /// transfer, so it is generous rather than short; a user who changes their mind
+    /// cancels, and cancelling is instant.
+    /// </remarks>
+    public static HttpClient CreateDownloadHttpClient()
+    {
+        var client = new HttpClient
+        {
+            Timeout = TimeSpan.FromMinutes(30),
+        };
+
+        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(Repository, "1.0"));
+
+        return client;
+    }
 
     /// <summary>
     /// A client configured the way the GitHub API expects.

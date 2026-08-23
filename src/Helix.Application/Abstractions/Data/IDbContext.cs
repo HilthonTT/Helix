@@ -1,4 +1,5 @@
 ﻿using Helix.Domain.Auditlogs;
+using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,8 @@ public interface IDbContext
     public DbSet<User> Users { get; init; }
 
     public DbSet<Drive> Drives { get; init; }
+
+    public DbSet<DriveGroup> DriveGroups { get; init; }
 
     public DbSet<SettingsModel> Settings { get; init; }
 

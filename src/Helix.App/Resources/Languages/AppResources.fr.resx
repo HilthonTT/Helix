@@ -441,6 +441,78 @@
   <data name="TrayStorageLowMessage" xml:space="preserve">
     <value>{0} n’a plus que {1} % d’espace libre.</value>
   </data>
+  <data name="DriveGroups" xml:space="preserve">
+    <value>Groupes</value>
+  </data>
+  <data name="YourGroups" xml:space="preserve">
+    <value>Vos groupes</value>
+  </data>
+  <data name="NewGroup" xml:space="preserve">
+    <value>Nouveau groupe</value>
+  </data>
+  <data name="EditGroup" xml:space="preserve">
+    <value>Modifier le groupe</value>
+  </data>
+  <data name="DeleteGroup" xml:space="preserve">
+    <value>Supprimer le groupe</value>
+  </data>
+  <data name="DeleteGroupConfirm" xml:space="preserve">
+    <value>Voulez-vous vraiment supprimer '{0}' ? Les lecteurs qu'il contient ne sont pas affectés.</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>Nom du groupe</value>
+  </data>
+  <data name="GroupNamePlaceholder" xml:space="preserve">
+    <value>Maison, Bureau, Sauvegarde…</value>
+  </data>
+  <data name="GroupDrives" xml:space="preserve">
+    <value>Lecteurs de ce groupe</value>
+  </data>
+  <data name="NoDrivesForGroup" xml:space="preserve">
+    <value>Ajoutez d'abord un lecteur — un groupe rassemble des lecteurs existants.</value>
+  </data>
+  <data name="ConnectGroup" xml:space="preserve">
+    <value>Connecter le groupe</value>
+  </data>
+  <data name="DisconnectGroup" xml:space="preserve">
+    <value>Déconnecter le groupe</value>
+  </data>
+  <data name="TrayConnectGroup" xml:space="preserve">
+    <value>Connecter {0}</value>
+  </data>
+  <data name="UpdateInstall" xml:space="preserve">
+    <value>Télécharger et installer</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Téléchargement… {0} %</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Prêt à installer</value>
+  </data>
+  <data name="UpdateReadyMessage" xml:space="preserve">
+    <value>Helix {0} a été téléchargé. Helix va se fermer, se remplacer puis redémarrer. Vos lecteurs et réglages sont conservés.</value>
+  </data>
+  <data name="UpdateInstallNow" xml:space="preserve">
+    <value>Installer et redémarrer</value>
+  </data>
+  <data name="IdleLock" xml:space="preserve">
+    <value>Verrouiller après inactivité</value>
+  </data>
+  <data name="IdleLockDescription" xml:space="preserve">
+    <value>Redemander le mot de passe après ce nombre de minutes sans activité. 0 ne verrouille jamais. Les lecteurs restent connectés.</value>
+  </data>
+  <data name="LockTitle" xml:space="preserve">
+    <value>Verrouillé</value>
+  </data>
+  <data name="LockMessage" xml:space="preserve">
+    <value>Helix s'est verrouillé après un moment sans activité. Vos lecteurs sont restés connectés.</value>
+  </data>
+  <data name="LockUnlock" xml:space="preserve">
+    <value>Déverrouiller</value>
+  </data>
+  <data name="LockWrongPassword" xml:space="preserve">
+    <value>Ce mot de passe n'est pas correct.</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix continue de fonctionner dans la zone de notification.</value>
   </data>

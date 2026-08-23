@@ -30,6 +30,10 @@ public static class DependencyInjection
         // the two above it lives as long as the app does.
         services.AddSingleton<StorageAlertService>();
 
+        // Holds the idle poll and the route to come back to, so it outlives every page
+        // it might lock.
+        services.AddSingleton<IdleLockService>();
+
         services.AddScoped<HomePage>();
 
         return services;

@@ -10,6 +10,7 @@ using Helix.Application.Abstractions.Storage;
 using Helix.Application.Abstractions.Updates;
 using Helix.Application.Abstractions.Time;
 using Helix.Domain.Auditlogs;
+using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Helix.Domain.Settings;
 using Helix.Domain.Users;
@@ -93,6 +94,8 @@ public static class DependencyInjection
 
         services.AddScoped<IDriveRepository, DriveRepository>();
 
+        services.AddScoped<IDriveGroupRepository, DriveGroupRepository>();
+
         services.AddScoped<ISettingsRepository, SettingsRepository>();
 
         services.AddScoped<IAuditlogRepository, AuditlogRepository>();
@@ -118,7 +121,17 @@ public static class DependencyInjection
         services.AddSingleton<IUpdateChecker>(sp => new GitHubUpdateChecker(
             UpdateConfiguration.CreateHttpClient(),
             sp.GetRequiredService<ILogger<GitHubUpdateChecker>>(),
-            () => AppInfo.Current.VersionString));
+            () => AppInfo.Current.VersionString,
+            () => UpdateConfiguration.AssetMoniker));
+
+        // Its own client, with a timeout that suits moving a release rather than reading
+        // one. Both paths are resolved through delegates so a test can point the swap at
+        // a temporary folder instead of at the running app.
+        services.AddSingleton<IUpdateInstaller>(sp => new UpdateInstaller(
+            UpdateConfiguration.CreateDownloadHttpClient(),
+            sp.GetRequiredService<ILogger<UpdateInstaller>>(),
+            () => UpdateInstaller.DefaultInstallDirectory,
+            () => UpdateInstaller.DefaultStagingRoot));
 
         services.AddPlatformServices();
 
@@ -126,9 +139,10 @@ public static class DependencyInjection
     }
 
     /// <summary>
-    /// Binds the five abstractions whose implementation is genuinely per-OS: mounting a
-    /// share, registering for launch at login, putting a shortcut on the desktop, and
-    /// sitting in the system tray, and measuring what a mount is really on.
+    /// Binds the six abstractions whose implementation is genuinely per-OS: mounting a
+    /// share, registering for launch at login, putting a shortcut on the desktop, sitting
+    /// in the system tray, measuring what a mount is really on, and asking the system how
+    /// long it has been since anyone touched it.
     /// Everything else in this layer is platform-neutral.
     /// </summary>
     private static IServiceCollection AddPlatformServices(this IServiceCollection services)
@@ -144,6 +158,8 @@ public static class DependencyInjection
         services.AddSingleton<ITrayIcon, WindowsTrayIcon>();
 
         services.AddSingleton<IStorageProbe, WindowsStorageProbe>();
+
+        services.AddSingleton<IIdleTimeProvider, WindowsIdleTimeProvider>();
 #elif MACCATALYST
         services.AddSingleton<INasConnector, MacNasConnector>();
 
@@ -154,13 +170,15 @@ public static class DependencyInjection
         services.AddSingleton<ITrayIcon, UnsupportedTrayIcon>();
 
         services.AddSingleton<IStorageProbe, MacStorageProbe>();
+
+        services.AddSingleton<IIdleTimeProvider, MacIdleTimeProvider>();
 #else
         // Fail at composition rather than at the first drive connection: a head added
         // without its platform services would otherwise look fine until it was used.
         throw new PlatformNotSupportedException(
             "Helix has no platform services for this target framework. Add implementations of " +
-            $"{nameof(INasConnector)}, {nameof(IStartupService)}, {nameof(IDesktopService)} and " +
-            $"{nameof(ITrayIcon)} and {nameof(IStorageProbe)} for it.");
+            $"{nameof(INasConnector)}, {nameof(IStartupService)}, {nameof(IDesktopService)}, " +
+            $"{nameof(ITrayIcon)}, {nameof(IStorageProbe)} and {nameof(IIdleTimeProvider)} for it.");
 #endif
 
         return services;

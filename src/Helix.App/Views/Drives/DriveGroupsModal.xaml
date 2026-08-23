@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
+             xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:DataType="vm:DriveGroupsViewModel"
+             x:Class="Helix.App.Views.Drives.DriveGroupsModal"
+             BackgroundColor="Transparent">
+
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <!-- Header -->
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{l10n:Translate DriveGroups}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{l10n:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+            </Grid>
+
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16" Padding="24,4,24,20">
+
+                    <!-- Existing groups: tap one to edit it, or the bin to be rid of it -->
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding Groups.Count, Converter={StaticResource CountToBoolConverter}}">
+                        <Label Text="{l10n:Translate YourGroups}" Style="{StaticResource FieldLabel}"/>
+
+                        <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Groups}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:DriveGroupDisplay">
+                                    <Border Style="{StaticResource Row}" Padding="12,10">
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                                            <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                                <Label Text="{Binding Name}"
+                                                       Style="{StaticResource BodyStrong}"
+                                                       LineBreakMode="TailTruncation"
+                                                       MaxLines="1"/>
+                                                <Label Style="{StaticResource Caption}"
+                                                       FontSize="11"
+                                                       Text="{Binding MemberCount, StringFormat='{0} drives'}"/>
+                                            </VerticalStackLayout>
+
+                                            <Border Grid.Column="1"
+                                                    Style="{StaticResource IconChip}"
+                                                    ToolTipProperties.Text="{l10n:Translate EditGroup}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DriveGroupsViewModel}}, Path=EditCommand, x:DataType=vm:DriveGroupsViewModel}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <Label Text="{x:Static icons:IconFont.PencilAlt}"
+                                                       Style="{StaticResource IconSm}"
+                                                       InputTransparent="True"
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                            </Border>
+
+                                            <Border Grid.Column="2"
+                                                    Style="{StaticResource IconChip}"
+                                                    ToolTipProperties.Text="{l10n:Translate DeleteGroup}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DriveGroupsViewModel}}, Path=DeleteCommand, x:DataType=vm:DriveGroupsViewModel}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <Label Text="{x:Static icons:IconFont.Trash}"
+                                                       Style="{StaticResource IconSm}"
+                                                       InputTransparent="True"
+                                                       TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <BoxView Style="{StaticResource Divider}" Margin="0,6"/>
+                    </VerticalStackLayout>
+
+                    <!-- Editor: the same fields whether a group is being made or changed -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="{Binding EditorTitle}" Style="{StaticResource Title3}" VerticalOptions="Center"/>
+
+                        <Border Grid.Column="1"
+                                Style="{StaticResource Chip}"
+                                IsVisible="{Binding IsEditing}"
+                                ToolTipProperties.Text="{l10n:Translate NewGroup}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StartNewGroupCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="{l10n:Translate NewGroup}" FontSize="13" InputTransparent="True"/>
+                        </Border>
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate GroupName}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{l10n:Translate GroupNamePlaceholder}"
+                                   Text="{Binding Name}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate GroupDrives}" Style="{StaticResource FieldLabel}"/>
+
+                        <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Drives}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:DriveSelection">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
+                                        <CheckBox IsChecked="{Binding IsSelected}" VerticalOptions="Center"/>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding Label}"
+                                               Style="{StaticResource Caption}"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <!-- A group of nothing is a button that does nothing -->
+                        <Label Text="{l10n:Translate NoDrivesForGroup}"
+                               Style="{StaticResource Caption}"
+                               IsVisible="{Binding HasDrives, Converter={StaticResource InvertedBoolConverter}}"/>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,4,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Close}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Grid.Column="1"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Save}"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+        </Grid>
+    </Border>
+
+</ContentView>

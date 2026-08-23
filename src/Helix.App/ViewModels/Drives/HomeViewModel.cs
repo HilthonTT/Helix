@@ -1,16 +1,19 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
 using Helix.App.Messaging.Navigation;
 using Helix.App.Models;
 using Microsoft.Extensions.Logging;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Storage;
+using Helix.Application.Features.DriveGroups.Queries;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
+using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using System.Collections.ObjectModel;
 using SettingsModel = Helix.Domain.Settings.Settings;
@@ -29,6 +32,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         // Partial properties cannot carry field initializers, so defaults are seeded here.
         Drives = [];
+        DriveGroups = [];
         TotalStorage = string.Empty;
         TotalConnected = string.Empty;
 
@@ -38,6 +42,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial ObservableCollection<DriveDisplay> Drives { get; set; }
+
+    /// <summary>
+    /// The saved sets of drives, as the strip above the drive list shows them.
+    /// </summary>
+    [ObservableProperty]
+    public partial ObservableCollection<DriveGroupDisplay> DriveGroups { get; set; }
 
     [ObservableProperty]
     public partial string TotalStorage { get; set; }
@@ -56,6 +66,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
     private static void OpenCreateDriveModal()
     {
         WeakReferenceMessenger.Default.Send(new CreateDriveMessage(true));
+    }
+
+    [RelayCommand]
+    private static void OpenDriveGroupsModal()
+    {
+        WeakReferenceMessenger.Default.Send(new DriveGroupsMessage(true));
     }
 
     [RelayCommand]
@@ -240,6 +256,30 @@ internal sealed partial class HomeViewModel : BaseViewModel
     }
 
     /// <summary>
+    /// Re-reads the groups behind the strip.
+    /// </summary>
+    /// <remarks>
+    /// Counted against the drives on screen so a group that names a deleted drive shows
+    /// what it can still connect rather than what it once held. Failures are swallowed on
+    /// purpose: a strip that cannot be read is a strip that is not shown, and it must not
+    /// stand between the user and the drive list underneath it.
+    /// </remarks>
+    public async Task FetchDriveGroupsAsync()
+    {
+        Result<List<DriveGroup>> result = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
+        if (result.IsFailure)
+        {
+            DriveGroups = [];
+
+            return;
+        }
+
+        HashSet<Guid> existing = [.. Drives.Select(drive => drive.Id)];
+
+        DriveGroups = [.. result.Value.Select(group => new DriveGroupDisplay(group, existing))];
+    }
+
+    /// <summary>
     /// Recomputes the dashboard tiles. The connection count is a cheap logical-drive
     /// lookup, but the capacity figure does I/O against the share, so it is probed off
     /// the UI thread — the monitor drives this on a timer now, and an unreachable NAS
@@ -319,6 +359,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
             Drives.Add(driveDisplay);
 
             _ = RefreshTotalsAsync();
+        });
+
+        WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(this, (r, m) =>
+        {
+            _ = FetchDriveGroupsAsync();
         });
 
         WeakReferenceMessenger.Default.Register<DriveSearchedMessage>(this, (r, m) =>

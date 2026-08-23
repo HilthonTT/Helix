@@ -248,6 +248,19 @@
                                 </Border>
                             </Grid>
         
+                            <Grid Style="{StaticResource PreferenceRow}">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{l10n:Translate IdleLock}" Style="{StaticResource Title3}"/>
+                                    <Label Text="{l10n:Translate IdleLockDescription}" Style="{StaticResource Caption}"/>
+                                </VerticalStackLayout>
+                                <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
+                                    <Entry Placeholder="0"
+                                           Keyboard="Numeric"
+                                           Text="{Binding Settings.IdleLockMinutes}"
+                                           IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                </Border>
+                            </Grid>
+        
                             <BoxView Style="{StaticResource Divider}"/>
         
                             <Grid Style="{StaticResource PreferenceRow}">
@@ -268,6 +281,14 @@
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate Updates}" Style="{StaticResource Title3}"/>
                                     <Label Text="{l10n:Translate UpdatesDescription}" Style="{StaticResource Caption}"/>
+
+                                    <!-- A release is a couple of hundred megabytes; a
+                                         button that only goes disabled reads as one that
+                                         did nothing. -->
+                                    <Label Text="{Binding UpdateStatus}"
+                                           Style="{StaticResource Caption}"
+                                           FontFamily="{StaticResource FontMono}"
+                                           IsVisible="{Binding HasUpdateStatus}"/>
                                 </VerticalStackLayout>
                                 <Button Grid.Column="1"
                                         Style="{StaticResource ButtonSecondary}"

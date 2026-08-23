@@ -441,6 +441,78 @@
   <data name="TrayStorageLowMessage" xml:space="preserve">
     <value>{0} の空き容量は残り {1}% です。</value>
   </data>
+  <data name="DriveGroups" xml:space="preserve">
+    <value>グループ</value>
+  </data>
+  <data name="YourGroups" xml:space="preserve">
+    <value>グループ一覧</value>
+  </data>
+  <data name="NewGroup" xml:space="preserve">
+    <value>新しいグループ</value>
+  </data>
+  <data name="EditGroup" xml:space="preserve">
+    <value>グループを編集</value>
+  </data>
+  <data name="DeleteGroup" xml:space="preserve">
+    <value>グループを削除</value>
+  </data>
+  <data name="DeleteGroupConfirm" xml:space="preserve">
+    <value>'{0}' を削除しますか？ 含まれるドライブはそのまま残ります。</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>グループ名</value>
+  </data>
+  <data name="GroupNamePlaceholder" xml:space="preserve">
+    <value>自宅、オフィス、バックアップ…</value>
+  </data>
+  <data name="GroupDrives" xml:space="preserve">
+    <value>このグループのドライブ</value>
+  </data>
+  <data name="NoDrivesForGroup" xml:space="preserve">
+    <value>先にドライブを追加してください。グループは既存のドライブの集まりです。</value>
+  </data>
+  <data name="ConnectGroup" xml:space="preserve">
+    <value>グループを接続</value>
+  </data>
+  <data name="DisconnectGroup" xml:space="preserve">
+    <value>グループを切断</value>
+  </data>
+  <data name="TrayConnectGroup" xml:space="preserve">
+    <value>{0} を接続</value>
+  </data>
+  <data name="UpdateInstall" xml:space="preserve">
+    <value>ダウンロードしてインストール</value>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>ダウンロード中… {0}%</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>インストールの準備ができました</value>
+  </data>
+  <data name="UpdateReadyMessage" xml:space="preserve">
+    <value>Helix {0} をダウンロードしました。Helix を終了し、入れ替えてから再起動します。ドライブと設定はそのまま残ります。</value>
+  </data>
+  <data name="UpdateInstallNow" xml:space="preserve">
+    <value>インストールして再起動</value>
+  </data>
+  <data name="IdleLock" xml:space="preserve">
+    <value>操作がないときロック</value>
+  </data>
+  <data name="IdleLockDescription" xml:space="preserve">
+    <value>この分数だけ操作がないとパスワードを再度求めます。0 ならロックしません。ロック中もドライブは接続されたままです。</value>
+  </data>
+  <data name="LockTitle" xml:space="preserve">
+    <value>ロック中</value>
+  </data>
+  <data name="LockMessage" xml:space="preserve">
+    <value>しばらく操作がなかったため Helix はロックされました。ドライブは接続されたままです。</value>
+  </data>
+  <data name="LockUnlock" xml:space="preserve">
+    <value>ロック解除</value>
+  </data>
+  <data name="LockWrongPassword" xml:space="preserve">
+    <value>パスワードが正しくありません。</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix は通知領域で実行中です。</value>
   </data>
