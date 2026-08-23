@@ -232,7 +232,7 @@ internal sealed class TrayIconService
                     // Hide first: an icon whose process has gone stays in the tray until
                     // the user happens to mouse over it.
                     Stop();
-                    MainThread.BeginInvokeOnMainThread(() => Microsoft.Maui.Controls.Application.Current?.Quit());
+                    MainWindow.Exit();
                     return;
 
                 case ConnectAllId:

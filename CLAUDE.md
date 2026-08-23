@@ -298,7 +298,12 @@ The XAML, viewmodels, converters and behaviours are shared verbatim; only these 
   Catalyst exposes no public API for a window scene, so `BaseViewModel.MinimizeApp` runs
   its countdown and then does nothing on macOS rather than reaching for a private
   selector. On Windows it hides to the tray while `TrayIconService` is running, because
-  the icon is then the way back, and falls back to a plain minimize when it is not.
+  the icon is then the way back, and falls back to a plain minimize when it is not. The
+  title bar close button follows the same rule: `MauiProgram.OnWindowClosing` cancels the
+  close and hides to the tray while the icon is up, and lets the window close when it is
+  not, so the app is never hidden with no way back. The tray Exit item is the only real
+  quit, and it goes through `MainWindow.Exit` — the `IsExiting` flag is what stops that
+  shutdown being turned back into a hide.
 - `Common/DrivePlatform` — the one flag the shared drive modals bind to, so the
   "reconnect at sign-in" switch is hidden rather than shown-and-ignored on macOS.
 - `Behaviors/Hover` (hand cursor), `Services/ModalHost` (Escape-to-dismiss) and the

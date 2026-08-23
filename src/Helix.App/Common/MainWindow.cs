@@ -75,6 +75,27 @@ internal static class MainWindow
 #endif
     }
 
+    /// <summary>
+    /// Whether a real shutdown has been asked for, so the close button stops being
+    /// treated as "hide me" on the way out.
+    /// </summary>
+    public static bool IsExiting { get; private set; }
+
+    /// <summary>
+    /// Quits for real, rather than closing to the tray.
+    /// </summary>
+    /// <remarks>
+    /// The tray's Exit item is the only way out once the close button hides the window,
+    /// so it goes through here: the flag is what tells the window's Closing handler to
+    /// let the close through instead of cancelling it again.
+    /// </remarks>
+    public static void Exit()
+    {
+        IsExiting = true;
+
+        MainThread.BeginInvokeOnMainThread(() => AppBase.Current?.Quit());
+    }
+
 #if WINDOWS
     private static void Dispatch(Action<AppWindow> action)
     {

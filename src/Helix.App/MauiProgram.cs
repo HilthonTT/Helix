@@ -7,6 +7,7 @@ using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 #if WINDOWS
+using Helix.App.Services;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
@@ -74,6 +75,10 @@ public static class MauiProgram
                     WindowBounds bounds = WindowSizing.Calculate(displayBounds.Width, displayBounds.Height);
 
                     appWindow.MoveAndResize(new RectInt32(bounds.X, bounds.Y, bounds.Width, bounds.Height));
+
+                    // The close button parks the app in the tray instead of ending the
+                    // session; the tray's Exit item is what ends it.
+                    appWindow.Closing += OnWindowClosing;
                 });
             });
         });
@@ -109,6 +114,39 @@ public static class MauiProgram
     }
 
 #if WINDOWS
+    /// <summary>
+    /// Turns the title bar's close button into hide-to-tray.
+    /// </summary>
+    /// <remarks>
+    /// Cancelled only while there is a tray icon to come back from — before sign-in, or
+    /// where Explorer refused the icon, the close button still closes, because hiding a
+    /// window with no way back is worse than quitting. Same rule the auto-minimize
+    /// countdown follows in <c>BaseViewModel.MinimizeApp</c>.
+    ///
+    /// This also fires for the shutdown the tray asks for, hence the flag: without it
+    /// Exit would hide the window instead of closing it.
+    /// </remarks>
+    private static void OnWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        if (MainWindow.IsExiting)
+        {
+            return;
+        }
+
+        // GetService, not GetRequiredService: nothing about closing a window should be
+        // able to throw out of a WinUI event handler.
+        TrayIconService? tray = App.ServiceProvider?.GetService<TrayIconService>();
+        if (tray is null || !tray.IsRunning)
+        {
+            return;
+        }
+
+        args.Cancel = true;
+
+        MainWindow.HideToTray();
+        tray.NotifyHiddenToTray();
+    }
+
     private static void ModifyEntry()
     {
         // Entries sit inside our own bordered Field container, so the platform chrome
