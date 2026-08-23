@@ -5,6 +5,7 @@ using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
+using Helix.Application.Features.Storage.Queries;
 using Helix.Application.Features.Updates.Queries;
 using Helix.Application.Features.Users.Commands;
 
@@ -19,6 +20,7 @@ public static class DependencyInjection
             .AddDiagnosticsHandlers()
             .AddDrivesHandlers()
             .AddSettingsHandlers()
+            .AddStorageHandlers()
             .AddUpdatesHandlers()
             .AddUsersHandlers();
 
@@ -69,6 +71,13 @@ public static class DependencyInjection
     {
         services.AddScoped<GetSettings>();
         services.AddScoped<UpdateSettings>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddStorageHandlers(this IServiceCollection services)
+    {
+        services.AddScoped<GetStorageAlerts>();
 
         return services;
     }

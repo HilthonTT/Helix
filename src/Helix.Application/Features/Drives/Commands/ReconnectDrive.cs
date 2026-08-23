@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
@@ -28,6 +28,7 @@ public sealed class ReconnectDrive(
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
     INasConnector nasConnector,
+    IHostReachability hostReachability,
     IDateTimeProvider dateTimeProvider) : IHandler
 {
     /// <param name="DriveId">The drive observed dropping.</param>
@@ -66,6 +67,24 @@ public sealed class ReconnectDrive(
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
+        }
+
+        // Asked before the mount is attempted, not instead of it: away from the NAS's
+        // own network every attempt otherwise waits out the platform's SMB timeout and
+        // files a failure that only ever meant "not on that network". A drive whose host
+        // is absent is left exactly as it was, to be picked up again when it answers.
+        if (!await hostReachability.IsReachableAsync(drive.Host, cancellationToken))
+        {
+            Error unreachable = DriveErrors.HostUnreachable(drive.Host);
+
+            if (request.RecordDrop)
+            {
+                Log(AuditAction.DriveReconnectFailed, unreachable.Description);
+            }
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return Result.Failure(unreachable);
         }
 
         Result result = await nasConnector.ConnectAsync(drive, cancellationToken);

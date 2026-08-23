@@ -429,6 +429,18 @@
   <data name="TrayDriveReconnected" xml:space="preserve">
     <value>Drive reconnected</value>
   </data>
+  <data name="StorageAlertThreshold" xml:space="preserve">
+    <value>Low space warning</value>
+  </data>
+  <data name="StorageAlertThresholdDescription" xml:space="preserve">
+    <value>Warn me when a volume has less than this percentage of free space left. 0 turns the warning off.</value>
+  </data>
+  <data name="TrayStorageLow" xml:space="preserve">
+    <value>Storage is running low</value>
+  </data>
+  <data name="TrayStorageLowMessage" xml:space="preserve">
+    <value>{0} has {1}% free space left.</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix is still running in the notification area.</value>
   </data>

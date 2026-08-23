@@ -108,6 +108,10 @@ public static class DependencyInjection
         // Holds the watched set and the polling loop for the app's lifetime.
         services.AddSingleton<IDriveMonitor, DriveMonitor>();
 
+        // Singleton for its cache: the reconnect loop asks about the same handful of
+        // hosts over and over, and several mapped drives are usually one NAS.
+        services.AddSingleton<IHostReachability, HostReachability>();
+
         // One client for the app's lifetime, as HttpClient is meant to be used. The
         // current version is read through a delegate so the checker stays testable
         // without a MAUI host behind AppInfo.

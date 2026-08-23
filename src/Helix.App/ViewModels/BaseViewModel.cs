@@ -38,6 +38,15 @@ public abstract partial class BaseViewModel : ObservableObject
 
     public bool IsNotBusy => !IsBusy;
 
+    /// <summary>
+    /// The running version, as the sign-in pages show it under the wordmark.
+    /// </summary>
+    /// <remarks>
+    /// Plain rather than observable: it is fixed for the life of the process, and the
+    /// same string the sidebar footer is built from, so the two can never disagree.
+    /// </remarks>
+    public string AppVersion => $"v{VersionInfo.Display}";
+
     [ObservableProperty]
     public partial bool TimerCancelled { get; set; }
 

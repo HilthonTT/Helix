@@ -1085,6 +1085,42 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Low space warning.
+        /// </summary>
+        internal static string StorageAlertThreshold {
+            get {
+                return ResourceManager.GetString("StorageAlertThreshold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warn me when a volume has less than this percentage of free space left. 0 turns the warning off..
+        /// </summary>
+        internal static string StorageAlertThresholdDescription {
+            get {
+                return ResourceManager.GetString("StorageAlertThresholdDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Storage is running low.
+        /// </summary>
+        internal static string TrayStorageLow {
+            get {
+                return ResourceManager.GetString("TrayStorageLow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} has {1}% free space left..
+        /// </summary>
+        internal static string TrayStorageLowMessage {
+            get {
+                return ResourceManager.GetString("TrayStorageLowMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Audit log retention.
         /// </summary>
         internal static string AuditlogRetention {

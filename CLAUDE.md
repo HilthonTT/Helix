@@ -85,6 +85,7 @@ Features/       one folder per feature, split into Commands / Queries
                 Diagnostics/Commands
                 Drives/{Commands,Queries,Contracts}
                 Settings/{Commands,Queries}
+                Storage/{Queries,Contracts}
                 Updates/Queries
                 Users/Commands
 DependencyInjection.cs
@@ -158,10 +159,55 @@ an update to itself. The stamped value is `ApplicationDisplayVersion` with
 four-part and what is shown is not — `ReleaseVersion.ToDisplayString` reduces it for the
 update dialog.
 
-`AppShell.FormatVersion` reduces the same string back to three components for the sidebar
-footer, so what the footer shows is exactly the tag on the releases page. It also strips a
-`+<commit>` suffix first: the build emits both a file version and an informational one, and
+`Common/VersionInfo` reduces the same string back to three components for the UI, so what
+is shown is exactly the tag on the releases page. It also strips a `+<commit>` suffix
+first: the build emits both a file version and an informational one, and
 `Version.TryParse` rejects the latter, which would otherwise put a commit hash in the UI.
+Both places that display the version go through it — the sidebar footer via
+`AppShell.AppVersion`, the sign-in pages via `BaseViewModel.AppVersion` — so the two can
+never disagree about what is running.
+
+### Reconnecting away from the NAS
+
+`ReconnectDrive` asks `IHostReachability` whether the NAS answers before it tries to
+mount anything, and returns `DriveErrors.HostUnreachable` when it does not. The point is
+that a drive whose host is absent has not failed to connect: on the NAS's own network a
+bad mount fails in milliseconds, but away from it every attempt waits out the platform's
+SMB timeout and files a warning naming a share that was never going to answer.
+
+`HostReachability` opens a TCP connection to 445, then 139, rather than pinging — ICMP is
+blocked or deprioritised often enough that a ping proves less than the connection Helix is
+about to make. Readings are cached for ten seconds and the in-flight task is shared, so
+thirteen shares of one pool cost one handshake per sweep rather than thirteen. **Anything
+that is not the host declining to answer reads as reachable**, deliberately: a false
+"unreachable" would stop Helix reconnecting a drive that would have come back, which is
+the one thing the watchdog exists to do.
+
+`DriveWatchdog` reads that error code and puts the drive back at a flat 30-second interval
+without counting it as a failure, so a laptop returning to the NAS's network reconnects in
+seconds rather than at whatever the exponential backoff had escalated to. It logs those at
+Debug rather than Warning — on a laptop this is the ordinary state of affairs for most of
+the day, and a warning per drive per sweep buries the real failures in the file the user is
+asked to send on. The sweep is skipped outright when `Connectivity` reports no network.
+
+### The low-space warning
+
+`Settings.StorageAlertThresholdPercent` is free space, as a percentage of a volume, below
+which Helix says something; 0 turns it off. A percentage rather than a byte figure because
+one install commonly watches volumes orders of magnitude apart in size.
+
+`GetStorageAlerts` measures through the same `IStorageProbe` the dashboard uses, so it
+answers in **volumes, not drives** — thirteen shares of one pool are one thing running out
+of room, and warning about it thirteen times would train the user to dismiss the warning.
+`VolumeUsage` carries the letters that resolved to each volume so the warning can name the
+drives. Only mounted drives are measured: an unmounted one has not run out of space, it
+has not been asked.
+
+`StorageAlertService` runs it on its own 15-minute timer — free space moves over days, and
+each reading is a blocking call against a share — and remembers which volumes it has
+already warned about, so a full pool is reported once rather than every quarter of an hour.
+A volume that recovers is forgotten, so it can warn again months later. It starts a minute
+after the dashboard does, because the drives are still being connected at that moment.
 
 ### The audit log
 
@@ -275,7 +321,8 @@ Messaging/     CommunityToolkit.Mvvm messages, by feature
 Models/        observable display models bound by the views
 Platforms/     MAUI platform heads
 Resources/     AppIcon, Fonts, Images, Languages, Splash, Styles
-Services/      DriveWatchdog, TrayIconService, ModalHost, PassphrasePromptService
+Services/      DriveWatchdog, TrayIconService, StorageAlertService, ModalHost,
+               PassphrasePromptService
 ViewModels/    BaseViewModel + Auditlogs/, Drives/, Settings/, Users/
 Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/, Users/
 ```

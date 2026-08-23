@@ -14,6 +14,11 @@ public static class SettingsErrors
         "Settings.RetentionMustNotBeNegative",
         "The audit log retention must be zero or more days. Zero keeps every entry.");
 
+    public static readonly Error StorageAlertThresholdOutOfRange = Error.Problem(
+        "Settings.StorageAlertThresholdOutOfRange",
+        $"The low-space warning must be between 0 and {Settings.MaximumStorageAlertThresholdPercent} percent. " +
+        "Zero turns it off.");
+
     public static Error ShortcutUpdateFailed(string message) => Error.Problem(
         "Settings.ShortcutUpdateFailed",
         $"Failed to update the startup/desktop shortcut: {message}");

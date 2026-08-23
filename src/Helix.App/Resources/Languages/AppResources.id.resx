@@ -429,6 +429,18 @@
   <data name="TrayDriveReconnected" xml:space="preserve">
     <value>Drive tersambung kembali</value>
   </data>
+  <data name="StorageAlertThreshold" xml:space="preserve">
+    <value>Peringatan ruang menipis</value>
+  </data>
+  <data name="StorageAlertThresholdDescription" xml:space="preserve">
+    <value>Beri tahu saya bila ruang kosong sebuah volume kurang dari persentase ini. 0 mematikan peringatan.</value>
+  </data>
+  <data name="TrayStorageLow" xml:space="preserve">
+    <value>Ruang penyimpanan menipis</value>
+  </data>
+  <data name="TrayStorageLowMessage" xml:space="preserve">
+    <value>{0} tinggal {1}% ruang kosong.</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix masih berjalan di area notifikasi.</value>
   </data>

@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
 using Helix.App.Services;
 using Helix.App.ViewModels.Drives;
@@ -29,6 +29,7 @@ public sealed partial class HomePage : ContentPage
     private readonly ModalHost _modals;
     private readonly DriveWatchdog _watchdog;
     private readonly TrayIconService _tray;
+    private readonly StorageAlertService _storageAlerts;
 
     public HomePage()
     {
@@ -41,6 +42,7 @@ public sealed partial class HomePage : ContentPage
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
         _watchdog = App.ServiceProvider.GetRequiredService<DriveWatchdog>();
         _tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
+        _storageAlerts = App.ServiceProvider.GetRequiredService<StorageAlertService>();
 
         _modals = new ModalHost(BlockScreen);
         _modals.Register(CreateDrive, CreateDriveLayout, CreateDriveView);
@@ -78,6 +80,9 @@ public sealed partial class HomePage : ContentPage
 
             // Same reason — the tray menu lists the signed-in user's drives.
             await _tray.StartAsync();
+
+            // Started after the tray, because the tray is where its warnings come out.
+            _storageAlerts.Start();
 
             await PruneAuditlogsAsync();
         }

@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Navigation;
 using Helix.App.Messaging.Users;
 using Helix.App.Services;
@@ -22,10 +22,10 @@ public sealed partial class AppShell : Shell
 
     /// <summary>
     /// Shipping version, read from the build rather than hard-coded here. Windows reports
-    /// it as four parts ("2.0.0.0") for an unpackaged app, so it is trimmed back to the
-    /// major.minor pair the release is actually named after.
+    /// it as four parts ("2.0.0.0") for an unpackaged app, so <see cref="VersionInfo"/>
+    /// trims it back to the three the release is actually tagged with.
     /// </summary>
-    public string AppVersion => $"Helix v{FormatVersion(AppInfo.Current.VersionString)}";
+    public string AppVersion => $"Helix v{VersionInfo.Display}";
 
     public string Author => "by Hilthon";
 
@@ -126,6 +126,9 @@ public sealed partial class AppShell : Shell
         // comes down with the session rather than lingering over the login page.
         App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
 
+        // The threshold, and the drives measured against it, belong to that user too.
+        App.ServiceProvider.GetRequiredService<StorageAlertService>().Stop();
+
         // Same reasoning for the two pieces of once-per-session state: the countdown
         // would otherwise keep running and minimize the window over the login page, and
         // the dashboard's startup pass would never run again for the next user.
@@ -195,41 +198,6 @@ public sealed partial class AppShell : Shell
         {
             _syncingSelection = false;
         }
-    }
-
-    /// <summary>
-    /// Reduces whatever version string the platform reports to the three-part form the
-    /// releases are tagged with — <c>2.1.0.0</c> reads as <c>2.1.0</c>.
-    /// </summary>
-    /// <remarks>
-    /// Always three components, so the footer matches the tag on the releases page
-    /// exactly and can be compared against it at a glance. Trimming to major.minor showed
-    /// 2.1.0 as "v2.1" and 2.0.1 as "v2.0" — in the second case still naming the version
-    /// the user had before updating.
-    /// </remarks>
-    private static string FormatVersion(string versionString)
-    {
-        ReadOnlySpan<char> candidate = versionString.AsSpan().Trim();
-
-        // The build carries two version strings — a four-part file version (2.1.0.0) and
-        // an informational one with the commit appended (2.1.0+23d2862...) — and which of
-        // them AppInfo hands back depends on how the app was packaged. Version.TryParse
-        // rejects the second outright, which would drop the raw string, commit hash and
-        // all, into the sidebar. Trimmed here so either shape reads the same.
-        int suffix = candidate.IndexOfAny('+', '-');
-        if (suffix >= 0)
-        {
-            candidate = candidate[..suffix];
-        }
-
-        if (!Version.TryParse(candidate, out Version? version))
-        {
-            return versionString;
-        }
-
-        // Build is -1 when the string had only two components; a release is always
-        // tagged with three, so it reads as the zero it stands for.
-        return $"{version.Major}.{version.Minor}.{Math.Max(0, version.Build)}";
     }
 
     private static void InitRoutes()

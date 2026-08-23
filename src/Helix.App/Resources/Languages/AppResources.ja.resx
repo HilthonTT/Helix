@@ -429,6 +429,18 @@
   <data name="TrayDriveReconnected" xml:space="preserve">
     <value>ドライブが再接続されました</value>
   </data>
+  <data name="StorageAlertThreshold" xml:space="preserve">
+    <value>空き容量の警告</value>
+  </data>
+  <data name="StorageAlertThresholdDescription" xml:space="preserve">
+    <value>ボリュームの空き容量がこの割合を下回ったら警告します。0 で警告を無効にします。</value>
+  </data>
+  <data name="TrayStorageLow" xml:space="preserve">
+    <value>空き容量が少なくなっています</value>
+  </data>
+  <data name="TrayStorageLowMessage" xml:space="preserve">
+    <value>{0} の空き容量は残り {1}% です。</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix は通知領域で実行中です。</value>
   </data>

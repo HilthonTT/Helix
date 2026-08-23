@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Storage;
+﻿using Helix.Application.Abstractions.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Helix.Infrastructure.Storage;
@@ -68,49 +68,65 @@ internal abstract class StorageProbe : IStorageProbe
             return [];
         }
 
+        string[] ordered = [.. driveLetters];
+
         Reading?[] readings = await Task.WhenAll(
-            driveLetters.Select(letter => MeasureAsync(letter, cancellationToken)));
+            ordered.Select(letter => MeasureAsync(letter, cancellationToken)));
 
         // Keyed by total size, keeping the smallest free reading seen for it. Smallest,
         // rather than whichever arrived first, so the figure does not flicker between
-        // refreshes as the drives finish probing in a different order each time.
-        var freeByTotal = new Dictionary<long, long>();
+        // refreshes as the drives finish probing in a different order each time. The
+        // letters ride along so a caller can name the drives a volume is mounted as.
+        var volumes = new Dictionary<long, Volume>();
 
         int measured = 0;
 
-        foreach (Reading? reading in readings)
+        for (int index = 0; index < readings.Length; index++)
         {
-            if (reading is null)
+            if (readings[index] is not Reading reading)
             {
                 continue;
             }
 
             measured++;
 
-            freeByTotal[reading.TotalBytes] = freeByTotal.TryGetValue(reading.TotalBytes, out long free)
-                ? Math.Min(free, reading.FreeBytes)
-                : reading.FreeBytes;
+            if (volumes.TryGetValue(reading.TotalBytes, out Volume? volume))
+            {
+                volume.FreeBytes = Math.Min(volume.FreeBytes, reading.FreeBytes);
+                volume.Letters.Add(ordered[index]);
+
+                continue;
+            }
+
+            volumes[reading.TotalBytes] = new Volume(reading.FreeBytes, [ordered[index]]);
         }
 
-        if (freeByTotal.Count < measured)
+        if (volumes.Count < measured)
         {
             _logger.LogDebug(
                 "Collapsed {Mounts} mounted drives to {Volumes} distinct volumes for the storage total.",
                 measured,
-                freeByTotal.Count);
+                volumes.Count);
         }
 
         return
         [
-            .. freeByTotal.Select(volume => new VolumeUsage(
+            .. volumes.Select(volume => new VolumeUsage(
                 $"capacity:{volume.Key}",
                 volume.Key,
-                Math.Max(0, volume.Key - volume.Value)))
+                Math.Max(0, volume.Key - volume.Value.FreeBytes),
+                volume.Value.Letters))
         ];
     }
 
     /// <summary>One mount's raw numbers, before duplicates are collapsed.</summary>
     private sealed record Reading(long TotalBytes, long FreeBytes);
+
+    /// <summary>One distinct volume, as the mounts that resolved to it are folded in.</summary>
+    private sealed record Volume(long FreeBytes, List<string> Letters)
+    {
+        public long FreeBytes { get; set; } = FreeBytes;
+    }
 
     private async Task<Reading?> MeasureAsync(string letter, CancellationToken cancellationToken)
     {

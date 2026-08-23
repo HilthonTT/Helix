@@ -429,6 +429,18 @@
   <data name="TrayDriveReconnected" xml:space="preserve">
     <value>Schijf opnieuw verbonden</value>
   </data>
+  <data name="StorageAlertThreshold" xml:space="preserve">
+    <value>Waarschuwing weinig ruimte</value>
+  </data>
+  <data name="StorageAlertThresholdDescription" xml:space="preserve">
+    <value>Waarschuw me wanneer een volume minder dan dit percentage vrije ruimte heeft. 0 schakelt de waarschuwing uit.</value>
+  </data>
+  <data name="TrayStorageLow" xml:space="preserve">
+    <value>Opslagruimte raakt op</value>
+  </data>
+  <data name="TrayStorageLowMessage" xml:space="preserve">
+    <value>{0} heeft nog {1}% vrije ruimte.</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix draait nog steeds in het systeemvak.</value>
   </data>

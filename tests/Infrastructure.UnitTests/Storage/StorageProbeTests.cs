@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Helix.Application.Abstractions.Storage;
 using Helix.Infrastructure.Storage;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -174,6 +174,49 @@ public sealed class StorageProbeTests
     /// An unreachable share keeps its capacity — it is simply unknown right now. Counting
     /// it as zero would make the dashboard total shrink every time a drive dropped.
     /// </summary>
+    [Fact]
+    public async Task ProbeAsync_Should_NameTheDrivesEachVolumeIsMountedAs()
+    {
+        // Carried so a caller can say which drives a volume is behind. A total on its own
+        // is enough for the dashboard and no use at all for a warning about one pool.
+        var probe = new FakeProbe(new()
+        {
+            ["Y"] = (4 * Terabyte, Terabyte),
+            ["Z"] = (4 * Terabyte, Terabyte),
+        });
+
+        IReadOnlyList<VolumeUsage> volumes = await probe.ProbeAsync(["Y", "Z"]);
+
+        volumes.Should().ContainSingle().Which.Letters.Should().Equal("Y", "Z");
+    }
+
+    [Fact]
+    public async Task ProbeAsync_Should_LeaveOutTheLettersItCouldNotMeasure()
+    {
+        var probe = new FakeProbe(new()
+        {
+            ["Z"] = (4 * Terabyte, Terabyte),
+        });
+
+        IReadOnlyList<VolumeUsage> volumes = await probe.ProbeAsync(["Y", "Z"]);
+
+        volumes.Should().ContainSingle().Which.Letters.Should().Equal("Z");
+    }
+
+    [Fact]
+    public async Task ProbeAsync_Should_ReportFreeSpaceAsAShareOfTheVolume()
+    {
+        var probe = new FakeProbe(new()
+        {
+            ["Z"] = (4 * Terabyte, Terabyte),
+        });
+
+        IReadOnlyList<VolumeUsage> volumes = await probe.ProbeAsync(["Z"]);
+
+        volumes[0].FreeBytes.Should().Be(Terabyte);
+        volumes[0].FreePercent.Should().Be(25);
+    }
+
     [Fact]
     public async Task ProbeAsync_Should_LeaveOutDrivesThatAreNotReachable()
     {

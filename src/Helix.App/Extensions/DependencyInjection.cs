@@ -26,6 +26,10 @@ public static class DependencyInjection
         // lifetime — the icon it drives is a singleton and outlives every page.
         services.AddSingleton<TrayIconService>();
 
+        // Holds its own slow timer and the set of volumes already warned about, so like
+        // the two above it lives as long as the app does.
+        services.AddSingleton<StorageAlertService>();
+
         services.AddScoped<HomePage>();
 
         return services;

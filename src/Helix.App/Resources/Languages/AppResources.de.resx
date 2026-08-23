@@ -429,6 +429,18 @@
   <data name="TrayDriveReconnected" xml:space="preserve">
     <value>Laufwerk wieder verbunden</value>
   </data>
+  <data name="StorageAlertThreshold" xml:space="preserve">
+    <value>Warnung bei wenig Speicher</value>
+  </data>
+  <data name="StorageAlertThresholdDescription" xml:space="preserve">
+    <value>Warnen, wenn ein Volume weniger als diesen Prozentsatz an freiem Speicher hat. 0 schaltet die Warnung aus.</value>
+  </data>
+  <data name="TrayStorageLow" xml:space="preserve">
+    <value>Speicherplatz wird knapp</value>
+  </data>
+  <data name="TrayStorageLowMessage" xml:space="preserve">
+    <value>{0} hat noch {1} % freien Speicher.</value>
+  </data>
   <data name="TrayStillRunning" xml:space="preserve">
     <value>Helix läuft weiterhin im Infobereich.</value>
   </data>

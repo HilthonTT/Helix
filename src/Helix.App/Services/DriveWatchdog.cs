@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Features.Drives.Commands;
@@ -38,6 +38,18 @@ internal sealed class DriveWatchdog
 
     private static readonly TimeSpan FirstRetryDelay = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan MaximumRetryDelay = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// How long to wait before looking again at a drive whose NAS is not on this network.
+    /// </summary>
+    /// <remarks>
+    /// Flat rather than escalating, and it deliberately does not count as a failure. The
+    /// backoff exists to stop Helix hammering a share that is refusing it; a NAS that is
+    /// simply somewhere else is not refusing anything, and the moment the user is back on
+    /// its network the drive should come back in seconds rather than in the five minutes
+    /// an escalated backoff would have reached by then.
+    /// </remarks>
+    private static readonly TimeSpan OfflineRetryInterval = TimeSpan.FromSeconds(30);
 
     private readonly IDriveMonitor _monitor;
     private readonly INasConnector _nasConnector;
@@ -195,6 +207,14 @@ internal sealed class DriveWatchdog
 
     private async Task RetryDueAsync()
     {
+        // Nothing is reachable, so there is nothing to try. Cheap enough to ask every
+        // sweep, and it saves a probe and a mount attempt per pending drive while the
+        // machine is on no network at all — asleep in a bag, or between two Wi-Fi points.
+        if (!HasNetwork())
+        {
+            return;
+        }
+
         List<PendingReconnect> due;
 
         lock (_gate)
@@ -269,6 +289,19 @@ internal sealed class DriveWatchdog
                 return;
             }
 
+            if (result.Error.Code == DriveErrors.HostUnreachableCode)
+            {
+                // Not a failure to reconnect — the NAS is not on this network. Debug
+                // rather than Warning: on a laptop this is the ordinary state of affairs
+                // for most of the day, and a warning per drive per sweep would bury the
+                // real failures in the log the user is asked to send on.
+                _logger.LogDebug("Drive {Letter}: is waiting for its NAS to be reachable again.", letter);
+
+                ScheduleOfflineRetry(driveId, letter);
+
+                return;
+            }
+
             // The one line that makes an unattended failure diagnosable after the fact:
             // the reason the share refused, and how many times it has now refused.
             _logger.LogWarning(
@@ -303,6 +336,26 @@ internal sealed class DriveWatchdog
         }
     }
 
+    /// <summary>
+    /// Puts a drive back in the queue at the flat offline interval, without counting the
+    /// deferral as one of the failures the backoff is built from.
+    /// </summary>
+    private void ScheduleOfflineRetry(Guid driveId, string letter)
+    {
+        lock (_gate)
+        {
+            int failures = _pending.TryGetValue(driveId, out PendingReconnect? existing)
+                ? existing.Failures
+                : 0;
+
+            _pending[driveId] = new PendingReconnect(
+                driveId,
+                letter,
+                failures,
+                DateTime.UtcNow + OfflineRetryInterval);
+        }
+    }
+
     private void Forget(Guid driveId)
     {
         lock (_gate)
@@ -328,6 +381,28 @@ internal sealed class DriveWatchdog
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
         });
+    }
+
+    /// <summary>
+    /// Whether the machine is on a network at all.
+    /// </summary>
+    /// <remarks>
+    /// Answers true if the platform will not say, because this gates the retry loop: a
+    /// fault in here has to cost an attempt that was going to fail anyway, never the
+    /// reconnecting that is the whole point of the loop.
+    /// </remarks>
+    private bool HasNetwork()
+    {
+        try
+        {
+            return Connectivity.Current.NetworkAccess != NetworkAccess.None;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Could not read the network state; assuming there is one.");
+
+            return true;
+        }
     }
 
     private static async Task<bool> IsAutoConnectEnabledAsync()

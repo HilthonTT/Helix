@@ -17,6 +17,21 @@ public sealed class Settings : Entity
     /// </remarks>
     public const int DefaultAuditlogRetentionDays = 90;
 
+    /// <summary>
+    /// Free space, as a percentage of a volume, below which Helix says something. Zero
+    /// turns the warning off.
+    /// </summary>
+    /// <remarks>
+    /// Ten percent because that is roughly where a NAS stops behaving well rather than
+    /// where it stops accepting writes — snapshots, parity and the filesystem's own
+    /// housekeeping all want room — and because the whole point is to be told before the
+    /// backup that fails is the one you needed.
+    /// </remarks>
+    public const int DefaultStorageAlertThresholdPercent = 10;
+
+    /// <summary>The largest threshold that still means anything; see the constant above.</summary>
+    public const int MaximumStorageAlertThresholdPercent = 99;
+
     [JsonConstructor]
     private Settings(
         Guid id,
@@ -27,7 +42,8 @@ public sealed class Settings : Entity
         bool setDesktopShortcut,
         int timerCount,
         Language language,
-        int auditlogRetentionDays)
+        int auditlogRetentionDays,
+        int storageAlertThresholdPercent)
         : base(id)
     {
         Ensure.NotNullOrEmpty(id, nameof(id));
@@ -39,6 +55,7 @@ public sealed class Settings : Entity
         Ensure.MustBePositive(timerCount, nameof(timerCount));
         Ensure.NotNull(language, nameof(language));
         Ensure.MustNotBeNegative(auditlogRetentionDays, nameof(auditlogRetentionDays));
+        Ensure.MustNotBeNegative(storageAlertThresholdPercent, nameof(storageAlertThresholdPercent));
 
         UserId = userId;
         AutoConnect = autoConnect;
@@ -48,6 +65,7 @@ public sealed class Settings : Entity
         TimerCount = timerCount;
         Language = language;
         AuditlogRetentionDays = auditlogRetentionDays;
+        StorageAlertThresholdPercent = storageAlertThresholdPercent;
     }
 
     /// <summary>
@@ -80,6 +98,17 @@ public sealed class Settings : Entity
     /// </summary>
     public int AuditlogRetentionDays { get; private set; }
 
+    /// <summary>
+    /// Free space below which a volume is reported as running out, as a percentage of
+    /// its size. Zero means never — see <see cref="DefaultStorageAlertThresholdPercent"/>.
+    /// </summary>
+    /// <remarks>
+    /// A percentage rather than a byte figure because one Helix install commonly watches
+    /// volumes orders of magnitude apart in size, and 50 GB left is comfortable on a 43 TB
+    /// pool and nearly full on a 64 GB one.
+    /// </remarks>
+    public int StorageAlertThresholdPercent { get; private set; }
+
     public static Settings Create(
         Guid userId,
         bool autoConnect,
@@ -88,7 +117,8 @@ public sealed class Settings : Entity
         bool setDesktopShortcut,
         int timerCount,
         Language language,
-        int auditlogRetentionDays = DefaultAuditlogRetentionDays)
+        int auditlogRetentionDays = DefaultAuditlogRetentionDays,
+        int storageAlertThresholdPercent = DefaultStorageAlertThresholdPercent)
     {
         var settings = new Settings(
             Guid.CreateVersion7(),
@@ -99,7 +129,8 @@ public sealed class Settings : Entity
             setDesktopShortcut,
             timerCount,
             language,
-            auditlogRetentionDays);
+            auditlogRetentionDays,
+            storageAlertThresholdPercent);
 
         return settings;
     }
@@ -111,7 +142,8 @@ public sealed class Settings : Entity
         bool setDesktopShorcut,
         int timerCount,
         Language language,
-        int auditlogRetentionDays)
+        int auditlogRetentionDays,
+        int storageAlertThresholdPercent)
     {
         AutoConnect = autoConnect;
         AutoMinimize = autoMinimize;
@@ -120,5 +152,6 @@ public sealed class Settings : Entity
         TimerCount = timerCount;
         Language = language;
         AuditlogRetentionDays = auditlogRetentionDays;
+        StorageAlertThresholdPercent = storageAlertThresholdPercent;
     }
 }

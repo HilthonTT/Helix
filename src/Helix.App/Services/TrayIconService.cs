@@ -146,6 +146,25 @@ internal sealed class TrayIconService
     }
 
     /// <summary>
+    /// Puts a notification up, if there is a tray to put it in.
+    /// </summary>
+    /// <remarks>
+    /// The single way anything else in the app speaks to the user while the window is
+    /// away, so every tray call stays behind this class and its <see cref="IsRunning"/>
+    /// gate — a notification from an icon that was never shown goes nowhere, and on
+    /// macOS there is no icon at all.
+    /// </remarks>
+    public void Notify(string title, string message)
+    {
+        if (!_running)
+        {
+            return;
+        }
+
+        _trayIcon.Notify(title, message);
+    }
+
+    /// <summary>
     /// Re-reads the drives, rebuilds the menu and refreshes the tooltip.
     /// </summary>
     public async Task RefreshAsync()

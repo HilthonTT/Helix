@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Handlers;
@@ -23,7 +23,8 @@ public sealed class UpdateSettings(
         bool SetDesktopShortcut,
         int TimerCount,
         Language Language,
-        int AuditlogRetentionDays)
+        int AuditlogRetentionDays,
+        int StorageAlertThresholdPercent)
     {
         public sealed class Builder(
             bool autoConnect,
@@ -32,7 +33,8 @@ public sealed class UpdateSettings(
             bool setDesktopShortcut,
             int timerCount,
             Language language,
-            int auditlogRetentionDays)
+            int auditlogRetentionDays,
+            int storageAlertThresholdPercent)
         {
             public bool AutoConnect { get; set; } = autoConnect;
 
@@ -48,6 +50,8 @@ public sealed class UpdateSettings(
 
             public int AuditlogRetentionDays { get; set; } = auditlogRetentionDays;
 
+            public int StorageAlertThresholdPercent { get; set; } = storageAlertThresholdPercent;
+
             public Request Build() => new(
                 AutoConnect,
                 AutoMinimize,
@@ -55,7 +59,8 @@ public sealed class UpdateSettings(
                 SetDesktopShortcut,
                 TimerCount,
                 Language,
-                AuditlogRetentionDays);
+                AuditlogRetentionDays,
+                StorageAlertThresholdPercent);
         }
     }
 
@@ -85,7 +90,8 @@ public sealed class UpdateSettings(
             request.SetDesktopShortcut,
             request.TimerCount,
             request.Language,
-            request.AuditlogRetentionDays);
+            request.AuditlogRetentionDays,
+            request.StorageAlertThresholdPercent);
 
         // The shortcut services throw IOException on failure (e.g. the startup folder
         // is locked down by policy). Handlers must never throw for expected failures —
@@ -118,6 +124,15 @@ public sealed class UpdateSettings(
         if (request.AuditlogRetentionDays < 0)
         {
             return Result.Failure(SettingsErrors.RetentionMustNotBeNegative);
+        }
+
+        // Zero is legal and means "never warn me". The upper bound is what keeps the
+        // warning meaning something: at 100 every volume is always below its threshold,
+        // which is a notification on every check rather than a warning about anything.
+        if (request.StorageAlertThresholdPercent < 0 ||
+            request.StorageAlertThresholdPercent > SettingsModel.MaximumStorageAlertThresholdPercent)
+        {
+            return Result.Failure(SettingsErrors.StorageAlertThresholdOutOfRange);
         }
 
         return Result.Success();

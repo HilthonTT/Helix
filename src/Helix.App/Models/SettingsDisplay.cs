@@ -25,6 +25,10 @@ internal sealed partial class SettingsDisplay : ObservableObject
     private readonly System.Timers.Timer _retentionDebounceTimer;
     private int _persistedRetentionDays;
 
+    // And for the low-space threshold, likewise typed digit by digit.
+    private readonly System.Timers.Timer _storageAlertDebounceTimer;
+    private int _persistedStorageAlertThresholdPercent;
+
     [ObservableProperty]
     public partial Guid Id { get; set; }
 
@@ -128,6 +132,24 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _retentionDebounceTimer.Start();
     }
 
+    /// <summary>
+    /// Free space below which a volume is reported as low, as a percentage; 0 turns the
+    /// warning off. Debounced for the same reason as the two boxes above — "1" on the way
+    /// to "15" would otherwise be saved, and warn about every healthy volume in between.
+    /// </summary>
+    [ObservableProperty]
+    public partial int StorageAlertThresholdPercent { get; set; }
+    partial void OnStorageAlertThresholdPercentChanged(int value)
+    {
+        if (!_initialized || _rollingBack)
+        {
+            return;
+        }
+
+        _storageAlertDebounceTimer.Stop();
+        _storageAlertDebounceTimer.Start();
+    }
+
     [ObservableProperty]
     public partial Language Language { get; set; }
     async partial void OnLanguageChanged(Language value)
@@ -160,6 +182,14 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _retentionDebounceTimer.Elapsed += (_, _) =>
             MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateRetentionDays());
 
+        _storageAlertDebounceTimer = new(500)
+        {
+            AutoReset = false
+        };
+
+        _storageAlertDebounceTimer.Elapsed += (_, _) =>
+            MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateStorageAlertThreshold());
+
         Id = settings.Id;
         UserId = settings.UserId;
         AutoConnect = settings.AutoConnect;
@@ -171,6 +201,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
         Language = settings.Language;
         AuditlogRetentionDays = settings.AuditlogRetentionDays;
         _persistedRetentionDays = settings.AuditlogRetentionDays;
+        StorageAlertThresholdPercent = settings.StorageAlertThresholdPercent;
+        _persistedStorageAlertThresholdPercent = settings.StorageAlertThresholdPercent;
 
         // Every seed above is done — from here on the hooks may write back.
         _initialized = true;
@@ -194,7 +226,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 SetDesktopShortcut,
                 TimerCount,
                 Language,
-                AuditlogRetentionDays);
+                AuditlogRetentionDays,
+                StorageAlertThresholdPercent);
 
             // Apply the specific update.
             updateAction(requestBuilder);
@@ -270,5 +303,18 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
 
         RollBack(() => AuditlogRetentionDays = _persistedRetentionDays);
+    }
+
+    private async Task DebouncedUpdateStorageAlertThreshold()
+    {
+        int attempted = StorageAlertThresholdPercent;
+
+        if (await UpdatePropertyAsync(builder => builder.StorageAlertThresholdPercent = attempted))
+        {
+            _persistedStorageAlertThresholdPercent = attempted;
+            return;
+        }
+
+        RollBack(() => StorageAlertThresholdPercent = _persistedStorageAlertThresholdPercent);
     }
 }
