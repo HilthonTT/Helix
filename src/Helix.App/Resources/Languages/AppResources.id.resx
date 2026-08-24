@@ -576,4 +576,16 @@
   <data name="OpenReleasePage" xml:space="preserve">
     <value>Buka halaman rilis</value>
   </data>
+  <data name="CloseToTray" xml:space="preserve">
+    <value>Tutup ke baki sistem</value>
+  </data>
+  <data name="CloseToTrayDescription" xml:space="preserve">
+    <value>Biarkan Helix berjalan di baki sistem saat Anda menutup jendela. Jika mati, Helix berhenti dan tidak ada yang menyambungkan ulang drive Anda sampai Anda membukanya lagi.</value>
+  </data>
+  <data name="NotifyOnMinimizeToTray" xml:space="preserve">
+    <value>Beri tahu saat disembunyikan ke baki sistem</value>
+  </data>
+  <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
+    <value>Tampilkan notifikasi saat pertama kali Helix menyembunyikan diri ke baki sistem di setiap sesi.</value>
+  </data>
 </root>

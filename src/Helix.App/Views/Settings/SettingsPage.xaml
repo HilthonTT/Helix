@@ -170,6 +170,30 @@
                                         IsToggled="{Binding Settings.AutoMinimize}"
                                         IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
+
+                            <!-- Both hidden rather than disabled where the head has no
+                                 tray: on macOS neither switch has anything to act on. -->
+                            <Grid Style="{StaticResource PreferenceRow}" IsVisible="{Binding SupportsTray}">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{l10n:Translate CloseToTray}" Style="{StaticResource Title3}"/>
+                                    <Label Text="{l10n:Translate CloseToTrayDescription}" Style="{StaticResource Caption}"/>
+                                </VerticalStackLayout>
+                                <Switch Grid.Column="1"
+                                        VerticalOptions="Center"
+                                        IsToggled="{Binding Settings.CloseToTray}"
+                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
+                            </Grid>
+
+                            <Grid Style="{StaticResource PreferenceRow}" IsVisible="{Binding SupportsTray}">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{l10n:Translate NotifyOnMinimizeToTray}" Style="{StaticResource Title3}"/>
+                                    <Label Text="{l10n:Translate NotifyOnMinimizeToTrayDescription}" Style="{StaticResource Caption}"/>
+                                </VerticalStackLayout>
+                                <Switch Grid.Column="1"
+                                        VerticalOptions="Center"
+                                        IsToggled="{Binding Settings.NotifyOnMinimizeToTray}"
+                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
+                            </Grid>
         
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">

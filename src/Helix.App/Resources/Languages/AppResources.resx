@@ -576,4 +576,16 @@
   <data name="OpenReleasePage" xml:space="preserve">
     <value>Open release page</value>
   </data>
+  <data name="CloseToTray" xml:space="preserve">
+    <value>Close to the system tray</value>
+  </data>
+  <data name="CloseToTrayDescription" xml:space="preserve">
+    <value>Keep Helix running in the tray when you close the window. Off quits Helix, and nothing reconnects your drives until you open it again.</value>
+  </data>
+  <data name="NotifyOnMinimizeToTray" xml:space="preserve">
+    <value>Notify when hidden to the tray</value>
+  </data>
+  <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
+    <value>Show a notification the first time Helix hides itself in the tray each session.</value>
+  </data>
 </root>

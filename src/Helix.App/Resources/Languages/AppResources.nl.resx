@@ -576,4 +576,16 @@
   <data name="OpenReleasePage" xml:space="preserve">
     <value>Releasepagina openen</value>
   </data>
+  <data name="CloseToTray" xml:space="preserve">
+    <value>Sluiten naar het systeemvak</value>
+  </data>
+  <data name="CloseToTrayDescription" xml:space="preserve">
+    <value>Helix blijft in het systeemvak draaien wanneer u het venster sluit. Uit sluit Helix af en niets verbindt uw schijven opnieuw totdat u het weer opent.</value>
+  </data>
+  <data name="NotifyOnMinimizeToTray" xml:space="preserve">
+    <value>Melden bij verbergen naar het systeemvak</value>
+  </data>
+  <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
+    <value>Toon een melding de eerste keer dat Helix zichzelf per sessie in het systeemvak verbergt.</value>
+  </data>
 </root>

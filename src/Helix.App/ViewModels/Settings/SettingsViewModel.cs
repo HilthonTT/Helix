@@ -46,6 +46,18 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     public partial SettingsDisplay? Settings { get; set; }
 
     /// <summary>
+    /// Whether this head has a system tray at all, so the two switches that only mean
+    /// something with one are hidden rather than shown and ignored.
+    /// </summary>
+    /// <remarks>
+    /// The tray service's own answer rather than a platform check of its own: it is the
+    /// same question, and macOS answers it with a no-op icon. Read once per page rather
+    /// than stored, because it cannot change while the app runs.
+    /// </remarks>
+    public bool SupportsTray =>
+        App.ServiceProvider.GetRequiredService<TrayIconService>().IsSupported;
+
+    /// <summary>
     /// What the updater is doing, or empty while it is doing nothing.
     /// </summary>
     /// <remarks>

@@ -576,4 +576,16 @@
   <data name="OpenReleasePage" xml:space="preserve">
     <value>リリースページを開く</value>
   </data>
+  <data name="CloseToTray" xml:space="preserve">
+    <value>閉じるときは通知領域へ</value>
+  </data>
+  <data name="CloseToTrayDescription" xml:space="preserve">
+    <value>ウィンドウを閉じても Helix を通知領域で実行し続けます。オフにすると Helix は終了し、次に開くまでドライブは再接続されません。</value>
+  </data>
+  <data name="NotifyOnMinimizeToTray" xml:space="preserve">
+    <value>通知領域に隠れたときに通知する</value>
+  </data>
+  <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
+    <value>セッションごとに Helix が初めて通知領域へ隠れたときに通知を表示します。</value>
+  </data>
 </root>

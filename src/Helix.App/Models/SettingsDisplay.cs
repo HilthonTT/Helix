@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messaging.Settings;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
 using Helix.Domain.Settings;
@@ -172,6 +174,42 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _idleLockDebounceTimer.Start();
     }
 
+    /// <summary>
+    /// Whether the close button hides Helix to the tray instead of quitting it.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CloseToTray { get; set; }
+    async partial void OnCloseToTrayChanged(bool value)
+    {
+        if (!_initialized || _rollingBack)
+        {
+            return;
+        }
+
+        if (!await UpdatePropertyAsync(builder => builder.CloseToTray = value))
+        {
+            RollBack(() => CloseToTray = !value);
+        }
+    }
+
+    /// <summary>
+    /// Whether the tray says where the window went when it is put away there.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool NotifyOnMinimizeToTray { get; set; }
+    async partial void OnNotifyOnMinimizeToTrayChanged(bool value)
+    {
+        if (!_initialized || _rollingBack)
+        {
+            return;
+        }
+
+        if (!await UpdatePropertyAsync(builder => builder.NotifyOnMinimizeToTray = value))
+        {
+            RollBack(() => NotifyOnMinimizeToTray = !value);
+        }
+    }
+
     [ObservableProperty]
     public partial Language Language { get; set; }
     async partial void OnLanguageChanged(Language value)
@@ -235,6 +273,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _persistedStorageAlertThresholdPercent = settings.StorageAlertThresholdPercent;
         IdleLockMinutes = settings.IdleLockMinutes;
         _persistedIdleLockMinutes = settings.IdleLockMinutes;
+        CloseToTray = settings.CloseToTray;
+        NotifyOnMinimizeToTray = settings.NotifyOnMinimizeToTray;
 
         // Every seed above is done — from here on the hooks may write back.
         _initialized = true;
@@ -260,7 +300,9 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 Language,
                 AuditlogRetentionDays,
                 StorageAlertThresholdPercent,
-                IdleLockMinutes);
+                IdleLockMinutes,
+                CloseToTray,
+                NotifyOnMinimizeToTray);
 
             // Apply the specific update.
             updateAction(requestBuilder);
@@ -277,6 +319,11 @@ internal sealed partial class SettingsDisplay : ObservableObject
 
                 return false;
             }
+
+            // Told rather than polled for: the two settings the tray answers
+            // synchronously are cached there, and a cache nobody refreshes is a switch
+            // that does nothing until the next sign-in.
+            WeakReferenceMessenger.Default.Send(new SettingsChangedMessage());
 
             return true;
         }

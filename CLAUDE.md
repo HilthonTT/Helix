@@ -141,8 +141,8 @@ for things never released, and it excludes pre-releases, which an unattended NAS
 should not be nudging people onto.
 
 Version comparison goes through `ReleaseVersion`, and it must. `ApplicationDisplayVersion`
-is three-part (`2.2.0`) to match the release tags, Windows reports the running build padded
-to four (`2.2.0.0`), and `Version` treats a missing component as **-1, not 0** — so an
+is three-part (`2.2.1`) to match the release tags, Windows reports the running build padded
+to four (`2.2.1.0`), and `Version` treats a missing component as **-1, not 0** — so an
 unnormalized compare makes the running build "older" than the release it was built from and
 announces an update to itself. Both sides are widened to four components first. A tag that
 is not a version (`nightly`) is refused rather than guessed at.
@@ -167,7 +167,7 @@ update check both read it. MAUI only stamps `ApplicationDisplayVersion` into tha
 attribute when it is empty or the literal `0.0.0.0`, so **leave the manifest on the
 placeholder**: a real number written there wins over the `.csproj` and the app announces
 an update to itself. The stamped value is `ApplicationDisplayVersion` with
-`ApplicationVersion` as a fourth component (`2.2.0.3`), which is why what is compared is
+`ApplicationVersion` as a fourth component (`2.2.1.3`), which is why what is compared is
 four-part and what is shown is not — `ReleaseVersion.ToDisplayString` reduces it for the
 update dialog.
 
@@ -245,6 +245,29 @@ each reading is a blocking call against a share — and remembers which volumes 
 already warned about, so a full pool is reported once rather than every quarter of an hour.
 A volume that recovers is forgotten, so it can warn again months later. It starts a minute
 after the dashboard does, because the drives are still being connected at that moment.
+
+### Closing the window
+
+`Settings.CloseToTray` decides what the title bar's close button means: hide to the tray,
+or quit. On, because everything Helix does unattended — reconnecting a dropped share,
+warning about a full pool, locking itself — stops the moment the process does, and a NAS
+tool that only works while its window is open is a NAS tool that does not work. Off is
+for the user who wants the button to mean what it says.
+
+`Settings.NotifyOnMinimizeToTray` is whether the tray says so when the window is put away
+there, once per session, and covers the auto-minimize countdown as well as the close
+button — both go through `TrayIconService.NotifyHiddenToTray`. On, because a window that
+vanishes from the taskbar unexplained reads as a crash.
+
+Both are cached in `TrayIconService` and read from there synchronously, because the
+window's `Closing` handler is a WinUI event that has to decide before it returns and
+cannot await a query. The cache is filled per sign-in and refreshed on
+`SettingsChangedMessage`, which `SettingsDisplay` sends after any accepted write — a
+cache that only refilled at sign-in would be a switch that did nothing until the next
+one. A failed read leaves the last known values rather than reverting to the defaults.
+
+Neither switch is offered on macOS: `SettingsViewModel.SupportsTray` reports
+`ITrayIcon.IsSupported`, and the rows are hidden rather than shown and ignored.
 
 ### Drive groups
 
@@ -461,7 +484,7 @@ Extensions/    DependencyInjection (AddPresensation)
 Icons/         IconFont glyph constants
 Localization/  LocalizationResourceManager, TranslateExtension, CultureSwitcher
 Messaging/     CommunityToolkit.Mvvm messages, by feature
-               Auditlogs/, Drives/, Navigation/, Users/
+               Auditlogs/, DriveGroups/, Drives/, Navigation/, Settings/, Users/
 Models/        observable display models bound by the views
 Platforms/     MAUI platform heads
 Resources/     AppIcon, Fonts, Images, Languages, Splash, Styles
@@ -494,7 +517,10 @@ The XAML, viewmodels, converters and behaviours are shared verbatim; only these 
   close and hides to the tray while the icon is up, and lets the window close when it is
   not, so the app is never hidden with no way back. The tray Exit item is the only real
   quit, and it goes through `MainWindow.Exit` — the `IsExiting` flag is what stops that
-  shutdown being turned back into a hide.
+  shutdown being turned back into a hide. `Settings.CloseToTray` turned off is the other
+  way out: the close still cancels, but it then goes through `MainWindow.Exit` too, so
+  the icon comes down with the process rather than sitting in the tray until somebody
+  mouses over it.
 - `Common/DrivePlatform` — the one flag the shared drive modals bind to, so the
   "reconnect at sign-in" switch is hidden rather than shown-and-ignored on macOS.
 - `Behaviors/Hover` (hand cursor), `Services/ModalHost` (Escape-to-dismiss) and the

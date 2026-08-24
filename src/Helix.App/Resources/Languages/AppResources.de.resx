@@ -576,4 +576,16 @@
   <data name="OpenReleasePage" xml:space="preserve">
     <value>Release-Seite öffnen</value>
   </data>
+  <data name="CloseToTray" xml:space="preserve">
+    <value>In den Infobereich schließen</value>
+  </data>
+  <data name="CloseToTrayDescription" xml:space="preserve">
+    <value>Helix läuft im Infobereich weiter, wenn Sie das Fenster schließen. Aus beendet Helix, und Ihre Laufwerke werden erst wieder verbunden, wenn Sie es erneut öffnen.</value>
+  </data>
+  <data name="NotifyOnMinimizeToTray" xml:space="preserve">
+    <value>Benachrichtigen, wenn im Infobereich ausgeblendet</value>
+  </data>
+  <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
+    <value>Beim ersten Ausblenden in den Infobereich pro Sitzung eine Benachrichtigung anzeigen.</value>
+  </data>
 </root>

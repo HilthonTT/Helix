@@ -1336,5 +1336,41 @@ namespace Helix.App.Resources.Languages {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Close to the system tray.
+        /// </summary>
+        internal static string CloseToTray {
+            get {
+                return ResourceManager.GetString("CloseToTray", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Keep Helix running in the tray when you close the window. Off quits Helix, and nothing reconnects your drives until you open it again..
+        /// </summary>
+        internal static string CloseToTrayDescription {
+            get {
+                return ResourceManager.GetString("CloseToTrayDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Notify when hidden to the tray.
+        /// </summary>
+        internal static string NotifyOnMinimizeToTray {
+            get {
+                return ResourceManager.GetString("NotifyOnMinimizeToTray", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show a notification the first time Helix hides itself in the tray each session..
+        /// </summary>
+        internal static string NotifyOnMinimizeToTrayDescription {
+            get {
+                return ResourceManager.GetString("NotifyOnMinimizeToTrayDescription", resourceCulture);
+            }
+        }
+        
     }
 }

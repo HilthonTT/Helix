@@ -25,7 +25,9 @@ public sealed class UpdateSettings(
         Language Language,
         int AuditlogRetentionDays,
         int StorageAlertThresholdPercent,
-        int IdleLockMinutes)
+        int IdleLockMinutes,
+        bool CloseToTray,
+        bool NotifyOnMinimizeToTray)
     {
         public sealed class Builder(
             bool autoConnect,
@@ -36,7 +38,9 @@ public sealed class UpdateSettings(
             Language language,
             int auditlogRetentionDays,
             int storageAlertThresholdPercent,
-            int idleLockMinutes)
+            int idleLockMinutes,
+            bool closeToTray,
+            bool notifyOnMinimizeToTray)
         {
             public bool AutoConnect { get; set; } = autoConnect;
 
@@ -56,6 +60,10 @@ public sealed class UpdateSettings(
 
             public int IdleLockMinutes { get; set; } = idleLockMinutes;
 
+            public bool CloseToTray { get; set; } = closeToTray;
+
+            public bool NotifyOnMinimizeToTray { get; set; } = notifyOnMinimizeToTray;
+
             public Request Build() => new(
                 AutoConnect,
                 AutoMinimize,
@@ -65,7 +73,9 @@ public sealed class UpdateSettings(
                 Language,
                 AuditlogRetentionDays,
                 StorageAlertThresholdPercent,
-                IdleLockMinutes);
+                IdleLockMinutes,
+                CloseToTray,
+                NotifyOnMinimizeToTray);
         }
     }
 
@@ -97,7 +107,9 @@ public sealed class UpdateSettings(
             request.Language,
             request.AuditlogRetentionDays,
             request.StorageAlertThresholdPercent,
-            request.IdleLockMinutes);
+            request.IdleLockMinutes,
+            request.CloseToTray,
+            request.NotifyOnMinimizeToTray);
 
         // The shortcut services throw IOException on failure (e.g. the startup folder
         // is locked down by policy). Handlers must never throw for expected failures —

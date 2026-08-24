@@ -45,6 +45,27 @@ public sealed class Settings : Entity
     /// </remarks>
     public const int DefaultIdleLockMinutes = 0;
 
+    /// <summary>
+    /// Whether the window's close button puts Helix in the tray instead of quitting.
+    /// </summary>
+    /// <remarks>
+    /// On, because a NAS tool that stops running the moment its window is closed stops
+    /// reconnecting drives, warning about full volumes and locking itself — everything
+    /// it exists to do while nobody is looking. Off is for the user who wants the close
+    /// button to mean closed, and accepts that the drives are then on their own.
+    /// </remarks>
+    public const bool DefaultCloseToTray = true;
+
+    /// <summary>
+    /// Whether the tray says so, once a session, when the window is put away there.
+    /// </summary>
+    /// <remarks>
+    /// On, because a window that vanishes from the taskbar with no explanation reads as
+    /// a crash, and the first thing the user does about a crash is start Helix again.
+    /// Once they know where it went, they can turn this off.
+    /// </remarks>
+    public const bool DefaultNotifyOnMinimizeToTray = true;
+
     [JsonConstructor]
     private Settings(
         Guid id,
@@ -57,7 +78,9 @@ public sealed class Settings : Entity
         Language language,
         int auditlogRetentionDays,
         int storageAlertThresholdPercent,
-        int idleLockMinutes)
+        int idleLockMinutes,
+        bool closeToTray,
+        bool notifyOnMinimizeToTray)
         : base(id)
     {
         Ensure.NotNullOrEmpty(id, nameof(id));
@@ -71,6 +94,8 @@ public sealed class Settings : Entity
         Ensure.MustNotBeNegative(auditlogRetentionDays, nameof(auditlogRetentionDays));
         Ensure.MustNotBeNegative(storageAlertThresholdPercent, nameof(storageAlertThresholdPercent));
         Ensure.MustNotBeNegative(idleLockMinutes, nameof(idleLockMinutes));
+        Ensure.NotNull(closeToTray, nameof(closeToTray));
+        Ensure.NotNull(notifyOnMinimizeToTray, nameof(notifyOnMinimizeToTray));
 
         UserId = userId;
         AutoConnect = autoConnect;
@@ -82,6 +107,8 @@ public sealed class Settings : Entity
         AuditlogRetentionDays = auditlogRetentionDays;
         StorageAlertThresholdPercent = storageAlertThresholdPercent;
         IdleLockMinutes = idleLockMinutes;
+        CloseToTray = closeToTray;
+        NotifyOnMinimizeToTray = notifyOnMinimizeToTray;
     }
 
     /// <summary>
@@ -136,6 +163,23 @@ public sealed class Settings : Entity
     /// </remarks>
     public int IdleLockMinutes { get; private set; }
 
+    /// <summary>
+    /// Whether closing the window hides Helix to the tray instead of quitting it — see
+    /// <see cref="DefaultCloseToTray"/>.
+    /// </summary>
+    /// <remarks>
+    /// Only the close button follows this. Auto-minimize and the tray's own Exit item
+    /// both say what they do in their own names, and neither is the user reaching for
+    /// the corner of a window and being surprised by what happens.
+    /// </remarks>
+    public bool CloseToTray { get; private set; }
+
+    /// <summary>
+    /// Whether the tray explains where the window went, the first time in a session it
+    /// is put away — see <see cref="DefaultNotifyOnMinimizeToTray"/>.
+    /// </summary>
+    public bool NotifyOnMinimizeToTray { get; private set; }
+
     public static Settings Create(
         Guid userId,
         bool autoConnect,
@@ -146,7 +190,9 @@ public sealed class Settings : Entity
         Language language,
         int auditlogRetentionDays = DefaultAuditlogRetentionDays,
         int storageAlertThresholdPercent = DefaultStorageAlertThresholdPercent,
-        int idleLockMinutes = DefaultIdleLockMinutes)
+        int idleLockMinutes = DefaultIdleLockMinutes,
+        bool closeToTray = DefaultCloseToTray,
+        bool notifyOnMinimizeToTray = DefaultNotifyOnMinimizeToTray)
     {
         var settings = new Settings(
             Guid.CreateVersion7(),
@@ -159,7 +205,9 @@ public sealed class Settings : Entity
             language,
             auditlogRetentionDays,
             storageAlertThresholdPercent,
-            idleLockMinutes);
+            idleLockMinutes,
+            closeToTray,
+            notifyOnMinimizeToTray);
 
         return settings;
     }
@@ -173,7 +221,9 @@ public sealed class Settings : Entity
         Language language,
         int auditlogRetentionDays,
         int storageAlertThresholdPercent,
-        int idleLockMinutes)
+        int idleLockMinutes,
+        bool closeToTray,
+        bool notifyOnMinimizeToTray)
     {
         AutoConnect = autoConnect;
         AutoMinimize = autoMinimize;
@@ -184,5 +234,7 @@ public sealed class Settings : Entity
         AuditlogRetentionDays = auditlogRetentionDays;
         StorageAlertThresholdPercent = storageAlertThresholdPercent;
         IdleLockMinutes = idleLockMinutes;
+        CloseToTray = closeToTray;
+        NotifyOnMinimizeToTray = notifyOnMinimizeToTray;
     }
 }

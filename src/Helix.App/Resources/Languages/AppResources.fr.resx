@@ -576,4 +576,16 @@
   <data name="OpenReleasePage" xml:space="preserve">
     <value>Ouvrir la page de la version</value>
   </data>
+  <data name="CloseToTray" xml:space="preserve">
+    <value>Fermer dans la zone de notification</value>
+  </data>
+  <data name="CloseToTrayDescription" xml:space="preserve">
+    <value>Helix continue de fonctionner dans la zone de notification quand vous fermez la fenêtre. Désactivé, Helix se ferme et plus rien ne reconnecte vos lecteurs jusqu'à la prochaine ouverture.</value>
+  </data>
+  <data name="NotifyOnMinimizeToTray" xml:space="preserve">
+    <value>Prévenir lors du masquage dans la zone de notification</value>
+  </data>
+  <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
+    <value>Afficher une notification la première fois qu'Helix se masque dans la zone de notification à chaque session.</value>
+  </data>
 </root>

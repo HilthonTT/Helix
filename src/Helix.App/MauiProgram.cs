@@ -115,7 +115,8 @@ public static class MauiProgram
 
 #if WINDOWS
     /// <summary>
-    /// Turns the title bar's close button into hide-to-tray.
+    /// Turns the title bar's close button into hide-to-tray, where the user asked for
+    /// that.
     /// </summary>
     /// <remarks>
     /// Cancelled only while there is a tray icon to come back from — before sign-in, or
@@ -123,7 +124,13 @@ public static class MauiProgram
     /// window with no way back is worse than quitting. Same rule the auto-minimize
     /// countdown follows in <c>BaseViewModel.MinimizeApp</c>.
     ///
-    /// This also fires for the shutdown the tray asks for, hence the flag: without it
+    /// The other way out is <c>Settings.CloseToTray</c> turned off, which is the user
+    /// saying the close button means closed. That still goes through
+    /// <see cref="MainWindow.Exit"/> rather than simply letting the close through: it is
+    /// the app's one real quit, and it takes the icon down on the way — an icon whose
+    /// process has gone sits in the tray until somebody happens to mouse over it.
+    ///
+    /// This also fires for the shutdown that quit asks for, hence the flag: without it
     /// Exit would hide the window instead of closing it.
     /// </remarks>
     private static void OnWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
@@ -141,7 +148,17 @@ public static class MauiProgram
             return;
         }
 
+        // Cancelled either way: the quit below closes this window itself, and letting
+        // this close run on as well would race it.
         args.Cancel = true;
+
+        if (!tray.ClosesToTray)
+        {
+            tray.Stop();
+            MainWindow.Exit();
+
+            return;
+        }
 
         MainWindow.HideToTray();
         tray.NotifyHiddenToTray();

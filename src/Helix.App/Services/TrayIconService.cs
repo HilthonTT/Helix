@@ -1,6 +1,7 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
+using Helix.App.Messaging.Settings;
 using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Desktop;
@@ -8,9 +9,11 @@ using Helix.Application.Features.DriveGroups.Commands;
 using Helix.Application.Features.DriveGroups.Queries;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
+using Helix.Application.Features.Settings.Queries;
 using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
+using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.App.Services;
 
@@ -53,6 +56,14 @@ internal sealed class TrayIconService
     private bool _running;
     private bool _announcedHiding;
 
+    // The two settings that have to be answered without awaiting anything: the window's
+    // Closing handler is a WinUI event that must decide before it returns, and the
+    // notification goes up at the moment the window is put away. Read on the UI and tray
+    // threads, written from the thread pool when the settings page reports a change —
+    // volatile rather than locked because each is a single bool nothing else depends on.
+    private volatile bool _closeToTray = SettingsModel.DefaultCloseToTray;
+    private volatile bool _notifyOnMinimizeToTray = SettingsModel.DefaultNotifyOnMinimizeToTray;
+
     public TrayIconService(
         ITrayIcon trayIcon,
         INasConnector nasConnector,
@@ -70,6 +81,18 @@ internal sealed class TrayIconService
 
     /// <summary>Whether the icon is currently showing — false before sign-in and after sign-out.</summary>
     public bool IsRunning => _running;
+
+    /// <summary>
+    /// Whether closing the window should put Helix in the tray rather than quit it.
+    /// </summary>
+    /// <remarks>
+    /// Answered from the cached setting, because the caller is the window's Closing
+    /// handler and it has nowhere to await. Until the settings have been read — before
+    /// sign-in, or where the read failed — this is the default, which is to keep
+    /// running: hiding a window the user can get back beats quitting a session they
+    /// meant to keep.
+    /// </remarks>
+    public bool ClosesToTray => _closeToTray;
 
     /// <summary>
     /// Puts the icon up and fills in its menu. Safe to call on every dashboard
@@ -104,6 +127,9 @@ internal sealed class TrayIconService
 
             return;
         }
+
+        // This user's, not the last one's: the icon is put up again per sign-in.
+        await LoadPreferencesAsync();
 
         await RefreshAsync();
     }
@@ -144,7 +170,7 @@ internal sealed class TrayIconService
     /// </remarks>
     public void NotifyHiddenToTray()
     {
-        if (!_running || _announcedHiding)
+        if (!_running || _announcedHiding || !_notifyOnMinimizeToTray)
         {
             return;
         }
@@ -422,6 +448,43 @@ internal sealed class TrayIconService
         WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, (r, m) => RefreshSafely());
         WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) => RefreshSafely());
         WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(this, (r, m) => RefreshSafely());
+
+        // The menu does not change with the settings, but what the close button does and
+        // whether the tray explains itself both do.
+        WeakReferenceMessenger.Default.Register<SettingsChangedMessage>(this, (r, m) => ReloadPreferencesSafely());
+    }
+
+    /// <summary>
+    /// Re-reads the two settings the tray has to answer without awaiting.
+    /// </summary>
+    /// <remarks>
+    /// A failed read leaves the last known values in place rather than falling back to
+    /// the defaults: the user turning close-to-tray off and then hitting a locked
+    /// database should not quietly get it back.
+    /// </remarks>
+    private async Task LoadPreferencesAsync()
+    {
+        Result<SettingsModel> result = await ScopedHandler.HandleAsync((GetSettings h) => h.Handle());
+        if (result.IsFailure)
+        {
+            return;
+        }
+
+        _closeToTray = result.Value.CloseToTray;
+        _notifyOnMinimizeToTray = result.Value.NotifyOnMinimizeToTray;
+    }
+
+    /// <summary>
+    /// Reloads without letting a failure escape as an unhandled exception — the same
+    /// hazard <see cref="RefreshSafely"/> exists for.
+    /// </summary>
+    private void ReloadPreferencesSafely()
+    {
+        _ = LoadPreferencesAsync().ContinueWith(
+            task => _logger.LogError(task.Exception, "The tray icon failed to re-read its settings."),
+            CancellationToken.None,
+            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
     }
 
     /// <summary>
