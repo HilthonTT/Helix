@@ -11,9 +11,9 @@
 	</PropertyGroup>
 
 	<ItemGroup Label="MAUI">
-		<PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.90" />
-		<PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.90" />
-		<PackageVersion Include="CommunityToolkit.Maui" Version="15.0.0" />
+		<PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.100" />
+		<PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.100" />
+		<PackageVersion Include="CommunityToolkit.Maui" Version="15.0.1" />
 		<PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 	</ItemGroup>
 
