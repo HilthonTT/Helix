@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -302,6 +302,23 @@ this point costs nothing. `Apply` writes a helper script, starts it and returns;
 moves anything. The helper moves the install aside rather than writing over it, so a
 failure halfway puts back exactly what was there; the moved-aside copy is deleted only once
 the copy has finished.
+
+The helper is started with its **`WorkingDirectory` set to its own folder**, and that line
+is load-bearing on Windows. A child process with no working directory set inherits the
+parent's, which for Helix is the install folder — Explorer starts an app there, and
+`WindowsStartupService` and `WindowsDesktopService` both set it there explicitly in the
+shortcuts they write. A process holds a handle to its current directory and Windows will
+not rename a held folder, so the move that puts the install aside failed with a sharing
+violation every time, the script's `catch` swallowed it, and the last line started the old
+build again: 2.2.0 "updated" to 2.2.1, restarted, and was still 2.2.0. PowerShell's
+`Set-Location` inside the script does not fix this — it moves the shell's location, not the
+process's current directory, and it is the process handle that holds the folder.
+
+The move is retried for `MoveAttempts` seconds, because an indexer or a virus scanner
+holding the folder for a moment should not cost the release. Whatever happens is appended
+to `helix-updates.log` in the log directory, named so `LogFileWriter` collects it into the
+diagnostics zip: the helper outlives the logger, and its failure path puts the old version
+back and starts it, which is indistinguishable from success unless it is written down.
 
 Neither script carries a comment of its own and both are built line by line rather than as
 raw string literals. Each lives in a branch excluded on the other platform, and the

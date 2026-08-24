@@ -1,7 +1,8 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Helix.Application.Abstractions.Updates;
 using Helix.Infrastructure.Updates;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
@@ -24,6 +25,8 @@ public sealed class UpdateInstallerTests : IDisposable
     private string InstallDirectory => Path.Combine(_root, "install");
 
     private string StagingRoot => Path.Combine(_root, "staging");
+
+    private string LogDirectory => Path.Combine(_root, "logs");
 
     public UpdateInstallerTests()
     {
@@ -55,7 +58,8 @@ public sealed class UpdateInstallerTests : IDisposable
         new(new HttpClient(new StubHandler(respond)),
             NullLogger<UpdateInstaller>.Instance,
             () => InstallDirectory,
-            () => StagingRoot);
+            () => StagingRoot,
+            () => LogDirectory);
 
     private static UpdateCheck Update(string? url = "https://example.invalid/helix.zip") =>
         new(true, "2.0.0", "v2.1.0", "https://example.invalid/release", url, "Helix-v2.1.0-win-x64.zip");
@@ -230,5 +234,59 @@ public sealed class UpdateInstallerTests : IDisposable
         Result result = installer.Apply(Path.Combine(StagingRoot, "never-staged"));
 
         result.Error.Should().Be(UpdateErrors.UnreadableDownload);
+    }
+
+    /// <summary>
+    /// The helper must not be started inside the folder it has to rename.
+    /// </summary>
+    /// <remarks>
+    /// This is the whole of the bug that shipped an update which did not install. A child
+    /// process started with no working directory inherits the parent's, which for Helix is
+    /// the install folder — Explorer starts an app there, and both shortcut services set
+    /// it there by hand. A process holds a handle to its current directory, Windows will
+    /// not rename a held folder, and the swap failed every time while reporting success.
+    /// </remarks>
+    [Fact]
+    public void Helper_Should_NotRunFromInsideTheFolderItReplaces()
+    {
+        string scriptPath = Path.Combine(StagingRoot, "helper", "apply-update.ps1");
+
+        ProcessStartInfo start = UpdateInstaller.CreateHelperStart(scriptPath);
+
+        start.WorkingDirectory.Should().NotBeNullOrWhiteSpace();
+
+        string workingDirectory = Path.GetFullPath(start.WorkingDirectory);
+        string install = Path.GetFullPath(InstallDirectory);
+
+        workingDirectory.Should().NotStartWith(install);
+        workingDirectory.Should().Be(Path.GetFullPath(Path.GetDirectoryName(scriptPath)!));
+    }
+
+    /// <summary>
+    /// A swap that cannot happen has to be retried, and then said out loud.
+    /// </summary>
+    /// <remarks>
+    /// The failure path puts the previous version back and starts it, which looks exactly
+    /// like a successful update from the outside — so the only thing separating "installed"
+    /// from "silently did nothing" is what the helper writes down.
+    /// </remarks>
+    [Fact]
+    public void SwapScript_Should_RetryTheMove_AndRecordWhatHappened()
+    {
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        string staged = Path.Combine(StagingRoot, "v9.9.9", "unpacked");
+        Directory.CreateDirectory(staged);
+
+        string scriptPath = installer.WriteSwapScript(staged, InstallDirectory);
+
+        string script = File.ReadAllText(scriptPath);
+
+        script.Should().Contain("foreach ($attempt in 1..");
+        script.Should().Contain("UpdateHelper:");
+
+        // Written where the diagnostics export looks, so a failed update reaches whoever
+        // is asked to explain it.
+        script.Should().Contain(Path.Combine(LogDirectory, "helix-updates.log"));
     }
 }

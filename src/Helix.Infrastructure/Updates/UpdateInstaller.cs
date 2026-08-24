@@ -32,25 +32,56 @@ internal sealed class UpdateInstaller : IUpdateInstaller
     /// <summary>How long the helper waits for Helix to exit before giving up.</summary>
     private const int ExitWaitSeconds = 60;
 
+    /// <summary>
+    /// How many times the helper tries to move the install aside before giving up.
+    /// </summary>
+    /// <remarks>
+    /// One attempt was enough to lose an update to whatever happened to be looking at the
+    /// folder for a second — an indexer, a virus scanner, an Explorer window left open in
+    /// it. A second a try for ten seconds costs nothing when the alternative is a release
+    /// that silently does not install.
+    /// </remarks>
+    private const int MoveAttempts = 10;
+
+    /// <summary>
+    /// The file the helper writes what it did to, in the folder the diagnostics export
+    /// reads.
+    /// </summary>
+    /// <remarks>
+    /// The helper runs after Helix has exited, so it cannot log through
+    /// <see cref="ILogger"/> like everything else. It is also the one part of the update
+    /// nobody watches: a swap that fails puts the previous version back and starts it,
+    /// which is indistinguishable from a swap that worked unless it says so somewhere.
+    /// Named to match what <c>LogFileWriter</c> collects, so it lands in the zip the user
+    /// is asked to send without anything else having to know about it.
+    /// </remarks>
+    private const string HelperLogFileName = "helix-updates.log";
+
     private readonly HttpClient _httpClient;
     private readonly ILogger<UpdateInstaller> _logger;
     private readonly Func<string> _installDirectory;
     private readonly Func<string> _stagingRoot;
+    private readonly Func<string> _logDirectory;
 
     /// <param name="installDirectory">
     /// The folder to be replaced. Injected rather than read inline so a test can point it
     /// at a temporary directory instead of the running app.
     /// </param>
+    /// <param name="logDirectory">
+    /// Where the helper writes what it did, since it outlives the logger.
+    /// </param>
     public UpdateInstaller(
         HttpClient httpClient,
         ILogger<UpdateInstaller> logger,
         Func<string> installDirectory,
-        Func<string> stagingRoot)
+        Func<string> stagingRoot,
+        Func<string> logDirectory)
     {
         _httpClient = httpClient;
         _logger = logger;
         _installDirectory = installDirectory;
         _stagingRoot = stagingRoot;
+        _logDirectory = logDirectory;
     }
 
     /// <summary>Where staged downloads go, beside the database and the logs.</summary>
@@ -349,8 +380,28 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         }
     }
 
-    private static ProcessStartInfo CreateHelperStart(string scriptPath)
+    /// <summary>
+    /// How the helper is launched. The working directory is the load-bearing part.
+    /// </summary>
+    /// <remarks>
+    /// Left unset, a child process inherits this one's current directory — and Helix's is
+    /// the install folder: Explorer starts an app there, and the shortcuts the startup and
+    /// desktop services write set it there explicitly. A process whose current directory
+    /// is a folder holds a handle to it, and Windows will not rename a folder that is
+    /// held, so <c>Move-Item $install $install.old</c> failed with a sharing violation
+    /// every single time. The script's catch swallowed it and its last line started the
+    /// old build again: the update reported success, the app came back, and it was still
+    /// the version it had been. Pointing the helper at its own folder — under app data,
+    /// never inside the install — is what makes the swap possible at all.
+    ///
+    /// PowerShell's <c>Set-Location</c> inside the script would not do this: it moves the
+    /// shell's location, not the process's current directory, and it is the process's
+    /// handle that holds the folder.
+    /// </remarks>
+    internal static ProcessStartInfo CreateHelperStart(string scriptPath)
     {
+        string helperDirectory = Path.GetDirectoryName(scriptPath) ?? Path.GetTempPath();
+
 #if WINDOWS
         return new ProcessStartInfo
         {
@@ -358,6 +409,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             Arguments = $"-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"{scriptPath}\"",
             UseShellExecute = false,
             CreateNoWindow = true,
+            WorkingDirectory = helperDirectory,
         };
 #else
         return new ProcessStartInfo
@@ -366,6 +418,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             Arguments = $"\"{scriptPath}\"",
             UseShellExecute = false,
             CreateNoWindow = true,
+            WorkingDirectory = helperDirectory,
         };
 #endif
     }
@@ -387,12 +440,19 @@ internal sealed class UpdateInstaller : IUpdateInstaller
     /// non-whitespace character is <c>#</c> — a shell comment, a shebang — reads as one
     /// and fails the build for the other head.
     /// </remarks>
-    private string WriteSwapScript(string stagedDirectory, string installDirectory)
+    internal string WriteSwapScript(string stagedDirectory, string installDirectory)
     {
         int processId = Environment.ProcessId;
 
         string scriptDirectory = Path.Combine(_stagingRoot(), "helper");
         Directory.CreateDirectory(scriptDirectory);
+
+        // Created here rather than left to the helper: its logging is best-effort and
+        // silent when it fails, and a missing folder would make it silent every time.
+        string logDirectory = _logDirectory();
+        Directory.CreateDirectory(logDirectory);
+
+        string logPath = Path.Combine(logDirectory, HelperLogFileName);
 
 #if WINDOWS
         string scriptPath = Path.Combine(scriptDirectory, "apply-update.ps1");
@@ -404,24 +464,46 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             $"$staged  = '{Escape(stagedDirectory)}'",
             $"$install = '{Escape(installDirectory)}'",
             $"$exe     = '{Escape(executable)}'",
+            $"$log     = '{Escape(logPath)}'",
             "$backup  = \"$install.old\"",
+            "function Write-Log($message) {",
+            "    try {",
+            "        $stamp = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd HH:mm:ss.fff')",
+            "        Add-Content -LiteralPath $log -Value \"$stamp [inf] UpdateHelper: $message\"",
+            "    } catch { }",
+            "}",
             $"try {{ Wait-Process -Id {processId} -Timeout {ExitWaitSeconds} -ErrorAction Stop }} catch {{ }}",
 
             // The process object is gone before every handle it held is.
             "Start-Sleep -Seconds 2",
             "if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Recurse -Force }",
-            "try {",
-            "    Move-Item -LiteralPath $install -Destination $backup -Force",
-            "    New-Item -ItemType Directory -Path $install -Force | Out-Null",
-            "    Copy-Item -Path (Join-Path $staged '*') -Destination $install -Recurse -Force",
-            "    Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction SilentlyContinue",
-            "} catch {",
-            "    if (Test-Path -LiteralPath $backup) {",
+            "$moved = $false",
+            "$reason = 'the folder was still held after every attempt'",
+            $"foreach ($attempt in 1..{MoveAttempts}) {{",
+            "    try {",
+            "        Move-Item -LiteralPath $install -Destination $backup -Force",
+            "        $moved = $true",
+            "        break",
+            "    } catch {",
+            "        $reason = $_.Exception.Message",
+            "        Start-Sleep -Seconds 1",
+            "    }",
+            "}",
+            "if ($moved) {",
+            "    try {",
+            "        New-Item -ItemType Directory -Path $install -Force | Out-Null",
+            "        Copy-Item -Path (Join-Path $staged '*') -Destination $install -Recurse -Force",
+            "        Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction SilentlyContinue",
+            "        Write-Log 'The update was applied.'",
+            "    } catch {",
+            "        Write-Log \"The update could not be copied over the install: $($_.Exception.Message). The previous version was put back.\"",
             "        if (Test-Path -LiteralPath $install) {",
             "            Remove-Item -LiteralPath $install -Recurse -Force -ErrorAction SilentlyContinue",
             "        }",
             "        Move-Item -LiteralPath $backup -Destination $install -Force",
             "    }",
+            "} else {",
+            "    Write-Log \"The install folder could not be moved aside, so the update was not applied and the previous version is still installed: $reason\"",
             "}",
             "if (Test-Path -LiteralPath $exe) { Start-Process -FilePath $exe }",
         ];
@@ -432,7 +514,9 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         [
             $"staged=\"{Escape(stagedDirectory)}\"",
             $"install=\"{Escape(installDirectory)}\"",
+            $"log=\"{Escape(logPath)}\"",
             "backup=\"$install.old\"",
+            "write_log() { printf '%s [inf] UpdateHelper: %s\\n' \"$(date -u '+%Y-%m-%d %H:%M:%S.000')\" \"$1\" >> \"$log\" 2>/dev/null || true; }",
             $"for _ in $(seq 1 {ExitWaitSeconds}); do",
             $"  kill -0 {processId} 2>/dev/null || break",
             "  sleep 1",
@@ -445,10 +529,14 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             // attributes, and a plain copy flattens the ones that make it launchable.
             "  if ditto \"$staged\" \"$install\"; then",
             "    rm -rf \"$backup\"",
+            "    write_log 'The update was applied.'",
             "  else",
             "    rm -rf \"$install\"",
             "    mv \"$backup\" \"$install\"",
+            "    write_log 'The update could not be copied over the install. The previous version was put back.'",
             "  fi",
+            "else",
+            "  write_log 'The install folder could not be moved aside, so the update was not applied and the previous version is still installed.'",
             "fi",
             "open \"$install\"",
         ];

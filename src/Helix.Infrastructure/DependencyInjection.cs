@@ -131,7 +131,8 @@ public static class DependencyInjection
             UpdateConfiguration.CreateDownloadHttpClient(),
             sp.GetRequiredService<ILogger<UpdateInstaller>>(),
             () => UpdateInstaller.DefaultInstallDirectory,
-            () => UpdateInstaller.DefaultStagingRoot));
+            () => UpdateInstaller.DefaultStagingRoot,
+            () => DiagnosticsConfiguration.LogDirectory));
 
         services.AddPlatformServices();
 
