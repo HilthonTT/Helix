@@ -202,6 +202,31 @@ Debug rather than Warning — on a laptop this is the ordinary state of affairs 
 the day, and a warning per drive per sweep buries the real failures in the file the user is
 asked to send on. The sweep is skipped outright when `Connectivity` reports no network.
 
+### Telling a deliberate disconnect from a drop
+
+`IDriveMonitor.Suppress` hands back a handle; while it is held, the letters it names are
+neither reported as changed nor used to move the baseline, and disposing it re-seeds them
+from what is actually mounted. Every handler that mounts or unmounts on purpose —
+`ConnectDrive`, `DisconnectDrive`, `ConnectAllDrives`, `DisconnectAllDrives`,
+`ConnectDriveGroup`, and `DeleteDrive` for the persistent mapping it cancels — holds one
+across the operation. **Add one to any new handler that mounts or unmounts.**
+
+Without it the monitor cannot tell "the user pressed disconnect" from "the NAS fell over",
+because both are a letter that stopped being there, and everything downstream believes the
+second: the tray fires a toast per drive and, with auto-connect on, `DriveWatchdog` puts
+every one of them straight back. Pressing "disconnect all" told the user seconds later
+that their drives had reconnected. The same on the way up — the startup connect fired a
+"reconnected" toast per drive, because the watchdog had seeded its baseline from a machine
+with nothing mounted moments earlier.
+
+The handle covers the whole operation rather than being a note filed after it: a poll
+landing between the unmount and the note is the case that produces the spurious reconnect,
+so there must be no window at all. Suppressions are counted, so a group going down while a
+row's own disconnect is in flight cannot uncover the other's letters.
+
+`ReconnectDrive` deliberately does **not** suppress. A drive coming back unattended is
+exactly what the tray notification and the audit entry exist to report.
+
 ### The low-space warning
 
 `Settings.StorageAlertThresholdPercent` is free space, as a percentage of a volume, below
@@ -358,6 +383,49 @@ Do not "simplify" the dashboard total back into a sum over drive letters.
 Both connectors take the NAS password as a separate credential argument rather than
 putting it in a command line — do not "simplify" either into a `net.exe` or
 `mount_smbfs //user:pass@host` shell-out.
+
+Windows allows **one credential context per server for the whole logon session**, which is
+why `WindowsNasConnector` does three things it would otherwise not need to.
+
+It holds a per-host `SemaphoreSlim` around each mount, so the thirteen shares of one NAS
+that "connect all" and the drive groups hand over at once do not race to establish that
+context and come back `ERROR_SESSION_CREDENTIAL_CONFLICT` (1219). The gate's wait is
+capped at the mount timeout, so an absent NAS cannot turn "connect all" into five seconds
+per drive; going ahead ungated is safe there, because a server that is not answering has
+no session to conflict over.
+
+When a mount hits 1219 anyway, **what happens next turns entirely on whether any drive
+letter is still mounted from that server** (`HasLiveConnectionTo`), and the two branches
+must not be collapsed into one:
+
+- **Something is using it.** A share mapped by hand in Explorer, or the first of this
+  NAS's own thirteen drives. Windows will not hold a second credential set for that
+  server while the first is in use, so the mount is retried **with no credentials at
+  all** — how a share is asked onto an existing session — and comes up on whatever
+  account that session belongs to. This is the branch that stopped one drive working and
+  twelve failing.
+- **Nothing is using it.** The context is a leftover: a session outlives the last
+  connection to it, invisible to `net use` and unrelated to Credential Manager, and the
+  deviceless session `Test` opens is a common way to leave one behind. Joining it would
+  mount the share while proving nothing about the credentials, so **a wrong password
+  would go on working** until the leftover expired. The session is dropped instead
+  (`DropIdleServerSession`) and the drive's own credentials get a real attempt, whose
+  error — a plain logon failure, usually — is what gets reported.
+
+`Test` takes the same branch for the same reason, and more urgently: a connection test
+answered out of a session nobody is using has tested nothing.
+
+Dropping the session is only ever done on the second branch. On the first,
+`WNetCancelConnection2` against a server name would take down the user's Explorer
+mappings and every Helix drive already mounted on that NAS — never do that from a
+background reconnect. Even on the second branch the cancel is **unforced**, so a
+deviceless connection held by some other process refuses it rather than being broken.
+
+The limit worth knowing, because no amount of code moves it: while other shares of a NAS
+are mounted, a drive on that NAS mounts on the existing session and its stored password
+is never checked. Editing a password and reconnecting that one drive will appear to work
+whatever you type. Only with nothing else mounted from that server does the password get
+tested.
 
 macOS has no drive letters, so `Drive.Letter` names a directory under the mount root
 instead. The persisted domain model is identical on both platforms.

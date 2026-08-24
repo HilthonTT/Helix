@@ -20,6 +20,7 @@ public class DriveGroupTests
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly ILoggedInUser _loggedInUserMock;
     private readonly INasConnector _nasConnectorMock;
+    private readonly IDriveMonitor _driveMonitorMock;
     private readonly IDateTimeProvider _dateTimeProviderMock;
 
     private readonly Drive _media;
@@ -32,6 +33,7 @@ public class DriveGroupTests
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _loggedInUserMock = Substitute.For<ILoggedInUser>();
         _nasConnectorMock = Substitute.For<INasConnector>();
+        _driveMonitorMock = Substitute.For<IDriveMonitor>();
         _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
         _dateTimeProviderMock.UtcNow.Returns(Now);
@@ -66,6 +68,7 @@ public class DriveGroupTests
             _unitOfWorkMock,
             _loggedInUserMock,
             _nasConnectorMock,
+            _driveMonitorMock,
             _dateTimeProviderMock);
 
     private DriveGroup GivenGroup(params Guid[] driveIds)

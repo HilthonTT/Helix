@@ -27,6 +27,7 @@ public sealed class ConnectDriveGroup(
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
     INasConnector nasConnector,
+    IDriveMonitor driveMonitor,
     IDateTimeProvider dateTimeProvider) : IHandler
 {
     /// <param name="Disconnect">False connects the group, true takes it down.</param>
@@ -79,6 +80,11 @@ public sealed class ConnectDriveGroup(
         {
             return Result.Success();
         }
+
+        // Pressing a group button is Helix changing these letters on purpose, in both
+        // directions, so the monitor is told to expect it — otherwise taking a group down
+        // is followed by the watchdog putting it back up.
+        using IDisposable suppression = driveMonitor.Suppress(targets.Select(drive => drive.Letter));
 
         // Neither call throws for an expected failure, so WhenAll cannot fault and the
         // per-drive outcomes are aggregated rather than thrown.

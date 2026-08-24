@@ -7,9 +7,10 @@ using Helix.Domain.Users;
 namespace Helix.Application.Features.Drives.Commands;
 
 public sealed class DisconnectAllDrives(
-    IDriveRepository driveRepository, 
-    ILoggedInUser loggedInUser, 
-    INasConnector nasConnector) : IHandler
+    IDriveRepository driveRepository,
+    ILoggedInUser loggedInUser,
+    INasConnector nasConnector,
+    IDriveMonitor driveMonitor) : IHandler
 {
     public async Task<Result> Handle(CancellationToken cancellationToken = default)
     {
@@ -36,6 +37,12 @@ public sealed class DisconnectAllDrives(
         {
             return Result.Success();
         }
+
+        // The whole batch, for the whole batch's duration. Thirteen letters vanishing at
+        // once is indistinguishable from the NAS falling off the network, and that is what
+        // the watchdog would make of it: a tray toast per drive, an audit entry per drive,
+        // and then every one of them reconnected behind the user's back.
+        using IDisposable suppression = driveMonitor.Suppress(connectedDrives.Select(d => d.Letter));
 
         // DisconnectAsync never throws — it returns Result.Failure for expected
         // failures, so we aggregate the per-drive outcomes instead of using

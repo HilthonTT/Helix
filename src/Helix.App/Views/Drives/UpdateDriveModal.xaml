@@ -58,9 +58,11 @@
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate NasHost}" Style="{StaticResource FieldLabel}"/>
                         <Border Style="{StaticResource Field}">
+                            <!-- Not masked by HideSecrets, unlike the two fields below it: a host is
+                                 an address, not a secret, and hiding it made the one field the user
+                                 most often has to check against their NAS unreadable. -->
                             <Entry Placeholder="{l10n:Translate AddNasHostPlaceholder}"
                                    Text="{Binding Drive.Host}"
-                                   IsPassword="{Binding HideSecrets}"
                                    IsEnabled="{Binding IsNotBusy}"/>
                         </Border>
                     </VerticalStackLayout>

@@ -21,6 +21,7 @@ public class ConnectAllDrivesTests
     private readonly IDriveRepository _driveRepositoryMock;
     private readonly ILoggedInUser _loggedInUserMock;
     private readonly INasConnector _nasConnectorMock;
+    private readonly IDriveMonitor _driveMonitorMock;
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly IDateTimeProvider _dateTimeProviderMock;
 
@@ -29,6 +30,7 @@ public class ConnectAllDrivesTests
         _driveRepositoryMock = Substitute.For<IDriveRepository>();
         _loggedInUserMock = Substitute.For<ILoggedInUser>();
         _nasConnectorMock = Substitute.For<INasConnector>();
+        _driveMonitorMock = Substitute.For<IDriveMonitor>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
         _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
@@ -45,6 +47,7 @@ public class ConnectAllDrivesTests
             _unitOfWorkMock,
             _loggedInUserMock,
             _nasConnectorMock,
+            _driveMonitorMock,
             _dateTimeProviderMock);
     }
 
@@ -103,6 +106,41 @@ public class ConnectAllDrivesTests
         result.IsSuccess.Should().BeTrue();
 
         await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// This is the pass that runs as the dashboard opens, moments after the watchdog
+    /// seeded its baseline from a machine with nothing mounted. Unannounced, every drive
+    /// it brings up reads as a fresh connection and the tray fires a toast for each.
+    /// </summary>
+    [Fact]
+    public async Task Handle_Should_TellTheMonitorTheMountsAreItsOwn()
+    {
+        // Arrange
+        HaveDrives(Automatic, Manual);
+
+        // Act
+        await _connectAllDrives.Handle();
+
+        // Assert
+        _driveMonitorMock.Received(1).Suppress(
+            Arg.Is<IEnumerable<string>>(letters => letters.OrderBy(l => l).SequenceEqual(new[] { "Y", "Z" })));
+    }
+
+    [Fact]
+    public async Task Handle_Should_ReleaseTheSuppressionWhenItIsDone()
+    {
+        // Arrange
+        HaveDrives(Automatic);
+
+        var suppression = Substitute.For<IDisposable>();
+        _driveMonitorMock.Suppress(Arg.Any<IEnumerable<string>>()).Returns(suppression);
+
+        // Act
+        await _connectAllDrives.Handle();
+
+        // Assert
+        suppression.Received(1).Dispose();
     }
 
     [Fact]

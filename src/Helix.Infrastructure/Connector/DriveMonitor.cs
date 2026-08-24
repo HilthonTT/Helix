@@ -25,6 +25,13 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
     /// <summary>Last observed connectivity per watched letter — the diff baseline.</summary>
     private Dictionary<string, bool> _baseline = [];
 
+    /// <summary>
+    /// Letters whose state Helix is changing on purpose, and how many callers are
+    /// currently saying so. Counted rather than a flag: two overlapping operations may
+    /// name the same letter, and the first to finish must not uncover it for the second.
+    /// </summary>
+    private readonly Dictionary<string, int> _suppressed = [];
+
     private CancellationTokenSource? _cancellation;
     private Task? _loop;
 
@@ -52,6 +59,72 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
             // Seed from reality rather than from the previous baseline: a drive that is
             // already offline when it starts being watched has not just dropped.
             _baseline = _watched.Keys.ToDictionary(letter => letter, connected.Contains);
+        }
+    }
+
+    public IDisposable Suppress(IEnumerable<string> letters)
+    {
+        string[] normalized = [.. letters
+            .Where(letter => !string.IsNullOrWhiteSpace(letter))
+            .Select(Normalize)
+            .Distinct()];
+
+        if (normalized.Length == 0)
+        {
+            return NullSuppression.Instance;
+        }
+
+        lock (_gate)
+        {
+            foreach (string letter in normalized)
+            {
+                _suppressed[letter] = _suppressed.TryGetValue(letter, out int count) ? count + 1 : 1;
+            }
+        }
+
+        return new Suppression(this, normalized);
+    }
+
+    /// <summary>
+    /// Ends one suppression and re-seeds the baseline of the letters it covered from
+    /// what is actually mounted now.
+    /// </summary>
+    /// <remarks>
+    /// Re-seeding rather than simply resuming: the caller has just mounted or unmounted
+    /// these letters, so their new state is the state everything downstream should
+    /// consider normal. Resuming with the old baseline would hand the next poll exactly
+    /// the change the suppression existed to swallow.
+    /// </remarks>
+    private void Release(string[] letters)
+    {
+        // Read outside the lock — it is a bitmask query, but it is still not this
+        // object's business to hold its own gate across a platform call.
+        HashSet<string> connected = _nasConnector.GetConnectedLetters();
+
+        lock (_gate)
+        {
+            foreach (string letter in letters)
+            {
+                if (!_suppressed.TryGetValue(letter, out int count))
+                {
+                    continue;
+                }
+
+                if (count > 1)
+                {
+                    // Somebody else is still working on this letter; leave the baseline
+                    // to whoever releases last.
+                    _suppressed[letter] = count - 1;
+                    continue;
+                }
+
+                _suppressed.Remove(letter);
+
+                if (_baseline.ContainsKey(letter))
+                {
+                    _baseline[letter] = connected.Contains(letter);
+                }
+            }
         }
     }
 
@@ -132,6 +205,15 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         {
             foreach ((string letter, WatchedDrive drive) in _watched)
             {
+                if (_suppressed.ContainsKey(letter))
+                {
+                    // Helix is mid-mount or mid-unmount on this one. The baseline is
+                    // left untouched as well as unreported: whatever it reads right now
+                    // is a half-finished operation, and the release re-seeds it from the
+                    // finished one.
+                    continue;
+                }
+
                 bool isConnected = connected.Contains(letter);
 
                 if (_baseline.TryGetValue(letter, out bool was) && was == isConnected)
@@ -151,6 +233,37 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
     }
 
     private static string Normalize(string letter) => letter.Trim().ToUpperInvariant();
+
+    /// <summary>The handle handed back by <see cref="Suppress"/>.</summary>
+    private sealed class Suppression(DriveMonitor monitor, string[] letters) : IDisposable
+    {
+        private bool _released;
+
+        public void Dispose()
+        {
+            // Idempotent: a `using` inside a method that also disposes by hand, or a
+            // double dispose from a retry, must not decrement the count twice and
+            // uncover a letter another caller is still holding.
+            if (_released)
+            {
+                return;
+            }
+
+            _released = true;
+
+            monitor.Release(letters);
+        }
+    }
+
+    /// <summary>Returned when there is nothing to suppress, so callers can still `using`.</summary>
+    private sealed class NullSuppression : IDisposable
+    {
+        public static readonly NullSuppression Instance = new();
+
+        public void Dispose()
+        {
+        }
+    }
 
     public void Dispose()
     {

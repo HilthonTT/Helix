@@ -1,5 +1,7 @@
 ﻿using Helix.Application.Abstractions.Connector;
 using Helix.Domain.Drives;
+using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
@@ -15,14 +17,37 @@ namespace Helix.Infrastructure.Connector;
 /// passwords.
 /// </summary>
 [SupportedOSPlatform("windows")]
-internal sealed class WindowsNasConnector : INasConnector
+internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) : INasConnector
 {
     private const int ConnectionTimeoutMilliseconds = 5_000;
 
+    /// <summary>
+    /// One gate per server, so two shares of the same NAS are never mounted at the same
+    /// instant.
+    /// </summary>
+    /// <remarks>
+    /// Windows keeps a single credential context per server for the whole logon session,
+    /// and establishing it is not atomic: hand the redirector thirteen shares of one NAS
+    /// at once, as "connect all" and every drive group does, and the mounts that arrive
+    /// while the first session is still being set up come back with
+    /// <c>ERROR_SESSION_CREDENTIAL_CONFLICT</c>. Letting the first one through on its own
+    /// turns the rest into cheap additions to a session that already exists.
+    ///
+    /// Keyed by the rendered UNC host rather than the typed one, so the several spellings
+    /// of one address share a gate. The semaphores are never removed: a machine talks to
+    /// a handful of NASes, and this object lives as long as the app does.
+    /// </remarks>
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _hostGates =
+        new(StringComparer.OrdinalIgnoreCase);
+
     public Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
-        RunWithTimeoutAsync(
-            () => Connect(drive),
-            timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+        WithHostGateAsync(
+            drive,
+            () => RunWithTimeoutAsync(
+                () => Connect(drive),
+                timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                cancellationToken),
             failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
             cancellationToken);
 
@@ -34,9 +59,13 @@ internal sealed class WindowsNasConnector : INasConnector
             cancellationToken);
 
     public Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default) =>
-        RunWithTimeoutAsync(
-            () => Test(drive),
-            timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+        WithHostGateAsync(
+            drive,
+            () => RunWithTimeoutAsync(
+                () => Test(drive),
+                timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                cancellationToken),
             failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
             cancellationToken);
 
@@ -80,25 +109,172 @@ internal sealed class WindowsNasConnector : INasConnector
         return letters;
     }
 
-    private static Result Connect(Drive drive)
+    /// <summary>
+    /// Maps one share, and deals with the one credential context Windows allows per
+    /// server when the drive's own credentials are not the ones already in it.
+    /// </summary>
+    /// <remarks>
+    /// A server gets one credential context per logon session, so a mount whose username
+    /// and password differ from the ones that context was built with comes back
+    /// <c>ERROR_SESSION_CREDENTIAL_CONFLICT</c> however correct they are. What to do
+    /// about that depends entirely on whether anything is still using the context, and
+    /// the two cases pull in opposite directions:
+    ///
+    /// Something <b>is</b> using it — a share mapped by hand in Explorer, or the first of
+    /// this NAS's thirteen drives, which is the case that made twelve of them fail at
+    /// once — and there is no alternative to joining it. Windows will not hold a second
+    /// credential set for that server while the first is in use, so the mount is retried
+    /// with no credentials at all, which is how a share is asked onto an existing
+    /// session. The drive comes up on whatever account the session belongs to.
+    ///
+    /// <b>Nothing</b> is using it, and the context is a leftover: a session outlives the
+    /// last connection to it, invisible to <c>net use</c> and unreachable by Credential
+    /// Manager, and the deviceless session <see cref="Test"/> opens is a common way to
+    /// leave one behind. Joining that would be indefensible — it would mount the share
+    /// while proving nothing whatsoever about the credentials the user just typed, so a
+    /// password that is simply wrong would go on working until the leftover expired. It
+    /// is dropped instead, and the drive's own credentials are given a real attempt.
+    ///
+    /// Dropping it is only safe here because nothing holds it: on the other branch,
+    /// <c>WNetCancelConnection2</c> against a server name would take down the user's
+    /// Explorer mappings and every Helix drive already mounted on that NAS. Even here it
+    /// is unforced, so an open handle refuses the cancel rather than losing anything.
+    /// </remarks>
+    private Result Connect(Drive drive)
     {
-        var resource = new NETRESOURCE
-        {
-            dwType = RESOURCETYPE_DISK,
-            lpLocalName = $"{drive.Letter.ToUpperInvariant()}:",
-            lpRemoteName = RemoteNameFor(drive),
-            lpProvider = null,
-        };
+        string local = $"{drive.Letter.ToUpperInvariant()}:";
+        string remote = RemoteNameFor(drive);
+        string host = ToUncHost(drive.Host);
 
         // CONNECT_UPDATE_PROFILE writes the mapping into the user profile, so Explorer
         // restores it at sign-in without Helix running. CONNECT_TEMPORARY is the opposite
         // and stays the default: the mapping lives exactly as long as the Windows session.
         uint flags = drive.Persistent ? CONNECT_UPDATE_PROFILE : CONNECT_TEMPORARY;
 
-        int code = WNetAddConnection2W(ref resource, drive.Password, drive.Username, flags);
-        return code == NO_ERROR
-            ? Result.Success()
-            : Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code)));
+        int code = AddConnection(local, remote, drive.Username, drive.Password, flags);
+        if (code == NO_ERROR)
+        {
+            return Result.Success();
+        }
+
+        if (code != ERROR_SESSION_CREDENTIAL_CONFLICT)
+        {
+            return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code)));
+        }
+
+        if (!HasLiveConnectionTo(host))
+        {
+            logger.LogInformation(
+                "Drive {Letter}: clearing a leftover session for its server, which nothing is using.",
+                drive.Letter);
+
+            DropIdleServerSession(host);
+
+            int retry = AddConnection(local, remote, drive.Username, drive.Password, flags);
+            if (retry == NO_ERROR)
+            {
+                return Result.Success();
+            }
+
+            // Whatever the honest attempt said, including a plain logon failure — which
+            // is the answer the user is owed when the stored password is wrong.
+            logger.LogWarning(
+                "Drive {Letter}: would not mount with its own credentials — {Reason}",
+                drive.Letter,
+                DescribeWNetError(retry));
+
+            return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(retry)));
+        }
+
+        logger.LogInformation(
+            "Drive {Letter}: its server is in use under other credentials; mounting on that session.",
+            drive.Letter);
+
+        int reuse = AddConnection(local, remote, username: null, password: null, flags);
+        if (reuse == NO_ERROR)
+        {
+            return Result.Success();
+        }
+
+        // Reported as the conflict rather than as whatever the fallback tripped over: the
+        // session in use is the reason this drive is not mounted, and the second
+        // attempt's error only describes what that session would not let us do.
+        logger.LogWarning(
+            "Drive {Letter}: the session its server is using would not take the mount — {Reason}",
+            drive.Letter,
+            DescribeWNetError(reuse));
+
+        return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code)));
+    }
+
+    /// <summary>
+    /// Whether any drive letter is currently mounted from <paramref name="uncHost"/>.
+    /// </summary>
+    /// <remarks>
+    /// The question being asked is "would dropping this server's session cost anybody
+    /// anything", and a mapped letter is the form that costs the most. A deviceless
+    /// connection held by another process is not visible here, which is why the cancel
+    /// that follows a false answer is left unforced — that case refuses rather than
+    /// breaking something this cannot see.
+    /// </remarks>
+    private static bool HasLiveConnectionTo(string uncHost)
+    {
+        string prefix = $@"\{uncHost}";
+
+        foreach (DriveInfo drive in DriveInfo.GetDrives())
+        {
+            if (drive.DriveType != DriveType.Network || drive.Name.Length == 0)
+            {
+                continue;
+            }
+
+            string? remote = RemoteNameOf($"{drive.Name[0]}:");
+
+            if (remote is not null && remote.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Resolves what a mapped letter points at, or null if it is not a mapping.</summary>
+    private static string? RemoteNameOf(string localName)
+    {
+        var buffer = new char[MaxPathLength];
+        int length = buffer.Length;
+
+        if (WNetGetConnectionW(localName, buffer, ref length) != NO_ERROR)
+        {
+            return null;
+        }
+
+        // Read to the terminator rather than trusting the returned length, which counts
+        // it on some paths and not others.
+        int end = Array.IndexOf(buffer, '\0');
+
+        return end > 0 ? new string(buffer, 0, end) : null;
+    }
+
+    /// <summary>
+    /// Drops a server session that no mapped letter is using, so the next mount has to
+    /// authenticate for real. Best effort — an in-use session refuses and is left alone.
+    /// </summary>
+    private static void DropIdleServerSession(string uncHost) =>
+        WNetCancelConnection2W($@"\{uncHost}", 0, fForce: false);
+
+    private static int AddConnection(string? local, string remote, string? username, string? password, uint flags)
+    {
+        var resource = new NETRESOURCE
+        {
+            dwType = RESOURCETYPE_DISK,
+            lpLocalName = local,
+            lpRemoteName = remote,
+            lpProvider = null,
+        };
+
+        return WNetAddConnection2W(ref resource, password, username, flags);
     }
 
     private static Result Disconnect(Drive drive)
@@ -135,15 +311,18 @@ internal sealed class WindowsNasConnector : INasConnector
     {
         string remoteName = RemoteNameFor(drive);
 
-        var resource = new NETRESOURCE
-        {
-            dwType = RESOURCETYPE_DISK,
-            lpLocalName = null,
-            lpRemoteName = remoteName,
-            lpProvider = null,
-        };
+        int code = AddConnection(local: null, remoteName, drive.Username, drive.Password, CONNECT_TEMPORARY);
 
-        int code = WNetAddConnection2W(ref resource, drive.Password, drive.Username, CONNECT_TEMPORARY);
+        // The same leftover-session problem the mount has, and worse here: a test that
+        // answers from a session nobody is using has tested nothing. Cleared and asked
+        // again, so the answer is about the credentials on screen.
+        if (code == ERROR_SESSION_CREDENTIAL_CONFLICT && !HasLiveConnectionTo(ToUncHost(drive.Host)))
+        {
+            DropIdleServerSession(ToUncHost(drive.Host));
+
+            code = AddConnection(local: null, remoteName, drive.Username, drive.Password, CONNECT_TEMPORARY);
+        }
+
         if (code != NO_ERROR)
         {
             return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code)));
@@ -194,6 +373,50 @@ internal sealed class WindowsNasConnector : INasConnector
         return $"{literal}.ipv6-literal.net";
     }
 
+    /// <summary>
+    /// Runs the work with the server's gate held, so only one mount to a given NAS is in
+    /// flight at a time.
+    /// </summary>
+    /// <remarks>
+    /// The wait is capped at the same timeout one mount gets. Nothing holds the gate for
+    /// longer than a single attempt, so the cap only bites when that attempt is hanging
+    /// on an absent NAS — and queueing behind it is then the wrong answer, because
+    /// "connect all" against a NAS that has gone away would take five seconds per drive
+    /// instead of five seconds in total. Going ahead ungated costs nothing there: the
+    /// race the gate exists for cannot happen on a server that is not answering.
+    /// </remarks>
+    private async Task<Result> WithHostGateAsync(
+        Drive drive,
+        Func<Task<Result>> work,
+        Func<string, Result> failure,
+        CancellationToken cancellationToken)
+    {
+        SemaphoreSlim gate = _hostGates.GetOrAdd(ToUncHost(drive.Host), _ => new SemaphoreSlim(1, 1));
+
+        bool held;
+
+        try
+        {
+            held = await gate.WaitAsync(ConnectionTimeoutMilliseconds, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return failure("Operation canceled by user.");
+        }
+
+        try
+        {
+            return await work();
+        }
+        finally
+        {
+            if (held)
+            {
+                gate.Release();
+            }
+        }
+    }
+
     private static async Task<Result> RunWithTimeoutAsync(
         Func<Result> work,
         Func<Result> timeoutError,
@@ -231,7 +454,9 @@ internal sealed class WindowsNasConnector : INasConnector
         ERROR_LOGON_FAILURE => "Logon failure: unknown user name or bad password.",
         ERROR_NO_NETWORK => "The network is not present or not started.",
         ERROR_NOT_CONNECTED => "The device is not currently connected.",
-        ERROR_SESSION_CREDENTIAL_CONFLICT => "A conflicting credential set already exists for this server.",
+        ERROR_SESSION_CREDENTIAL_CONFLICT =>
+            "Windows is already signed in to this server with different credentials. Disconnect " +
+            "every drive and Explorer window using it, or sign out of Windows, and try again.",
         _ => new Win32Exception(code).Message,
     };
 
@@ -252,6 +477,9 @@ internal sealed class WindowsNasConnector : INasConnector
     private const int ERROR_NO_NETWORK = 1222;
     private const int ERROR_NOT_CONNECTED = 2250;
     private const int ERROR_SESSION_CREDENTIAL_CONFLICT = 1219;
+
+    /// <summary>Buffer size for <c>WNetGetConnection</c>, in characters.</summary>
+    private const int MaxPathLength = 260;
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct NETRESOURCE
@@ -278,4 +506,10 @@ internal sealed class WindowsNasConnector : INasConnector
         string lpName,
         uint dwFlags,
         [MarshalAs(UnmanagedType.Bool)] bool fForce);
+
+    [DllImport("mpr.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern int WNetGetConnectionW(
+        string lpLocalName,
+        [Out] char[] lpRemoteName,
+        ref int lpnLength);
 }

@@ -12,6 +12,7 @@ public sealed class ConnectAllDrives(
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
     INasConnector nasConnector,
+    IDriveMonitor driveMonitor,
     IDateTimeProvider dateTimeProvider) : IHandler
 {
     /// <param name="OnlyAutoConnect">
@@ -52,6 +53,12 @@ public sealed class ConnectAllDrives(
         {
             return Result.Success();
         }
+
+        // Held for the whole batch. This is the pass that runs when the dashboard opens,
+        // and without it every drive that comes up is reported as a fresh connection: the
+        // watchdog seeded its baseline from an empty machine moments earlier, so the next
+        // poll fires a tray toast per drive for mounts the app made itself.
+        using IDisposable suppression = driveMonitor.Suppress(disconnectedDrives.Select(d => d.Letter));
 
         // ConnectAsync never throws — it returns Result.Failure for expected failures
         // (e.g. a bad password), so Task.WhenAll cannot fault and we aggregate the

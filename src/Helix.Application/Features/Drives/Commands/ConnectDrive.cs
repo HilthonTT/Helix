@@ -12,6 +12,7 @@ public sealed class ConnectDrive(
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
     INasConnector nasConnector,
+    IDriveMonitor driveMonitor,
     IDateTimeProvider dateTimeProvider) : IHandler
 {
     public sealed record Request(Guid DriveId);
@@ -35,6 +36,10 @@ public sealed class ConnectDrive(
         {
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
+
+        // The monitor cannot tell this from a share coming back on its own, and the
+        // tray would announce a drive the user is watching themselves connect.
+        using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
 
         Result result = await nasConnector.ConnectAsync(drive, cancellationToken);
         if (result.IsFailure)

@@ -46,6 +46,30 @@ public interface IDriveMonitor
     /// </summary>
     void Watch(IReadOnlyCollection<WatchedDrive> drives);
 
+    /// <summary>
+    /// Marks a set of drive letters as being mounted or unmounted by Helix itself, so
+    /// nothing that happens to them until the returned handle is disposed is reported
+    /// as a change.
+    /// </summary>
+    /// <remarks>
+    /// The monitor cannot tell a share that dropped from one the user just pressed
+    /// disconnect on — both are a letter that stopped being there — and everything
+    /// downstream reacts to the difference. Left unsuppressed, "disconnect all" is
+    /// followed by a tray toast per drive and, with auto-connect on, by the watchdog
+    /// putting every one of them straight back: the user disconnects their drives and
+    /// is told seconds later that they reconnected.
+    ///
+    /// The handle covers the whole operation rather than being a note filed after it,
+    /// because a poll landing between the unmount and the note would report the drop
+    /// before anyone could say it was intended. On disposal the baseline is re-seeded
+    /// from what is actually mounted, so whatever the caller did becomes the new normal
+    /// and the next poll has nothing to say about it.
+    ///
+    /// Suppressions nest and are counted, so two overlapping callers cannot uncover
+    /// each other's letters.
+    /// </remarks>
+    IDisposable Suppress(IEnumerable<string> letters);
+
     void Start(TimeSpan interval);
 
     void Stop();
