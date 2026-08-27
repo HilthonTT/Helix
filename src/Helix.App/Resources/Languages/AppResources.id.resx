@@ -588,4 +588,10 @@
   <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
     <value>Tampilkan notifikasi saat pertama kali Helix menyembunyikan diri ke baki sistem di setiap sesi.</value>
   </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Menghubungkan…</value>
+  </data>
+  <data name="Disconnecting" xml:space="preserve">
+    <value>Memutuskan…</value>
+  </data>
 </root>

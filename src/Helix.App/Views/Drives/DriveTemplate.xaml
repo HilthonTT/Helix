@@ -48,13 +48,18 @@
                    MaxLines="1"/>
 
             <!--
-            The status is the toggle. Two pills swap on Connected rather than one pill
-            retinted by a trigger, so the resting colours stay plain style values and
-            the hover animation has a stable colour to return to.
+            The status is the toggle. Three pills swap rather than one pill retinted by a
+            trigger, so the resting colours stay plain style values and the hover
+            animation has a stable colour to return to.
+
+            The third is the busy one, and it replaces the other two while a mount is in
+            flight: the row is disabled for the duration, so leaving the old pill up left
+            the user pressing "Disconnected" with nothing appearing to happen for as long
+            as the share took to answer.
             -->
             <Grid Grid.Column="3" VerticalOptions="Center">
                 <Border Style="{StaticResource PillSuccess}"
-                        IsVisible="{Binding Connected}"
+                        IsVisible="{Binding ShowConnected}"
                         ToolTipProperties.Text="{l10n:Translate Disconnect}"
                         behaviors:Hover.Cursor="True"
                         behaviors:Hover.Scale="1.04">
@@ -75,7 +80,7 @@
                 </Border>
 
                 <Border Style="{StaticResource PillDanger}"
-                        IsVisible="{Binding Disconnected}"
+                        IsVisible="{Binding ShowDisconnected}"
                         ToolTipProperties.Text="{l10n:Translate Connect}"
                         behaviors:Hover.Cursor="True"
                         behaviors:Hover.Scale="1.04">
@@ -90,6 +95,20 @@
                                TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
                         <Label Text="{l10n:Translate Disconnected}"
                                Style="{StaticResource DangerText}"
+                               FontSize="12"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource PillNeutral}"
+                        IsVisible="{Binding IsBusy}">
+                    <HorizontalStackLayout Spacing="8" InputTransparent="True">
+                        <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                           WidthRequest="12"
+                                           HeightRequest="12"
+                                           VerticalOptions="Center"/>
+                        <Label Text="{Binding BusyText}"
+                               Style="{StaticResource Caption}"
                                FontSize="12"
                                VerticalOptions="Center"/>
                     </HorizontalStackLayout>

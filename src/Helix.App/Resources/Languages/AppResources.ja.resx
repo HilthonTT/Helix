@@ -588,4 +588,10 @@
   <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
     <value>セッションごとに Helix が初めて通知領域へ隠れたときに通知を表示します。</value>
   </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>接続中…</value>
+  </data>
+  <data name="Disconnecting" xml:space="preserve">
+    <value>切断中…</value>
+  </data>
 </root>

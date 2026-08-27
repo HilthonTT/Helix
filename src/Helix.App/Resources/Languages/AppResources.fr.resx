@@ -588,4 +588,10 @@
   <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
     <value>Afficher une notification la première fois qu'Helix se masque dans la zone de notification à chaque session.</value>
   </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Connexion…</value>
+  </data>
+  <data name="Disconnecting" xml:space="preserve">
+    <value>Déconnexion…</value>
+  </data>
 </root>

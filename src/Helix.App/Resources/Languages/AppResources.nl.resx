@@ -588,4 +588,10 @@
   <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
     <value>Toon een melding de eerste keer dat Helix zichzelf per sessie in het systeemvak verbergt.</value>
   </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Verbinden…</value>
+  </data>
+  <data name="Disconnecting" xml:space="preserve">
+    <value>Loskoppelen…</value>
+  </data>
 </root>

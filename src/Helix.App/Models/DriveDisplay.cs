@@ -42,16 +42,47 @@ internal sealed partial class DriveDisplay : ObservableObject
 
     /// <summary>Drives the status pill in the drive row; bound, so the UI follows it.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Disconnected))]
+    [NotifyPropertyChangedFor(nameof(ShowConnected))]
+    [NotifyPropertyChangedFor(nameof(ShowDisconnected))]
     public partial bool Connected { get; set; }
-
-    public bool Disconnected => !Connected;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]
+    [NotifyPropertyChangedFor(nameof(ShowConnected))]
+    [NotifyPropertyChangedFor(nameof(ShowDisconnected))]
+    [NotifyPropertyChangedFor(nameof(BusyText))]
     public partial bool IsBusy { get; set; }
 
     public bool IsNotBusy => !IsBusy;
+
+    /// <summary>
+    /// The three states the status pill can be in are mutually exclusive, and the busy
+    /// one wins: a mount in flight is neither connected nor disconnected yet, and
+    /// leaving the old pill up while it ran is what made the row look unresponsive.
+    /// </summary>
+    public bool ShowConnected => Connected && !IsBusy;
+
+    public bool ShowDisconnected => !Connected && !IsBusy;
+
+    /// <summary>What the busy pill says while an operation is in flight.</summary>
+    /// <remarks>
+    /// Snapshotted when the row goes busy rather than read off <see cref="Connected"/>
+    /// each time: the handler flips Connected while IsBusy is still held, so a live
+    /// read would flash "Disconnecting" at the end of a successful connect.
+    /// </remarks>
+    public string BusyText => _busyText;
+
+    private string _busyText = string.Empty;
+
+    partial void OnIsBusyChanging(bool value)
+    {
+        if (value)
+        {
+            // The row only ever toggles, so the operation starting is the opposite of
+            // the state it is in.
+            _busyText = Connected ? AppResources.Disconnecting : AppResources.Connecting;
+        }
+    }
 
     public DriveDisplay(Drive drive)
         : this()

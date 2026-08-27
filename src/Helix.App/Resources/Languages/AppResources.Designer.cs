@@ -1371,6 +1371,23 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("NotifyOnMinimizeToTrayDescription", resourceCulture);
             }
         }
+        /// <summary>
+        ///   Looks up a localized string similar to Connecting….
+        /// </summary>
+        internal static string Connecting {
+            get {
+                return ResourceManager.GetString("Connecting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnecting….
+        /// </summary>
+        internal static string Disconnecting {
+            get {
+                return ResourceManager.GetString("Disconnecting", resourceCulture);
+            }
+        }
         
     }
 }

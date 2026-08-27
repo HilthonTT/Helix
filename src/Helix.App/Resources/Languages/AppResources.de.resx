@@ -588,4 +588,10 @@
   <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
     <value>Beim ersten Ausblenden in den Infobereich pro Sitzung eine Benachrichtigung anzeigen.</value>
   </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Verbinden…</value>
+  </data>
+  <data name="Disconnecting" xml:space="preserve">
+    <value>Trennen…</value>
+  </data>
 </root>

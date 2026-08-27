@@ -588,4 +588,10 @@
   <data name="NotifyOnMinimizeToTrayDescription" xml:space="preserve">
     <value>Show a notification the first time Helix hides itself in the tray each session.</value>
   </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Connecting…</value>
+  </data>
+  <data name="Disconnecting" xml:space="preserve">
+    <value>Disconnecting…</value>
+  </data>
 </root>
