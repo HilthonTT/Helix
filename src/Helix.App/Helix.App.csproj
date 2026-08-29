@@ -99,10 +99,14 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<!-- libuiohook ships no maccatalyst runtime pack, and a global keyboard hook would
-		     need Accessibility permission on macOS anyway; the Ctrl+Enter shortcut it
-		     powers is guarded with #if WINDOWS at every call site. -->
-		<PackageReference Include="SharpHook" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" />
+		<!-- Referenced on both heads. SharpHook 8 ships a Mac Catalyst assembly and the
+		     libuiohook natives for maccatalyst-x64 and -arm64, so the Ctrl+Enter shortcut
+		     on the sign-in pages no longer has to be Windows-only. macOS gates a global
+		     hook behind Accessibility access, which the user grants or does not: without
+		     it RunAsync faults at startup, that is logged, and nothing else changes.
+		     Nothing here reaches Linux - libuiohook supports it, MAUI has no Linux head
+		     for it to run in. -->
+		<PackageReference Include="SharpHook" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" />
 	</ItemGroup>
 

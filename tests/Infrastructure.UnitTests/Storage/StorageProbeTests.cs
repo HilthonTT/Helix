@@ -18,15 +18,28 @@ public sealed class StorageProbeTests
     private const long Terabyte = 1024L * 1024 * 1024 * 1024;
 
     /// <summary>A probe with the filesystem replaced by a table of readings.</summary>
-    private sealed class FakeProbe(Dictionary<string, (long Total, long Free)> capacities)
+    /// <param name="vanishing">
+    /// Letters whose read throws the way a real one does when the mount is unmapped
+    /// between <c>IsReady</c> and <c>TotalSize</c>, rather than answering "not reachable".
+    /// </param>
+    private sealed class FakeProbe(
+        Dictionary<string, (long Total, long Free)> capacities,
+        params string[] vanishing)
         : StorageProbe(NullLogger.Instance)
     {
         protected override string RootPathFor(string letter) => letter;
 
-        protected override (long TotalBytes, long FreeBytes)? ReadCapacity(string rootPath) =>
-            capacities.TryGetValue(rootPath, out (long Total, long Free) reading)
+        protected override (long TotalBytes, long FreeBytes)? ReadCapacity(string rootPath)
+        {
+            if (vanishing.Contains(rootPath))
+            {
+                throw new DriveNotFoundException($"Could not find the drive '{rootPath}'.");
+            }
+
+            return capacities.TryGetValue(rootPath, out (long Total, long Free) reading)
                 ? (reading.Total, reading.Free)
                 : null;
+        }
     }
 
     [Fact]
@@ -226,5 +239,30 @@ public sealed class StorageProbeTests
 
         volumes.Should().ContainSingle();
         volumes.Sum(v => v.TotalBytes).Should().Be(20 * Terabyte);
+    }
+
+    /// <summary>
+    /// A mount that disappears while the sweep is running takes only itself out of the
+    /// total.
+    /// </summary>
+    /// <remarks>
+    /// This is what disconnecting a drive looks like from in here: the letter passes
+    /// <c>IsReady</c> and is gone by the time its size is asked for, and
+    /// <see cref="DriveInfo"/> answers that with a <see cref="DriveNotFoundException"/>
+    /// rather than by going not-ready. The other drives are still mounted and still have
+    /// to be counted.
+    /// </remarks>
+    [Fact]
+    public async Task ProbeAsync_Should_LeaveOutADriveThatIsUnmappedWhileItIsBeingMeasured()
+    {
+        var probe = new FakeProbe(
+            new() { ["Z"] = (20 * Terabyte, 5 * Terabyte) },
+            "Q");
+
+        IReadOnlyList<VolumeUsage> volumes = await probe.ProbeAsync(["Q", "Z"]);
+
+        volumes.Should().ContainSingle();
+        volumes.Sum(v => v.TotalBytes).Should().Be(20 * Terabyte);
+        volumes[0].Letters.Should().Equal("Z");
     }
 }

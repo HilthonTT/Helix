@@ -1,17 +1,13 @@
 ﻿using Helix.App.ViewModels.Users;
 using Microsoft.Extensions.Logging;
-#if WINDOWS
 using SharpHook;
-using SharpHook.Native;
-#endif
+using SharpHook.Data;
 
 namespace Helix.App.Views.Users;
 
 public sealed partial class RegisterPage : ContentPage
 {
-#if WINDOWS
     private IGlobalHook? _hook;
-#endif
 
     private readonly RegisterViewModel _viewModel;
 
@@ -29,16 +25,15 @@ public sealed partial class RegisterPage : ContentPage
         SetLoadingToFalse();
         LoadCurrentLanguage();
 
-#if WINDOWS
         // Reuse the app-wide hook started in MauiProgram: libuiohook allows only one
         // running global hook per process, so a second hook's RunAsync faults and the
-        // Ctrl+Enter shortcut would never fire. Windows-only — see AddPresensation.
+        // Ctrl+Enter shortcut would never fire. Subscribing costs nothing where the hook
+        // never started - on macOS without Accessibility access, most likely - it simply
+        // never raises.
         _hook = App.ServiceProvider.GetRequiredService<IGlobalHook>();
         _hook.KeyPressed += OnKeyPressed;
-#endif
     }
 
-#if WINDOWS
     protected override void OnDisappearing()
     {
         if (_hook is null)
@@ -52,7 +47,7 @@ public sealed partial class RegisterPage : ContentPage
 
     private void OnKeyPressed(object? sender, KeyboardHookEventArgs e)
     {
-        if (e.Data.KeyCode != KeyCode.VcEnter || (e.RawEvent.Mask & ModifierMask.Ctrl) == 0)
+        if (e.Data.KeyCode != KeyCode.VcEnter || (e.RawEvent.Mask & EventMask.Ctrl) == 0)
         {
             return;
         }
@@ -69,7 +64,6 @@ public sealed partial class RegisterPage : ContentPage
             }
         });
     }
-#endif
 
     private void LoadCurrentLanguage()
     {

@@ -153,11 +153,28 @@ internal abstract class StorageProbe : IStorageProbe
     /// </remarks>
     protected virtual (long TotalBytes, long FreeBytes)? ReadCapacity(string rootPath)
     {
-        var driveInfo = new DriveInfo(rootPath);
+        try
+        {
+            var driveInfo = new DriveInfo(rootPath);
 
-        return driveInfo.IsReady && driveInfo.TotalSize > 0
-            ? (driveInfo.TotalSize, driveInfo.AvailableFreeSpace)
-            : null;
+            return driveInfo.IsReady && driveInfo.TotalSize > 0
+                ? (driveInfo.TotalSize, driveInfo.AvailableFreeSpace)
+                : null;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // IsReady answers for the moment it was asked, and each of these properties
+            // is a separate round trip to the share: the mapping can be gone by the time
+            // TotalSize is read, and DriveInfo reports that by throwing
+            // DriveNotFoundException rather than by going not-ready. Disconnecting a
+            // drive while the dashboard is measuring is the ordinary way to see it, and
+            // it means what the not-ready branch above means - this mount cannot be
+            // measured right now - so it answers the same way rather than taking the
+            // sweep down for the drives that are still there.
+            _logger.LogDebug(ex, "The mount at {RootPath} went away while it was being measured.", rootPath);
+
+            return null;
+        }
     }
 
     private Reading? Measure(string letter)

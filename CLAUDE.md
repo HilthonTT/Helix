@@ -520,8 +520,10 @@ A view and its viewmodel sit in the same feature folder under their respective r
 The XAML, viewmodels, converters and behaviours are shared verbatim; only these carry an
 `#if`, and each has a working macOS path or a deliberate no-op:
 
-- `MauiProgram` — the WinUI lifecycle hook, the `EntryHandler` chrome tweak and the
-  SharpHook startup are `#if WINDOWS`.
+- `MauiProgram` — the WinUI lifecycle hook and the `EntryHandler` chrome tweak are
+  `#if WINDOWS`. The SharpHook startup is not: as of SharpHook 8 the package ships a Mac
+  Catalyst assembly and the libuiohook natives for it, so the global hook runs on both
+  heads.
 - `App.CreateWindow` — Catalyst sizes its window here from `Common/WindowSizing`, the
   same rule the Windows lifecycle event applies through `AppWindow`. Change the rule in
   one place and both heads follow.
@@ -540,8 +542,18 @@ The XAML, viewmodels, converters and behaviours are shared verbatim; only these 
   mouses over it.
 - `Common/DrivePlatform` — the one flag the shared drive modals bind to, so the
   "reconnect at sign-in" switch is hidden rather than shown-and-ignored on macOS.
-- `Behaviors/Hover` (hand cursor), `Services/ModalHost` (Escape-to-dismiss) and the
-  `LoginPage`/`RegisterPage` Ctrl+Enter shortcut — Windows only, no-ops elsewhere.
+- `Behaviors/Hover` (hand cursor) and `Services/ModalHost` (Escape-to-dismiss) — Windows
+  only, no-ops elsewhere.
+
+The `LoginPage`/`RegisterPage` Ctrl+Enter shortcut used to be in that list and no longer
+is. The hook is started once in `MauiProgram` and both pages subscribe to the singleton,
+because libuiohook allows one running hook per process. It is asked for as
+`GlobalHookType.Keyboard`: Ctrl+Enter is all it is for, and the mouse half would put every
+pointer move across the native boundary for nothing. macOS refuses a global hook until the
+app is granted Accessibility access, so on a Mac where it has not been, `RunAsync` faults
+at startup, that is logged with what to do about it, and everything else carries on —
+subscribing to a hook that never started simply never raises. Linux is not a question
+Helix can answer: libuiohook supports it, MAUI has no Linux head.
 
 The Catalyst head ships with the **App Sandbox disabled** (`Platforms/MacCatalyst/Entitlements.plist`).
 A sandboxed process cannot mount a network filesystem, write a LaunchAgent or touch the

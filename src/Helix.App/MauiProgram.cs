@@ -5,6 +5,8 @@ using Helix.Infrastructure;
 using Helix.Infrastructure.Cryptography;
 using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
+using SharpHook;
+using SharpHook.Data;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 #if WINDOWS
 using Helix.App.Services;
@@ -12,7 +14,6 @@ using Microsoft.Maui.Handlers;
 using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
-using SharpHook;
 using System.Diagnostics;
 using Windows.Graphics;
 #endif
@@ -95,23 +96,48 @@ public static class MauiProgram
         // is captured by the underlying SecureStorage call.
         Task.Run(() => PasswordGenerator.InitializeAsync(startupLogger)).GetAwaiter().GetResult();
 
-#if WINDOWS
-        // The global hook backs the Ctrl+Enter shortcut on the sign-in pages. libuiohook
-        // ships no maccatalyst native and macOS would gate it behind an Accessibility
-        // prompt, so the Catalyst head goes without it.
+        // The global hook backs the Ctrl+Enter shortcut on the sign-in pages. It runs on
+        // both heads as of SharpHook 8, which ships a Mac Catalyst assembly and the
+        // libuiohook natives to go with it.
         var hook = app.Services.GetRequiredService<IGlobalHook>();
 
-        // Single fire-and-forget launch of the global hook; observe faults so they
-        // are not silently swallowed.
-        hook.RunAsync().ContinueWith(
-            t => startupLogger.LogError(t.Exception, "The global keyboard hook faulted; the Ctrl+Enter shortcut is dead for this session."),
+        // Keyboard only. Ctrl+Enter is the whole of what this is for, and the mouse half
+        // of the hook would put every pointer move across the native boundary and onto
+        // the task pool for nothing - which on macOS is also half of what the
+        // Accessibility permission would be spent on.
+        //
+        // Single fire-and-forget launch; observe faults so they are not silently
+        // swallowed. The background thread is asked for here rather than at
+        // construction, which is where SharpHook moved the choice in 8.0: the native
+        // hook loop is blocking, and a foreground thread would keep the process alive
+        // after the window has gone. macOS needs the main run loop for this, which a
+        // MAUI app has; what it may not have is the Accessibility permission, and
+        // without it the hook faults here rather than anywhere the user is waiting.
+        hook.RunAsync(GlobalHookType.Keyboard, useBackgroundThread: true).ContinueWith(
+            t => startupLogger.LogError(t.Exception, "The global keyboard hook faulted; the Ctrl+Enter shortcut is dead for this session. {Hint}", HookFailureHint),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
             TaskScheduler.Default);
-#endif
 
         return app;
     }
+
+    /// <summary>
+    /// What to try, for the one platform where a failed hook is something the user can
+    /// do something about.
+    /// </summary>
+    /// <remarks>
+    /// macOS refuses a global hook until the app is granted Accessibility access, and
+    /// that is by far the likeliest reason for this to fail there - so the log line says
+    /// so rather than leaving whoever reads it to guess. Windows has no equivalent
+    /// switch, so it gets nothing to chase.
+    /// </remarks>
+    private const string HookFailureHint =
+#if MACCATALYST
+        "Grant Helix access under System Settings > Privacy & Security > Accessibility to enable it.";
+#else
+        "";
+#endif
 
 #if WINDOWS
     /// <summary>

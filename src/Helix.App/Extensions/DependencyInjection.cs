@@ -1,9 +1,7 @@
 ﻿using Helix.App.Services;
 using Helix.App.Views.Drives;
 using Helix.Application.Abstractions.Security;
-#if WINDOWS
 using SharpHook;
-#endif
 
 namespace Helix.App.Extensions;
 
@@ -11,11 +9,14 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPresensation(this IServiceCollection services)
     {
-#if WINDOWS
-        // Backs the Ctrl+Enter shortcut on the sign-in pages. Windows-only: SharpHook
-        // ships no maccatalyst native, so the Catalyst head never resolves this.
-        services.AddSingleton<IGlobalHook>(sp => new TaskPoolGlobalHook(runAsyncOnBackgroundThread: true));
-#endif
+        // Backs the Ctrl+Enter shortcut on the sign-in pages, on both heads: SharpHook 8
+        // ships a Mac Catalyst assembly and the libuiohook natives for it, so the hook
+        // is no longer something only Windows can resolve.
+        //
+        // Whether it runs on a background thread is no longer the constructor's business
+        // as of SharpHook 8 - it is an argument to RunAsync, which is where MauiProgram
+        // starts this.
+        services.AddSingleton<IGlobalHook>(sp => new TaskPoolGlobalHook());
 
         services.AddSingleton<IPassphrasePrompt, PassphrasePromptService>();
 
