@@ -20,28 +20,28 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
     private readonly HttpClient _httpClient;
     private readonly ILogger<GitHubUpdateChecker> _logger;
     private readonly Func<string> _currentVersion;
-    private readonly Func<string> _assetMoniker;
+    private readonly Func<IReadOnlyList<string>> _assetMonikers;
 
     /// <param name="currentVersion">
     /// Injected rather than read inline so the comparison can be tested without a MAUI
     /// host, which is where <c>AppInfo</c> comes from.
     /// </param>
-    /// <param name="assetMoniker">
-    /// The fragment a release asset's name must contain to be the one for this machine —
+    /// <param name="assetMonikers">
+    /// The fragments a release asset's name may contain to be one this machine can run —
     /// <c>win-x64</c>, <c>win-arm64</c> or <c>macos</c>, matching what the release
-    /// workflow names its archives. Injected for the same reason the version is: so the
-    /// selection can be tested without being on the platform it selects for.
+    /// workflow names its archives — best first. Injected for the same reason the version
+    /// is: so the selection can be tested without being on the machine it selects for.
     /// </param>
     public GitHubUpdateChecker(
         HttpClient httpClient,
         ILogger<GitHubUpdateChecker> logger,
         Func<string> currentVersion,
-        Func<string> assetMoniker)
+        Func<IReadOnlyList<string>> assetMonikers)
     {
         _httpClient = httpClient;
         _logger = logger;
         _currentVersion = currentVersion;
-        _assetMoniker = assetMoniker;
+        _assetMonikers = assetMonikers;
     }
 
     public async Task<Result<UpdateCheck>> CheckAsync(CancellationToken cancellationToken = default)
@@ -136,9 +136,9 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
                 // Worth a line: the difference between "no update" and "an update nobody
                 // can install from in here" is invisible from the dialog otherwise.
                 _logger.LogInformation(
-                    "Release {Tag} carries no asset for {Moniker}; the release page is the only route.",
+                    "Release {Tag} carries no asset for {Monikers}; the release page is the only route.",
                     release.TagName,
-                    _assetMoniker());
+                    string.Join(", ", _assetMonikers()));
             }
 
             // Compared as reported, shown three-part: the comparison wants every
@@ -149,12 +149,13 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
                 release.TagName,
                 url,
                 asset?.BrowserDownloadUrl,
-                asset?.Name);
+                asset?.Name,
+                asset?.Digest);
         }
     }
 
     /// <summary>
-    /// The one asset built for this machine, or null if the release has none.
+    /// The best asset this machine can run, or null if the release has none.
     /// </summary>
     /// <remarks>
     /// Matched on the file name rather than on any field GitHub provides, because there
@@ -165,6 +166,11 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
     /// naive contains-check for x64 in neither direction — so the comparison is exact
     /// enough to be safe: an x64 machine must never be handed the arm64 build, which
     /// would install cleanly and then refuse to start.
+    ///
+    /// The candidates are walked in the order they are given rather than matched all at
+    /// once, because that order is the whole of what makes a fallback safe: an Arm64
+    /// machine takes the Arm64 build where there is one, and the emulated x64 build only
+    /// where there is not.
     /// </remarks>
     private GitHubAsset? SelectAsset(GitHubRelease release)
     {
@@ -173,17 +179,43 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
             return null;
         }
 
-        string moniker = _assetMoniker();
+        IReadOnlyList<string> monikers = _assetMonikers();
 
-        if (string.IsNullOrWhiteSpace(moniker))
+        for (int index = 0; index < monikers.Count; index++)
         {
-            return null;
+            string moniker = monikers[index];
+
+            if (string.IsNullOrWhiteSpace(moniker))
+            {
+                continue;
+            }
+
+            GitHubAsset? match = release.Assets.FirstOrDefault(asset =>
+                !string.IsNullOrWhiteSpace(asset.Name) &&
+                !string.IsNullOrWhiteSpace(asset.BrowserDownloadUrl) &&
+                asset.Name.Contains($"-{moniker}.", StringComparison.OrdinalIgnoreCase));
+
+            if (match is null)
+            {
+                continue;
+            }
+
+            if (index > 0)
+            {
+                // Worth saying out loud: the machine is about to be handed a build that
+                // is not the one for it, and the reason is that the release carries no
+                // such build rather than anything about the machine.
+                _logger.LogInformation(
+                    "Release {Tag} has no {Preferred} asset; falling back to {Moniker}.",
+                    release.TagName,
+                    monikers[0],
+                    moniker);
+            }
+
+            return match;
         }
 
-        return release.Assets.FirstOrDefault(asset =>
-            !string.IsNullOrWhiteSpace(asset.Name) &&
-            !string.IsNullOrWhiteSpace(asset.BrowserDownloadUrl) &&
-            asset.Name.Contains($"-{moniker}.", StringComparison.OrdinalIgnoreCase));
+        return null;
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -214,5 +246,14 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
 
         [JsonPropertyName("browser_download_url")]
         public string? BrowserDownloadUrl { get; init; }
+
+        /// <summary>GitHub's own digest of the asset, as <c>sha256:&lt;hex&gt;</c>.</summary>
+        /// <remarks>
+        /// Absent from releases published before GitHub began returning the field, which
+        /// is why everything downstream treats it as optional rather than as something it
+        /// can insist on.
+        /// </remarks>
+        [JsonPropertyName("digest")]
+        public string? Digest { get; init; }
     }
 }

@@ -55,6 +55,17 @@ public static class UpdateErrors
         "Update.DownloadNotHelix",
         "The downloaded update does not look like Helix, so it was not installed.");
 
+    /// <remarks>
+    /// GitHub publishes a SHA-256 for every release asset, and this is what happens when
+    /// what arrived does not match it. Distinct from <see cref="UnreadableDownload"/>
+    /// because the archive may well open perfectly well and simply not be the file that
+    /// was published — a truncated transfer, a proxy that rewrote it, a cache serving
+    /// something stale. Nothing has been replaced either way.
+    /// </remarks>
+    public static readonly Error DownloadCorrupt = Error.Problem(
+        "Update.DownloadCorrupt",
+        "The downloaded update does not match the checksum GitHub published for it, so it was not installed.");
+
     public static readonly Error NotWritable = Error.Problem(
         "Update.NotWritable",
         "Helix cannot replace its own files where it is installed. Update it by hand, or move it somewhere you own.");

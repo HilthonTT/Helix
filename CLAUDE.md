@@ -288,16 +288,27 @@ anyway, to stop a long-lived install accumulating ids that name nothing.
 ### Installing an update
 
 `GitHubUpdateChecker` also reads the release's `assets` and picks the archive whose name
-carries this machine's moniker — `win-x64`, `win-arm64`, `macos`, matching what the release
-workflow publishes. The match is on `-{moniker}.` and has to stay exact enough that an x64
-machine can never be handed the arm64 build, which installs cleanly and then will not
-start. A release with no asset for this machine still reports the update; only the release
-page is offered.
+carries a moniker this machine can run — `win-x64`, `win-arm64`, `macos`, matching what the
+release workflow publishes. The match is on `-{moniker}.` and has to stay exact enough that
+an x64 machine can never be handed the arm64 build, which installs cleanly and then will
+not start. A release with no asset for this machine still reports the update; only the
+release page is offered.
+
+`UpdateConfiguration.AssetMonikers` asks the **operating system** its architecture, not
+this process, and returns candidates best-first. What gets replaced is the whole install
+folder, which the helper then starts fresh, so the question is what the machine can run
+rather than what happens to be running: a 32-bit build on 64-bit Windows reported x86, had
+no asset, and could never update itself out of that state. Arm64 lists `win-x64` behind
+`win-arm64` because Windows on Arm runs x64 under emulation, so a release carrying no Arm64
+archive is still installable; the fallback only ever runs in that direction, and
+`SelectAsset` walks the list in order rather than matching it all at once, which is the
+whole of what keeps that safe.
 
 `UpdateInstaller` splits the work at the point it stops being undoable. `StageAsync`
-downloads, unpacks and checks that what came down contains `Helix.App.exe` (or a
-`.app` bundle), all while Helix runs and with the install untouched — every failure before
-this point costs nothing. `Apply` writes a helper script, starts it and returns; the caller
+downloads, checks the bytes against the digest GitHub published, unpacks, and checks that
+what came down contains `Helix.App.exe` (or a `.app` bundle), all while Helix runs and with
+the install untouched — every failure before this point costs nothing, and none of them
+leave the download behind. `Apply` writes a helper script, starts it and returns; the caller
 **must quit immediately**, because the helper is waiting on this process to exit before it
 moves anything. The helper moves the install aside rather than writing over it, so a
 failure halfway puts back exactly what was there; the moved-aside copy is deleted only once
@@ -326,8 +337,28 @@ preprocessor still scans excluded regions for directives: any line starting with
 shell comment, a shebang — reads as one and fails the other head's build.
 
 Nothing verifies a signature, because the release archives are unsigned and there is
-nothing to verify against. What there is: TLS to github.com, and the check that the archive
-holds the executable it claims to.
+nothing to verify against. What there is: TLS to github.com, the SHA-256 the release API
+publishes for each asset, and the check that the archive holds the executable it claims to.
+The digest is compared before the archive is opened, hashed as the download is written
+rather than by reading the file back, and a mismatch is `UpdateErrors.DownloadCorrupt` —
+distinct from an unreadable archive, because a truncated or substituted file may well open
+perfectly well. It proves the bytes are the ones the API described, not who built them; the
+signature is still the missing half. A release that publishes **no** digest, or one in an
+algorithm this build does not know, is staged anyway: GitHub only began returning the field
+recently, so refusing those would break updating for exactly the installs furthest behind,
+and a hard failure on an unknown algorithm would let one change at GitHub's end stop every
+install at once.
+
+Staged downloads do not accumulate. `StageAsync` prunes every other release folder under
+the staging root before it starts — they are installed or abandoned, and each is an
+unpacked build of a couple of hundred megabytes — and the swap script deletes the folder it
+copied out of, but only after the copy has succeeded, since until then it is the only copy
+of the new version. The helper's own folder is never pruned: a helper started seconds ago
+may still be running from it. `ReleaseFolderOf` finds what the helper should delete by
+climbing to the child of the staging root rather than by taking the path apart, because the
+payload sits a folder or two below it (`unpacked`, and on macOS the `.app` inside that);
+anything not under the staging root at all yields nothing to delete, and both scripts guard
+on that before removing anything.
 
 ### The idle lock
 

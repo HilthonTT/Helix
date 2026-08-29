@@ -12,6 +12,12 @@
 /// nothing for it.
 /// </param>
 /// <param name="AssetName">The asset's file name, for the log and the staging folder.</param>
+/// <param name="AssetDigest">
+/// The digest GitHub publishes for the asset, in its own <c>sha256:&lt;hex&gt;</c> form,
+/// or null where the release carries none — releases published before GitHub began
+/// returning the field do not have one, and nothing can be verified against a digest that
+/// was never published.
+/// </param>
 /// <remarks>
 /// The asset is nullable and every caller has to cope with it being absent: a release
 /// may be published before its build finishes uploading, may carry assets for the other
@@ -25,7 +31,8 @@ public sealed record UpdateCheck(
     string LatestVersion,
     string ReleaseUrl,
     string? DownloadUrl = null,
-    string? AssetName = null)
+    string? AssetName = null,
+    string? AssetDigest = null)
 {
     /// <summary>Whether this update can be installed rather than only announced.</summary>
     public bool CanInstall => IsUpdateAvailable && !string.IsNullOrWhiteSpace(DownloadUrl);

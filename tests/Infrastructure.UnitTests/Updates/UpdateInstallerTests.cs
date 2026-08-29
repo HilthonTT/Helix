@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Infrastructure.UnitTests.Updates;
@@ -61,10 +62,31 @@ public sealed class UpdateInstallerTests : IDisposable
             () => StagingRoot,
             () => LogDirectory);
 
-    private static UpdateCheck Update(string? url = "https://example.invalid/helix.zip") =>
-        new(true, "2.0.0", "v2.1.0", "https://example.invalid/release", url, "Helix-v2.1.0-win-x64.zip");
+    private static UpdateCheck Update(
+        string? url = "https://example.invalid/helix.zip",
+        string? digest = null) =>
+        new(true, "2.0.0", "v2.1.0", "https://example.invalid/release", url, "Helix-v2.1.0-win-x64.zip", digest);
 
-    private static HttpResponseMessage Zip(params (string Name, string Content)[] entries)
+    /// <summary>The digest GitHub would publish for these bytes.</summary>
+    private static string DigestOf(byte[] archive) => $"sha256:{Convert.ToHexString(SHA256.HashData(archive))}";
+
+    private static HttpResponseMessage Zip(params (string Name, string Content)[] entries) =>
+        Respond(ZipBytes(entries));
+
+    private static HttpResponseMessage Respond(byte[] body) => new(HttpStatusCode.OK)
+    {
+        Content = new ByteArrayContent(body),
+    };
+
+    /// <summary>
+    /// A zip's bytes, kept rather than wrapped straight into a response.
+    /// </summary>
+    /// <remarks>
+    /// Every entry is stamped with the time it was created, so two calls do not produce
+    /// the same archive — a test that checks a digest has to hash the same bytes it
+    /// serves, not an identical-looking zip built a moment later.
+    /// </remarks>
+    private static byte[] ZipBytes(params (string Name, string Content)[] entries)
     {
         using var buffer = new MemoryStream();
 
@@ -77,10 +99,7 @@ public sealed class UpdateInstallerTests : IDisposable
             }
         }
 
-        return new HttpResponseMessage(HttpStatusCode.OK)
-        {
-            Content = new ByteArrayContent(buffer.ToArray()),
-        };
+        return buffer.ToArray();
     }
 
     [Fact]
@@ -202,9 +221,10 @@ public sealed class UpdateInstallerTests : IDisposable
         // The asset name is whatever the release carries. Combined into a path unchecked,
         // a name with a parent-directory segment in it writes outside the staging folder.
         //
-        // Staged from something that will not unpack on purpose: that is the one path
-        // that leaves the downloaded file on disk to be found, where a run that succeeds
-        // or fails to download deletes it and would hide where it had been written.
+        // Staged from something that will not unpack on purpose, so that the download is
+        // known to have run to completion and written its file somewhere: a test that
+        // only checked the absence of an escaped file would pass just as well if nothing
+        // had been downloaded at all.
         UpdateInstaller installer = Installer(() => new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent("not an archive", Encoding.UTF8),
@@ -222,8 +242,35 @@ public sealed class UpdateInstallerTests : IDisposable
 
         result.Error.Should().Be(UpdateErrors.UnreadableDownload);
 
-        File.Exists(Path.Combine(_root, "escaped.zip")).Should().BeFalse();
-        Directory.GetFiles(StagingRoot, "escaped.zip", SearchOption.AllDirectories).Should().ContainSingle();
+        // Nowhere above the staging root, and nowhere beside it either. The archive
+        // itself is no longer there to be found - a staging attempt that fails now
+        // clears up after itself, which is the whole point of the folder not outliving
+        // the attempt - so what is checked is the escape rather than the arrival.
+        Directory.GetFiles(_root, "escaped.zip", SearchOption.AllDirectories).Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// A staging attempt that fails does not leave its download behind.
+    /// </summary>
+    /// <remarks>
+    /// The archive is the same couple of hundred megabytes whether it unpacked or not,
+    /// and an install that is never going to happen has no claim on the disk. The next
+    /// attempt at the same version would clear the folder anyway; this is about the
+    /// attempt that is never repeated.
+    /// </remarks>
+    [Fact]
+    public async Task StageAsync_Should_KeepNothing_WhenTheArchiveWillNotUnpack()
+    {
+        UpdateInstaller installer = Installer(() => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("not an archive", Encoding.UTF8),
+        });
+
+        Result<string> result = await installer.StageAsync(Update());
+
+        result.Error.Should().Be(UpdateErrors.UnreadableDownload);
+
+        Directory.Exists(Path.Combine(StagingRoot, "v2.1.0")).Should().BeFalse();
     }
 
     [Fact]
@@ -288,5 +335,165 @@ public sealed class UpdateInstallerTests : IDisposable
         // Written where the diagnostics export looks, so a failed update reaches whoever
         // is asked to explain it.
         script.Should().Contain(Path.Combine(LogDirectory, "helix-updates.log"));
+    }
+
+    /// <summary>
+    /// The download is checked against the digest GitHub published for it before anything
+    /// is opened.
+    /// </summary>
+    [Fact]
+    public async Task StageAsync_Should_AcceptTheDownload_WhenItMatchesThePublishedDigest()
+    {
+        byte[] archive = ZipBytes(("Helix.App.exe", "binary"));
+
+        UpdateInstaller installer = Installer(() => Respond(archive));
+
+        Result<string> result = await installer.StageAsync(Update(digest: DigestOf(archive)));
+
+        result.IsSuccess.Should().BeTrue();
+        File.Exists(Path.Combine(result.Value, "Helix.App.exe")).Should().BeTrue();
+    }
+
+    /// <summary>
+    /// And thrown away when it does not. TLS covers who it came from; this covers whether
+    /// all of it arrived, which is the failure a two-hundred-megabyte download actually
+    /// has.
+    /// </summary>
+    [Fact]
+    public async Task StageAsync_Should_Refuse_WhenTheDownloadDoesNotMatchThePublishedDigest()
+    {
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        Result<string> result = await installer.StageAsync(
+            Update(digest: $"sha256:{new string('a', 64)}"));
+
+        result.Error.Should().Be(UpdateErrors.DownloadCorrupt);
+    }
+
+    /// <summary>
+    /// A refused download leaves nothing behind either — there is no reason to keep two
+    /// hundred megabytes of an archive that will never be installed.
+    /// </summary>
+    [Fact]
+    public async Task StageAsync_Should_KeepNothing_WhenTheDigestDoesNotMatch()
+    {
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        await installer.StageAsync(Update(digest: $"sha256:{new string('a', 64)}"));
+
+        Directory.Exists(Path.Combine(StagingRoot, "v2.1.0")).Should().BeFalse();
+    }
+
+    /// <summary>
+    /// Releases published before GitHub returned digests carry none, and refusing them
+    /// would break updating for exactly the installs furthest behind.
+    /// </summary>
+    [Fact]
+    public async Task StageAsync_Should_Stage_WhenTheReleasePublishesNoDigest()
+    {
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        Result<string> result = await installer.StageAsync(Update(digest: null));
+
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    /// <summary>
+    /// Nor is a digest in an algorithm this build does not know a hard failure: it cannot
+    /// be checked, and treating that as corruption would let one change at GitHub's end
+    /// stop every install at once.
+    /// </summary>
+    [Fact]
+    public async Task StageAsync_Should_Stage_WhenTheDigestIsInAnAlgorithmItDoesNotKnow()
+    {
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        Result<string> result = await installer.StageAsync(Update(digest: "sha512:whatever"));
+
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    /// <summary>
+    /// Staging a release clears out the ones staged before it.
+    /// </summary>
+    /// <remarks>
+    /// Each is an unpacked build of a couple of hundred megabytes, and they used to stay
+    /// for the life of the install — one folder per version the user had ever updated
+    /// through, in the same per-user directory as the database and the logs.
+    /// </remarks>
+    [Fact]
+    public async Task StageAsync_Should_RemoveTheReleasesStagedBeforeIt()
+    {
+        string old = Path.Combine(StagingRoot, "v2.0.0", "unpacked");
+        Directory.CreateDirectory(old);
+        File.WriteAllText(Path.Combine(old, "Helix.App.exe"), "the version before last");
+
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        await installer.StageAsync(Update());
+
+        Directory.Exists(Path.Combine(StagingRoot, "v2.0.0")).Should().BeFalse();
+        Directory.Exists(Path.Combine(StagingRoot, "v2.1.0")).Should().BeTrue();
+    }
+
+    /// <summary>
+    /// The helper's own folder is not one of them: a helper started seconds ago may still
+    /// be running out of it.
+    /// </summary>
+    [Fact]
+    public async Task StageAsync_Should_LeaveTheHelperFolderAlone()
+    {
+        string helper = Path.Combine(StagingRoot, "helper");
+        Directory.CreateDirectory(helper);
+        File.WriteAllText(Path.Combine(helper, "apply-update.ps1"), "an update in progress");
+
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        await installer.StageAsync(Update());
+
+        File.Exists(Path.Combine(helper, "apply-update.ps1")).Should().BeTrue();
+    }
+
+    /// <summary>
+    /// The one staged copy nothing else can clear is the one being installed: it is what
+    /// the helper is copying out of, so only the helper knows when it is finished with.
+    /// </summary>
+    [Fact]
+    public void SwapScript_Should_RemoveTheStagedRelease_OnceTheCopyHasSucceeded()
+    {
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        string release = Path.Combine(StagingRoot, "v2.1.0");
+        string staged = Path.Combine(release, "unpacked");
+        Directory.CreateDirectory(staged);
+
+        string script = File.ReadAllText(installer.WriteSwapScript(staged, InstallDirectory));
+
+        // The release folder, not the payload inside it: on macOS the payload is the .app
+        // bundle a level further down, and leaving its parents behind would leave the
+        // problem behind.
+        script.Should().Contain(release);
+
+        int copied = script.IndexOf("Copy-Item", StringComparison.Ordinal);
+        int removed = script.IndexOf("Remove-Item -LiteralPath $release", StringComparison.Ordinal);
+
+        removed.Should().BeGreaterThan(copied);
+    }
+
+    /// <summary>
+    /// A staged folder that is not under the staging root belongs to nobody this can
+    /// reason about, and is left exactly where it is.
+    /// </summary>
+    [Fact]
+    public void SwapScript_Should_DeleteNothing_WhenTheStagedFolderIsNotUnderTheStagingRoot()
+    {
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        string outside = Path.Combine(_root, "somewhere-else");
+        Directory.CreateDirectory(outside);
+
+        string script = File.ReadAllText(installer.WriteSwapScript(outside, InstallDirectory));
+
+        script.Should().Contain("$release = ''");
     }
 }

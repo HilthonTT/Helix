@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Security.Cryptography;
 
 namespace Helix.Infrastructure.Updates;
 
@@ -17,9 +18,11 @@ namespace Helix.Infrastructure.Updates;
 /// is still running and leaves the install untouched if any of it fails.
 ///
 /// Nothing here verifies a signature, because there is nothing to verify against: the
-/// release archives are unsigned. What it does have is TLS to github.com and a check
-/// that the archive contains the executable it claims to. That is the same trust the
-/// user extends by downloading the zip by hand, which is what this replaces.
+/// release archives are unsigned. What it does have is TLS to github.com, the SHA-256
+/// the release API publishes for the asset, and a check that the archive contains the
+/// executable it claims to. That is the same trust the user extends by downloading the
+/// zip by hand, which is what this replaces, plus the one check they would not have
+/// made.
 /// </remarks>
 internal sealed class UpdateInstaller : IUpdateInstaller
 {
@@ -56,6 +59,12 @@ internal sealed class UpdateInstaller : IUpdateInstaller
     /// is asked to send without anything else having to know about it.
     /// </remarks>
     private const string HelperLogFileName = "helix-updates.log";
+
+    /// <summary>The only digest algorithm GitHub publishes, and the only one understood.</summary>
+    private const string DigestPrefix = "sha256:";
+
+    /// <summary>The staging root's one subfolder that is not a staged release.</summary>
+    private const string HelperDirectoryName = "helper";
 
     private readonly HttpClient _httpClient;
     private readonly ILogger<UpdateInstaller> _logger;
@@ -142,6 +151,13 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
         string releaseDirectory = Path.Combine(_stagingRoot(), Sanitize(update.LatestVersion));
 
+        // Anything else under the staging root is a release that was installed or given
+        // up on, and each one is an unpacked build of a couple of hundred megabytes. They
+        // used to stay there for the life of the install: one folder per version the user
+        // had ever updated through, in the same per-user app data directory as the
+        // database and the logs.
+        PruneStagedReleases(releaseDirectory);
+
         try
         {
             // A previous attempt's half-unpacked copy is not something to build on.
@@ -165,10 +181,20 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         // folder.
         string archivePath = Path.Combine(releaseDirectory, ArchiveFileName(update.AssetName));
 
-        Result download = await DownloadAsync(update.DownloadUrl, archivePath, progress, cancellationToken);
+        Result<string> download = await DownloadAsync(update.DownloadUrl, archivePath, progress, cancellationToken);
         if (download.IsFailure)
         {
             return Result.Failure<string>(download.Error);
+        }
+
+        // Before it is opened, not after: an archive that is not what GitHub published is
+        // not something to unpack and inspect, it is something to throw away.
+        Result verified = VerifyDigest(update, download.Value);
+        if (verified.IsFailure)
+        {
+            TryDeleteDirectory(releaseDirectory);
+
+            return Result.Failure<string>(verified.Error);
         }
 
         string unpacked = Path.Combine(releaseDirectory, "unpacked");
@@ -181,6 +207,8 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         {
             _logger.LogWarning(ex, "The downloaded update could not be unpacked.");
 
+            TryDeleteDirectory(releaseDirectory);
+
             return Result.Failure<string>(UpdateErrors.UnreadableDownload);
         }
 
@@ -190,6 +218,8 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         if (payload is null)
         {
             _logger.LogWarning("The downloaded update did not contain a Helix build.");
+
+            TryDeleteDirectory(releaseDirectory);
 
             return Result.Failure<string>(UpdateErrors.DownloadNotHelix);
         }
@@ -239,7 +269,17 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         }
     }
 
-    private async Task<Result> DownloadAsync(
+    /// <summary>
+    /// Fetches the archive, and reports the SHA-256 of exactly the bytes that were
+    /// written.
+    /// </summary>
+    /// <remarks>
+    /// Hashed as it is copied rather than by reading the file back afterwards: the
+    /// archive is a couple of hundred megabytes, the bytes are already in hand, and a
+    /// second pass over a file that was just written measures the disk cache more than
+    /// anything else.
+    /// </remarks>
+    private async Task<Result<string>> DownloadAsync(
         string url,
         string destination,
         IProgress<double>? progress,
@@ -258,13 +298,15 @@ internal sealed class UpdateInstaller : IUpdateInstaller
                     "The update download answered with status {Status}.",
                     (int)response.StatusCode);
 
-                return Result.Failure(UpdateErrors.DownloadFailed);
+                return Result.Failure<string>(UpdateErrors.DownloadFailed);
             }
 
             long? total = response.Content.Headers.ContentLength;
 
             await using Stream source = await response.Content.ReadAsStreamAsync(cancellationToken);
             await using FileStream target = File.Create(destination);
+
+            using IncrementalHash digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
 
             byte[] buffer = new byte[81920];
             long copied = 0;
@@ -273,6 +315,8 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             while ((read = await source.ReadAsync(buffer, cancellationToken)) > 0)
             {
                 await target.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+
+                digest.AppendData(buffer, 0, read);
 
                 copied += read;
 
@@ -284,7 +328,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
                 }
             }
 
-            return Result.Success();
+            return Convert.ToHexString(digest.GetHashAndReset());
         }
         catch (OperationCanceledException)
         {
@@ -299,8 +343,140 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
             TryDelete(destination);
 
-            return Result.Failure(UpdateErrors.DownloadFailed);
+            return Result.Failure<string>(UpdateErrors.DownloadFailed);
         }
+    }
+
+    /// <summary>
+    /// Checks what arrived against the digest GitHub published for it.
+    /// </summary>
+    /// <remarks>
+    /// The archives are unsigned, so this proves nothing about who built them — what it
+    /// proves is that the bytes are the ones the API described, which is the failure this
+    /// can actually have: a transfer that stopped short, a proxy or a cache that served
+    /// something else. It is the only check between a download and a working install
+    /// being replaced by it.
+    ///
+    /// A release with no digest is accepted rather than refused. GitHub only began
+    /// returning the field recently, and every release published before that has none;
+    /// refusing them would break updating for exactly the installs most in need of it.
+    /// The same goes for a digest in an algorithm this does not know: it cannot be
+    /// checked, and turning that into a hard failure would mean a future change at
+    /// GitHub's end stopping every install at once.
+    /// </remarks>
+    private Result VerifyDigest(UpdateCheck update, string actualDigest)
+    {
+        string? published = update.AssetDigest?.Trim();
+
+        if (string.IsNullOrWhiteSpace(published))
+        {
+            _logger.LogInformation(
+                "Release {Version} publishes no digest for {Asset}; the download could not be verified.",
+                update.LatestVersion,
+                update.AssetName);
+
+            return Result.Success();
+        }
+
+        if (!published.StartsWith(DigestPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarning(
+                "The digest published for {Asset} is not one this build understands, so it was not checked.",
+                update.AssetName);
+
+            return Result.Success();
+        }
+
+        string expected = published[DigestPrefix.Length..];
+
+        if (!string.Equals(expected, actualDigest, StringComparison.OrdinalIgnoreCase))
+        {
+            // Both are logged: a mismatch is either a broken download or something worth
+            // being able to describe afterwards, and neither is diagnosable from the fact
+            // that it happened.
+            _logger.LogError(
+                "The update downloaded for {Version} hashed to {Actual}, but GitHub published {Expected}. It was discarded.",
+                update.LatestVersion,
+                actualDigest,
+                expected);
+
+            return Result.Failure(UpdateErrors.DownloadCorrupt);
+        }
+
+        _logger.LogInformation("The download for {Version} matches the digest GitHub published.", update.LatestVersion);
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Removes every staged release except the one about to be used.
+    /// </summary>
+    /// <remarks>
+    /// Done here rather than after an install because this is the moment the staging root
+    /// is known to be nobody's working directory: the helper of a previous update copies
+    /// out of a staged folder and would not survive it being deleted underneath it. Its
+    /// own folder is left alone for the same reason - a helper started seconds ago may
+    /// still be running from it.
+    /// </remarks>
+    private void PruneStagedReleases(string keep)
+    {
+        string root = _stagingRoot();
+
+        if (!Directory.Exists(root))
+        {
+            return;
+        }
+
+        string keepName = Path.GetFileName(keep.TrimEnd(Path.DirectorySeparatorChar));
+
+        foreach (string directory in Directory.EnumerateDirectories(root))
+        {
+            string name = Path.GetFileName(directory);
+
+            if (string.Equals(name, keepName, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(name, HelperDirectoryName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (TryDeleteDirectory(directory))
+            {
+                _logger.LogInformation("Removed the staged copy of a previous update at {Directory}.", name);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The staged release folder holding <paramref name="stagedDirectory"/>, for the
+    /// helper to remove once it has finished copying out of it.
+    /// </summary>
+    /// <remarks>
+    /// The payload is a folder or two below the release folder - <c>unpacked</c>, and on
+    /// macOS the <c>.app</c> bundle inside it - so what has to be deleted is not what was
+    /// handed over. Found by climbing to the child of the staging root rather than by
+    /// taking the path apart, and anything that is not under the staging root at all is
+    /// left exactly as it is: a caller pointing somewhere else means a test, and a
+    /// delete that walked out of the staging root would be the worst bug in this file.
+    /// </remarks>
+    private string? ReleaseFolderOf(string stagedDirectory)
+    {
+        string root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(_stagingRoot()));
+        var candidate = new DirectoryInfo(Path.GetFullPath(stagedDirectory));
+
+        while (candidate.Parent is not null)
+        {
+            if (string.Equals(
+                Path.TrimEndingDirectorySeparator(candidate.Parent.FullName),
+                root,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return candidate.FullName;
+            }
+
+            candidate = candidate.Parent;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -454,6 +630,10 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
         string logPath = Path.Combine(logDirectory, HelperLogFileName);
 
+        // Empty where the staged folder is not under the staging root, which is a test
+        // pointing somewhere of its own; both scripts guard on it before deleting.
+        string releaseDirectory = ReleaseFolderOf(stagedDirectory) ?? string.Empty;
+
 #if WINDOWS
         string scriptPath = Path.Combine(scriptDirectory, "apply-update.ps1");
         string executable = Path.Combine(installDirectory, WindowsExecutable);
@@ -465,6 +645,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             $"$install = '{Escape(installDirectory)}'",
             $"$exe     = '{Escape(executable)}'",
             $"$log     = '{Escape(logPath)}'",
+            $"$release = '{Escape(releaseDirectory)}'",
             "$backup  = \"$install.old\"",
             "function Write-Log($message) {",
             "    try {",
@@ -494,6 +675,11 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             "        New-Item -ItemType Directory -Path $install -Force | Out-Null",
             "        Copy-Item -Path (Join-Path $staged '*') -Destination $install -Recurse -Force",
             "        Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction SilentlyContinue",
+
+            // Only once the copy has succeeded: until then it is the only copy of the
+            // new version, and on the failure path below it is not needed either - what
+            // goes back is the build that was already there.
+            "        if ($release) { Remove-Item -LiteralPath $release -Recurse -Force -ErrorAction SilentlyContinue }",
             "        Write-Log 'The update was applied.'",
             "    } catch {",
             "        Write-Log \"The update could not be copied over the install: $($_.Exception.Message). The previous version was put back.\"",
@@ -515,6 +701,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             $"staged=\"{Escape(stagedDirectory)}\"",
             $"install=\"{Escape(installDirectory)}\"",
             $"log=\"{Escape(logPath)}\"",
+            $"release=\"{Escape(releaseDirectory)}\"",
             "backup=\"$install.old\"",
             "write_log() { printf '%s [inf] UpdateHelper: %s\\n' \"$(date -u '+%Y-%m-%d %H:%M:%S.000')\" \"$1\" >> \"$log\" 2>/dev/null || true; }",
             $"for _ in $(seq 1 {ExitWaitSeconds}); do",
@@ -529,6 +716,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             // attributes, and a plain copy flattens the ones that make it launchable.
             "  if ditto \"$staged\" \"$install\"; then",
             "    rm -rf \"$backup\"",
+            "    [ -n \"$release\" ] && rm -rf \"$release\"",
             "    write_log 'The update was applied.'",
             "  else",
             "    rm -rf \"$install\"",
@@ -574,6 +762,30 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
     private static string Sanitize(string version) =>
         string.Concat(version.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
+
+    /// <summary>Removes a directory tree, reporting whether it went.</summary>
+    private bool TryDeleteDirectory(string path)
+    {
+        try
+        {
+            if (!Directory.Exists(path))
+            {
+                return false;
+            }
+
+            Directory.Delete(path, recursive: true);
+
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // Something is holding it - an open Explorer window, a scanner. It is a
+            // couple of hundred megabytes of disk, not a reason to fail an update.
+            _logger.LogDebug(ex, "Could not remove the staged update folder {Directory}.", path);
+
+            return false;
+        }
+    }
 
     private void TryDelete(string path)
     {

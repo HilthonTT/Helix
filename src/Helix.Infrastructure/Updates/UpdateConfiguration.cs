@@ -28,26 +28,41 @@ internal static class UpdateConfiguration
     public static string ReleasesPageUrl => $"https://github.com/{Owner}/{Repository}/releases";
 
     /// <summary>
-    /// The fragment that identifies this machine's build in a release asset's name.
+    /// The fragments that identify a build this machine can run, best first.
     /// </summary>
     /// <remarks>
     /// Matches how the release workflow names its archives — <c>Helix-v2.1.0-win-x64.zip</c>,
-    /// <c>-win-arm64</c>, <c>-macos</c>. An architecture with no published build answers
-    /// empty rather than guessing, which reads downstream as "no download for this
-    /// computer" and leaves the release page as the route.
+    /// <c>-win-arm64</c>, <c>-macos</c>. A machine with no published build answers empty
+    /// rather than guessing, which reads downstream as "no download for this computer"
+    /// and leaves the release page as the route.
+    ///
+    /// The question is asked of the <b>operating system</b>, not of this process, and the
+    /// difference is not academic. What gets replaced is the whole install folder, which
+    /// the helper then starts fresh — so what matters is what the machine can run, not
+    /// what happens to be running. A 32-bit build on a 64-bit Windows reported x86, had
+    /// no asset, and could never update itself out of that state; it now gets the x64
+    /// build, which the machine has always been able to run.
+    ///
+    /// Arm64 lists the x64 build behind its own. Windows on Arm runs x64 under emulation,
+    /// so where a release carries no Arm64 archive that is a working install rather than
+    /// nothing — and the order means it is only ever reached when the native build is
+    /// genuinely absent. The reverse is never offered: an x64 machine handed the Arm64
+    /// build would install it cleanly and then not start, which is the one outcome this
+    /// whole feature must never produce.
     /// </remarks>
-    public static string AssetMoniker
+    public static IReadOnlyList<string> AssetMonikers
     {
         get
         {
 #if MACCATALYST
-            return "macos";
+            // One universal bundle, lipo'd for both architectures by the release workflow.
+            return ["macos"];
 #else
-            return RuntimeInformation.ProcessArchitecture switch
+            return RuntimeInformation.OSArchitecture switch
             {
-                Architecture.Arm64 => "win-arm64",
-                Architecture.X64 => "win-x64",
-                _ => string.Empty,
+                Architecture.Arm64 => ["win-arm64", "win-x64"],
+                Architecture.X64 => ["win-x64"],
+                _ => [],
             };
 #endif
         }

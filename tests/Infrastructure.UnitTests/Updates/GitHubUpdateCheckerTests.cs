@@ -42,11 +42,20 @@ public sealed class GitHubUpdateCheckerTests
         Content = new StringContent(body, Encoding.UTF8, "application/json"),
     };
 
+    /// <param name="moniker">The build this machine would rather have.</param>
+    /// <param name="fallbacks">
+    /// Builds it can run where that one is not published, in order — what Arm64 supplies
+    /// so that a release carrying only the x64 archive is still installable.
+    /// </param>
     private static GitHubUpdateChecker Checker(
         StubHandler handler,
         string current = CurrentVersion,
-        string moniker = "win-x64") =>
-        new(new HttpClient(handler), NullLogger<GitHubUpdateChecker>.Instance, () => current, () => moniker);
+        string moniker = "win-x64",
+        params string[] fallbacks) =>
+        new(new HttpClient(handler),
+            NullLogger<GitHubUpdateChecker>.Instance,
+            () => current,
+            () => [moniker, .. fallbacks]);
 
     private static string ReleaseJson(string tag, string? url = "https://github.com/HilthonTT/Helix/releases/tag/v2.1.0") =>
         $$"""
@@ -63,6 +72,21 @@ public sealed class GitHubUpdateCheckerTests
             { "name": "Helix-{{tag}}-win-arm64.zip", "browser_download_url": "https://example.invalid/arm64" },
             { "name": "Helix-{{tag}}-win-x64.zip", "browser_download_url": "https://example.invalid/x64" },
             { "name": "Helix-{{tag}}-macos.zip", "browser_download_url": "https://example.invalid/macos" }
+          ]
+        }
+        """;
+
+    /// <summary>A release carrying only the x64 archive, and a digest for it.</summary>
+    private static string ReleaseWithX64AssetJson(string tag, string? digest = null) =>
+        $$"""
+        {
+          "tag_name": "{{tag}}",
+          "html_url": "https://github.com/HilthonTT/Helix/releases/tag/{{tag}}",
+          "assets": [
+            {
+              "name": "Helix-{{tag}}-win-x64.zip",
+              "browser_download_url": "https://example.invalid/x64"{{(digest is null ? "" : $",\n              \"digest\": \"{digest}\"")}}
+            }
           ]
         }
         """;
@@ -244,5 +268,89 @@ public sealed class GitHubUpdateCheckerTests
 
         result.IsSuccess.Should().BeTrue();
         result.Value.ReleaseUrl.Should().Be(UpdateConfiguration.ReleasesPageUrl);
+    }
+
+    /// <summary>
+    /// The digest GitHub publishes for an asset is carried through, because the installer
+    /// is the only thing that can act on it and this is the only thing that reads the API.
+    /// </summary>
+    [Fact]
+    public async Task CheckAsync_Should_CarryTheDigestGitHubPublishesForTheAsset()
+    {
+        const string digest = "sha256:1507529b5376213a8dd4affbe80ee388b425473676d5ba53e7b11ae67f9907cf";
+
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithX64AssetJson("v2.1.0", digest)));
+
+        Result<UpdateCheck> result = await Checker(handler).CheckAsync();
+
+        result.Value.AssetDigest.Should().Be(digest);
+    }
+
+    /// <summary>
+    /// A release published before GitHub returned digests has none, and that is not a
+    /// reason to refuse to install it.
+    /// </summary>
+    [Fact]
+    public async Task CheckAsync_Should_ReportNoDigest_WhenTheReleaseCarriesNone()
+    {
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithX64AssetJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler).CheckAsync();
+
+        result.Value.AssetDigest.Should().BeNull();
+        result.Value.CanInstall.Should().BeTrue();
+    }
+
+    /// <summary>
+    /// An Arm64 machine takes the Arm64 build when the release has one.
+    /// </summary>
+    [Fact]
+    public async Task CheckAsync_Should_PreferTheNativeBuild_WhenTheReleaseCarriesBoth()
+    {
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithAssetsJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler, moniker: "win-arm64", fallbacks: "win-x64").CheckAsync();
+
+        result.Value.AssetName.Should().Be("Helix-v2.1.0-win-arm64.zip");
+    }
+
+    /// <summary>
+    /// And falls back to the x64 build when it does not: Windows on Arm runs that under
+    /// emulation, so it is a working install rather than nothing at all.
+    /// </summary>
+    [Fact]
+    public async Task CheckAsync_Should_FallBackToTheEmulatedBuild_WhenTheNativeOneIsNotPublished()
+    {
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithX64AssetJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler, moniker: "win-arm64", fallbacks: "win-x64").CheckAsync();
+
+        result.Value.AssetName.Should().Be("Helix-v2.1.0-win-x64.zip");
+        result.Value.CanInstall.Should().BeTrue();
+    }
+
+    /// <summary>
+    /// The fallback only ever runs downhill. An x64 machine handed the Arm64 build would
+    /// install it cleanly and then not start, so no list ever offers it one.
+    /// </summary>
+    [Fact]
+    public async Task CheckAsync_Should_OfferNothing_WhenOnlyTheOtherArchitectureIsPublished()
+    {
+        var handler = new StubHandler(() => Json(
+            HttpStatusCode.OK,
+            """
+            {
+              "tag_name": "v2.1.0",
+              "html_url": "https://github.com/HilthonTT/Helix/releases/tag/v2.1.0",
+              "assets": [
+                { "name": "Helix-v2.1.0-win-arm64.zip", "browser_download_url": "https://example.invalid/arm64" }
+              ]
+            }
+            """));
+
+        Result<UpdateCheck> result = await Checker(handler, moniker: "win-x64").CheckAsync();
+
+        result.Value.IsUpdateAvailable.Should().BeTrue();
+        result.Value.CanInstall.Should().BeFalse();
     }
 }

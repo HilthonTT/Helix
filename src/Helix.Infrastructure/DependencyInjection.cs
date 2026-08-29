@@ -122,7 +122,7 @@ public static class DependencyInjection
             UpdateConfiguration.CreateHttpClient(),
             sp.GetRequiredService<ILogger<GitHubUpdateChecker>>(),
             () => AppInfo.Current.VersionString,
-            () => UpdateConfiguration.AssetMoniker));
+            () => UpdateConfiguration.AssetMonikers));
 
         // Its own client, with a timeout that suits moving a release rather than reading
         // one. Both paths are resolved through delegates so a test can point the swap at
