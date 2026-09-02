@@ -397,3 +397,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /src/Helix.App/Platforms/Windows/Package.appxmanifest
+/problems/NAS_Credential_Conflict_Fix.md
+/problems/Reduce_Language_Files_Fix.md

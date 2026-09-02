@@ -118,7 +118,7 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
     /// and password differ from the ones that context was built with comes back
     /// <c>ERROR_SESSION_CREDENTIAL_CONFLICT</c> however correct they are. What to do
     /// about that depends entirely on whether anything is still using the context, and
-    /// the two cases pull in opposite directions:
+    /// the cases pull in opposite directions:
     ///
     /// Something <b>is</b> using it — a share mapped by hand in Explorer, or the first of
     /// this NAS's thirteen drives, which is the case that made twelve of them fail at
@@ -135,9 +135,24 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
     /// password that is simply wrong would go on working until the leftover expired. It
     /// is dropped instead, and the drive's own credentials are given a real attempt.
     ///
-    /// Dropping it is only safe here because nothing holds it: on the other branch,
+    /// Which of those it is, is decided by <see cref="HasLiveConnectionTo"/>, and that
+    /// question can only be answered for the sessions that carry a drive letter. A
+    /// deviceless one — a backup client that mounts the NAS at boot, an Explorer window
+    /// left on a UNC path, a leftover of Helix's own <see cref="Test"/> — looks exactly
+    /// like nothing at all, so the drop is refused by the process holding it and the
+    /// honest retry conflicts again. That second conflict is the tell: a leftover would
+    /// have been gone. Every drive of a NAS failing at boot because a backup had already
+    /// opened it is what this costs, so the third case joins the session it cannot see
+    /// rather than failing, on exactly the reasoning as the first.
+    ///
+    /// The wrong-password guarantee survives that, because it only ever applied to the
+    /// genuinely idle case: there the drop succeeds and the retry is a real
+    /// authentication whose logon failure is reported as one. A session that refuses to
+    /// be dropped was never going to test anything.
+    ///
+    /// Dropping it is only ever done on the idle branch: on the other,
     /// <c>WNetCancelConnection2</c> against a server name would take down the user's
-    /// Explorer mappings and every Helix drive already mounted on that NAS. Even here it
+    /// Explorer mappings and every Helix drive already mounted on that NAS. Even there it
     /// is unforced, so an open handle refuses the cancel rather than losing anything.
     /// </remarks>
     private Result Connect(Drive drive)
@@ -165,7 +180,7 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
         if (!HasLiveConnectionTo(host))
         {
             logger.LogInformation(
-                "Drive {Letter}: clearing a leftover session for its server, which nothing is using.",
+                "Drive {Letter}: clearing what looks like a leftover session for its server.",
                 drive.Letter);
 
             DropIdleServerSession(host);
@@ -178,17 +193,31 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
 
             // Whatever the honest attempt said, including a plain logon failure — which
             // is the answer the user is owed when the stored password is wrong.
-            logger.LogWarning(
-                "Drive {Letter}: would not mount with its own credentials — {Reason}",
-                drive.Letter,
-                DescribeWNetError(retry));
+            if (retry != ERROR_SESSION_CREDENTIAL_CONFLICT)
+            {
+                logger.LogWarning(
+                    "Drive {Letter}: would not mount with its own credentials — {Reason}",
+                    drive.Letter,
+                    DescribeWNetError(retry));
 
-            return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(retry)));
+                return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(retry)));
+            }
+
+            // Still conflicting after the drop, so the session was never idle: it is held
+            // by something with no drive letter, which is invisible to the check above —
+            // a backup client that mounts the NAS at boot, an Explorer window sitting on
+            // a UNC path, a deviceless leftover of Helix's own Test. Fall through and
+            // join it rather than giving up on a server that is plainly reachable.
+            logger.LogInformation(
+                "Drive {Letter}: its server is held by a session with no drive letter; mounting on that one.",
+                drive.Letter);
         }
-
-        logger.LogInformation(
-            "Drive {Letter}: its server is in use under other credentials; mounting on that session.",
-            drive.Letter);
+        else
+        {
+            logger.LogInformation(
+                "Drive {Letter}: its server is in use under other credentials; mounting on that session.",
+                drive.Letter);
+        }
 
         int reuse = AddConnection(local, remote, username: null, password: null, flags);
         if (reuse == NO_ERROR)
@@ -215,7 +244,9 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
     /// anything", and a mapped letter is the form that costs the most. A deviceless
     /// connection held by another process is not visible here, which is why the cancel
     /// that follows a false answer is left unforced — that case refuses rather than
-    /// breaking something this cannot see.
+    /// breaking something this cannot see — and why <see cref="Connect"/> treats a
+    /// conflict that survives the cancel as proof of a holder this could not see, rather
+    /// than as a final answer.
     /// </remarks>
     private static bool HasLiveConnectionTo(string uncHost)
     {

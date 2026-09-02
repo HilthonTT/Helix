@@ -483,8 +483,24 @@ must not be collapsed into one:
   (`DropIdleServerSession`) and the drive's own credentials get a real attempt, whose
   error — a plain logon failure, usually — is what gets reported.
 
-`Test` takes the same branch for the same reason, and more urgently: a connection test
-answered out of a session nobody is using has tested nothing.
+`HasLiveConnectionTo` can only answer for sessions that carry a **drive letter**, and a
+deviceless one — a backup client that mounts the NAS at boot, an Explorer window left on a
+UNC path, a leftover of Helix's own `Test` — is indistinguishable from nothing at all. So
+the drop is refused by whatever holds it and the honest retry conflicts a second time.
+**That second conflict is the tell**: a real leftover would have gone. The session is
+therefore treated as the first branch after all and joined with no credentials, rather than
+the drive giving up. Every drive of a NAS failing at boot because a backup had opened it
+first is what the missing third case cost. Only a retry that comes back with something
+*other* than 1219 — a logon failure, a missing share — is reported as the failure it is.
+
+The wrong-password guarantee is untouched by that, because it only ever applied to the
+genuinely idle case: there the drop succeeds and the retry is a real authentication. A
+session that refuses to be dropped was never going to test a password.
+
+`Test` takes the same first branch for the same reason, and more urgently: a connection
+test answered out of a session nobody is using has tested nothing. It deliberately does
+**not** gain the join-it-anyway fallback — a test that mounts on somebody else's session
+has tested nothing either, so a conflict it cannot clear is reported as a conflict.
 
 Dropping the session is only ever done on the second branch. On the first,
 `WNetCancelConnection2` against a server name would take down the user's Explorer
