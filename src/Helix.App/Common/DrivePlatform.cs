@@ -22,4 +22,20 @@ internal static class DrivePlatform
 #else
         false;
 #endif
+
+    /// <summary>
+    /// Whether mounting under the server's DNS name instead of its address buys anything.
+    /// </summary>
+    /// <remarks>
+    /// It is a way round the single credential context Windows keeps per server name,
+    /// which is a Windows problem: NetFS asks for credentials per mount, so on macOS the
+    /// switch would change the spelling of the URL and nothing else. Hidden there rather
+    /// than offered and quietly ignored, the same as the persistent-mapping switch.
+    /// </remarks>
+    public static bool SupportsHostnameConnect =>
+#if WINDOWS
+        true;
+#else
+        false;
+#endif
 }

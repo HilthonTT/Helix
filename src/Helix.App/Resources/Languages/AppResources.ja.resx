@@ -411,6 +411,9 @@
   <data name="PersistentMapping" xml:space="preserve">
     <value>Windows サインイン時に再接続する</value>
   </data>
+  <data name="ConnectByHostname" xml:space="preserve">
+    <value>サーバー名で接続する</value>
+  </data>
   <data name="TrayOpen" xml:space="preserve">
     <value>Helix を開く</value>
   </data>

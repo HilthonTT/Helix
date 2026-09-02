@@ -29,6 +29,9 @@ internal sealed partial class UpdateDriveModel : ObservableObject
     [ObservableProperty]
     public partial bool Persistent { get; set; }
 
+    [ObservableProperty]
+    public partial bool ConnectByHostname { get; set; }
+
     public UpdateDriveModel()
     {
         // Partial properties cannot carry field initializers, so defaults are seeded here.
@@ -39,6 +42,7 @@ internal sealed partial class UpdateDriveModel : ObservableObject
         Password = string.Empty;
         AutoConnect = true;
         Persistent = false;
+        ConnectByHostname = false;
     }
 
     public UpdateDriveModel(Drive drive)
@@ -52,5 +56,6 @@ internal sealed partial class UpdateDriveModel : ObservableObject
         Password = drive.Password;
         AutoConnect = drive.AutoConnect;
         Persistent = drive.Persistent;
+        ConnectByHostname = drive.ConnectByHostname;
     }
 }

@@ -411,6 +411,9 @@
   <data name="PersistentMapping" xml:space="preserve">
     <value>Reconnect at Windows sign-in</value>
   </data>
+  <data name="ConnectByHostname" xml:space="preserve">
+    <value>Connect using the server name</value>
+  </data>
   <data name="TrayOpen" xml:space="preserve">
     <value>Open Helix</value>
   </data>

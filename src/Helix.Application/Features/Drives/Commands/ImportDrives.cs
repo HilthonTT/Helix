@@ -95,7 +95,8 @@ public sealed class ImportDrives(
                 d.Username,
                 d.Password,
                 d.AutoConnect,
-                d.Persistent))
+                d.Persistent,
+                d.ConnectByHostname))
             .ToList();
 
         List<string> existingDriveLetters = await driveRepository.GetExistingDriveLettersAsync(

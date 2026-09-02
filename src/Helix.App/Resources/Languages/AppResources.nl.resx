@@ -411,6 +411,9 @@
   <data name="PersistentMapping" xml:space="preserve">
     <value>Opnieuw verbinden bij Windows-aanmelding</value>
   </data>
+  <data name="ConnectByHostname" xml:space="preserve">
+    <value>Verbinden via de servernaam</value>
+  </data>
   <data name="TrayOpen" xml:space="preserve">
     <value>Helix openen</value>
   </data>

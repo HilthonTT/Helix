@@ -158,8 +158,8 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
     private Result Connect(Drive drive)
     {
         string local = $"{drive.Letter.ToUpperInvariant()}:";
-        string remote = RemoteNameFor(drive);
-        string host = ToUncHost(drive.Host);
+        string host = EffectiveHostFor(drive);
+        string remote = ShareOn(host, drive.Name);
 
         // CONNECT_UPDATE_PROFILE writes the mapping into the user profile, so Explorer
         // restores it at sign-in without Helix running. CONNECT_TEMPORARY is the opposite
@@ -225,15 +225,90 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
             return Result.Success();
         }
 
-        // Reported as the conflict rather than as whatever the fallback tripped over: the
-        // session in use is the reason this drive is not mounted, and the second
-        // attempt's error only describes what that session would not let us do.
         logger.LogWarning(
             "Drive {Letter}: the session its server is using would not take the mount — {Reason}",
             drive.Letter,
             DescribeWNetError(reuse));
 
+        // Last resort. The session holds the server under the spelling being used, and
+        // Windows keys credentials per spelling, so the other one is an untouched slot
+        // this drive's own credentials can have to themselves.
+        Result? alternate = TryAlternateSpelling(drive, local, host, flags);
+        if (alternate is not null)
+        {
+            return alternate;
+        }
+
+        // Reported as the conflict rather than as whatever the fallbacks tripped over: the
+        // session in use is the reason this drive is not mounted, and the later attempts'
+        // errors only describe what that session would not let us do.
         return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code)));
+    }
+
+    /// <summary>
+    /// Mounts under the server's other name — its hostname if the drive names an address,
+    /// its address if the drive names a host — or null when there is no other name to try
+    /// or it did not work either.
+    /// </summary>
+    /// <remarks>
+    /// Windows hands out one credential context per server <i>name string</i>, so the two
+    /// spellings of one NAS are two slots. Everything above this has already failed: the
+    /// drive's own credentials conflicted, the session would not be dropped, and joining
+    /// it was refused. Under the other spelling there is no session to conflict with, so
+    /// the drive's real credentials get a clean attempt — which is strictly better than
+    /// the join even when both would work, because a wrong password fails here rather
+    /// than mounting on somebody else's account.
+    ///
+    /// Doing this unasked is defensible only as a last resort. It costs a second
+    /// credential context to a NAS that already has one, which is the state that produces
+    /// these conflicts in the first place: paying that to rescue a drive that is otherwise
+    /// not mounting is worth it, paying it routinely is not. A user who wants it routinely
+    /// turns on <see cref="Drive.ConnectByHostname"/> and gets it before the conflict
+    /// rather than after.
+    ///
+    /// A failure returns null rather than an error of its own, so the caller still reports
+    /// the conflict that actually stopped the drive.
+    /// </remarks>
+    private Result? TryAlternateSpelling(Drive drive, string local, string host, uint flags)
+    {
+        string? alternate = HostSpelling.AlternateOf(host);
+        if (alternate is null)
+        {
+            return null;
+        }
+
+        int code = AddConnection(local, ShareOn(alternate, drive.Name), drive.Username, drive.Password, flags);
+        if (code != NO_ERROR)
+        {
+            return null;
+        }
+
+        logger.LogInformation(
+            "Drive {Letter}: mounted under its server's other name, which has a credential slot of its own.",
+            drive.Letter);
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// The host to mount under: the one the user typed, unless the drive asked for the
+    /// server's name and typed an address.
+    /// </summary>
+    /// <remarks>
+    /// A lookup that answers nothing leaves the address as typed. The switch is a way
+    /// round a collision, not a requirement — failing the mount because DNS was quiet
+    /// would turn an optional improvement into a new way to lose a drive.
+    /// </remarks>
+    private static string EffectiveHostFor(Drive drive)
+    {
+        string host = ToUncHost(drive.Host);
+
+        if (!drive.ConnectByHostname || !HostSpelling.IsAddress(host))
+        {
+            return host;
+        }
+
+        return HostSpelling.AlternateOf(host) ?? host;
     }
 
     /// <summary>
@@ -340,16 +415,17 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
     /// </remarks>
     private static Result Test(Drive drive)
     {
-        string remoteName = RemoteNameFor(drive);
+        string host = EffectiveHostFor(drive);
+        string remoteName = ShareOn(host, drive.Name);
 
         int code = AddConnection(local: null, remoteName, drive.Username, drive.Password, CONNECT_TEMPORARY);
 
         // The same leftover-session problem the mount has, and worse here: a test that
         // answers from a session nobody is using has tested nothing. Cleared and asked
         // again, so the answer is about the credentials on screen.
-        if (code == ERROR_SESSION_CREDENTIAL_CONFLICT && !HasLiveConnectionTo(ToUncHost(drive.Host)))
+        if (code == ERROR_SESSION_CREDENTIAL_CONFLICT && !HasLiveConnectionTo(host))
         {
-            DropIdleServerSession(ToUncHost(drive.Host));
+            DropIdleServerSession(host);
 
             code = AddConnection(local: null, remoteName, drive.Username, drive.Password, CONNECT_TEMPORARY);
         }
@@ -367,7 +443,8 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
         return Result.Success();
     }
 
-    private static string RemoteNameFor(Drive drive) => $@"\\{ToUncHost(drive.Host)}\{drive.Name}";
+    /// <summary>The UNC path of one share on one server.</summary>
+    private static string ShareOn(string uncHost, string shareName) => $@"\\{uncHost}\{shareName}";
 
     /// <summary>
     /// Renders a host into the form a UNC path accepts.

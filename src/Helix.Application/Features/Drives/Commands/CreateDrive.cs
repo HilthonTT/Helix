@@ -25,6 +25,11 @@ public sealed class CreateDrive(
     /// a mapping that outlives the app is a change to the user machine, so it is opted
     /// into rather than out of.
     /// </param>
+    /// <param name="ConnectByHostname">
+    /// Whether to mount under the server's DNS name instead of the address as typed.
+    /// Defaults to false: it costs a reverse lookup and only matters when something else
+    /// on the machine already holds the NAS under different credentials.
+    /// </param>
     public sealed record Request(
         string Letter,
         string Host,
@@ -32,7 +37,8 @@ public sealed class CreateDrive(
         string Username,
         string Password,
         bool AutoConnect = true,
-        bool Persistent = false);
+        bool Persistent = false,
+        bool ConnectByHostname = false);
 
     public async Task<Result<Drive>> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -68,7 +74,8 @@ public sealed class CreateDrive(
             request.Username,
             request.Password,
             request.AutoConnect,
-            request.Persistent);
+            request.Persistent,
+            request.ConnectByHostname);
 
         driveRepository.Insert(drive);
 

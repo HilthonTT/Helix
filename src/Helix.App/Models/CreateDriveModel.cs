@@ -17,6 +17,7 @@ internal sealed partial class CreateDriveModel : ObservableObject
         // takes part in the automatic passes, the way every drive did before the flag.
         AutoConnect = true;
         Persistent = false;
+        ConnectByHostname = false;
     }
 
     [ObservableProperty]
@@ -39,4 +40,7 @@ internal sealed partial class CreateDriveModel : ObservableObject
 
     [ObservableProperty]
     public partial bool Persistent { get; set; }
+
+    [ObservableProperty]
+    public partial bool ConnectByHostname { get; set; }
 }

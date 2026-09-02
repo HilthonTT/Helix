@@ -82,7 +82,7 @@ public sealed class InsertAuditLogsInterceptorTests : IDisposable
 
         Drive drive = await SeedDriveAsync(context);
 
-        drive.Update("Y", "nas.local", "Media", "user", "password", autoConnect: true, persistent: false);
+        drive.Update("Y", "nas.local", "Media", "user", "password", autoConnect: true, persistent: false, connectByHostname: false);
         await context.SaveChangesAsync(CancellationToken.None);
 
         List<Auditlog> entries = await EntriesAsync(context);
@@ -119,7 +119,7 @@ public sealed class InsertAuditLogsInterceptorTests : IDisposable
         Drive drive = await SeedDriveAsync(context);
 
         drive.MarkConnected(new DateTime(2026, 8, 20, 12, 0, 0, DateTimeKind.Utc));
-        drive.Update("Z", "nas.local", "Media Vault", "user", "password", autoConnect: true, persistent: false);
+        drive.Update("Z", "nas.local", "Media Vault", "user", "password", autoConnect: true, persistent: false, connectByHostname: false);
 
         await context.SaveChangesAsync(CancellationToken.None);
 

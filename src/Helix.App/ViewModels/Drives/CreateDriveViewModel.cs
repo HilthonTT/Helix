@@ -53,6 +53,12 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
     /// </remarks>
     public bool SupportsPersistentMappings => DrivePlatform.SupportsPersistentMappings;
 
+    /// <summary>
+    /// Hides the "connect by server name" switch where it would buy nothing — see
+    /// <see cref="DrivePlatform.SupportsHostnameConnect"/>.
+    /// </summary>
+    public bool SupportsHostnameConnect => DrivePlatform.SupportsHostnameConnect;
+
     [RelayCommand]
     private async Task SaveAsync()
     {
@@ -72,7 +78,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 Form.Username,
                 Form.Password,
                 Form.AutoConnect,
-                Form.Persistent);
+                Form.Persistent,
+                Form.ConnectByHostname);
 
             Result<Drive> result = await ScopedHandler.HandleAsync((CreateDrive h) => h.Handle(request));
             if (result.IsFailure)

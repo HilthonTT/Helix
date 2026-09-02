@@ -23,7 +23,8 @@ public sealed class UpdateDrive(
         string Username,
         string Password,
         bool AutoConnect = true,
-        bool Persistent = false);
+        bool Persistent = false,
+        bool ConnectByHostname = false);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -75,7 +76,8 @@ public sealed class UpdateDrive(
             request.Username,
             request.Password,
             request.AutoConnect,
-            request.Persistent);
+            request.Persistent,
+            request.ConnectByHostname);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

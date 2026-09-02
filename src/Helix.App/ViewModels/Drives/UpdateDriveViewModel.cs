@@ -48,6 +48,12 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
     /// </summary>
     public bool SupportsPersistentMappings => DrivePlatform.SupportsPersistentMappings;
 
+    /// <summary>
+    /// Hides the "connect by server name" switch where it would buy nothing — see
+    /// <see cref="DrivePlatform.SupportsHostnameConnect"/>.
+    /// </summary>
+    public bool SupportsHostnameConnect => DrivePlatform.SupportsHostnameConnect;
+
     [RelayCommand]
     private async Task UpdateAsync()
     {
@@ -68,7 +74,8 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 Drive.Username,
                 Drive.Password,
                 Drive.AutoConnect,
-                Drive.Persistent);
+                Drive.Persistent,
+                Drive.ConnectByHostname);
 
             Result result = await ScopedHandler.HandleAsync((UpdateDrive h) => h.Handle(request));
             if (result.IsFailure)

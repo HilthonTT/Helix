@@ -960,6 +960,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connect using the server name.
+        /// </summary>
+        internal static string ConnectByHostname {
+            get {
+                return ResourceManager.GetString("ConnectByHostname", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Test connection.
         /// </summary>
         internal static string TestConnection {

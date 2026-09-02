@@ -508,6 +508,30 @@ mappings and every Helix drive already mounted on that NAS — never do that fro
 background reconnect. Even on the second branch the cancel is **unforced**, so a
 deviceless connection held by some other process refuses it rather than being broken.
 
+When even the join is refused, one thing is left: Windows keys credentials per server
+**name string**, not per machine, so `\192.168.1.6` and `\NAS` are two slots for one NAS.
+`TryAlternateSpelling` asks `HostSpelling` for the other spelling and mounts under it,
+where there is no session to conflict with and the drive's own credentials get a clean
+attempt. It is a last resort and must stay one: its cost is a second credential context to
+a NAS that already has one, which is the state that produces these conflicts. A failure
+there returns null rather than an error, so what gets reported is still the conflict that
+actually stopped the drive.
+
+`Drive.ConnectByHostname` is the same trick asked for in advance — mount under the server's
+name rather than the address typed into `Host`, so the collision never happens. It is worth
+more than the fallback, because it never joins anybody's session: the drive comes up on its
+own credentials, so a wrong password is still reported as one. Off by default, a no-op
+unless the host is an IP literal, and hidden on macOS (`DrivePlatform.SupportsHostnameConnect`)
+where NetFS asks for credentials per mount and the spelling buys nothing.
+
+`HostSpelling` caches every answer for the life of the process, **including the failures**:
+a home router with no PTR records for its DHCP leases is the normal case, not the
+exception, and a lookup per drive per sweep would put thirteen of them on the critical path
+of every reconnect. Lookups are capped at 1.5s and abandoned rather than cancelled, because
+the BCL's synchronous resolver takes no token. A lookup that answers nothing leaves the
+address as typed — failing a mount because DNS was quiet would turn an optional improvement
+into a new way to lose a drive.
+
 The limit worth knowing, because no amount of code moves it: while other shares of a NAS
 are mounted, a drive on that NAS mounts on the existing session and its stored password
 is never checked. Editing a password and reconnecting that one drive will appear to work

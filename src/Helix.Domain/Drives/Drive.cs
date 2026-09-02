@@ -11,7 +11,8 @@ public sealed class Drive : Entity, IAuditable
         string username,
         string password,
         bool autoConnect,
-        bool persistent)
+        bool persistent,
+        bool connectByHostname)
         : base(id)
     {
         Ensure.NotNullOrEmpty(id, nameof(id));
@@ -31,6 +32,7 @@ public sealed class Drive : Entity, IAuditable
         Password = password;
         AutoConnect = autoConnect;
         Persistent = persistent;
+        ConnectByHostname = connectByHostname;
 
         DateTime utcNow = DateTime.UtcNow;
 
@@ -96,6 +98,25 @@ public sealed class Drive : Entity, IAuditable
     public bool Persistent { get; private set; }
 
     /// <summary>
+    /// Whether to mount this share under the server's DNS name rather than the address
+    /// typed into <see cref="Host"/>. Off by default, does nothing unless the host is an
+    /// IP literal, and ignored on macOS.
+    /// </summary>
+    /// <remarks>
+    /// Windows keys its one credential context per server <i>name string</i>, so
+    /// <c>\192.168.1.6</c> and <c>\NAS</c> get a slot each despite being one machine.
+    /// When another application holds the address under its own credentials — a backup
+    /// client that mounts the NAS at boot is the case this exists for — connecting under
+    /// the name sidesteps the collision rather than mounting on somebody else's session.
+    ///
+    /// That buys a guarantee the connector's fallbacks cannot: the drive comes up on its
+    /// <i>own</i> credentials, so a wrong stored password is still reported as one. The
+    /// cost is a reverse DNS lookup a home network may not answer, in which case the
+    /// address is used as typed and nothing is worse than before.
+    /// </remarks>
+    public bool ConnectByHostname { get; private set; }
+
+    /// <summary>
     /// When this drive last connected successfully, or null if it never has.
     /// </summary>
     /// <remarks>
@@ -129,7 +150,8 @@ public sealed class Drive : Entity, IAuditable
         string username,
         string password,
         bool autoConnect = true,
-        bool persistent = false)
+        bool persistent = false,
+        bool connectByHostname = false)
     {
         var drive = new Drive(
             Guid.CreateVersion7(),
@@ -140,13 +162,14 @@ public sealed class Drive : Entity, IAuditable
             username,
             password,
             autoConnect,
-            persistent);
+            persistent,
+            connectByHostname);
 
         return drive;
     }
 
     /// <remarks>
-    /// Every field is required, deliberately — no defaults on the two flags. An update
+    /// Every field is required, deliberately — no defaults on the flags. An update
     /// replaces the whole drive, so a caller that forgot to pass them would silently
     /// reset the user's choices rather than leave them alone.
     /// </remarks>
@@ -157,7 +180,8 @@ public sealed class Drive : Entity, IAuditable
         string username,
         string password,
         bool autoConnect,
-        bool persistent)
+        bool persistent,
+        bool connectByHostname)
     {
         Ensure.NotNullOrEmpty(letter, nameof(letter));
         Ensure.MustBeOneChar(letter, nameof(letter));
@@ -173,5 +197,6 @@ public sealed class Drive : Entity, IAuditable
         Password = password;
         AutoConnect = autoConnect;
         Persistent = persistent;
+        ConnectByHostname = connectByHostname;
     }
 }

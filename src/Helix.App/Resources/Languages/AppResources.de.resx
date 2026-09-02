@@ -411,6 +411,9 @@
   <data name="PersistentMapping" xml:space="preserve">
     <value>Bei der Windows-Anmeldung wiederherstellen</value>
   </data>
+  <data name="ConnectByHostname" xml:space="preserve">
+    <value>Über den Servernamen verbinden</value>
+  </data>
   <data name="TrayOpen" xml:space="preserve">
     <value>Helix öffnen</value>
   </data>

@@ -19,7 +19,8 @@ public sealed record DriveImportDto(
     string Username,
     string Password,
     bool AutoConnect = true,
-    bool Persistent = false)
+    bool Persistent = false,
+    bool ConnectByHostname = false)
 {
     /// <summary>
     /// The host under its former name, read from vaults written before the field was
