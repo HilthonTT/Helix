@@ -52,6 +52,18 @@ Two repo-root files own the shared MSBuild configuration; keep project files fre
 - `Directory.Build.props` — properties every project inherits (`ImplicitUsings`, `Nullable`).
 - `Directory.Packages.props` — Central Package Management. Every NuGet version lives here and `.csproj` files reference packages *without* a `Version` attribute.
 
+`Helix.App.csproj` sets `SatelliteResourceLanguages` to the cultures Helix is translated
+into, and `_HelixPruneWindowsAppSdkCultures` finishes the job: the property trims the .NET
+satellite assemblies, but the self-contained Windows App SDK also copies WinUI's own
+`.mui` resources as one folder per culture — 86 of them, for dialogs in languages the app
+cannot be switched to — and those are `None` items the SDK's targets add, so they are
+removed by matching on the language in their `Link`. Together they took a published
+install from 119 culture folders to 13 and 650 files to 494; file count, not size, is what
+an antivirus scan, a copy and a backup pay for. **Add a culture to both places** when adding
+an `AppResources.<culture>.resx`. The prune target uses `String.Contains` rather than a
+regex on purpose: MSBuild's property-function parser mis-parses a `(…)` group inside a
+quoted argument and the condition silently matched nothing.
+
 ## Architecture
 
 Clean Architecture with four layers plus a SharedKernel. Dependencies only point inward, and this is enforced by `tests/ArchitectureTests/Layers/LayerTests.cs` using NetArchTest — do not break those rules.

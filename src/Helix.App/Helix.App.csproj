@@ -20,6 +20,16 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
+		<!--
+		Only the cultures Helix is translated into — the list in Localization/CultureSwitcher.
+		Without this the build copies the satellite resource assemblies that .NET, MAUI and
+		the toolkit packages ship for ~120 cultures into the output as one folder each, none
+		of which Helix ever loads. They doubled the file count of a published install, and
+		file count rather than size is what an antivirus scan, a copy and a backup pay for.
+		Add a culture here when adding an AppResources.<culture>.resx.
+		-->
+		<SatelliteResourceLanguages>en;de;fr;id;ja;nl</SatelliteResourceLanguages>
+
 		<!-- Display name -->
 		<ApplicationTitle>Helix</ApplicationTitle>
 
@@ -210,6 +220,35 @@
 
 		<Delete Files="$(_HelixStampedManifest)"
 		        Condition="Exists('$(_HelixStampedManifest)') AND '$(_HelixStampedVersion)' != '$(_HelixExpectedVersion)'" />
+	</Target>
+
+	<!--
+	  The other half of SatelliteResourceLanguages. That property trims the .NET satellite
+	  assemblies, but a self-contained Windows App SDK also carries WinUI's own native
+	  resources - Microsoft.ui.xaml.dll.mui and its Phone twin - as one folder per culture,
+	  and the SDK's targets add every one of them to the output regardless: 86 folders of
+	  two files each, for the strings in WinUI's built-in dialogs, in languages Helix
+	  cannot be switched to. Those targets add them as None items whose Link is
+	  <culture>\<file>.mui, so this runs straight after them and removes the ones whose
+	  language is not in the list. It matches on the language alone - en-GB and en-us
+	  stay with en - because Windows picks the MUI by the OS display language, region
+	  included, and a user on nl-BE should get the Dutch dialog rather than none.
+	-->
+	<Target Name="_HelixPruneWindowsAppSdkCultures"
+	        AfterTargets="AddMicrosoftWindowsAppSDKPayloadFilesFromMsix;AddMicrosoftWindowsAppSDKPayloadFilesFromComponents"
+	        Condition="'$(SatelliteResourceLanguages)' != ''">
+
+		<ItemGroup>
+			<_HelixMui Include="@(None)"
+			           Condition="'%(Extension)' == '.mui' AND $([System.String]::Copy('%(None.Link)').Contains('\'))">
+				<Language>$([System.Text.RegularExpressions.Regex]::Replace('%(None.Link)', '[-\/].*$', ''))</Language>
+			</_HelixMui>
+
+			<_HelixMuiToPrune Include="@(_HelixMui)"
+			                  Condition="!$([System.String]::Copy(';$(SatelliteResourceLanguages);').Contains(';%(_HelixMui.Language);'))" />
+
+			<None Remove="@(_HelixMuiToPrune)" />
+		</ItemGroup>
 	</Target>
 
 </Project>
