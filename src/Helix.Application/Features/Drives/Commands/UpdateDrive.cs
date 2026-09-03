@@ -13,7 +13,8 @@ public sealed class UpdateDrive(
     IDriveRepository driveRepository,
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
-    INasConnector nasConnector) : IHandler
+    INasConnector nasConnector,
+    IDriveMonitor driveMonitor) : IHandler
 {
     public sealed record Request(
         Guid DriveId,
@@ -66,6 +67,17 @@ public sealed class UpdateDrive(
             if (nasConnector.GetConnectedLetters().Contains(request.Letter.ToUpperInvariant()))
             {
                 return Result.Failure(DriveErrors.LetterInUse(request.Letter));
+            }
+
+            // The old letter is about to belong to no row. Left mounted, a persistent
+            // mapping would be restored by Explorer at every sign-in with nothing in
+            // Helix able to remove it — the orphan DeleteDrive exists to prevent. Best
+            // effort, like there: an unreachable share must not block the edit.
+            if (nasConnector.GetConnectedLetters().Contains(drive.Letter))
+            {
+                using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
+
+                await nasConnector.DisconnectAsync(drive, cancellationToken);
             }
         }
 

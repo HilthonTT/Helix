@@ -63,6 +63,13 @@ internal sealed class DriveWatchdog
     private readonly HashSet<Guid> _inFlight = [];
 
     private CancellationTokenSource? _retryCancellation;
+
+    /// <summary>
+    /// Bumped by <see cref="Stop"/>. An attempt that was already awaiting the reconnect
+    /// when the user signed out compares this against what it captured, so it does not
+    /// schedule a retry into the next user's queue.
+    /// </summary>
+    private int _generation;
     private bool _subscribed;
 
     public DriveWatchdog(IDriveMonitor monitor, INasConnector nasConnector, ILogger<DriveWatchdog> logger)
@@ -117,6 +124,7 @@ internal sealed class DriveWatchdog
 
         lock (_gate)
         {
+            _generation++;
             _pending.Clear();
             _inFlight.Clear();
         }
@@ -255,12 +263,16 @@ internal sealed class DriveWatchdog
 
     private async Task AttemptAsync(Guid driveId, string letter, bool reconnect, bool recordDrop)
     {
+        int generation;
+
         lock (_gate)
         {
             if (!_inFlight.Add(driveId))
             {
                 return;
             }
+
+            generation = _generation;
         }
 
         try
@@ -271,6 +283,14 @@ internal sealed class DriveWatchdog
             if (!reconnect)
             {
                 // Recorded only; nothing to retry.
+                return;
+            }
+
+            if (IsStale(generation))
+            {
+                // Stop() ran while the reconnect was in flight. The outcome belongs to a
+                // session that is over; scheduling anything from it would queue this
+                // drive under whoever signs in next.
                 return;
             }
 
@@ -317,6 +337,14 @@ internal sealed class DriveWatchdog
             {
                 _inFlight.Remove(driveId);
             }
+        }
+    }
+
+    private bool IsStale(int generation)
+    {
+        lock (_gate)
+        {
+            return generation != _generation;
         }
     }
 

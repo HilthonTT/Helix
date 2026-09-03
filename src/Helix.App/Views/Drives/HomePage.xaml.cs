@@ -247,7 +247,20 @@ public sealed partial class HomePage : ContentPage
             this, async (r, m) => await _modals.ToggleAsync(DriveGroups, m.Show));
 
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(
-            this, async (r, m) => await InitializeChartAsync());
+            this, async (r, m) =>
+            {
+                // Published on every connectivity edge, including while the window is
+                // hidden in the tray; a transient read failure there must not escape an
+                // async void and surface as an unhandled-exception alert.
+                try
+                {
+                    await InitializeChartAsync();
+                }
+                catch (Exception ex)
+                {
+                    AppLog.For<HomePage>().LogWarning(ex, "The drive chart could not be refreshed.");
+                }
+            });
     }
 
     private async void Preferences_Clicked(object sender, EventArgs e)

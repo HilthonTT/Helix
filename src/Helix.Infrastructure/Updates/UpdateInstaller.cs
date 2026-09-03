@@ -330,9 +330,11 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
             return Convert.ToHexString(digest.GetHashAndReset());
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // The user changed their mind; nothing has been touched.
+            // The user changed their mind; nothing has been touched. Filtered on the
+            // caller's token because HttpClient reports its own timeout as the same
+            // exception, and that one is a failed download, not a change of mind.
             TryDelete(destination);
 
             throw;
@@ -673,7 +675,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             "if ($moved) {",
             "    try {",
             "        New-Item -ItemType Directory -Path $install -Force | Out-Null",
-            "        Copy-Item -Path (Join-Path $staged '*') -Destination $install -Recurse -Force",
+            "        Get-ChildItem -LiteralPath $staged -Force | Copy-Item -Destination $install -Recurse -Force",
             "        Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction SilentlyContinue",
 
             // Only once the copy has succeeded: until then it is the only copy of the

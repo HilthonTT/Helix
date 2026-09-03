@@ -298,6 +298,43 @@ public sealed class DriveMonitorTests
     }
 
     [Fact]
+    public async Task Suppress_Should_Not_Report_A_Drop_When_Released_During_A_Poll()
+    {
+        // Arrange — M is unmounted and Helix is mounting it.
+        DriveMonitor monitor = CreateMonitor();
+        monitor.Watch([new WatchedDrive(MediaId, "M")]);
+
+        List<DriveConnectivityChange> changes = Capture(monitor);
+
+        IDisposable suppression = monitor.Suppress(["M"]);
+
+        // The poll reads the mounted set while M is still absent; the mount finishes and
+        // the suppression is released before the poll gets to compare.
+        bool released = false;
+        _nasConnector.GetConnectedLetters().Returns(_ =>
+        {
+            if (!released)
+            {
+                released = true;
+                Connected("M");
+                suppression.Dispose();
+
+                return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            }
+
+            return new HashSet<string>(["M"], StringComparer.OrdinalIgnoreCase);
+        });
+
+        // Act
+        await monitor.PollAsync();
+        await monitor.PollAsync();
+
+        // Assert — the stale snapshot must not read as a drop, and the settled state
+        // matches the baseline the release seeded, so there is nothing to report.
+        changes.Should().BeEmpty("the letter was connected by Helix on purpose, not lost");
+    }
+
+    [Fact]
     public async Task Suppress_Should_Only_Cover_The_Letters_It_Names()
     {
         // Arrange

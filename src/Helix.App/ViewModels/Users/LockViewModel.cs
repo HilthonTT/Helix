@@ -90,6 +90,13 @@ internal sealed partial class LockViewModel : BaseViewModel
         await App.ServiceProvider.GetRequiredService<IdleLockService>().SignOutAsync();
     }
 
-    /// <summary>Re-reads the account name each time the screen appears.</summary>
-    public void Refresh() => OnPropertyChanged(nameof(Username));
+    /// <summary>
+    /// Re-reads the account name and clears the previous attempt's error each time the
+    /// screen appears.
+    /// </summary>
+    public void Refresh()
+    {
+        Error = string.Empty;
+        OnPropertyChanged(nameof(Username));
+    }
 }

@@ -27,17 +27,19 @@ public sealed class SearchAuditlogs(IDbContext context, ILoggedInUser loggedInUs
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
-            string term = request.SearchTerm;
+            // Upper-cased on both sides, as SearchDrives does: SQLite's instr() is
+            // case-sensitive, and letters are always stored uppercase.
+            string term = request.SearchTerm.ToUpperInvariant();
 
             // Matched against the drive it happened to rather than the rendered sentence:
             // the sentence is composed at display time in the user's language and does
             // not exist in the database to search. Message still carries the text of
             // entries written before the log was structured, so it stays in the filter.
             auditlogsQuery = auditlogsQuery.Where(a =>
-                (a.EntityName != null && a.EntityName.Contains(term)) ||
+                (a.EntityName != null && a.EntityName.ToUpper().Contains(term)) ||
                 (a.EntityLetter != null && a.EntityLetter.Contains(term)) ||
-                (a.Detail != null && a.Detail.Contains(term)) ||
-                (a.Message != null && a.Message.Contains(term)));
+                (a.Detail != null && a.Detail.ToUpper().Contains(term)) ||
+                (a.Message != null && a.Message.ToUpper().Contains(term)));
         }
 
         if (request.SortOrder == SortOrder.Descending)

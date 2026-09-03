@@ -53,6 +53,13 @@ internal sealed class StorageAlertService
 
     private CancellationTokenSource? _cancellation;
 
+    /// <summary>
+    /// Bumped by <see cref="Stop"/>. A check blocked on a share probe when the user
+    /// signed out compares this against what it captured, so its result does not land
+    /// in the next user's set of already-warned volumes.
+    /// </summary>
+    private int _generation;
+
     public StorageAlertService(TrayIconService tray, ILogger<StorageAlertService> logger)
     {
         _tray = tray;
@@ -102,6 +109,8 @@ internal sealed class StorageAlertService
 
         lock (_gate)
         {
+            _generation++;
+
             // The next user is told about their own full pools from scratch.
             _warned.Clear();
         }
@@ -113,6 +122,13 @@ internal sealed class StorageAlertService
     /// </summary>
     public async Task CheckAsync()
     {
+        int generation;
+
+        lock (_gate)
+        {
+            generation = _generation;
+        }
+
         Result<List<StorageAlert>> result = await ScopedHandler.HandleAsync((GetStorageAlerts h) => h.Handle());
         if (result.IsFailure)
         {
@@ -127,6 +143,13 @@ internal sealed class StorageAlertService
 
         lock (_gate)
         {
+            if (generation != _generation)
+            {
+                // Stop() ran while the probe was blocking; the reading belongs to a
+                // session that is over.
+                return;
+            }
+
             HashSet<string> current = [.. alerts.Select(alert => alert.VolumeId)];
 
             // A volume that is no longer short of space is forgotten, so that if it fills

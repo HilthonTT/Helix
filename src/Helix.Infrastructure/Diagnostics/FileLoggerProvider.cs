@@ -75,7 +75,7 @@ internal sealed class FileLogger : ILogger
         }
 
         var line = new StringBuilder()
-            .Append(DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff"))
+            .Append(DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture))
             .Append(" [")
             .Append(Describe(logLevel))
             .Append("] ")

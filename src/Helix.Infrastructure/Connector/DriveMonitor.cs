@@ -32,6 +32,18 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
     /// </summary>
     private readonly Dictionary<string, int> _suppressed = [];
 
+    /// <summary>
+    /// When each letter's suppression was last released, on <see cref="_clock"/>. A poll
+    /// reads the mounted set outside the gate, so a release can land between that read
+    /// and the compare: the release re-seeds the baseline from the finished operation,
+    /// and the stale snapshot then differs from it by exactly the change the suppression
+    /// existed to swallow. A poll skips a letter released after its snapshot began, and
+    /// only that poll — the next one reads a set that already reflects the release.
+    /// </summary>
+    private readonly Dictionary<string, long> _releasedAt = [];
+
+    private long _clock;
+
     private CancellationTokenSource? _cancellation;
     private Task? _loop;
 
@@ -119,6 +131,7 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
                 }
 
                 _suppressed.Remove(letter);
+                _releasedAt[letter] = ++_clock;
 
                 if (_baseline.ContainsKey(letter))
                 {
@@ -197,6 +210,13 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 
     private void Poll()
     {
+        long snapshotStartedAt;
+
+        lock (_gate)
+        {
+            snapshotStartedAt = _clock;
+        }
+
         HashSet<string> connected = _nasConnector.GetConnectedLetters();
 
         List<DriveConnectivityChange> changes = [];
@@ -205,7 +225,7 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         {
             foreach ((string letter, WatchedDrive drive) in _watched)
             {
-                if (_suppressed.ContainsKey(letter))
+                if (_suppressed.ContainsKey(letter) || WasReleasedAfter(letter, snapshotStartedAt))
                 {
                     // Helix is mid-mount or mid-unmount on this one. The baseline is
                     // left untouched as well as unreported: whatever it reads right now
@@ -231,6 +251,9 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
             ConnectivityChanged?.Invoke(this, changes);
         }
     }
+
+    private bool WasReleasedAfter(string letter, long clock) =>
+        _releasedAt.TryGetValue(letter, out long releasedAt) && releasedAt > clock;
 
     private static string Normalize(string letter) => letter.Trim().ToUpperInvariant();
 

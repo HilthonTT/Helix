@@ -84,6 +84,10 @@ internal sealed class DiagnosticsLog : IDiagnosticsLog
         }
         catch (UnauthorizedAccessException)
         {
+            // The zip may already exist: a log file can turn unreadable after the
+            // archive was created, and a truncated one must not be left behind.
+            TryDeletePartialExport(path, created);
+
             return Result.Failure<string>(DiagnosticsErrors.ExportFailed(
                 "Helix is not allowed to write to that folder."));
         }

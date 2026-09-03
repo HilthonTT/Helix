@@ -26,7 +26,7 @@ public sealed class Drive : Entity, IAuditable
 
         UserId = userId;
         Letter = letter;
-        Host = host;
+        Host = host.Trim();
         Name = name;
         Username = username;
         Password = password;
@@ -191,7 +191,7 @@ public sealed class Drive : Entity, IAuditable
         Ensure.NotNullOrEmpty(password, nameof(password));
 
         Letter = letter.ToUpperInvariant();
-        Host = host;
+        Host = host.Trim();
         Name = name;
         Username = username;
         Password = password;

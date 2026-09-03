@@ -325,7 +325,9 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
     /// </remarks>
     private static bool HasLiveConnectionTo(string uncHost)
     {
-        string prefix = $@"\{uncHost}";
+        // Two leading backslashes, as WNetGetConnection reports it, and a trailing one so
+        // that \\NAS cannot match a letter mounted from \\NAS2.
+        string prefix = $@"\\{uncHost}\";
 
         foreach (DriveInfo drive in DriveInfo.GetDrives())
         {
@@ -368,7 +370,7 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
     /// authenticate for real. Best effort — an in-use session refuses and is left alone.
     /// </summary>
     private static void DropIdleServerSession(string uncHost) =>
-        WNetCancelConnection2W($@"\{uncHost}", 0, fForce: false);
+        WNetCancelConnection2W($@"\\{uncHost}", 0, fForce: false);
 
     private static int AddConnection(string? local, string remote, string? username, string? password, uint flags)
     {

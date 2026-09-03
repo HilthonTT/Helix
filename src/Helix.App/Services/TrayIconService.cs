@@ -223,6 +223,14 @@ internal sealed class TrayIconService
 
         List<DriveGroup> groups = groupsResult.IsSuccess ? groupsResult.Value : [];
 
+        // Re-checked after the awaits: a refresh started just before sign-out would
+        // otherwise resume past Stop() and put the icon back up, listing the previous
+        // user's drives over the sign-in page.
+        if (!_running)
+        {
+            return;
+        }
+
         lock (_gate)
         {
             _drives = drives;

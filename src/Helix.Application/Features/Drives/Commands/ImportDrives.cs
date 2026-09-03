@@ -1,4 +1,5 @@
 ﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Security;
@@ -16,7 +17,8 @@ public sealed class ImportDrives(
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
     IVaultCipher vaultCipher,
-    IPassphrasePrompt passphrasePrompt) : IHandler
+    IPassphrasePrompt passphrasePrompt,
+    INasConnector nasConnector) : IHandler
 {
     private const string FileExtension = ".helixvault";
 
@@ -110,6 +112,11 @@ public sealed class ImportDrives(
         // lowercase letter would not match its candidate and would be imported a second
         // time, under a letter already in use.
         var taken = new HashSet<string>(existingDriveLetters, StringComparer.OrdinalIgnoreCase);
+
+        // The same check CreateDrive makes: a letter held by a USB stick, an optical
+        // drive or another account's mapping would import fine and then fail at every
+        // connect with a Windows error that named no field.
+        taken.UnionWith(nasConnector.GetConnectedLetters());
 
         List<Drive> newDrives = candidates
             .Where(drive => !taken.Contains(drive.Letter))
