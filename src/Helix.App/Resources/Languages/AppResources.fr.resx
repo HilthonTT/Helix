@@ -597,4 +597,70 @@
   <data name="Disconnecting" xml:space="preserve">
     <value>Déconnexion…</value>
   </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Une erreur s'est produite.</value>
+  </data>
+  <data name="DrivesExported" xml:space="preserve">
+    <value>Vos lecteurs ont été exportés.</value>
+  </data>
+  <data name="DrivesImported" xml:space="preserve">
+    <value>Vos lecteurs ont été importés.</value>
+  </data>
+  <data name="PasswordUpdated" xml:space="preserve">
+    <value>Votre mot de passe a été mis à jour.</value>
+  </data>
+  <data name="UsernameUpdated" xml:space="preserve">
+    <value>Votre nom d'utilisateur a été mis à jour.</value>
+  </data>
+  <data name="EncryptExport" xml:space="preserve">
+    <value>Chiffrer l'export</value>
+  </data>
+  <data name="EncryptExportMessage" xml:space="preserve">
+    <value>Saisissez une phrase secrète pour protéger cet export de lecteurs.</value>
+  </data>
+  <data name="EncryptExportConfirmMessage" xml:space="preserve">
+    <value>Saisissez à nouveau la même phrase secrète pour confirmer.</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Continuer</value>
+  </data>
+  <data name="Encrypt" xml:space="preserve">
+    <value>Chiffrer</value>
+  </data>
+  <data name="Passphrase" xml:space="preserve">
+    <value>Phrase secrète</value>
+  </data>
+  <data name="ConfirmPassphrase" xml:space="preserve">
+    <value>Confirmer la phrase secrète</value>
+  </data>
+  <data name="PassphrasesDontMatch" xml:space="preserve">
+    <value>Les phrases secrètes ne correspondent pas</value>
+  </data>
+  <data name="PassphrasesDontMatchMessage" xml:space="preserve">
+    <value>Les deux phrases secrètes saisies sont différentes. Veuillez réessayer.</value>
+  </data>
+  <data name="DecryptImport" xml:space="preserve">
+    <value>Déchiffrer l'import</value>
+  </data>
+  <data name="DecryptImportMessage" xml:space="preserve">
+    <value>Saisissez la phrase secrète utilisée lors de l'export de ce coffre.</value>
+  </data>
+  <data name="Decrypt" xml:space="preserve">
+    <value>Déchiffrer</value>
+  </data>
+  <data name="StatusUnreachable" xml:space="preserve">
+    <value>Injoignable</value>
+  </data>
+  <data name="StatusUnreachableHint" xml:space="preserve">
+    <value>Le NAS n'est pas sur ce réseau. Helix continue d'essayer.</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>Échec</value>
+  </data>
 </root>

@@ -317,6 +317,8 @@ internal sealed class DriveWatchdog
                 // real failures in the log the user is asked to send on.
                 _logger.LogDebug("Drive {Letter}: is waiting for its NAS to be reachable again.", letter);
 
+                PublishFailureToUi(driveId, result.Error);
+
                 ScheduleOfflineRetry(driveId, letter);
 
                 return;
@@ -328,6 +330,8 @@ internal sealed class DriveWatchdog
                 "Could not reconnect drive {Letter}: — {Reason}",
                 letter,
                 result.Error.Description);
+
+            PublishFailureToUi(driveId, result.Error);
 
             ScheduleRetry(driveId, letter);
         }
@@ -409,6 +413,22 @@ internal sealed class DriveWatchdog
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
         });
+    }
+
+    /// <summary>
+    /// Tells the row why an attempt did not mount the drive.
+    /// </summary>
+    /// <remarks>
+    /// The row can already see that the drive is down; what it cannot see is whether the
+    /// NAS refused it or was never there. Sent on the same thread rule as
+    /// <see cref="PublishToUi"/> — this ends in a bound property write, and the retry loop
+    /// runs on the thread pool.
+    /// </remarks>
+    private static void PublishFailureToUi(Guid driveId, Error error)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+            WeakReferenceMessenger.Default.Send(
+                new DriveAttemptFailedMessage(driveId, error.Code, error.Description)));
     }
 
     /// <summary>

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Users;
 using Helix.App.ViewModels;
 using Helix.Application.Features.Users.Commands;
+using Helix.App.Resources.Languages;
 
 namespace Helix.App.ViewModels.Users;
 
@@ -48,7 +49,7 @@ internal sealed partial class UpdatePasswordViewModel : BaseViewModel
                 return;
             }
 
-            await DisplaySuccessAsync("You've updated your password");
+            await DisplaySuccessAsync(AppResources.PasswordUpdated);
 
             Close();
         }

@@ -4,6 +4,7 @@ using Helix.App.Messaging.Settings;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
 using Helix.Domain.Settings;
+using Helix.App.Services;
 
 namespace Helix.App.Models;
 
@@ -312,10 +313,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
             Result result = await ScopedHandler.HandleAsync((UpdateSettings h) => h.Handle(request));
             if (result.IsFailure)
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    await Shell.Current.DisplayAlertAsync("Something went wrong!", result.Error.Description, "Ok");
-                });
+                Notifier.Error(result.Error);
 
                 return false;
             }
@@ -329,10 +327,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
         catch (Exception ex)
         {
-            await MainThread.InvokeOnMainThreadAsync(async () =>
-            {
-                await Shell.Current.DisplayAlertAsync("Something went wrong!", ex.Message, "Ok");
-            });
+            Notifier.Error(ex.Message);
 
             return false;
         }

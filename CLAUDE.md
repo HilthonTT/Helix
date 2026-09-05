@@ -145,6 +145,41 @@ Release builds log Information and above; Debug builds also log Debug. Keep cred
 hosts and share names out of log messages beyond what a drive letter already reveals — the
 user is expected to send these files to a stranger.
 
+### Telling the user what happened
+
+Outcomes go through `Notifier`, which puts a dismissible banner on the page — not a
+`DisplayAlert`. `BaseViewModel.DisplayErrorAsync` and `DisplaySuccessAsync` still exist
+and still return a `Task`, because every call site already awaits them; they route to the
+banner now. **Do not reintroduce an alert for a result.**
+
+A dialog for a success is a keystroke the user owes the app for work they asked for and
+watched happen. Worse, WinUI throws when a second alert is raised while one is showing,
+which "connect all" over thirteen shares walks straight into — `DriveTemplate` carried a
+try/catch for exactly that, and it is gone. Modal dialogs are kept for the cases that are
+genuinely a **question**: deleting a group, installing an update, the export passphrase.
+
+`Notifier` marshals to the UI thread itself, because most of its callers are background
+work — the watchdog, the storage sweep, an `async void` handler — and none of them should
+have to know that. A message nobody displayed is held for 30 seconds rather than dropped:
+a failure raised mid-navigation, or before the first page is up, then lands on the page
+that arrives. That is what makes the WinUI last-resort handler in `App.xaml.cs` reportable
+at all — it previously had no window to raise an alert on.
+
+`NotificationHost` is the banner stack, one per page in the **last child of the root
+grid**, so a banner sits above the modal layer: a failure raised from inside a sheet has
+to be readable without closing it. Only the host whose page is `Shell.Current.CurrentPage`
+accepts a message — Shell keeps visited pages alive, so a plain broadcast would leave a
+banner waiting on three pages the user is not on. `LockPage` deliberately has none; it
+renders its own error inline.
+
+Banners dismiss themselves, a failure getting noticeably longer than a success, and the
+stack is capped so a sweep failing over thirteen shares cannot bury the page it is
+reporting on. Nothing is lost when one goes: the audit log and the diagnostics file are
+what the record is for.
+
+Every string either side of this is in `AppResources`. The app is translated into five
+languages and was still saying "Something went wrong!" in English at eleven call sites.
+
 ### The update check
 
 `GitHubUpdateChecker` reads `/releases/latest` — unauthenticated, read-only, nothing
@@ -206,6 +241,17 @@ thirteen shares of one pool cost one handshake per sweep rather than thirteen. *
 that is not the host declining to answer reads as reachable**, deliberately: a false
 "unreachable" would stop Helix reconnecting a drive that would have come back, which is
 the one thing the watchdog exists to do.
+
+The row says which of the two it is. `DriveDisplay.OfflineReason` carries
+`HostUnreachable` or `Refused`, and the status pill has one for each — amber "Unreachable"
+against red "Failed" — beside the plain "Disconnected" that a drive the user put down
+keeps. Without it, a laptop away from its NAS showed thirteen identical red pills, which
+is also what thirteen wrong passwords look like. The reason is only ever set from an
+attempt that actually happened, by `DriveWatchdog` through `DriveAttemptFailedMessage` or
+by the row's own connect; a drive nobody has tried stays on the plain pill rather than
+being guessed at, and a drive that comes up clears it, so a new outage cannot be blamed on
+the old one. The unreachable pill gets the localized sentence and the refused one the
+share's own words, since the domain's error descriptions are not translated.
 
 `DriveWatchdog` reads that error code and puts the drive back at a flat 30-second interval
 without counting it as a failure, so a laptop returning to the NAS's network reconnects in
@@ -578,18 +624,20 @@ App.xaml, AppShell.xaml, MauiProgram.cs, GlobalUsings.cs
 Behaviors/     attached behaviors used from XAML
 Common/        ScopedHandler, PageNames, PresentationAssembly, StorageUsageHelper, WindowSizing,
                MainWindow, DrivePlatform, AppLog
-Controls/      custom controls and layouts (NavItem, ChartView, HorizontalWrapLayout)
+Controls/      custom controls and layouts (NavItem, ChartView, HorizontalWrapLayout,
+               NotificationHost)
 Converters/    IValueConverter implementations
 Extensions/    DependencyInjection (AddPresensation)
 Icons/         IconFont glyph constants
 Localization/  LocalizationResourceManager, TranslateExtension, CultureSwitcher
 Messaging/     CommunityToolkit.Mvvm messages, by feature
-               Auditlogs/, DriveGroups/, Drives/, Navigation/, Settings/, Users/
+               Auditlogs/, DriveGroups/, Drives/, Navigation/, Notifications/,
+               Settings/, Users/
 Models/        observable display models bound by the views
 Platforms/     MAUI platform heads
 Resources/     AppIcon, Fonts, Images, Languages, Splash, Styles
 Services/      DriveWatchdog, TrayIconService, StorageAlertService, IdleLockService,
-               ModalHost, PassphrasePromptService
+               ModalHost, PassphrasePromptService, Notifier
 ViewModels/    BaseViewModel + Auditlogs/, Drives/, Settings/, Users/
 Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/, Users/
 ```

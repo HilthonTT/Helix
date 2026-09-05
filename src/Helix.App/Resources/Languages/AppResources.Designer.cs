@@ -1398,5 +1398,203 @@ namespace Helix.App.Resources.Languages {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Dismiss.
+        /// </summary>
+        internal static string Dismiss {
+            get {
+                return ResourceManager.GetString("Dismiss", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OK.
+        /// </summary>
+        internal static string Ok {
+            get {
+                return ResourceManager.GetString("Ok", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Something went wrong..
+        /// </summary>
+        internal static string UnexpectedError {
+            get {
+                return ResourceManager.GetString("UnexpectedError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your drives have been exported..
+        /// </summary>
+        internal static string DrivesExported {
+            get {
+                return ResourceManager.GetString("DrivesExported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your drives have been imported..
+        /// </summary>
+        internal static string DrivesImported {
+            get {
+                return ResourceManager.GetString("DrivesImported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your password has been updated..
+        /// </summary>
+        internal static string PasswordUpdated {
+            get {
+                return ResourceManager.GetString("PasswordUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your username has been updated..
+        /// </summary>
+        internal static string UsernameUpdated {
+            get {
+                return ResourceManager.GetString("UsernameUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Encrypt export.
+        /// </summary>
+        internal static string EncryptExport {
+            get {
+                return ResourceManager.GetString("EncryptExport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter a passphrase to protect this drive export..
+        /// </summary>
+        internal static string EncryptExportMessage {
+            get {
+                return ResourceManager.GetString("EncryptExportMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Re-enter the same passphrase to confirm..
+        /// </summary>
+        internal static string EncryptExportConfirmMessage {
+            get {
+                return ResourceManager.GetString("EncryptExportConfirmMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Continue.
+        /// </summary>
+        internal static string Continue {
+            get {
+                return ResourceManager.GetString("Continue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Encrypt.
+        /// </summary>
+        internal static string Encrypt {
+            get {
+                return ResourceManager.GetString("Encrypt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passphrase.
+        /// </summary>
+        internal static string Passphrase {
+            get {
+                return ResourceManager.GetString("Passphrase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm passphrase.
+        /// </summary>
+        internal static string ConfirmPassphrase {
+            get {
+                return ResourceManager.GetString("ConfirmPassphrase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passphrases don't match.
+        /// </summary>
+        internal static string PassphrasesDontMatch {
+            get {
+                return ResourceManager.GetString("PassphrasesDontMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The two passphrases you entered are different. Please try again..
+        /// </summary>
+        internal static string PassphrasesDontMatchMessage {
+            get {
+                return ResourceManager.GetString("PassphrasesDontMatchMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decrypt import.
+        /// </summary>
+        internal static string DecryptImport {
+            get {
+                return ResourceManager.GetString("DecryptImport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the passphrase used when this vault was exported..
+        /// </summary>
+        internal static string DecryptImportMessage {
+            get {
+                return ResourceManager.GetString("DecryptImportMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decrypt.
+        /// </summary>
+        internal static string Decrypt {
+            get {
+                return ResourceManager.GetString("Decrypt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unreachable.
+        /// </summary>
+        internal static string StatusUnreachable {
+            get {
+                return ResourceManager.GetString("StatusUnreachable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The NAS is not on this network. Helix keeps trying..
+        /// </summary>
+        internal static string StatusUnreachableHint {
+            get {
+                return ResourceManager.GetString("StatusUnreachableHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed.
+        /// </summary>
+        internal static string StatusFailed {
+            get {
+                return ResourceManager.GetString("StatusFailed", resourceCulture);
+            }
+        }
+        
     }
 }

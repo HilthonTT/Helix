@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Helix.App.Models"
@@ -48,14 +48,19 @@
                    MaxLines="1"/>
 
             <!--
-            The status is the toggle. Three pills swap rather than one pill retinted by a
+            The status is the toggle. Pills swap rather than one pill retinted by a
             trigger, so the resting colours stay plain style values and the hover
             animation has a stable colour to return to.
 
-            The third is the busy one, and it replaces the other two while a mount is in
-            flight: the row is disabled for the duration, so leaving the old pill up left
-            the user pressing "Disconnected" with nothing appearing to happen for as long
-            as the share took to answer.
+            Three of them are ways of being offline, because "Disconnected" alone covered
+            a drive the user put down, a NAS that is on another network, and a share that
+            refused the password — and away from the NAS that is every row on the page,
+            all day, in the same red.
+
+            The busy one replaces all the others while a mount is in flight: the row is
+            disabled for the duration, so leaving the old pill up left the user pressing
+            "Disconnected" with nothing appearing to happen for as long as the share took
+            to answer.
             -->
             <Grid Grid.Column="3" VerticalOptions="Center">
                 <Border Style="{StaticResource PillSuccess}"
@@ -94,6 +99,57 @@
                                VerticalOptions="Center"
                                TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
                         <Label Text="{l10n:Translate Disconnected}"
+                               Style="{StaticResource DangerText}"
+                               FontSize="12"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!--
+                Offline, but the NAS never answered — the ordinary state of a laptop away
+                from it, so amber rather than red, and it says what it is instead of
+                sharing a word with a wrong password. Tappable like the others: pressing
+                it is a deliberate attempt, which is worth making even when the last
+                unattended one found nothing.
+                -->
+                <Border Style="{StaticResource PillWarning}"
+                        IsVisible="{Binding ShowUnreachable}"
+                        ToolTipProperties.Text="{Binding OfflineDetail}"
+                        behaviors:Hover.Cursor="True"
+                        behaviors:Hover.Scale="1.04">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="ToggleConnect"/>
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="8" InputTransparent="True">
+                        <Label Text="{x:Static icons:IconFont.Circle}"
+                               Style="{StaticResource IconSm}"
+                               FontSize="8"
+                               VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"/>
+                        <Label Text="{l10n:Translate StatusUnreachable}"
+                               Style="{StaticResource WarningText}"
+                               FontSize="12"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- The NAS answered and the mount was refused: a real failure, and the
+                     tooltip carries what it said. -->
+                <Border Style="{StaticResource PillDanger}"
+                        IsVisible="{Binding ShowFailed}"
+                        ToolTipProperties.Text="{Binding OfflineDetail}"
+                        behaviors:Hover.Cursor="True"
+                        behaviors:Hover.Scale="1.04">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="ToggleConnect"/>
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="8" InputTransparent="True">
+                        <Label Text="{x:Static icons:IconFont.ExclamationCircle}"
+                               Style="{StaticResource IconSm}"
+                               FontSize="9"
+                               VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                        <Label Text="{l10n:Translate StatusFailed}"
                                Style="{StaticResource DangerText}"
                                FontSize="12"
                                VerticalOptions="Center"/>

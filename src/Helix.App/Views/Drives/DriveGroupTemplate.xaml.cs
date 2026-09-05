@@ -1,8 +1,9 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
 using Helix.App.Models;
 using Helix.Application.Features.DriveGroups.Commands;
 using Microsoft.Extensions.Logging;
+using Helix.App.Services;
 
 namespace Helix.App.Views.Drives;
 
@@ -62,7 +63,7 @@ public sealed partial class DriveGroupTemplate : ContentView
 
             if (result.IsFailure)
             {
-                await Shell.Current.DisplayAlertAsync("Something went wrong!", result.Error.Description, "Ok");
+                Notifier.Error(result.Error);
             }
         }
         catch (Exception ex)

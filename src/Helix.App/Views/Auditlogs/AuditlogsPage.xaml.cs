@@ -38,7 +38,7 @@ public sealed partial class AuditlogsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Something went wrong!", ex.Message, "Ok");
+            Notifier.Error(ex.Message);
         }
     }
 

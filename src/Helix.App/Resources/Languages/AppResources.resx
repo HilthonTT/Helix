@@ -597,4 +597,70 @@
   <data name="Disconnecting" xml:space="preserve">
     <value>Disconnecting…</value>
   </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Something went wrong.</value>
+  </data>
+  <data name="DrivesExported" xml:space="preserve">
+    <value>Your drives have been exported.</value>
+  </data>
+  <data name="DrivesImported" xml:space="preserve">
+    <value>Your drives have been imported.</value>
+  </data>
+  <data name="PasswordUpdated" xml:space="preserve">
+    <value>Your password has been updated.</value>
+  </data>
+  <data name="UsernameUpdated" xml:space="preserve">
+    <value>Your username has been updated.</value>
+  </data>
+  <data name="EncryptExport" xml:space="preserve">
+    <value>Encrypt export</value>
+  </data>
+  <data name="EncryptExportMessage" xml:space="preserve">
+    <value>Enter a passphrase to protect this drive export.</value>
+  </data>
+  <data name="EncryptExportConfirmMessage" xml:space="preserve">
+    <value>Re-enter the same passphrase to confirm.</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="Encrypt" xml:space="preserve">
+    <value>Encrypt</value>
+  </data>
+  <data name="Passphrase" xml:space="preserve">
+    <value>Passphrase</value>
+  </data>
+  <data name="ConfirmPassphrase" xml:space="preserve">
+    <value>Confirm passphrase</value>
+  </data>
+  <data name="PassphrasesDontMatch" xml:space="preserve">
+    <value>Passphrases don't match</value>
+  </data>
+  <data name="PassphrasesDontMatchMessage" xml:space="preserve">
+    <value>The two passphrases you entered are different. Please try again.</value>
+  </data>
+  <data name="DecryptImport" xml:space="preserve">
+    <value>Decrypt import</value>
+  </data>
+  <data name="DecryptImportMessage" xml:space="preserve">
+    <value>Enter the passphrase used when this vault was exported.</value>
+  </data>
+  <data name="Decrypt" xml:space="preserve">
+    <value>Decrypt</value>
+  </data>
+  <data name="StatusUnreachable" xml:space="preserve">
+    <value>Unreachable</value>
+  </data>
+  <data name="StatusUnreachableHint" xml:space="preserve">
+    <value>The NAS is not on this network. Helix keeps trying.</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
 </root>

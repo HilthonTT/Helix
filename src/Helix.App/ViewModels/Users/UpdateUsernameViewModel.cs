@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Users;
 using Helix.App.ViewModels;
 using Helix.Application.Features.Users.Commands;
+using Helix.App.Resources.Languages;
 
 namespace Helix.App.ViewModels.Users;
 
@@ -41,7 +42,7 @@ internal sealed partial class UpdateUsernameViewModel : BaseViewModel
                 return;
             }
 
-            await DisplaySuccessAsync("You've updated your username.");
+            await DisplaySuccessAsync(AppResources.UsernameUpdated);
 
             WeakReferenceMessenger.Default.Send(new UsernameUpdatedMessage(Username));
             WeakReferenceMessenger.Default.Send(new UpdateUsernameMessage(false, string.Empty));

@@ -1,4 +1,5 @@
-﻿using Helix.Application.Abstractions.Security;
+﻿using Helix.App.Resources.Languages;
+using Helix.Application.Abstractions.Security;
 
 namespace Helix.App.Services;
 
@@ -20,11 +21,11 @@ internal sealed class PassphrasePromptService : IPassphrasePrompt
         }
 
         string? first = await shell.DisplayPromptAsync(
-            title: "Encrypt export",
-            message: "Enter a passphrase to protect this drive export.",
-            accept: "Continue",
-            cancel: "Cancel",
-            placeholder: "Passphrase",
+            title: AppResources.EncryptExport,
+            message: AppResources.EncryptExportMessage,
+            accept: AppResources.Continue,
+            cancel: AppResources.Cancel,
+            placeholder: AppResources.Passphrase,
             maxLength: MaxLength,
             keyboard: Keyboard.Text);
 
@@ -34,11 +35,11 @@ internal sealed class PassphrasePromptService : IPassphrasePrompt
         }
 
         string? second = await shell.DisplayPromptAsync(
-            title: "Encrypt export",
-            message: "Re-enter the same passphrase to confirm.",
-            accept: "Encrypt",
-            cancel: "Cancel",
-            placeholder: "Confirm passphrase",
+            title: AppResources.EncryptExport,
+            message: AppResources.EncryptExportConfirmMessage,
+            accept: AppResources.Encrypt,
+            cancel: AppResources.Cancel,
+            placeholder: AppResources.ConfirmPassphrase,
             maxLength: MaxLength,
             keyboard: Keyboard.Text);
 
@@ -50,9 +51,9 @@ internal sealed class PassphrasePromptService : IPassphrasePrompt
         if (!string.Equals(first, second, StringComparison.Ordinal))
         {
             await shell.DisplayAlertAsync(
-                "Passphrases don't match",
-                "The two passphrases you entered are different. Please try again.",
-                "Ok");
+                AppResources.PassphrasesDontMatch,
+                AppResources.PassphrasesDontMatchMessage,
+                AppResources.Ok);
             return null;
         }
 
@@ -68,11 +69,11 @@ internal sealed class PassphrasePromptService : IPassphrasePrompt
         }
 
         string? passphrase = await shell.DisplayPromptAsync(
-            title: "Decrypt import",
-            message: "Enter the passphrase used when this vault was exported.",
-            accept: "Decrypt",
-            cancel: "Cancel",
-            placeholder: "Passphrase",
+            title: AppResources.DecryptImport,
+            message: AppResources.DecryptImportMessage,
+            accept: AppResources.Decrypt,
+            cancel: AppResources.Cancel,
+            placeholder: AppResources.Passphrase,
             maxLength: MaxLength,
             keyboard: Keyboard.Text);
 

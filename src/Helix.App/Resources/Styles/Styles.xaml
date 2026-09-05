@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -150,6 +150,11 @@
                 Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
     </Style>
 
+    <Style x:Key="WarningText" TargetType="Label" BasedOn="{StaticResource LabelBase}">
+        <Setter Property="TextColor"
+                Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"/>
+    </Style>
+
     <Style x:Key="BrandText" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="TextColor" Value="{StaticResource Brand}"/>
     </Style>
@@ -239,6 +244,12 @@
     <Style x:Key="PillDanger" TargetType="Border" BasedOn="{StaticResource Pill}">
         <Setter Property="Background"
                 Value="{AppThemeBinding Light={StaticResource DangerWashLightBrush}, Dark={StaticResource DangerWashDarkBrush}}"/>
+    </Style>
+
+    <!-- The NAS is not on this network: a wait, not a failure, so it is not the red one. -->
+    <Style x:Key="PillWarning" TargetType="Border" BasedOn="{StaticResource Pill}">
+        <Setter Property="Background"
+                Value="{AppThemeBinding Light={StaticResource WarningWashLightBrush}, Dark={StaticResource WarningWashDarkBrush}}"/>
     </Style>
 
     <Style x:Key="PillNeutral" TargetType="Border" BasedOn="{StaticResource Pill}">

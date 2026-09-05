@@ -103,14 +103,28 @@ public abstract partial class BaseViewModel : ObservableObject
         _countdownStarted = false;
     }
 
+    /// <summary>
+    /// Reports a failure in the page's notification banner.
+    /// </summary>
+    /// <remarks>
+    /// Both of these used to raise a modal alert, which is why they still return a task
+    /// nobody awaits anything real on: every call site already writes
+    /// <c>await DisplayErrorAsync(...)</c>, and the signature is what keeps them from all
+    /// having to change to say the same thing. See <see cref="Notifier"/> for why the
+    /// dialog went.
+    /// </remarks>
     public static Task DisplayErrorAsync(Error error)
     {
-        return Shell.Current.DisplayAlertAsync("Something went wrong!", error.Description, "Ok");
+        Notifier.Error(error);
+
+        return Task.CompletedTask;
     }
 
     public static Task DisplaySuccessAsync(string message)
     {
-        return Shell.Current.DisplayAlertAsync("Success!", message, "Ok");
+        Notifier.Success(message);
+
+        return Task.CompletedTask;
     }
 
     /// <summary>

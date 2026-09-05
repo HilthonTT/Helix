@@ -597,4 +597,70 @@
   <data name="Disconnecting" xml:space="preserve">
     <value>Loskoppelen…</value>
   </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Sluiten</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Er is iets misgegaan.</value>
+  </data>
+  <data name="DrivesExported" xml:space="preserve">
+    <value>Je schijven zijn geëxporteerd.</value>
+  </data>
+  <data name="DrivesImported" xml:space="preserve">
+    <value>Je schijven zijn geïmporteerd.</value>
+  </data>
+  <data name="PasswordUpdated" xml:space="preserve">
+    <value>Je wachtwoord is bijgewerkt.</value>
+  </data>
+  <data name="UsernameUpdated" xml:space="preserve">
+    <value>Je gebruikersnaam is bijgewerkt.</value>
+  </data>
+  <data name="EncryptExport" xml:space="preserve">
+    <value>Export versleutelen</value>
+  </data>
+  <data name="EncryptExportMessage" xml:space="preserve">
+    <value>Voer een wachtwoordzin in om deze schijfexport te beveiligen.</value>
+  </data>
+  <data name="EncryptExportConfirmMessage" xml:space="preserve">
+    <value>Voer dezelfde wachtwoordzin nogmaals in ter bevestiging.</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Doorgaan</value>
+  </data>
+  <data name="Encrypt" xml:space="preserve">
+    <value>Versleutelen</value>
+  </data>
+  <data name="Passphrase" xml:space="preserve">
+    <value>Wachtwoordzin</value>
+  </data>
+  <data name="ConfirmPassphrase" xml:space="preserve">
+    <value>Wachtwoordzin bevestigen</value>
+  </data>
+  <data name="PassphrasesDontMatch" xml:space="preserve">
+    <value>Wachtwoordzinnen komen niet overeen</value>
+  </data>
+  <data name="PassphrasesDontMatchMessage" xml:space="preserve">
+    <value>De twee ingevoerde wachtwoordzinnen verschillen. Probeer het opnieuw.</value>
+  </data>
+  <data name="DecryptImport" xml:space="preserve">
+    <value>Import ontsleutelen</value>
+  </data>
+  <data name="DecryptImportMessage" xml:space="preserve">
+    <value>Voer de wachtwoordzin in die is gebruikt bij het exporteren van deze kluis.</value>
+  </data>
+  <data name="Decrypt" xml:space="preserve">
+    <value>Ontsleutelen</value>
+  </data>
+  <data name="StatusUnreachable" xml:space="preserve">
+    <value>Onbereikbaar</value>
+  </data>
+  <data name="StatusUnreachableHint" xml:space="preserve">
+    <value>De NAS bevindt zich niet op dit netwerk. Helix blijft het proberen.</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>Mislukt</value>
+  </data>
 </root>

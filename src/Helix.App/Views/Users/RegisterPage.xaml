@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Helix.App.ViewModels.Users"
              xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:l10n="clr-namespace:Helix.App.Localization"
+             xmlns:controls="clr-namespace:Helix.App.Controls"
              x:DataType="vm:RegisterViewModel"
              x:Class="Helix.App.Views.Users.RegisterPage"
              Title=""
@@ -162,6 +163,10 @@
                 <ActivityIndicator IsRunning="{Binding IsLoading}" WidthRequest="28" HeightRequest="28"/>
             </VerticalStackLayout>
         </Grid>
+        <!-- Last child of the root grid, so a banner sits above the modal layer too:
+             a failure raised from inside a sheet has to be readable without closing it. -->
+        <controls:NotificationHost/>
+
     </Grid>
 
 </ContentPage>

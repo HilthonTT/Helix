@@ -597,4 +597,70 @@
   <data name="Disconnecting" xml:space="preserve">
     <value>切断中…</value>
   </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>問題が発生しました。</value>
+  </data>
+  <data name="DrivesExported" xml:space="preserve">
+    <value>ドライブをエクスポートしました。</value>
+  </data>
+  <data name="DrivesImported" xml:space="preserve">
+    <value>ドライブをインポートしました。</value>
+  </data>
+  <data name="PasswordUpdated" xml:space="preserve">
+    <value>パスワードを更新しました。</value>
+  </data>
+  <data name="UsernameUpdated" xml:space="preserve">
+    <value>ユーザー名を更新しました。</value>
+  </data>
+  <data name="EncryptExport" xml:space="preserve">
+    <value>エクスポートを暗号化</value>
+  </data>
+  <data name="EncryptExportMessage" xml:space="preserve">
+    <value>このドライブのエクスポートを保護するパスフレーズを入力してください。</value>
+  </data>
+  <data name="EncryptExportConfirmMessage" xml:space="preserve">
+    <value>確認のため同じパスフレーズをもう一度入力してください。</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>続行</value>
+  </data>
+  <data name="Encrypt" xml:space="preserve">
+    <value>暗号化</value>
+  </data>
+  <data name="Passphrase" xml:space="preserve">
+    <value>パスフレーズ</value>
+  </data>
+  <data name="ConfirmPassphrase" xml:space="preserve">
+    <value>パスフレーズの確認</value>
+  </data>
+  <data name="PassphrasesDontMatch" xml:space="preserve">
+    <value>パスフレーズが一致しません</value>
+  </data>
+  <data name="PassphrasesDontMatchMessage" xml:space="preserve">
+    <value>入力された 2 つのパスフレーズが異なります。もう一度お試しください。</value>
+  </data>
+  <data name="DecryptImport" xml:space="preserve">
+    <value>インポートを復号</value>
+  </data>
+  <data name="DecryptImportMessage" xml:space="preserve">
+    <value>このボールトをエクスポートしたときのパスフレーズを入力してください。</value>
+  </data>
+  <data name="Decrypt" xml:space="preserve">
+    <value>復号</value>
+  </data>
+  <data name="StatusUnreachable" xml:space="preserve">
+    <value>接続不可</value>
+  </data>
+  <data name="StatusUnreachableHint" xml:space="preserve">
+    <value>この NAS はこのネットワーク上にありません。Helix は再試行を続けます。</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>失敗</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+﻿<?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -61,6 +61,8 @@
 
     <Color x:Key="WarningDark">#FBBF24</Color>
     <Color x:Key="WarningLight">#B45309</Color>
+    <Color x:Key="WarningWashDark">#26FBBF24</Color>
+    <Color x:Key="WarningWashLight">#1FB45309</Color>
 
     <Color x:Key="ScrimColor">#B3000000</Color>
 
@@ -89,6 +91,8 @@
     <SolidColorBrush x:Key="SuccessWashLightBrush" Color="{StaticResource SuccessWashLight}"/>
     <SolidColorBrush x:Key="DangerWashDarkBrush" Color="{StaticResource DangerWashDark}"/>
     <SolidColorBrush x:Key="DangerWashLightBrush" Color="{StaticResource DangerWashLight}"/>
+    <SolidColorBrush x:Key="WarningWashDarkBrush" Color="{StaticResource WarningWashDark}"/>
+    <SolidColorBrush x:Key="WarningWashLightBrush" Color="{StaticResource WarningWashLight}"/>
 
     <!-- The brand gradient, lifted straight off the logomark. Used sparingly:
          the sign-in panel and the dashboard's primary call to action. -->

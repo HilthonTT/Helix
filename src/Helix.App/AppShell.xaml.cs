@@ -114,7 +114,7 @@ public sealed partial class AppShell : Shell
         Result result = await ScopedHandler.HandleAsync((LogoutUser h) => h.Handle());
         if (result.IsFailure)
         {
-            await Current.DisplayAlertAsync("Something went wrong!", result.Error.Description, "Ok");
+            Notifier.Error(result.Error);
             return;
         }
 

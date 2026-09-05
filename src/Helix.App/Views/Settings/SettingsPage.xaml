@@ -350,6 +350,10 @@
                                                 AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
+        <!-- Last child of the root grid, so a banner sits above the modal layer too:
+             a failure raised from inside a sheet has to be readable without closing it. -->
+        <controls:NotificationHost/>
+
     </Grid>
 
 </ContentPage>

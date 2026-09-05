@@ -17,6 +17,7 @@ using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using System.Collections.ObjectModel;
 using SettingsModel = Helix.Domain.Settings.Settings;
+using Helix.App.Resources.Languages;
 
 namespace Helix.App.ViewModels.Drives;
 
@@ -90,7 +91,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        await DisplaySuccessAsync("You've exported your drives!");
+        await DisplaySuccessAsync(AppResources.DrivesExported);
     }
 
     [RelayCommand]
@@ -103,7 +104,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        await DisplaySuccessAsync("You've imported your drives!");
+        await DisplaySuccessAsync(AppResources.DrivesImported);
 
         List<Drive> drives = result.Value;
 

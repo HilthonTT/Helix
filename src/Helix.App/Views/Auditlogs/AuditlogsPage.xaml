@@ -6,6 +6,7 @@
              xmlns:vm="clr-namespace:Helix.App.ViewModels.Auditlogs"
              xmlns:views="clr-namespace:Helix.App.Views.Auditlogs"
              xmlns:l10n="clr-namespace:Helix.App.Localization"
+             xmlns:controls="clr-namespace:Helix.App.Controls"
              x:Class="Helix.App.Views.Auditlogs.AuditlogsPage"
              x:DataType="vm:AuditlogsViewModel"
              Title="">
@@ -121,6 +122,10 @@
                                                   AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
                                                   AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
+
+        <!-- Last child of the root grid, so a banner sits above the modal layer too:
+             a failure raised from inside a sheet has to be readable without closing it. -->
+        <controls:NotificationHost/>
 
     </Grid>
 

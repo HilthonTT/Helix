@@ -37,7 +37,7 @@ public sealed partial class SettingsPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Something went wrong!", ex.Message, "Ok");
+            Notifier.Error(ex.Message);
         }
     }
 

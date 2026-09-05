@@ -597,4 +597,70 @@
   <data name="Disconnecting" xml:space="preserve">
     <value>Memutuskan…</value>
   </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Tutup</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Terjadi kesalahan.</value>
+  </data>
+  <data name="DrivesExported" xml:space="preserve">
+    <value>Drive Anda telah diekspor.</value>
+  </data>
+  <data name="DrivesImported" xml:space="preserve">
+    <value>Drive Anda telah diimpor.</value>
+  </data>
+  <data name="PasswordUpdated" xml:space="preserve">
+    <value>Kata sandi Anda telah diperbarui.</value>
+  </data>
+  <data name="UsernameUpdated" xml:space="preserve">
+    <value>Nama pengguna Anda telah diperbarui.</value>
+  </data>
+  <data name="EncryptExport" xml:space="preserve">
+    <value>Enkripsi ekspor</value>
+  </data>
+  <data name="EncryptExportMessage" xml:space="preserve">
+    <value>Masukkan frasa sandi untuk melindungi ekspor drive ini.</value>
+  </data>
+  <data name="EncryptExportConfirmMessage" xml:space="preserve">
+    <value>Masukkan kembali frasa sandi yang sama untuk konfirmasi.</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Lanjutkan</value>
+  </data>
+  <data name="Encrypt" xml:space="preserve">
+    <value>Enkripsi</value>
+  </data>
+  <data name="Passphrase" xml:space="preserve">
+    <value>Frasa sandi</value>
+  </data>
+  <data name="ConfirmPassphrase" xml:space="preserve">
+    <value>Konfirmasi frasa sandi</value>
+  </data>
+  <data name="PassphrasesDontMatch" xml:space="preserve">
+    <value>Frasa sandi tidak cocok</value>
+  </data>
+  <data name="PassphrasesDontMatchMessage" xml:space="preserve">
+    <value>Kedua frasa sandi yang Anda masukkan berbeda. Silakan coba lagi.</value>
+  </data>
+  <data name="DecryptImport" xml:space="preserve">
+    <value>Dekripsi impor</value>
+  </data>
+  <data name="DecryptImportMessage" xml:space="preserve">
+    <value>Masukkan frasa sandi yang digunakan saat vault ini diekspor.</value>
+  </data>
+  <data name="Decrypt" xml:space="preserve">
+    <value>Dekripsi</value>
+  </data>
+  <data name="StatusUnreachable" xml:space="preserve">
+    <value>Tidak terjangkau</value>
+  </data>
+  <data name="StatusUnreachableHint" xml:space="preserve">
+    <value>NAS tidak berada di jaringan ini. Helix terus mencoba.</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>Gagal</value>
+  </data>
 </root>

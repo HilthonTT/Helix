@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using AppBase = Microsoft.Maui.Controls.Application;
+using Helix.App.Resources.Languages;
+using Helix.App.Services;
 
 namespace Helix.App;
 
@@ -46,22 +48,10 @@ public sealed partial class App : AppBase
             // Keep the app alive; surface the failure without killing the process.
             e.Handled = true;
 
-            string message = e.Exception?.Message ?? "An unexpected error occurred.";
-            _ = MainThread.InvokeOnMainThreadAsync(async () =>
-            {
-                try
-                {
-                    Page? page = Current?.Windows.Count > 0 ? Current.Windows[0].Page : null;
-                    if (page is not null)
-                    {
-                        await page.DisplayAlertAsync("Something went wrong!", message, "Ok");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    AppLog.For<App>().LogError(ex, "Failed to show the crash alert.");
-                }
-            });
+            // Notifier holds this until a page with a banner host is on screen, which
+            // matters here more than anywhere: a fault during startup or navigation used
+            // to have no window to raise an alert on and was reported to nobody.
+            Notifier.Error(e.Exception?.Message ?? AppResources.UnexpectedError);
         };
 #endif
     }

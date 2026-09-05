@@ -44,25 +44,84 @@ internal sealed partial class DriveDisplay : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowConnected))]
     [NotifyPropertyChangedFor(nameof(ShowDisconnected))]
+    [NotifyPropertyChangedFor(nameof(ShowUnreachable))]
+    [NotifyPropertyChangedFor(nameof(ShowFailed))]
     public partial bool Connected { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]
     [NotifyPropertyChangedFor(nameof(ShowConnected))]
     [NotifyPropertyChangedFor(nameof(ShowDisconnected))]
+    [NotifyPropertyChangedFor(nameof(ShowUnreachable))]
+    [NotifyPropertyChangedFor(nameof(ShowFailed))]
     [NotifyPropertyChangedFor(nameof(BusyText))]
     public partial bool IsBusy { get; set; }
+
+    /// <summary>
+    /// Why the drive is not mounted, when an attempt has been made and can say.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowDisconnected))]
+    [NotifyPropertyChangedFor(nameof(ShowUnreachable))]
+    [NotifyPropertyChangedFor(nameof(ShowFailed))]
+    public partial DriveOfflineReason OfflineReason { get; set; }
+
+    /// <summary>
+    /// The tooltip on the offline pill: what went wrong, in full.
+    /// </summary>
+    /// <remarks>
+    /// The pill itself is one word because it lives in a 160px column beside twelve
+    /// others. The sentence that makes it actionable — which host did not answer, or what
+    /// the share said — hangs off it rather than being lost.
+    /// </remarks>
+    [ObservableProperty]
+    public partial string OfflineDetail { get; set; }
 
     public bool IsNotBusy => !IsBusy;
 
     /// <summary>
-    /// The three states the status pill can be in are mutually exclusive, and the busy
-    /// one wins: a mount in flight is neither connected nor disconnected yet, and
-    /// leaving the old pill up while it ran is what made the row look unresponsive.
+    /// The status pill's states are mutually exclusive, and the busy one wins: a mount in
+    /// flight is neither connected nor disconnected yet, and leaving the old pill up while
+    /// it ran is what made the row look unresponsive.
     /// </summary>
     public bool ShowConnected => Connected && !IsBusy;
 
-    public bool ShowDisconnected => !Connected && !IsBusy;
+    /// <summary>
+    /// Not mounted, with nothing to add. A drive the user disconnected is in this state,
+    /// which is the point: it is the resting pill, not the failure one.
+    /// </summary>
+    public bool ShowDisconnected => IsOffline && OfflineReason == DriveOfflineReason.Unknown;
+
+    /// <summary>The NAS is not answering — a wait rather than a failure.</summary>
+    public bool ShowUnreachable => IsOffline && OfflineReason == DriveOfflineReason.HostUnreachable;
+
+    /// <summary>The NAS answered and the mount was refused.</summary>
+    public bool ShowFailed => IsOffline && OfflineReason == DriveOfflineReason.Refused;
+
+    private bool IsOffline => !Connected && !IsBusy;
+
+    /// <summary>
+    /// Records why an attempt did not mount the drive, so the row can say which kind of
+    /// "not connected" this is.
+    /// </summary>
+    public void MarkOffline(DriveOfflineReason reason, string detail)
+    {
+        OfflineReason = reason;
+        OfflineDetail = detail;
+    }
+
+    /// <summary>
+    /// A drive that came up has no reason to be offline any more, whoever mounted it. Left
+    /// behind, a stale reason would resurface as soon as the drive next dropped and blame
+    /// the new outage on the old one.
+    /// </summary>
+    partial void OnConnectedChanged(bool value)
+    {
+        if (value)
+        {
+            MarkOffline(DriveOfflineReason.Unknown, string.Empty);
+        }
+    }
 
     /// <summary>What the busy pill says while an operation is in flight.</summary>
     /// <remarks>
@@ -109,5 +168,6 @@ internal sealed partial class DriveDisplay : ObservableObject
         Letter = string.Empty;
         Name = string.Empty;
         StorageUsage = string.Empty;
+        OfflineDetail = string.Empty;
     }
 }

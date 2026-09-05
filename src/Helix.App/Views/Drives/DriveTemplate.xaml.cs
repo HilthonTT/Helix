@@ -1,10 +1,13 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
 using Helix.App.Models;
+using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
+using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
+using Helix.App.Services;
 
 namespace Helix.App.Views.Drives;
 
@@ -61,14 +64,16 @@ public sealed partial class DriveTemplate : ContentView
     private async void ToggleConnect(object? sender, TappedEventArgs e)
     {
         // Event handler is `async void`: an escaping exception would tear down the
-        // whole app. Guard it so connection problems always surface as an alert.
+        // whole app. Guard it so connection problems always surface in the banner.
         try
         {
             await ToggleConnectInternalAsync();
         }
         catch (Exception ex)
         {
-            await ShowErrorAlert(ex.Message);
+            AppLog.For<DriveTemplate>().LogWarning(ex, "Toggling the drive connection failed.");
+
+            Notifier.Error(ex.Message);
         }
     }
 
@@ -92,7 +97,15 @@ public sealed partial class DriveTemplate : ContentView
             Result result = await HandleDriveConnection(request);
             if (result.IsFailure)
             {
-                await ShowErrorAlert(result.Error.Description);
+                // The row keeps the reason as well as reporting it: the banner is gone in
+                // a few seconds and the pill is what is still there next time the user
+                // looks at the page.
+                if (request is ConnectDrive.Request)
+                {
+                    MarkOffline(drive, result.Error);
+                }
+
+                Notifier.Error(result.Error);
                 return;
             }
 
@@ -125,26 +138,25 @@ public sealed partial class DriveTemplate : ContentView
         };
     }
 
-    private static Task ShowErrorAlert(string message)
+    /// <summary>
+    /// Files why an attempt did not mount the drive, from whichever path made it.
+    /// </summary>
+    /// <remarks>
+    /// The unreachable case gets the localized sentence rather than the error's own
+    /// description, because it is the one the user sees daily and the one there is
+    /// something to say about — the domain's descriptions are not translated. A refusal is
+    /// reported in the share's own words, which is the whole value of it.
+    /// </remarks>
+    private static void MarkOffline(DriveDisplay drive, Error error)
     {
-        // Marshal to the UI thread and swallow failures from stacked alerts: on WinUI
-        // a DisplayAlert raised while another is showing throws, which would otherwise
-        // bubble out of an async void handler and crash the app.
-        return MainThread.InvokeOnMainThreadAsync(async () =>
+        if (error.Code == DriveErrors.HostUnreachableCode)
         {
-            try
-            {
-                Page? page = Shell.Current;
-                if (page is not null)
-                {
-                    await page.DisplayAlertAsync("Something went wrong!", message, "Ok");
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLog.For<DriveTemplate>().LogWarning(ex, "Failed to show the error alert.");
-            }
-        });
+            drive.MarkOffline(DriveOfflineReason.HostUnreachable, AppResources.StatusUnreachableHint);
+
+            return;
+        }
+
+        drive.MarkOffline(DriveOfflineReason.Refused, error.Description);
     }
 
     private void HandleUpdate(object? sender, TappedEventArgs e)
@@ -197,6 +209,21 @@ public sealed partial class DriveTemplate : ContentView
             }
 
             RefreshStatus(drive);
+        });
+
+        WeakReferenceMessenger.Default.Unregister<DriveAttemptFailedMessage>(this);
+
+        // What the watchdog learned on the user's behalf while nobody was looking. Without
+        // it the row can only say the drive is down, which is the same thing it says about
+        // a drive the user disconnected themselves.
+        WeakReferenceMessenger.Default.Register<DriveAttemptFailedMessage>(this, (r, m) =>
+        {
+            if (BindingContext is not DriveDisplay drive || drive.Id != m.DriveId)
+            {
+                return;
+            }
+
+            MarkOffline(drive, Error.Problem(m.ErrorCode, m.Description));
         });
     }
 }
