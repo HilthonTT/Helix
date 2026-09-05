@@ -6,6 +6,7 @@
              xmlns:vm="clr-namespace:Helix.App.ViewModels.Auditlogs"
              xmlns:views="clr-namespace:Helix.App.Views.Auditlogs"
              xmlns:l10n="clr-namespace:Helix.App.Localization"
+             xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
              xmlns:controls="clr-namespace:Helix.App.Controls"
              x:Class="Helix.App.Views.Auditlogs.AuditlogsPage"
              x:DataType="vm:AuditlogsViewModel"
@@ -26,7 +27,7 @@
             <Border Grid.Row="1" Style="{StaticResource Card}">
                 <Grid RowDefinitions="Auto,Auto,*" Padding="20">
 
-                    <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,16">
+                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" Margin="0,0,0,16">
                         <Label Text="{l10n:Translate YourAuditlogs}"
                                Style="{StaticResource Title1}"
                                VerticalOptions="Center"/>
@@ -37,18 +38,42 @@
                                    FontFamily="{StaticResource FontMonoBold}"/>
                         </Border>
 
-                        <Border Grid.Column="3"
-                                Style="{StaticResource Chip}"
-                                SemanticProperties.Description="Opens the audit log filter">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding OpenSearchAuditlogsModalCommand}"/>
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="9" InputTransparent="True">
-                                <Label Text="{x:Static icons:IconFont.Filter}"
+                        <!-- Live, and matched against the sentence the row shows rather
+                             than against the columns the sentence is composed from. -->
+                        <!-- Fill with a ceiling rather than a fixed width; see the note
+                             on the dashboard's box. -->
+                        <Border Grid.Column="2"
+                                Style="{StaticResource Field}"
+                                MaximumWidthRequest="300"
+                                HorizontalOptions="End"
+                                Margin="0,0,4,0"
+                                VerticalOptions="Center">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Label Text="{x:Static icons:IconFont.Search}"
                                        Style="{StaticResource IconSm}"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
-                                <Label Text="{l10n:Translate Filter}" FontSize="13" VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
+                                       Margin="12,0,0,0"
+                                       VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+
+                                <Entry Grid.Column="1"
+                                       Margin="8,0,10,0"
+                                       Placeholder="{l10n:Translate SearchAuditlogs}"
+                                       Text="{Binding SearchTerm}"/>
+
+                                <Label Grid.Column="2"
+                                       Text="{x:Static icons:IconFont.Times}"
+                                       Style="{StaticResource IconSm}"
+                                       FontSize="12"
+                                       Margin="0,0,12,0"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding HasSearchTerm}"
+                                       ToolTipProperties.Text="{l10n:Translate ClearSearch}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ClearSearchCommand}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </Grid>
                         </Border>
                     </Grid>
 
@@ -59,26 +84,74 @@
                         <Grid ColumnDefinitions="Auto,*,200" ColumnSpacing="14" Padding="12,0">
                             <Label Text=" " Style="{StaticResource Overline}" WidthRequest="7"/>
                             <Label Grid.Column="1" Text="{l10n:Translate Message}" Style="{StaticResource Overline}"/>
-                            <Label Grid.Column="2"
-                                   Text="{l10n:Translate Date}"
-                                   Style="{StaticResource Overline}"
-                                   HorizontalTextAlignment="End"/>
+                            <HorizontalStackLayout Grid.Column="2"
+                                                   Spacing="5"
+                                                   HorizontalOptions="End"
+                                                   behaviors:Hover.Cursor="True">
+                                <HorizontalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleSortOrderCommand}"/>
+                                </HorizontalStackLayout.GestureRecognizers>
+                                <Label Text="{l10n:Translate Date}" Style="{StaticResource Overline}"/>
+                                <Label Text="{Binding SortGlyph}"
+                                       Style="{StaticResource Overline}"
+                                       FontFamily="{StaticResource FontIcon}"/>
+                            </HorizontalStackLayout>
                         </Grid>
 
                         <BoxView Style="{StaticResource Divider}"/>
                     </VerticalStackLayout>
 
-                    <ScrollView Grid.Row="2"
-                                Margin="0,8,0,0"
-                                IsVisible="{Binding Auditlogs.Count, Converter={StaticResource CountToBoolConverter}}">
-                        <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Auditlogs}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="models:AuditlogDisplay">
-                                    <views:AuditlogTemplate BindingContext="{Binding .}"/>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
-                    </ScrollView>
+                    <!--
+                    The list this mattered most for: ninety days of retention is the
+                    default, and every row of it used to be realized before the page could
+                    be drawn.
+                    -->
+                    <CollectionView Grid.Row="2"
+                                    Margin="0,8,0,0"
+                                    ItemsSource="{Binding Auditlogs}"
+                                    SelectionMode="None"
+                                    IsVisible="{Binding Auditlogs.Count, Converter={StaticResource CountToBoolConverter}}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="2"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:AuditlogDisplay">
+                                <views:AuditlogTemplate/>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Nothing matched the filter, which is not the same as an empty log. -->
+                    <VerticalStackLayout Grid.Row="1"
+                                         Grid.RowSpan="2"
+                                         Spacing="10"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="Center"
+                                         IsVisible="{Binding ShowNoMatches}">
+                        <Border Style="{StaticResource IconTile}"
+                                WidthRequest="56"
+                                HeightRequest="56"
+                                HorizontalOptions="Center">
+                            <Label Text="{x:Static icons:IconFont.Search}"
+                                   Style="{StaticResource IconLg}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                        </Border>
+
+                        <Label Text="{l10n:Translate NoAuditlogsMatchTitle}"
+                               Style="{StaticResource Title2}"
+                               HorizontalTextAlignment="Center"/>
+
+                        <Label Text="{l10n:Translate NoAuditlogsMatchMessage}"
+                               Style="{StaticResource Caption}"
+                               HorizontalTextAlignment="Center"
+                               MaximumWidthRequest="360"/>
+
+                        <Button Text="{l10n:Translate ClearSearch}"
+                                Style="{StaticResource ButtonSecondary}"
+                                Margin="0,6,0,0"
+                                HorizontalOptions="Center"
+                                Command="{Binding ClearSearchCommand}"/>
+                    </VerticalStackLayout>
 
                     <!-- Empty state -->
                     <VerticalStackLayout Grid.Row="1"
@@ -86,7 +159,7 @@
                                          Spacing="10"
                                          VerticalOptions="Center"
                                          HorizontalOptions="Center"
-                                         IsVisible="{Binding Auditlogs.Count, Converter={StaticResource CountToBoolConverter}, ConverterParameter=invert}">
+                                         IsVisible="{Binding ShowNoAuditlogs}">
                         <Border Style="{StaticResource IconTile}"
                                 WidthRequest="56"
                                 HeightRequest="56"
@@ -109,19 +182,6 @@
                 </Grid>
             </Border>
         </Grid>
-
-        <!-- ===== Modal layer ===== -->
-        <BoxView x:Name="BlockScreen"
-                 Color="{StaticResource Black}"
-                 Opacity="0"
-                 InputTransparent="True"/>
-
-        <AbsoluteLayout x:Name="SearchAuditlogsLayout" IsVisible="False">
-            <views:SearchAuditlogsModal x:Name="SearchAuditlogsView"
-                                                  WidthRequest="460"
-                                                  AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
-                                                  AbsoluteLayout.LayoutFlags="PositionProportional"/>
-        </AbsoluteLayout>
 
         <!-- Last child of the root grid, so a banner sits above the modal layer too:
              a failure raised from inside a sheet has to be readable without closing it. -->

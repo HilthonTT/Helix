@@ -235,10 +235,7 @@
     <value>Date</value>
   </data>
   <data name="SearchDrives" xml:space="preserve">
-    <value>Search Drives</value>
-  </data>
-  <data name="SearchTermPlaceholder" xml:space="preserve">
-    <value>Enter your search term (optional)</value>
+    <value>Search drives</value>
   </data>
   <data name="YourSortOrder" xml:space="preserve">
     <value>Your sort order</value>
@@ -256,7 +253,7 @@
     <value>Descending</value>
   </data>
   <data name="SearchAuditlogs" xml:space="preserve">
-    <value>Search auditlogs</value>
+    <value>Search the log</value>
   </data>
   <data name="AddNetworkDriveLetterPlaceholder" xml:space="preserve">
     <value>Add network's drive letter</value>
@@ -662,5 +659,71 @@
   </data>
   <data name="StatusFailed" xml:space="preserve">
     <value>Failed</value>
+  </data>
+  <data name="OpenInFileManager" xml:space="preserve">
+    <value>Open in file manager</value>
+  </data>
+  <data name="SettingsSaved" xml:space="preserve">
+    <value>Settings saved.</value>
+  </data>
+  <data name="UnitSeconds" xml:space="preserve">
+    <value>seconds</value>
+  </data>
+  <data name="UnitMinutes" xml:space="preserve">
+    <value>minutes</value>
+  </data>
+  <data name="UnitDays" xml:space="preserve">
+    <value>days</value>
+  </data>
+  <data name="UnitPercent" xml:space="preserve">
+    <value>%</value>
+  </data>
+  <data name="RetentionKeepEverything" xml:space="preserve">
+    <value>Keep everything</value>
+  </data>
+  <data name="StorageAlertOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="IdleLockNever" xml:space="preserve">
+    <value>Never</value>
+  </data>
+  <data name="ConnectAll" xml:space="preserve">
+    <value>Connect all</value>
+  </data>
+  <data name="DisconnectAll" xml:space="preserve">
+    <value>Disconnect all</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Select all</value>
+  </data>
+  <data name="ClearSelection" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="DrivesSelected" xml:space="preserve">
+    <value>{0} selected</value>
+  </data>
+  <data name="DisconnectConfirmTitle" xml:space="preserve">
+    <value>Disconnect drives</value>
+  </data>
+  <data name="DisconnectConfirmOne" xml:space="preserve">
+    <value>This drive will be unmounted. Anything you have open on it may fail to save.</value>
+  </data>
+  <data name="DisconnectConfirmMany" xml:space="preserve">
+    <value>{0} drives will be unmounted. Anything you have open on them may fail to save.</value>
+  </data>
+  <data name="ClearSearch" xml:space="preserve">
+    <value>Clear search</value>
+  </data>
+  <data name="NoDrivesMatchTitle" xml:space="preserve">
+    <value>No drives match</value>
+  </data>
+  <data name="NoDrivesMatchMessage" xml:space="preserve">
+    <value>Nothing here matches what you typed. Clear the search to see every drive again.</value>
+  </data>
+  <data name="NoAuditlogsMatchTitle" xml:space="preserve">
+    <value>No entries match</value>
+  </data>
+  <data name="NoAuditlogsMatchMessage" xml:space="preserve">
+    <value>Nothing in the log matches what you typed. Clear the search to see the whole history again.</value>
   </data>
 </root>

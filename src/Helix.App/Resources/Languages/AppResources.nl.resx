@@ -237,9 +237,6 @@
   <data name="SearchDrives" xml:space="preserve">
     <value>Schijven zoeken</value>
   </data>
-  <data name="SearchTermPlaceholder" xml:space="preserve">
-    <value>Voer uw zoekterm in (optioneel)</value>
-  </data>
   <data name="YourSortOrder" xml:space="preserve">
     <value>Uw sorteervolgorde</value>
   </data>
@@ -662,5 +659,71 @@
   </data>
   <data name="StatusFailed" xml:space="preserve">
     <value>Mislukt</value>
+  </data>
+  <data name="OpenInFileManager" xml:space="preserve">
+    <value>Openen in bestandsbeheer</value>
+  </data>
+  <data name="SettingsSaved" xml:space="preserve">
+    <value>Instellingen opgeslagen.</value>
+  </data>
+  <data name="UnitSeconds" xml:space="preserve">
+    <value>seconden</value>
+  </data>
+  <data name="UnitMinutes" xml:space="preserve">
+    <value>minuten</value>
+  </data>
+  <data name="UnitDays" xml:space="preserve">
+    <value>dagen</value>
+  </data>
+  <data name="UnitPercent" xml:space="preserve">
+    <value>%</value>
+  </data>
+  <data name="RetentionKeepEverything" xml:space="preserve">
+    <value>Alles bewaren</value>
+  </data>
+  <data name="StorageAlertOff" xml:space="preserve">
+    <value>Uit</value>
+  </data>
+  <data name="IdleLockNever" xml:space="preserve">
+    <value>Nooit</value>
+  </data>
+  <data name="ConnectAll" xml:space="preserve">
+    <value>Alles verbinden</value>
+  </data>
+  <data name="DisconnectAll" xml:space="preserve">
+    <value>Alles verbreken</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Alles selecteren</value>
+  </data>
+  <data name="ClearSelection" xml:space="preserve">
+    <value>Wissen</value>
+  </data>
+  <data name="DrivesSelected" xml:space="preserve">
+    <value>{0} geselecteerd</value>
+  </data>
+  <data name="DisconnectConfirmTitle" xml:space="preserve">
+    <value>Schijven verbreken</value>
+  </data>
+  <data name="DisconnectConfirmOne" xml:space="preserve">
+    <value>Deze schijf wordt ontkoppeld. Bestanden die je erop open hebt staan, kunnen mogelijk niet worden opgeslagen.</value>
+  </data>
+  <data name="DisconnectConfirmMany" xml:space="preserve">
+    <value>{0} schijven worden ontkoppeld. Bestanden die je erop open hebt staan, kunnen mogelijk niet worden opgeslagen.</value>
+  </data>
+  <data name="ClearSearch" xml:space="preserve">
+    <value>Zoekopdracht wissen</value>
+  </data>
+  <data name="NoDrivesMatchTitle" xml:space="preserve">
+    <value>Geen overeenkomende schijven</value>
+  </data>
+  <data name="NoDrivesMatchMessage" xml:space="preserve">
+    <value>Niets komt overeen met wat je hebt getypt. Wis de zoekopdracht om alle schijven weer te zien.</value>
+  </data>
+  <data name="NoAuditlogsMatchTitle" xml:space="preserve">
+    <value>Geen overeenkomende items</value>
+  </data>
+  <data name="NoAuditlogsMatchMessage" xml:space="preserve">
+    <value>Niets in het logboek komt overeen met wat je hebt getypt. Wis de zoekopdracht om de volledige geschiedenis weer te zien.</value>
   </data>
 </root>

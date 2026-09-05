@@ -3,6 +3,7 @@ using Helix.App.Messaging.Drives;
 using Helix.App.Models;
 using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Connector;
+using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
@@ -14,12 +15,16 @@ namespace Helix.App.Views.Drives;
 public sealed partial class DriveTemplate : ContentView
 {
     private readonly INasConnector _nasConnector;
+    private readonly IFileBrowser _fileBrowser;
 
     public DriveTemplate()
     {
         InitializeComponent();
 
+        // Both singletons, so holding them in fields is allowed where a scoped handler
+        // would not be.
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
+        _fileBrowser = App.ServiceProvider.GetRequiredService<IFileBrowser>();
     }
 
     protected override void OnBindingContextChanged()
@@ -159,6 +164,30 @@ public sealed partial class DriveTemplate : ContentView
         drive.MarkOffline(DriveOfflineReason.Refused, error.Description);
     }
 
+    private void ToggleSelected(object? sender, TappedEventArgs e)
+    {
+        if (BindingContext is DriveDisplay drive)
+        {
+            // The row is disabled while a mount is in flight, which takes the tick with
+            // it, so there is no guard needed here beyond the cast.
+            drive.IsSelected = !drive.IsSelected;
+        }
+    }
+
+    private void HandleOpen(object? sender, TappedEventArgs e)
+    {
+        if (BindingContext is not DriveDisplay drive)
+        {
+            return;
+        }
+
+        Result result = _fileBrowser.Open(_nasConnector.GetMountPath(drive.Letter));
+        if (result.IsFailure)
+        {
+            Notifier.Error(result.Error);
+        }
+    }
+
     private void HandleUpdate(object? sender, TappedEventArgs e)
     {
         if (BindingContext is not DriveDisplay drive)
@@ -195,6 +224,7 @@ public sealed partial class DriveTemplate : ContentView
             // to the old letter/name.
             drive.Letter = m.UpdatedDrive.Letter;
             drive.Name = m.UpdatedDrive.Name;
+            drive.Host = m.UpdatedDrive.Host;
 
             RefreshStatus(drive);
         });

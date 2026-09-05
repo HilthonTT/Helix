@@ -91,7 +91,7 @@ Entities, domain errors and repository **interfaces**, one folder per aggregate 
 ```
 Abstractions/   Authentication, Connector, Cryptography, Data, Desktop, Diagnostics,
                 Handlers, Security, Startup, Storage, Time, Updates — interfaces only
-Core/           Errors, Sorting, Validation — cross-feature helpers
+Core/           Drives, Errors, Sorting, Validation — cross-feature helpers
 Features/       one folder per feature, split into Commands / Queries
                 Auditlogs/{Commands,Queries}
                 Diagnostics/Commands
@@ -343,6 +343,137 @@ Readers resolve the ids against the drives that exist, so an id left behind by a
 drive disappears from the group rather than becoming an error — `DeleteDrive` prunes them
 anyway, to stop a long-lived install accumulating ids that name nothing.
 
+### Acting on several drives at once
+
+Everything used to be all-or-nothing — every drive, or one row at a time — with saved
+groups as the only way to act on a subset. A group is something you set up in advance for a
+set you use repeatedly; "these three, now" had no answer that did not involve creating a
+group and leaving it behind. Rows carry a tick, and `ConnectDrives` takes the ids.
+
+`ConnectDrives` and `ConnectDriveGroup` are the same work reached two ways, so everything
+below the list of drives lives in `Core/Drives/DriveMountBatch`: which of the set are in the
+wrong state, one suppression covering the whole batch, the mounts in parallel, the stamps
+on one thread, the failures aggregated into a single error. What stays in each handler is
+how the list was arrived at. The batch is a static helper rather than a handler because it
+does **no authorization and no lookup** — the caller has already established that these
+drives exist and belong to the signed-in user, and nothing that has not done so may reach
+it.
+
+Like a group, a selection ignores each drive's own `AutoConnect`: that flag holds a drive
+back from what Helix does unattended, and ticking a row is as deliberate as it gets. Ids
+that name nothing are skipped rather than failing the batch — a drive can be deleted from
+another window while a selection is held — and the ids are de-duplicated, since a repeated
+one would otherwise be mounted twice.
+
+The selection bar **replaces** the all-drives chips rather than sitting beside them. Two
+pairs of Connect/Disconnect on one line, one meaning "every drive" and the other "the three
+you ticked", is the kind of ambiguity that gets a NAS unmounted by accident; for the same
+reason the surviving chips now say "Connect all" and "Disconnect all" rather than "Connect"
+and "Disconnect". The selection is deliberately **not** cleared after an action: connecting
+three drives and then wanting to disconnect the same three is the common second act.
+
+Unmounting is confirmed, in a dialog — the one thing on the page that is a question rather
+than a result. Deleting a single drive was confirmed and unmounting thirteen at a stroke
+was not, which had the risk backwards: an unmount pulls the filesystem out from under
+whatever has a file open on it. The confirmation is skipped when nothing would actually
+come down, because a confirmation for a no-op teaches the user to dismiss them unread, and
+it has a singular and a plural form rather than one string with a number in it. The tray's
+own "disconnect all" is not confirmed and should not be: there is no window to put a dialog
+on when it is used.
+
+### Finding a drive, and a row in the log
+
+Both lists filter live, from a box that is always on screen, over what is already in
+memory. Both used to be a modal: open a sheet, type, press Search, wait for a database
+round trip, and have the results replace the list — four interactions and a query to narrow
+thirteen rows. `SearchDrives` and `SearchAuditlogs` were deleted along with the sheets;
+`GetDrives` and `GetAuditlogs` already load everything, so the queries were narrowing a set
+the app was holding anyway.
+
+Filtering in the viewmodel buys two things the queries could not have. The drive rows are
+**reused** rather than rebuilt, so a tick, a mount in flight and a drive's offline reason
+all survive typing — re-projecting fresh `DriveDisplay`s per keystroke would have thrown the
+selection away on the first letter. And the audit log is matched against the **sentence the
+row shows**, which is composed at display time in the user's language and does not exist in
+the database: searching for "disconnected" used to find nothing while the page was full of
+the word.
+
+Each page keeps a master list (`_allDrives`, `_allAuditlogs`) and `Drives`/`Auditlogs` is
+the filtered, sorted view onto it. **Anything that describes the estate rather than the
+list reads the master**: the storage and connection tiles, the connectivity donut, group
+membership, and the count "disconnect all" confirms against. A search box narrowing the
+list below them is not the NAS getting smaller.
+
+Rows filtered out are **deselected** on the way. Acting on a ticked row that is not on
+screen is the one outcome worth ruling out — "disconnect" has to mean the rows the user can
+see.
+
+An empty list now has two states. Filtering thirteen drives down to none and being told
+"you have no drives yet — add one" is the app forgetting what the user just typed, so
+`ShowNoMatches` offers to clear the search and `ShowNoDrives` offers to add a drive.
+
+Column headers sort. The list always drew a header row and never let anyone click it; the
+only ordering was ascending or descending, chosen in the modal, with no way to say by what.
+Letter, Name and Status sort; **storage usage does not**, because the column holds a
+sentence built for reading ("1.2 TB free of 43.2 TB") and ordering drives by the text of
+that puts 9 GB after 40 TB. A fresh column starts ascending rather than keeping the previous
+direction, and the caret marks which column is live.
+
+### The drive card at an ordinary window size
+
+The screenshots that exposed this were taken at 150% display scaling, which is worth
+remembering before reading pixel positions off one: a 1960px-wide window is a 1300 DIP
+window, and after the sidebar and the 320 DIP connectivity column the drive card is about
+670 DIP wide. Fixed row columns totalling 636 left the one flexible column — the drive's
+**name** — with nothing, and the header's title, search box and three labelled chips wanted
+about 810 in a 610 slot, so the search box got squeezed to a stub.
+
+`HomeViewModel.IsCompact` is the answer, set by the page from the **card's own measured
+width** (`DriveCard.SizeChanged`, threshold `CompactCardWidth`), not the window's — the
+card is what has to fit. Compact hides the chip labels (each chip carries the same text as a
+tooltip, so icon-only is still explained) and collapses the storage-usage column to 0.
+Storage is the column that goes because for every drive that is down it reads "Drive not
+ready", and the name is the column that matters.
+
+The column width lives on `Common/DriveListLayout`, an observable singleton that the header
+grid and every row grid bind with a **static `Source`** — never `RelativeSource`. A
+`ColumnDefinition` is a `BindableObject` but not an `Element`: it has no place in the visual
+tree and no parent, so an `AncestorType` lookup on it has nothing to walk and fails inside
+the item template, which took every row with it — a list that counted thirteen drives and
+drew none. A static-source binding needs only something to subscribe to and works on any
+bindable object. `HomeViewModel.IsCompact` mirrors into the singleton for the labels that
+bind through the viewmodel.
+
+**The header grid on `HomePage` and the row grid in `DriveTemplate` must stay identical**
+— same widths, same spacing — or the column labels drift off the data. The twelve-DIP
+column gap beside the collapsed storage column is the one thing the binding cannot remove,
+and is accepted.
+
+### Long lists
+
+Both lists are `CollectionView`, not `BindableLayout` over a `VerticalStackLayout` in a
+`ScrollView`. That shape realizes every row before the page can be drawn, which is
+survivable for thirteen drives and is not for ninety days of audit history — the default
+retention. `SelectionMode` is `None` on both: the drive rows carry their own tick, and
+CollectionView's own selection would also fire on a click anywhere in the row, so pressing
+"Disconnect" would select the row as a side effect.
+
+Rows are recycled, which `DriveTemplate` already handles — `OnBindingContextChanged`
+unregisters before it re-registers, so a view handed a different drive does not keep the
+old one's subscriptions.
+
+**The rows are still mouse-only.** Ctrl+F focuses the drive filter and that is the extent of
+the keyboard story. Making a row itself keyboard-operable is not a small change: its status
+pills and icon chips are styled `Border`s with tap gestures, which take no focus, and MAUI's
+`Button` takes text rather than arbitrary content — so every interactive part of the row
+would have to be rebuilt against a focusable control with a custom template before arrow
+keys and Enter could reach it. Worth doing; not a detail.
+
+The other thing left undone: `GetAuditlogs` still loads the whole history in one go.
+Virtualizing the rows means the page no longer *draws* thousands of them, but it still reads
+them all out of SQLite and holds them. Paging that query is the real fix, and it is
+untouched.
+
 ### Installing an update
 
 `GitHubUpdateChecker` also reads the release's `assets` and picks the archive whose name
@@ -482,6 +613,17 @@ throws, so a new head fails at composition rather than at first use):
 | `ITrayIcon` | `WindowsTrayIcon` — `Shell_NotifyIcon`, hidden window on its own message loop | `UnsupportedTrayIcon` — no-op, `IsSupported` is false |
 | `IStorageProbe` | `WindowsStorageProbe` — mounts are `Z:\` | `MacStorageProbe` — mounts are `~/Helix Drives/Z` |
 | `IIdleTimeProvider` | `WindowsIdleTimeProvider` — `GetLastInputInfo` | `MacIdleTimeProvider` — `CGEventSourceSecondsSinceLastEventType` |
+
+`INasConnector.GetMountPath` is the seventh thing that needs to know where a letter
+lives, after the two connectors and the two probes. It is asked of the connector because
+the connector is what put it there; it answers for any letter, mounted or not.
+
+Opening that folder goes through `IFileBrowser`, which is deliberately **not** a seventh
+platform seam: `ProcessStartInfo.UseShellExecute` hands a directory to Explorer on Windows
+and to `open` on macOS, so one implementation covers both and it is registered outside
+`AddPlatformServices()`. The drive row's folder button is the whole reason it exists — the
+point of the app is that `Z:` is there, and until this there was no way to go and look at
+it.
 
 Both storage probes derive from `StorageProbe`, which holds the part that matters: **one
 reading per volume, not per drive**. Several mapped drives are usually several shares of
@@ -625,7 +767,7 @@ Behaviors/     attached behaviors used from XAML
 Common/        ScopedHandler, PageNames, PresentationAssembly, StorageUsageHelper, WindowSizing,
                MainWindow, DrivePlatform, AppLog
 Controls/      custom controls and layouts (NavItem, ChartView, HorizontalWrapLayout,
-               NotificationHost)
+               NotificationHost, NumberField)
 Converters/    IValueConverter implementations
 Extensions/    DependencyInjection (AddPresensation)
 Icons/         IconFont glyph constants
@@ -645,6 +787,50 @@ Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/,
 A view and its viewmodel sit in the same feature folder under their respective roots — `Views/Drives/HomePage.xaml` pairs with `ViewModels/Drives/HomeViewModel.cs`.
 
 `GlobalUsings.cs` imports `Helix.App.Common` and `Helix.App.Localization` alongside the SharedKernel namespaces, so `ScopedHandler`, `PageNames` and `LocalizationResourceManager` need no per-file using.
+
+#### What the dashboard gives room to
+
+The stat row is **two cards, not three**. The auto-minimize countdown used to hold the
+third, level with how much storage the NAS has and how many drives are up — app chrome
+given the same weight as the two facts the page exists to report, and shown even to the
+users who have auto-minimize switched off and will never see it move. It is a chip in the
+page header now, present only while something is counting (`BaseViewModel.ShowCountdown`),
+carrying the same cancel and resume affordances the card had.
+
+`CountdownDisplay` renders it as `m:ss`. It was `$"{SecondsRemaining} seconds"` — English
+in an app translated into five languages, and "1 seconds" on the way past. Digits and a
+colon are the same in every locale, and the chip's icon and tooltip carry the meaning.
+
+The drive row's second line is the **host and** the last-connected stamp. A name is
+whatever the user called it, so two drives on two different NASes were told apart only by
+that; the address is the thing they actually differ by.
+
+#### Numbers in the settings page
+
+The four numeric preferences bind to `Controls/NumberField` rather than a bare `Entry`,
+and it is the answer to three separate problems with what was there.
+
+The **unit** lived in the row's title — "Timer count in seconds" — so the box was a number
+with no dimension, and the retention and idle-lock rows never said what they counted at
+all. **Zero means something** in three of the four — keep every audit log, never warn about
+space, never lock — and nothing on screen said so; `OffText` replaces the unit with that
+meaning the moment the value reaches zero. And the **bounds were only enforced after the
+write**: the handler rejected the value and the row rolled back, which is a failure banner
+for something the control could simply not have allowed. The low-space ceiling is bound
+from `Settings.MaximumStorageAlertThresholdPercent` rather than written into the page, so
+the two cannot drift. `UpdateSettings` still validates — this is a keyboard, not a trust
+boundary.
+
+The typed value is committed on Enter or on leaving the field, never per keystroke.
+`SettingsDisplay` debounces these by 500ms precisely because "9" on the way to "90" used to
+be saved and acted on; committing whole values means there is no such intermediate, and the
+timer stays as a backstop rather than as the thing standing between the user and a wrong
+setting.
+
+Only these four confirm themselves, through `Notifier`. A switch is its own confirmation —
+it is sitting there in its new position — but a number typed into a box looks identical
+whether it was stored or thrown away, and the write lands well after the keystroke that
+caused it.
 
 #### Platform-specific presentation code
 

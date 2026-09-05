@@ -58,6 +58,18 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         App.ServiceProvider.GetRequiredService<TrayIconService>().IsSupported;
 
     /// <summary>
+    /// The ceiling the low-space field clamps to, taken from the domain rather than
+    /// written into the page, so the control cannot let through a figure
+    /// <c>UpdateSettings</c> will then reject.
+    /// </summary>
+    /// <remarks>
+    /// An instance property, not a static one: the page binds to it, and a compiled
+    /// binding resolves against the DataType's instance members.
+    /// </remarks>
+    public int MaximumStorageAlertThresholdPercent =>
+        SettingsModel.MaximumStorageAlertThresholdPercent;
+
+    /// <summary>
     /// What the updater is doing, or empty while it is doing nothing.
     /// </summary>
     /// <remarks>

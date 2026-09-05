@@ -69,6 +69,8 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
             failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
             cancellationToken);
 
+    public string GetMountPath(string letter) => $"{letter.Trim().ToUpperInvariant()}:\\";
+
     public bool IsConnected(string letter)
     {
         if (string.IsNullOrWhiteSpace(letter))

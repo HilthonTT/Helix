@@ -237,9 +237,6 @@
   <data name="SearchDrives" xml:space="preserve">
     <value>Laufwerke durchsuchen</value>
   </data>
-  <data name="SearchTermPlaceholder" xml:space="preserve">
-    <value>Geben Sie Ihren Suchbegriff ein (optional)</value>
-  </data>
   <data name="YourSortOrder" xml:space="preserve">
     <value>Ihre Sortierreihenfolge</value>
   </data>
@@ -662,5 +659,71 @@
   </data>
   <data name="StatusFailed" xml:space="preserve">
     <value>Fehlgeschlagen</value>
+  </data>
+  <data name="OpenInFileManager" xml:space="preserve">
+    <value>Im Dateimanager öffnen</value>
+  </data>
+  <data name="SettingsSaved" xml:space="preserve">
+    <value>Einstellungen gespeichert.</value>
+  </data>
+  <data name="UnitSeconds" xml:space="preserve">
+    <value>Sekunden</value>
+  </data>
+  <data name="UnitMinutes" xml:space="preserve">
+    <value>Minuten</value>
+  </data>
+  <data name="UnitDays" xml:space="preserve">
+    <value>Tage</value>
+  </data>
+  <data name="UnitPercent" xml:space="preserve">
+    <value>%</value>
+  </data>
+  <data name="RetentionKeepEverything" xml:space="preserve">
+    <value>Alles behalten</value>
+  </data>
+  <data name="StorageAlertOff" xml:space="preserve">
+    <value>Aus</value>
+  </data>
+  <data name="IdleLockNever" xml:space="preserve">
+    <value>Nie</value>
+  </data>
+  <data name="ConnectAll" xml:space="preserve">
+    <value>Alle verbinden</value>
+  </data>
+  <data name="DisconnectAll" xml:space="preserve">
+    <value>Alle trennen</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Alle auswählen</value>
+  </data>
+  <data name="ClearSelection" xml:space="preserve">
+    <value>Aufheben</value>
+  </data>
+  <data name="DrivesSelected" xml:space="preserve">
+    <value>{0} ausgewählt</value>
+  </data>
+  <data name="DisconnectConfirmTitle" xml:space="preserve">
+    <value>Laufwerke trennen</value>
+  </data>
+  <data name="DisconnectConfirmOne" xml:space="preserve">
+    <value>Dieses Laufwerk wird ausgehängt. Geöffnete Dateien darauf können möglicherweise nicht gespeichert werden.</value>
+  </data>
+  <data name="DisconnectConfirmMany" xml:space="preserve">
+    <value>{0} Laufwerke werden ausgehängt. Geöffnete Dateien darauf können möglicherweise nicht gespeichert werden.</value>
+  </data>
+  <data name="ClearSearch" xml:space="preserve">
+    <value>Suche zurücksetzen</value>
+  </data>
+  <data name="NoDrivesMatchTitle" xml:space="preserve">
+    <value>Keine passenden Laufwerke</value>
+  </data>
+  <data name="NoDrivesMatchMessage" xml:space="preserve">
+    <value>Nichts hier passt zu Ihrer Eingabe. Setzen Sie die Suche zurück, um wieder alle Laufwerke zu sehen.</value>
+  </data>
+  <data name="NoAuditlogsMatchTitle" xml:space="preserve">
+    <value>Keine passenden Einträge</value>
+  </data>
+  <data name="NoAuditlogsMatchMessage" xml:space="preserve">
+    <value>Nichts im Protokoll passt zu Ihrer Eingabe. Setzen Sie die Suche zurück, um den gesamten Verlauf wieder zu sehen.</value>
   </data>
 </root>

@@ -8,6 +8,7 @@
              xmlns:views="clr-namespace:Helix.App.Views.Drives"
              xmlns:models="clr-namespace:Helix.App.Models"
              xmlns:l10n="clr-namespace:Helix.App.Localization"
+             xmlns:common="clr-namespace:Helix.App.Common"
              x:Class="Helix.App.Views.Drives.HomePage"
              x:DataType="vm:HomeViewModel"
              Title="">
@@ -27,6 +28,12 @@
             <MenuFlyoutItem Text="{l10n:Translate DriveGroups}" Clicked="DriveGroups_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="G" Modifiers="Ctrl"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutItem Text="{l10n:Translate Search}" Clicked="Search_Clicked">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="F" Modifiers="Ctrl"/>
                 </MenuFlyoutItem.KeyboardAccelerators>
             </MenuFlyoutItem>
 
@@ -66,6 +73,48 @@
                      in the Drives menu too, but they were undiscoverable there, so they
                      sit alongside as secondary actions. -->
                 <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
+                    <!-- The auto-minimize countdown, present only while one is running.
+                         Its cancel and resume chips are the same two the stat card had. -->
+                    <Border Style="{StaticResource Chip}"
+                            Padding="12,7"
+                            IsVisible="{Binding ShowCountdown}"
+                            ToolTipProperties.Text="{l10n:Translate TimeBeforeMinimize}">
+                        <HorizontalStackLayout Spacing="9">
+                            <Label Text="{x:Static icons:IconFont.Clock}"
+                                   Style="{StaticResource IconSm}"
+                                   VerticalOptions="Center"
+                                   TextColor="{StaticResource BrandOrange}"/>
+
+                            <Label Text="{Binding CountdownDisplay}"
+                                   Style="{StaticResource Mono}"
+                                   FontSize="13"
+                                   VerticalOptions="Center"/>
+
+                            <Label Text="{x:Static icons:IconFont.Times}"
+                                   Style="{StaticResource IconSm}"
+                                   FontSize="12"
+                                   VerticalOptions="Center"
+                                   ToolTipProperties.Text="{l10n:Translate Cancel}"
+                                   IsVisible="{Binding TimerCancelled, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}"
+                                   TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CancelTimerCommand}"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+
+                            <Label Text="{x:Static icons:IconFont.RotateRight}"
+                                   Style="{StaticResource IconSm}"
+                                   FontSize="12"
+                                   VerticalOptions="Center"
+                                   IsVisible="{Binding TimerCancelled}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ResumeTimerCommand}"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </HorizontalStackLayout>
+                    </Border>
+
                     <Button Text="{l10n:Translate ImportDrives}"
                             Style="{StaticResource ButtonSecondary}"
                             Command="{Binding ImportDrivesCommand}"/>
@@ -83,7 +132,10 @@
             <!-- ===== Left column: stats over the drive list ===== -->
             <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" RowSpacing="20">
 
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
+                <!-- Two cards, not three. The auto-minimize countdown used to sit here
+                     as the third, level with how much storage the NAS has and how many
+                     drives are up; it is app chrome, and it is a chip in the header now. -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
 
                     <!-- Storage -->
                     <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18">
@@ -135,58 +187,6 @@
                         </Grid>
                     </Border>
 
-                    <!-- Auto-minimise timer -->
-                    <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18">
-                        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
-                            <HorizontalStackLayout Spacing="12">
-                                <Border Style="{StaticResource IconTile}">
-                                    <Label Text="{x:Static icons:IconFont.Clock}"
-                                           Style="{StaticResource Icon}"
-                                           TextColor="{StaticResource BrandOrange}"/>
-                                </Border>
-                                <Label Text="{l10n:Translate Timer}"
-                                       Style="{StaticResource Overline}"
-                                       VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
-
-                            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" VerticalOptions="Center">
-                                <Label Text="{Binding TimerCount}"
-                                       Style="{StaticResource Metric}"
-                                       VerticalOptions="Center"/>
-
-                                <Border Grid.Column="1"
-                                        Style="{StaticResource IconChip}"
-                                        HorizontalOptions="End"
-                                        ToolTipProperties.Text="{l10n:Translate Cancel}"
-                                        IsVisible="{Binding TimerCancelled, Converter={StaticResource InvertedBoolConverter}, FallbackValue=True}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding CancelTimerCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <Label Text="{x:Static icons:IconFont.Times}"
-                                           Style="{StaticResource IconSm}"
-                                           InputTransparent="True"
-                                           TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
-                                </Border>
-
-                                <Border Grid.Column="1"
-                                        Style="{StaticResource IconChip}"
-                                        HorizontalOptions="End"
-                                        IsVisible="{Binding TimerCancelled}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding ResumeTimerCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <Label Text="{x:Static icons:IconFont.RotateRight}"
-                                           Style="{StaticResource IconSm}"
-                                           InputTransparent="True"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
-                                </Border>
-                            </Grid>
-
-                            <Label Grid.Row="2"
-                                   Text="{l10n:Translate TimeBeforeMinimize}"
-                                   Style="{StaticResource Caption}"/>
-                        </Grid>
-                    </Border>
                 </Grid>
 
                 <!-- ===== Groups ===== -->
@@ -215,11 +215,11 @@
                 </Border>
 
                 <!-- ===== Drive list ===== -->
-                <Border Grid.Row="2" Style="{StaticResource Card}">
+                <Border x:Name="DriveCard" Grid.Row="2" Style="{StaticResource Card}">
                     <Grid RowDefinitions="Auto,Auto,*" Padding="20">
 
                         <!-- Card header -->
-                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,16">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,16">
                             <Label Text="{l10n:Translate YourDrives}"
                                    Style="{StaticResource Title1}"
                                    VerticalOptions="Center"/>
@@ -230,7 +230,77 @@
                                        FontFamily="{StaticResource FontMonoBold}"/>
                             </Border>
 
-                            <ActivityIndicator Grid.Column="2"
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource Pill}"
+                                    Padding="10,3"
+                                    HorizontalOptions="Start"
+                                    Margin="4,0,0,0"
+                                    Background="{AppThemeBinding Light={StaticResource BrandWashLightBrush}, Dark={StaticResource BrandWashDarkBrush}}"
+                                    IsVisible="{Binding HasSelection}">
+                                <Label Text="{Binding SelectionSummary}"
+                                       Style="{StaticResource BrandText}"
+                                       FontSize="12"/>
+                            </Border>
+
+                            <!--
+                            Always on screen, filtering as it is typed. It replaced a
+                            modal with a Search button: four interactions and a database
+                            round trip to narrow a list that is already in memory.
+                            -->
+                            <!--
+                            End with a ceiling, never a fixed width, and never Fill.
+                            A WidthRequest of 240 in a star column that can be narrower
+                            than 240 does not shrink: the border overflowed into the chips
+                            beside it and was clipped, losing its right edge and the clear
+                            button with it. Fill fixed that and introduced the opposite
+                            problem — a child clamped by MaximumWidthRequest is arranged at
+                            the *start* of its column, so on a wide window the box sat by
+                            the title with a gulf between it and the buttons.
+
+                            End is what gets both. The border's content is a grid with a
+                            star column, so it still asks for the whole column and is
+                            capped at 300; End then puts that against the chips. It shrinks
+                            with the column rather than overflowing it, which is the one
+                            thing a WidthRequest could never do.
+                            -->
+                            <Border Grid.Column="4"
+                                    Style="{StaticResource Field}"
+                                    MaximumWidthRequest="300"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Center">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <Label Text="{x:Static icons:IconFont.Search}"
+                                           Style="{StaticResource IconSm}"
+                                           Margin="12,0,0,0"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+
+                                    <!-- Right margin as well as left: with no clear
+                                         button showing there is nothing else holding the
+                                         text off the border. -->
+                                    <Entry x:Name="DriveSearch"
+                                           Grid.Column="1"
+                                           Margin="8,0,10,0"
+                                           Placeholder="{l10n:Translate SearchDrives}"
+                                           Text="{Binding SearchTerm}"/>
+
+                                    <Label Grid.Column="2"
+                                           Text="{x:Static icons:IconFont.Times}"
+                                           Style="{StaticResource IconSm}"
+                                           FontSize="12"
+                                           Margin="0,0,12,0"
+                                           VerticalOptions="Center"
+                                           IsVisible="{Binding HasSearchTerm}"
+                                           ToolTipProperties.Text="{l10n:Translate ClearSearch}"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding ClearSearchCommand}"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
+                            </Border>
+
+                            <ActivityIndicator Grid.Column="3"
                                                HorizontalOptions="Start"
                                                VerticalOptions="Center"
                                                WidthRequest="18"
@@ -238,13 +308,83 @@
                                                IsRunning="{Binding IsBusy}"
                                                IsVisible="{Binding IsBusy}"/>
 
-                            <HorizontalStackLayout Grid.Column="3" Spacing="8">
+                            <HorizontalStackLayout Grid.Column="5"
+                                                   Spacing="8"
+                                                   IsVisible="{Binding HasSelection, Converter={StaticResource InvertedBoolConverter}}">
+                                <!-- Labels hide when the card is compact; the tooltip
+                                     says the same thing, so an icon-only chip is still
+                                     explained. -->
                                 <Border Style="{StaticResource Chip}"
                                         IsEnabled="{Binding IsNotBusy}"
                                         Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}"
+                                        ToolTipProperties.Text="{l10n:Translate ConnectAll}"
                                         SemanticProperties.Description="Connects every disconnected drive">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding ConnectDrivesCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                        <Label Text="{x:Static icons:IconFont.Link}"
+                                               Style="{StaticResource IconSm}"
+                                               TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                                        <Label Text="{l10n:Translate ConnectAll}"
+                                               FontSize="13"
+                                               VerticalOptions="Center"
+                                               IsVisible="{Binding ShowChipLabels}"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <Border Style="{StaticResource Chip}"
+                                        IsEnabled="{Binding IsNotBusy}"
+                                        Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}"
+                                        ToolTipProperties.Text="{l10n:Translate DisconnectAll}"
+                                        SemanticProperties.Description="Disconnects every connected drive">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding DisconnectDrivesCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                        <Label Text="{x:Static icons:IconFont.Unlink}"
+                                               Style="{StaticResource IconSm}"
+                                               TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                        <Label Text="{l10n:Translate DisconnectAll}"
+                                               FontSize="13"
+                                               VerticalOptions="Center"
+                                               IsVisible="{Binding ShowChipLabels}"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                                <Border Style="{StaticResource Chip}"
+                                        ToolTipProperties.Text="{l10n:Translate DriveGroups}"
+                                        SemanticProperties.Description="Opens the drive group manager">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenDriveGroupsModalCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                        <Label Text="{x:Static icons:IconFont.LayerGroup}"
+                                               Style="{StaticResource IconSm}"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                        <Label Text="{l10n:Translate DriveGroups}"
+                                               FontSize="13"
+                                               VerticalOptions="Center"
+                                               IsVisible="{Binding ShowChipLabels}"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+
+                            </HorizontalStackLayout>
+
+                            <!--
+                            Replaces the all-drives chips rather than sitting beside them.
+                            Two pairs of Connect/Disconnect buttons on one line, one
+                            meaning "every drive" and the other "the three you ticked", is
+                            the kind of ambiguity that gets a NAS unmounted by accident.
+                            -->
+                            <HorizontalStackLayout Grid.Column="5"
+                                                   Spacing="8"
+                                                   IsVisible="{Binding HasSelection}">
+                                <Border Style="{StaticResource Chip}"
+                                        IsEnabled="{Binding IsNotBusy}"
+                                        Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ConnectSelectedCommand}"/>
                                     </Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="9" InputTransparent="True">
                                         <Label Text="{x:Static icons:IconFont.Link}"
@@ -256,10 +396,9 @@
 
                                 <Border Style="{StaticResource Chip}"
                                         IsEnabled="{Binding IsNotBusy}"
-                                        Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}"
-                                        SemanticProperties.Description="Disconnects every connected drive">
+                                        Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}">
                                     <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding DisconnectDrivesCommand}"/>
+                                        <TapGestureRecognizer Command="{Binding DisconnectSelectedCommand}"/>
                                     </Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="9" InputTransparent="True">
                                         <Label Text="{x:Static icons:IconFont.Unlink}"
@@ -269,29 +408,15 @@
                                     </HorizontalStackLayout>
                                 </Border>
 
-                                <Border Style="{StaticResource Chip}"
-                                        SemanticProperties.Description="Opens the drive group manager">
+                                <Border Style="{StaticResource Chip}">
                                     <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding OpenDriveGroupsModalCommand}"/>
+                                        <TapGestureRecognizer Command="{Binding ClearSelectionCommand}"/>
                                     </Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="9" InputTransparent="True">
-                                        <Label Text="{x:Static icons:IconFont.LayerGroup}"
+                                        <Label Text="{x:Static icons:IconFont.Times}"
                                                Style="{StaticResource IconSm}"
                                                TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
-                                        <Label Text="{l10n:Translate DriveGroups}" FontSize="13" VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-                                </Border>
-
-                                <Border Style="{StaticResource Chip}"
-                                        SemanticProperties.Description="Opens the drive filter">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding OpenSearchDrivesModalCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
-                                        <Label Text="{x:Static icons:IconFont.Filter}"
-                                               Style="{StaticResource IconSm}"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
-                                        <Label Text="{l10n:Translate Filter}" FontSize="13" VerticalOptions="Center"/>
+                                        <Label Text="{l10n:Translate ClearSelection}" FontSize="13" VerticalOptions="Center"/>
                                     </HorizontalStackLayout>
                                 </Border>
                             </HorizontalStackLayout>
@@ -301,29 +426,165 @@
                         <VerticalStackLayout Grid.Row="1"
                                              Spacing="10"
                                              IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
-                            <Grid ColumnDefinitions="72,*,190,160,72" ColumnSpacing="14" Padding="12,0">
-                                <Label Text="{l10n:Translate Letter}" Style="{StaticResource Overline}"/>
-                                <Label Grid.Column="1" Text="{l10n:Translate Name}" Style="{StaticResource Overline}"/>
-                                <Label Grid.Column="2" Text="{l10n:Translate StorageUsage}" Style="{StaticResource Overline}"/>
-                                <Label Grid.Column="3" Text="{l10n:Translate Status}" Style="{StaticResource Overline}"/>
-                                <Label Grid.Column="4" Text="{l10n:Translate Actions}" Style="{StaticResource Overline}"/>
+                            <!--
+                            Sized to what each column holds and nothing more, because
+                            every DIP taken here is taken from the name. 112 for the
+                            actions, not Auto: a connected drive shows three chips and a
+                            disconnected one shows two, so an Auto column made every
+                            other column in that row a different width from its
+                            neighbours. Storage is bound: it collapses to 0 when the card
+                            is compact. Must match DriveTemplate's grid exactly.
+                            -->
+                            <Grid ColumnSpacing="12" Padding="12,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28"/>
+                                    <ColumnDefinition Width="52"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=StorageColumnWidth, x:DataType=common:DriveListLayout}"/>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="112"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Select-all, in the column the rows put their tick in. -->
+                                <Grid VerticalOptions="Center"
+                                      HorizontalOptions="Center"
+                                      ToolTipProperties.Text="{l10n:Translate SelectAll}">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ToggleSelectAllCommand}"/>
+                                    </Grid.GestureRecognizers>
+
+                                    <Border Style="{StaticResource Tick}"
+                                            IsVisible="{Binding AllSelected, Converter={StaticResource InvertedBoolConverter}}"
+                                            behaviors:Hover.Cursor="True"/>
+
+                                    <Border Style="{StaticResource TickChecked}"
+                                            IsVisible="{Binding AllSelected}"
+                                            behaviors:Hover.Cursor="True">
+                                        <Label Text="{x:Static icons:IconFont.Check}"
+                                               FontFamily="{StaticResource FontIcon}"
+                                               FontSize="10"
+                                               InputTransparent="True"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"
+                                               TextColor="{StaticResource White}"/>
+                                    </Border>
+                                </Grid>
+
+                                <!--
+                                Three of the five order the list. Storage usage does not:
+                                the column holds a sentence built for reading, and sorting
+                                drives by the text of it would put 9 GB after 40 TB.
+                                -->
+                                <HorizontalStackLayout Grid.Column="1"
+                                                       Spacing="5"
+                                                       behaviors:Hover.Cursor="True">
+                                    <HorizontalStackLayout.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SortByCommand}"
+                                                              CommandParameter="{x:Static models:DriveSortField.Letter}"/>
+                                    </HorizontalStackLayout.GestureRecognizers>
+                                    <Label Text="{l10n:Translate Letter}" Style="{StaticResource Overline}"/>
+                                    <Label Text="{Binding SortGlyph}"
+                                           Style="{StaticResource Overline}"
+                                           FontFamily="{StaticResource FontIcon}"
+                                           IsVisible="{Binding SortedByLetter}"/>
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Column="2"
+                                                       Spacing="5"
+                                                       behaviors:Hover.Cursor="True">
+                                    <HorizontalStackLayout.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SortByCommand}"
+                                                              CommandParameter="{x:Static models:DriveSortField.Name}"/>
+                                    </HorizontalStackLayout.GestureRecognizers>
+                                    <Label Text="{l10n:Translate Name}" Style="{StaticResource Overline}"/>
+                                    <Label Text="{Binding SortGlyph}"
+                                           Style="{StaticResource Overline}"
+                                           FontFamily="{StaticResource FontIcon}"
+                                           IsVisible="{Binding SortedByName}"/>
+                                </HorizontalStackLayout>
+
+                                <Label Grid.Column="3"
+                                       Text="{l10n:Translate StorageUsage}"
+                                       Style="{StaticResource Overline}"
+                                       IsVisible="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=ShowStorage, x:DataType=common:DriveListLayout}"/>
+
+                                <HorizontalStackLayout Grid.Column="4"
+                                                       Spacing="5"
+                                                       behaviors:Hover.Cursor="True">
+                                    <HorizontalStackLayout.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding SortByCommand}"
+                                                              CommandParameter="{x:Static models:DriveSortField.Status}"/>
+                                    </HorizontalStackLayout.GestureRecognizers>
+                                    <Label Text="{l10n:Translate Status}" Style="{StaticResource Overline}"/>
+                                    <Label Text="{Binding SortGlyph}"
+                                           Style="{StaticResource Overline}"
+                                           FontFamily="{StaticResource FontIcon}"
+                                           IsVisible="{Binding SortedByStatus}"/>
+                                </HorizontalStackLayout>
+
+                                <Label Grid.Column="5"
+                                       Text="{l10n:Translate Actions}"
+                                       Style="{StaticResource Overline}"
+                                       HorizontalTextAlignment="End"/>
                             </Grid>
 
                             <BoxView Style="{StaticResource Divider}"/>
                         </VerticalStackLayout>
 
                         <!-- Rows -->
-                        <ScrollView Grid.Row="2"
-                                    Margin="0,8,0,0"
-                                    IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
-                            <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Drives}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:DriveDisplay">
-                                        <views:DriveTemplate BindingContext="{Binding .}"/>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
-                        </ScrollView>
+                        <!--
+                        A CollectionView rather than a BindableLayout in a ScrollView:
+                        that realized every row up front, which is fine for thirteen
+                        drives and is the same shape the audit log was built in, where it
+                        is ninety days of history. This one recycles.
+                        -->
+                        <CollectionView Grid.Row="2"
+                                        Margin="0,8,0,0"
+                                        ItemsSource="{Binding Drives}"
+                                        SelectionMode="None"
+                                        IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="2"/>
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:DriveDisplay">
+                                    <views:DriveTemplate/>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <!-- Nothing matched the filter. Distinct from having no drives:
+                             the answer is to clear the box, not to add a drive. -->
+                        <VerticalStackLayout Grid.Row="1"
+                                             Grid.RowSpan="2"
+                                             Spacing="10"
+                                             VerticalOptions="Center"
+                                             HorizontalOptions="Center"
+                                             IsVisible="{Binding ShowNoMatches}">
+                            <Border Style="{StaticResource IconTile}"
+                                    WidthRequest="56"
+                                    HeightRequest="56"
+                                    HorizontalOptions="Center">
+                                <Label Text="{x:Static icons:IconFont.Search}"
+                                       Style="{StaticResource IconLg}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                            </Border>
+
+                            <Label Text="{l10n:Translate NoDrivesMatchTitle}"
+                                   Style="{StaticResource Title2}"
+                                   HorizontalTextAlignment="Center"/>
+
+                            <Label Text="{l10n:Translate NoDrivesMatchMessage}"
+                                   Style="{StaticResource Caption}"
+                                   HorizontalTextAlignment="Center"
+                                   MaximumWidthRequest="360"/>
+
+                            <Button Text="{l10n:Translate ClearSearch}"
+                                    Style="{StaticResource ButtonSecondary}"
+                                    Margin="0,6,0,0"
+                                    HorizontalOptions="Center"
+                                    Command="{Binding ClearSearchCommand}"/>
+                        </VerticalStackLayout>
 
                         <!-- Empty state -->
                         <VerticalStackLayout Grid.Row="1"
@@ -331,7 +592,7 @@
                                              Spacing="10"
                                              VerticalOptions="Center"
                                              HorizontalOptions="Center"
-                                             IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}, ConverterParameter=invert}">
+                                             IsVisible="{Binding ShowNoDrives}">
                             <Border Style="{StaticResource IconTile}"
                                     WidthRequest="56"
                                     HeightRequest="56"
@@ -453,13 +714,6 @@
                                           WidthRequest="440"
                                           AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
                                           AbsoluteLayout.LayoutFlags="PositionProportional"/>
-        </AbsoluteLayout>
-
-        <AbsoluteLayout x:Name="SearchDrivesLayout" IsVisible="False">
-            <views:SearchDrivesModal x:Name="SearchDrivesView"
-                                            WidthRequest="460"
-                                            AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
-                                            AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
         <!-- Last child of the root grid, so a banner sits above the modal layer too:

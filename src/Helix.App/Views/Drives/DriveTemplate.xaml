@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:common="clr-namespace:Helix.App.Common"
              xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
              xmlns:l10n="clr-namespace:Helix.App.Localization"
@@ -9,10 +10,53 @@
              x:DataType="models:DriveDisplay">
 
     <Border Style="{StaticResource Row}" IsEnabled="{Binding IsNotBusy}">
-        <Grid ColumnDefinitions="72,*,190,160,Auto" ColumnSpacing="14">
+        <!--
+        Must match the column header grid on HomePage exactly. The storage column binds
+        DriveListLayout with a static Source, never RelativeSource: a ColumnDefinition is
+        not an Element, so an ancestor lookup on it has nothing to walk and failed inside
+        the item template — taking every row with it. The twelve-DIP column gap beside an
+        empty column is the one thing this cannot remove, and is accepted.
+        -->
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="28"/>
+                <ColumnDefinition Width="52"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=StorageColumnWidth, x:DataType=common:DriveListLayout}"/>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="112"/>
+            </Grid.ColumnDefinitions>
+
+
+            <!--
+            Selection tick. A Border rather than a CheckBox: the platform control brings
+            its own accent colour and metrics, and this sits in a row built entirely out of
+            the app's own pills and chips.
+            -->
+            <Grid Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="ToggleSelected"/>
+                </Grid.GestureRecognizers>
+
+                <Border Style="{StaticResource Tick}"
+                        IsVisible="{Binding IsSelected, Converter={StaticResource InvertedBoolConverter}}"
+                        behaviors:Hover.Cursor="True"/>
+
+                <Border Style="{StaticResource TickChecked}"
+                        IsVisible="{Binding IsSelected}"
+                        behaviors:Hover.Cursor="True">
+                    <Label Text="{x:Static icons:IconFont.Check}"
+                           FontFamily="{StaticResource FontIcon}"
+                           FontSize="10"
+                           InputTransparent="True"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           TextColor="{StaticResource White}"/>
+                </Border>
+            </Grid>
 
             <!-- Drive letter, monospaced so the column stays optically aligned -->
-            <Border Grid.Column="0"
+            <Border Grid.Column="1"
                     Style="{StaticResource CardInset}"
                     Padding="10,6"
                     HorizontalOptions="Start"
@@ -24,28 +68,30 @@
             </Border>
 
             <!--
-            Name over last-connected: "offline" alone says nothing about whether the
-            share dropped a minute ago or has never been reachable.
+            Name over host and last-connected: "offline" alone says nothing about whether
+            the share dropped a minute ago or has never been reachable, and the name alone
+            is whatever the user called it — the host is what two drives actually differ by.
             -->
-            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+            <VerticalStackLayout Grid.Column="2" Spacing="1" VerticalOptions="Center">
                 <Label Text="{Binding Name}"
                        Style="{StaticResource BodyStrong}"
                        LineBreakMode="TailTruncation"
                        MaxLines="1"/>
 
-                <Label Text="{Binding LastConnected}"
+                <Label Text="{Binding Subtitle}"
                        Style="{StaticResource Caption}"
                        FontSize="11"
                        LineBreakMode="TailTruncation"
                        MaxLines="1"/>
             </VerticalStackLayout>
 
-            <Label Grid.Column="2"
+            <Label Grid.Column="3"
                    Text="{Binding StorageUsage}"
                    Style="{StaticResource Caption}"
                    VerticalOptions="Center"
                    LineBreakMode="TailTruncation"
-                   MaxLines="1"/>
+                   MaxLines="1"
+                   IsVisible="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=ShowStorage, x:DataType=common:DriveListLayout}"/>
 
             <!--
             The status is the toggle. Pills swap rather than one pill retinted by a
@@ -62,7 +108,7 @@
             "Disconnected" with nothing appearing to happen for as long as the share took
             to answer.
             -->
-            <Grid Grid.Column="3" VerticalOptions="Center">
+            <Grid Grid.Column="4" VerticalOptions="Center">
                 <Border Style="{StaticResource PillSuccess}"
                         IsVisible="{Binding ShowConnected}"
                         ToolTipProperties.Text="{l10n:Translate Disconnect}"
@@ -172,7 +218,27 @@
             </Grid>
 
             <!-- Row actions -->
-            <HorizontalStackLayout Grid.Column="4" Spacing="8" VerticalOptions="Center">
+            <HorizontalStackLayout Grid.Column="5"
+                                   Spacing="8"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Center">
+                <!--
+                The point of the whole app is that Z: exists; there was no way to go and
+                look at it. Only while the drive is mounted, because otherwise there is
+                nothing behind the folder — and the connect pill is right there for that.
+                -->
+                <Border Style="{StaticResource IconChip}"
+                        IsVisible="{Binding Connected}"
+                        ToolTipProperties.Text="{l10n:Translate OpenInFileManager}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="HandleOpen"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.FolderOpen}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+
                 <Border Style="{StaticResource IconChip}"
                         ToolTipProperties.Text="{l10n:Translate UpdateDrive}">
                     <Border.GestureRecognizers>

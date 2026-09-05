@@ -4,6 +4,7 @@ using Helix.App.Messaging.Settings;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
 using Helix.Domain.Settings;
+using Helix.App.Resources.Languages;
 using Helix.App.Services;
 
 namespace Helix.App.Models;
@@ -354,6 +355,18 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Says a typed setting was stored.
+    /// </summary>
+    /// <remarks>
+    /// Only the numeric fields get this. A switch is its own confirmation — it is sitting
+    /// there in its new position — but a number typed into a box looks identical whether
+    /// it was accepted or thrown away, and these four are all debounced, so the write
+    /// happens well after the keystroke that caused it. The banner collapses repeats, so
+    /// holding the stepper down says it once.
+    /// </remarks>
+    private static void ConfirmSaved() => Notifier.Success(AppResources.SettingsSaved);
+
     private async Task DebouncedUpdateTimerCount()
     {
         int attempted = TimerCount;
@@ -361,6 +374,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
         if (await UpdatePropertyAsync(builder => builder.TimerCount = attempted))
         {
             _persistedTimerCount = attempted;
+            ConfirmSaved();
             return;
         }
 
@@ -374,6 +388,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
         if (await UpdatePropertyAsync(builder => builder.AuditlogRetentionDays = attempted))
         {
             _persistedRetentionDays = attempted;
+            ConfirmSaved();
             return;
         }
 
@@ -387,6 +402,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
         if (await UpdatePropertyAsync(builder => builder.StorageAlertThresholdPercent = attempted))
         {
             _persistedStorageAlertThresholdPercent = attempted;
+            ConfirmSaved();
             return;
         }
 
@@ -400,6 +416,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
         if (await UpdatePropertyAsync(builder => builder.IdleLockMinutes = attempted))
         {
             _persistedIdleLockMinutes = attempted;
+            ConfirmSaved();
             return;
         }
 

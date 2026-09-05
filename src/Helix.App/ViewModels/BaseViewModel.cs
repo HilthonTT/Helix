@@ -48,16 +48,41 @@ public abstract partial class BaseViewModel : ObservableObject
     public string AppVersion => $"v{VersionInfo.Display}";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowCountdown))]
     public partial bool TimerCancelled { get; set; }
 
     [ObservableProperty]
     public partial bool ShowRedoButton { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TimerCount))]
+    [NotifyPropertyChangedFor(nameof(CountdownDisplay))]
+    [NotifyPropertyChangedFor(nameof(ShowCountdown))]
     public partial int SecondsRemaining { get; set; }
 
-    public string TimerCount => $"{SecondsRemaining} seconds";
+    /// <summary>
+    /// The countdown as the header chip shows it.
+    /// </summary>
+    /// <remarks>
+    /// <c>m:ss</c> rather than a sentence. It used to be <c>$"{SecondsRemaining} seconds"</c>,
+    /// which was English in an app translated into five languages and said "1 seconds" on
+    /// the way past. Digits and a colon are the same in all of them, and a clock face is
+    /// what a countdown looks like anyway — the chip's icon and tooltip say what it counts
+    /// down to.
+    /// </remarks>
+    public string CountdownDisplay => TimeSpan.FromSeconds(Math.Max(SecondsRemaining, 0)).ToString(@"m\:ss");
+
+    /// <summary>
+    /// Whether the auto-minimize countdown is worth any room on screen.
+    /// </summary>
+    /// <remarks>
+    /// It used to hold a third of the dashboard's stat row, level with how much storage
+    /// the NAS has and how many drives are up — app chrome given the same weight as the
+    /// two facts the page exists to report, and shown even to the users who have
+    /// auto-minimize switched off and will never see it move. It is a chip in the header
+    /// now, and only while something is actually counting: nothing is armed when both of
+    /// these are at rest.
+    /// </remarks>
+    public bool ShowCountdown => SecondsRemaining > 0 || TimerCancelled;
 
     [RelayCommand]
     public Task StartTimerAsync()

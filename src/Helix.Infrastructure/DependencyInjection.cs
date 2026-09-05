@@ -106,6 +106,9 @@ public static class DependencyInjection
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
+        // Not per-OS: the shell verb that opens a folder is the same call on both heads.
+        services.AddSingleton<IFileBrowser, FileBrowser>();
         services.AddSingleton<ICountdownService, CountdownService>();
 
         // Holds the watched set and the polling loop for the app's lifetime.

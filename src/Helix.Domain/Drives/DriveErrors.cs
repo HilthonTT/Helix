@@ -33,6 +33,16 @@ public static class DriveErrors
 
     public static Error FailedToDisconnect(string message) => Error.Problem("Drive.FailedToDisconnect", message);
 
+    /// <summary>
+    /// The mount the user asked to open is not there — it was unmounted between the row
+    /// being drawn and the click.
+    /// </summary>
+    public static readonly Error MountNotAvailable = Error.NotFound(
+        "Drive.MountNotAvailable",
+        "That drive is not mounted, so there is nothing to open.");
+
+    public static Error MountNotOpened(string message) => Error.Problem("Drive.MountNotOpened", message);
+
     public static Error LetterNotFound(string letter) => Error.NotFound(
         "Drive.LetterNotFound",
         $"The drive with the letter = '{letter}' was not found.");

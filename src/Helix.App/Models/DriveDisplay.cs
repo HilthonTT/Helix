@@ -15,6 +15,18 @@ internal sealed partial class DriveDisplay : ObservableObject
     [ObservableProperty]
     public partial string Name { get; set; }
 
+    /// <summary>
+    /// The NAS this drive is on, as the user typed it.
+    /// </summary>
+    /// <remarks>
+    /// On the row because a name is whatever the user called it: two drives on two
+    /// different NASes were told apart only by that, and the address is the thing they
+    /// actually differ by. Shown beside the last-connected stamp, not in place of it.
+    /// </remarks>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Subtitle))]
+    public partial string Host { get; set; }
+
     /// <summary>Human-readable capacity line, refreshed whenever connectivity changes.</summary>
     [ObservableProperty]
     public partial string StorageUsage { get; set; }
@@ -24,6 +36,7 @@ internal sealed partial class DriveDisplay : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LastConnected))]
+    [NotifyPropertyChangedFor(nameof(Subtitle))]
     public partial DateTime? LastConnectedOnUtc { get; set; }
 
     /// <summary>
@@ -39,6 +52,22 @@ internal sealed partial class DriveDisplay : ObservableObject
         : string.Format(
             AppResources.LastConnectedAt,
             LastConnectedOnUtc.Value.ToLocalTime().ToString("g"));
+
+    /// <summary>The row's second line: which NAS, and when it was last up.</summary>
+    public string Subtitle => string.IsNullOrWhiteSpace(Host)
+        ? LastConnected
+        : $"{Host} · {LastConnected}";
+
+    /// <summary>
+    /// Whether the row is ticked for a bulk action.
+    /// </summary>
+    /// <remarks>
+    /// Selection is deliberately not persisted and not part of the drive: it lasts as long
+    /// as the user is looking at the list, and replacing the collection — a search, a
+    /// reload — clears it, because the rows it referred to are gone.
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool IsSelected { get; set; }
 
     /// <summary>Drives the status pill in the drive row; bound, so the UI follows it.</summary>
     [ObservableProperty]
@@ -149,6 +178,7 @@ internal sealed partial class DriveDisplay : ObservableObject
         Id = drive.Id;
         Letter = drive.Letter;
         Name = drive.Name;
+        Host = drive.Host;
         LastConnectedOnUtc = drive.LastConnectedOnUtc;
     }
 
@@ -158,6 +188,7 @@ internal sealed partial class DriveDisplay : ObservableObject
         Id = updateDrive.Id;
         Letter = updateDrive.Letter;
         Name = updateDrive.Name;
+        Host = updateDrive.Host;
     }
 
     public DriveDisplay()
@@ -167,6 +198,7 @@ internal sealed partial class DriveDisplay : ObservableObject
         Id = Guid.Empty;
         Letter = string.Empty;
         Name = string.Empty;
+        Host = string.Empty;
         StorageUsage = string.Empty;
         OfflineDetail = string.Empty;
     }

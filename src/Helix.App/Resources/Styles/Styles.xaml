@@ -257,6 +257,24 @@
                 Value="{AppThemeBinding Light={StaticResource SurfaceAltLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"/>
     </Style>
 
+    <!-- Selection tick. Two styles that swap rather than one retinted by a trigger,
+         the same way the row's status pills do. -->
+    <Style x:Key="Tick" TargetType="Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Stroke"
+                Value="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=5}"/>
+        <Setter Property="WidthRequest" Value="18"/>
+        <Setter Property="HeightRequest" Value="18"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style x:Key="TickChecked" TargetType="Border" BasedOn="{StaticResource Tick}">
+        <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
+        <Setter Property="Stroke" Value="{StaticResource BrandBrush}"/>
+    </Style>
+
     <!-- Toolbar chip: bordered, tappable, hover-tinted -->
     <Style x:Key="Chip" TargetType="Border">
         <Setter Property="Background"

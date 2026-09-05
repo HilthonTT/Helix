@@ -235,10 +235,7 @@
     <value>日付</value>
   </data>
   <data name="SearchDrives" xml:space="preserve">
-    <value>検索ドライブ</value>
-  </data>
-  <data name="SearchTermPlaceholder" xml:space="preserve">
-    <value>検索語を入力します(オプション)</value>
+    <value>ドライブを検索</value>
   </data>
   <data name="YourSortOrder" xml:space="preserve">
     <value>並べ替え順序</value>
@@ -662,5 +659,71 @@
   </data>
   <data name="StatusFailed" xml:space="preserve">
     <value>失敗</value>
+  </data>
+  <data name="OpenInFileManager" xml:space="preserve">
+    <value>ファイルマネージャーで開く</value>
+  </data>
+  <data name="SettingsSaved" xml:space="preserve">
+    <value>設定を保存しました。</value>
+  </data>
+  <data name="UnitSeconds" xml:space="preserve">
+    <value>秒</value>
+  </data>
+  <data name="UnitMinutes" xml:space="preserve">
+    <value>分</value>
+  </data>
+  <data name="UnitDays" xml:space="preserve">
+    <value>日</value>
+  </data>
+  <data name="UnitPercent" xml:space="preserve">
+    <value>%</value>
+  </data>
+  <data name="RetentionKeepEverything" xml:space="preserve">
+    <value>すべて保持</value>
+  </data>
+  <data name="StorageAlertOff" xml:space="preserve">
+    <value>オフ</value>
+  </data>
+  <data name="IdleLockNever" xml:space="preserve">
+    <value>しない</value>
+  </data>
+  <data name="ConnectAll" xml:space="preserve">
+    <value>すべて接続</value>
+  </data>
+  <data name="DisconnectAll" xml:space="preserve">
+    <value>すべて切断</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>すべて選択</value>
+  </data>
+  <data name="ClearSelection" xml:space="preserve">
+    <value>選択解除</value>
+  </data>
+  <data name="DrivesSelected" xml:space="preserve">
+    <value>{0} 件選択中</value>
+  </data>
+  <data name="DisconnectConfirmTitle" xml:space="preserve">
+    <value>ドライブを切断</value>
+  </data>
+  <data name="DisconnectConfirmOne" xml:space="preserve">
+    <value>このドライブをアンマウントします。開いているファイルを保存できなくなる場合があります。</value>
+  </data>
+  <data name="DisconnectConfirmMany" xml:space="preserve">
+    <value>{0} 台のドライブをアンマウントします。開いているファイルを保存できなくなる場合があります。</value>
+  </data>
+  <data name="ClearSearch" xml:space="preserve">
+    <value>検索をクリア</value>
+  </data>
+  <data name="NoDrivesMatchTitle" xml:space="preserve">
+    <value>一致するドライブがありません</value>
+  </data>
+  <data name="NoDrivesMatchMessage" xml:space="preserve">
+    <value>入力に一致するものはありません。検索をクリアすると、すべてのドライブが再び表示されます。</value>
+  </data>
+  <data name="NoAuditlogsMatchTitle" xml:space="preserve">
+    <value>一致するエントリがありません</value>
+  </data>
+  <data name="NoAuditlogsMatchMessage" xml:space="preserve">
+    <value>ログ内に入力と一致するものはありません。検索をクリアすると、履歴全体が再び表示されます。</value>
   </data>
 </root>

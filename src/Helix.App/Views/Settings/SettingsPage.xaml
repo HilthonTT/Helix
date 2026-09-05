@@ -238,12 +238,18 @@
                                     <Label Text="{l10n:Translate TimerCountInSeconds}" Style="{StaticResource Title3}"/>
                                     <Label Text="{l10n:Translate TimerCountDescription}" Style="{StaticResource Caption}"/>
                                 </VerticalStackLayout>
-                                <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
-                                    <Entry Placeholder="20"
-                                           Keyboard="Numeric"
-                                           Text="{Binding Settings.TimerCount}"
-                                           IsEnabled="{Binding Settings.IsNotBusy}"/>
-                                </Border>
+                                <!-- No OffText: zero is not a setting here, it is a
+                                     rejected value. Switching the countdown off is what
+                                     the Auto-minimize toggle above is for. -->
+                                <controls:NumberField Grid.Column="1"
+                                                      WidthRequest="200"
+                                                      VerticalOptions="Center"
+                                                      Value="{Binding Settings.TimerCount}"
+                                                      Minimum="1"
+                                                      Maximum="3600"
+                                                      Step="5"
+                                                      Unit="{l10n:Translate UnitSeconds}"
+                                                      IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
         
                             <Grid Style="{StaticResource PreferenceRow}">
@@ -251,12 +257,16 @@
                                     <Label Text="{l10n:Translate AuditlogRetention}" Style="{StaticResource Title3}"/>
                                     <Label Text="{l10n:Translate AuditlogRetentionDescription}" Style="{StaticResource Caption}"/>
                                 </VerticalStackLayout>
-                                <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
-                                    <Entry Placeholder="90"
-                                           Keyboard="Numeric"
-                                           Text="{Binding Settings.AuditlogRetentionDays}"
-                                           IsEnabled="{Binding Settings.IsNotBusy}"/>
-                                </Border>
+                                <controls:NumberField Grid.Column="1"
+                                                      WidthRequest="200"
+                                                      VerticalOptions="Center"
+                                                      Value="{Binding Settings.AuditlogRetentionDays}"
+                                                      Minimum="0"
+                                                      Maximum="3650"
+                                                      Step="10"
+                                                      Unit="{l10n:Translate UnitDays}"
+                                                      OffText="{l10n:Translate RetentionKeepEverything}"
+                                                      IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
         
                             <Grid Style="{StaticResource PreferenceRow}">
@@ -264,12 +274,18 @@
                                     <Label Text="{l10n:Translate StorageAlertThreshold}" Style="{StaticResource Title3}"/>
                                     <Label Text="{l10n:Translate StorageAlertThresholdDescription}" Style="{StaticResource Caption}"/>
                                 </VerticalStackLayout>
-                                <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
-                                    <Entry Placeholder="10"
-                                           Keyboard="Numeric"
-                                           Text="{Binding Settings.StorageAlertThresholdPercent}"
-                                           IsEnabled="{Binding Settings.IsNotBusy}"/>
-                                </Border>
+                                <!-- Maximum comes from the domain rather than a literal:
+                                     it is the same bound UpdateSettings validates against. -->
+                                <controls:NumberField Grid.Column="1"
+                                                      WidthRequest="200"
+                                                      VerticalOptions="Center"
+                                                      Value="{Binding Settings.StorageAlertThresholdPercent}"
+                                                      Minimum="0"
+                                                      Maximum="{Binding MaximumStorageAlertThresholdPercent}"
+                                                      Step="1"
+                                                      Unit="{l10n:Translate UnitPercent}"
+                                                      OffText="{l10n:Translate StorageAlertOff}"
+                                                      IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
         
                             <Grid Style="{StaticResource PreferenceRow}">
@@ -277,12 +293,16 @@
                                     <Label Text="{l10n:Translate IdleLock}" Style="{StaticResource Title3}"/>
                                     <Label Text="{l10n:Translate IdleLockDescription}" Style="{StaticResource Caption}"/>
                                 </VerticalStackLayout>
-                                <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
-                                    <Entry Placeholder="0"
-                                           Keyboard="Numeric"
-                                           Text="{Binding Settings.IdleLockMinutes}"
-                                           IsEnabled="{Binding Settings.IsNotBusy}"/>
-                                </Border>
+                                <controls:NumberField Grid.Column="1"
+                                                      WidthRequest="200"
+                                                      VerticalOptions="Center"
+                                                      Value="{Binding Settings.IdleLockMinutes}"
+                                                      Minimum="0"
+                                                      Maximum="1440"
+                                                      Step="5"
+                                                      Unit="{l10n:Translate UnitMinutes}"
+                                                      OffText="{l10n:Translate IdleLockNever}"
+                                                      IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
         
                             <BoxView Style="{StaticResource Divider}"/>

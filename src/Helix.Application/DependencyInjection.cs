@@ -35,7 +35,6 @@ public static class DependencyInjection
     {
         services.AddScoped<GetAuditlogs>();
         services.AddScoped<PruneAuditlogs>();
-        services.AddScoped<SearchAuditlogs>();
 
         return services;
     }
@@ -63,13 +62,13 @@ public static class DependencyInjection
     {
         services.AddScoped<ConnectAllDrives>();
         services.AddScoped<ConnectDrive>();
+        services.AddScoped<ConnectDrives>();
 
         services.AddScoped<CreateDrive>();
         services.AddScoped<DeleteDrive>();
         services.AddScoped<GetAvailableDriveLetters>();
         services.AddScoped<GetDriveById>();
         services.AddScoped<GetDrives>();
-        services.AddScoped<SearchDrives>();
         services.AddScoped<UpdateDrive>();
 
         services.AddScoped<DisconnectDrive>();

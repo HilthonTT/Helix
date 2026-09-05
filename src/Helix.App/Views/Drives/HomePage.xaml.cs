@@ -19,7 +19,6 @@ public sealed partial class HomePage : ContentPage
     private const string CreateDrive = "create-drive";
     private const string UpdateDrive = "update-drive";
     private const string DeleteDrive = "delete-drive";
-    private const string SearchDrives = "search-drives";
     private const string DriveGroups = "drive-groups";
 
     private static bool _isFirstView = true;
@@ -52,12 +51,23 @@ public sealed partial class HomePage : ContentPage
         _modals.Register(CreateDrive, CreateDriveLayout, CreateDriveView);
         _modals.Register(UpdateDrive, UpdateDriveLayout, UpdateDriveView);
         _modals.Register(DeleteDrive, DeleteDriveLayout, DeleteDriveView);
-        _modals.Register(SearchDrives, SearchDrivesLayout, SearchDrivesView);
         _modals.Register(DriveGroups, DriveGroupsLayout, DriveGroupsView);
         _modals.AttachEscapeToDismiss(this);
 
+        // The drive card decides its own layout from its own width rather than the
+        // window's: the sidebar and the connectivity column both come out of the window
+        // before the card sees any of it, and it is the card that has to fit.
+        DriveCard.SizeChanged += (_, _) => _viewModel.IsCompact = DriveCard.Width < CompactCardWidth;
+
         RegisterMessages();
     }
+
+    /// <summary>
+    /// Below this many DIPs the drive card goes compact. Fullscreen on a laptop gives it
+    /// around 1060; an un-maximized window around 670. The header's full-labelled row
+    /// needs about 810 to sit without squeezing the search box.
+    /// </summary>
+    private const double CompactCardWidth = 850;
 
     protected async override void OnAppearing()
     {
@@ -240,9 +250,6 @@ public sealed partial class HomePage : ContentPage
         WeakReferenceMessenger.Default.Register<DeleteDriveMessage>(
             this, async (r, m) => await _modals.ToggleAsync(DeleteDrive, m.Value));
 
-        WeakReferenceMessenger.Default.Register<SearchDrivesMessage>(
-            this, async (r, m) => await _modals.ToggleAsync(SearchDrives, m.Value));
-
         WeakReferenceMessenger.Default.Register<DriveGroupsMessage>(
             this, async (r, m) => await _modals.ToggleAsync(DriveGroups, m.Show));
 
@@ -278,6 +285,17 @@ public sealed partial class HomePage : ContentPage
             _viewModel.OpenCreateDriveModalCommand.Execute(null);
         }
     }
+
+    /// <summary>
+    /// Ctrl+F puts the caret in the filter box.
+    /// </summary>
+    /// <remarks>
+    /// The list itself is still mouse-only — its pills and icon chips are styled Borders
+    /// with tap gestures, which take no focus — so this is the one keyboard route into
+    /// narrowing it. See the note in CLAUDE.md about what making the rows themselves
+    /// keyboard-operable would cost.
+    /// </remarks>
+    private void Search_Clicked(object sender, EventArgs e) => DriveSearch.Focus();
 
     private void DriveGroups_Clicked(object sender, EventArgs e)
     {

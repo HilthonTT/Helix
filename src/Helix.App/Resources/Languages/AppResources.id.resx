@@ -235,10 +235,7 @@
     <value>Tanggal</value>
   </data>
   <data name="SearchDrives" xml:space="preserve">
-    <value>Cari Drive</value>
-  </data>
-  <data name="SearchTermPlaceholder" xml:space="preserve">
-    <value>Masukkan istilah penelusuran Anda (opsional)</value>
+    <value>Cari drive</value>
   </data>
   <data name="YourSortOrder" xml:space="preserve">
     <value>Urutan pengurutan Anda</value>
@@ -662,5 +659,71 @@
   </data>
   <data name="StatusFailed" xml:space="preserve">
     <value>Gagal</value>
+  </data>
+  <data name="OpenInFileManager" xml:space="preserve">
+    <value>Buka di pengelola berkas</value>
+  </data>
+  <data name="SettingsSaved" xml:space="preserve">
+    <value>Pengaturan disimpan.</value>
+  </data>
+  <data name="UnitSeconds" xml:space="preserve">
+    <value>detik</value>
+  </data>
+  <data name="UnitMinutes" xml:space="preserve">
+    <value>menit</value>
+  </data>
+  <data name="UnitDays" xml:space="preserve">
+    <value>hari</value>
+  </data>
+  <data name="UnitPercent" xml:space="preserve">
+    <value>%</value>
+  </data>
+  <data name="RetentionKeepEverything" xml:space="preserve">
+    <value>Simpan semua</value>
+  </data>
+  <data name="StorageAlertOff" xml:space="preserve">
+    <value>Nonaktif</value>
+  </data>
+  <data name="IdleLockNever" xml:space="preserve">
+    <value>Tidak pernah</value>
+  </data>
+  <data name="ConnectAll" xml:space="preserve">
+    <value>Hubungkan semua</value>
+  </data>
+  <data name="DisconnectAll" xml:space="preserve">
+    <value>Putuskan semua</value>
+  </data>
+  <data name="SelectAll" xml:space="preserve">
+    <value>Pilih semua</value>
+  </data>
+  <data name="ClearSelection" xml:space="preserve">
+    <value>Hapus</value>
+  </data>
+  <data name="DrivesSelected" xml:space="preserve">
+    <value>{0} dipilih</value>
+  </data>
+  <data name="DisconnectConfirmTitle" xml:space="preserve">
+    <value>Putuskan drive</value>
+  </data>
+  <data name="DisconnectConfirmOne" xml:space="preserve">
+    <value>Drive ini akan dilepas. Berkas yang sedang terbuka di dalamnya mungkin gagal disimpan.</value>
+  </data>
+  <data name="DisconnectConfirmMany" xml:space="preserve">
+    <value>{0} drive akan dilepas. Berkas yang sedang terbuka di dalamnya mungkin gagal disimpan.</value>
+  </data>
+  <data name="ClearSearch" xml:space="preserve">
+    <value>Hapus pencarian</value>
+  </data>
+  <data name="NoDrivesMatchTitle" xml:space="preserve">
+    <value>Tidak ada drive yang cocok</value>
+  </data>
+  <data name="NoDrivesMatchMessage" xml:space="preserve">
+    <value>Tidak ada yang cocok dengan yang Anda ketik. Hapus pencarian untuk melihat semua drive lagi.</value>
+  </data>
+  <data name="NoAuditlogsMatchTitle" xml:space="preserve">
+    <value>Tidak ada entri yang cocok</value>
+  </data>
+  <data name="NoAuditlogsMatchMessage" xml:space="preserve">
+    <value>Tidak ada dalam log yang cocok dengan yang Anda ketik. Hapus pencarian untuk melihat seluruh riwayat lagi.</value>
   </data>
 </root>

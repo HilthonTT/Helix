@@ -1,4 +1,4 @@
-using Helix.Domain.Drives;
+﻿using Helix.Domain.Drives;
 
 namespace Helix.Application.Abstractions.Connector;
 
@@ -21,6 +21,18 @@ public interface INasConnector
     Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default);
 
     bool IsConnected(string letter);
+
+    /// <summary>
+    /// The filesystem path a drive letter is mounted at on this platform — <c>Z:\</c> on
+    /// Windows, a directory under the mount root on macOS.
+    /// </summary>
+    /// <remarks>
+    /// Asked of the connector because the connector is what put it there. Answers for any
+    /// letter, mounted or not: it is where the drive <em>would</em> be, and callers that
+    /// need to know whether anything is actually there ask
+    /// <see cref="IsConnected"/> or look at the path.
+    /// </remarks>
+    string GetMountPath(string letter);
 
     /// <summary>
     /// Returns every currently-mapped drive letter (uppercase, no colon). Callers

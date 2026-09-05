@@ -664,7 +664,7 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search auditlogs.
+        ///   Looks up a localized string similar to Search the log.
         /// </summary>
         internal static string SearchAuditlogs {
             get {
@@ -673,20 +673,11 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search Drives.
+        ///   Looks up a localized string similar to Search drives.
         /// </summary>
         internal static string SearchDrives {
             get {
                 return ResourceManager.GetString("SearchDrives", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enter your search term (optional).
-        /// </summary>
-        internal static string SearchTermPlaceholder {
-            get {
-                return ResourceManager.GetString("SearchTermPlaceholder", resourceCulture);
             }
         }
         
@@ -1593,6 +1584,204 @@ namespace Helix.App.Resources.Languages {
         internal static string StatusFailed {
             get {
                 return ResourceManager.GetString("StatusFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open in file manager.
+        /// </summary>
+        internal static string OpenInFileManager {
+            get {
+                return ResourceManager.GetString("OpenInFileManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings saved..
+        /// </summary>
+        internal static string SettingsSaved {
+            get {
+                return ResourceManager.GetString("SettingsSaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to seconds.
+        /// </summary>
+        internal static string UnitSeconds {
+            get {
+                return ResourceManager.GetString("UnitSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to minutes.
+        /// </summary>
+        internal static string UnitMinutes {
+            get {
+                return ResourceManager.GetString("UnitMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to days.
+        /// </summary>
+        internal static string UnitDays {
+            get {
+                return ResourceManager.GetString("UnitDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to %.
+        /// </summary>
+        internal static string UnitPercent {
+            get {
+                return ResourceManager.GetString("UnitPercent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Keep everything.
+        /// </summary>
+        internal static string RetentionKeepEverything {
+            get {
+                return ResourceManager.GetString("RetentionKeepEverything", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Off.
+        /// </summary>
+        internal static string StorageAlertOff {
+            get {
+                return ResourceManager.GetString("StorageAlertOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Never.
+        /// </summary>
+        internal static string IdleLockNever {
+            get {
+                return ResourceManager.GetString("IdleLockNever", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect all.
+        /// </summary>
+        internal static string ConnectAll {
+            get {
+                return ResourceManager.GetString("ConnectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect all.
+        /// </summary>
+        internal static string DisconnectAll {
+            get {
+                return ResourceManager.GetString("DisconnectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select all.
+        /// </summary>
+        internal static string SelectAll {
+            get {
+                return ResourceManager.GetString("SelectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear.
+        /// </summary>
+        internal static string ClearSelection {
+            get {
+                return ResourceManager.GetString("ClearSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} selected.
+        /// </summary>
+        internal static string DrivesSelected {
+            get {
+                return ResourceManager.GetString("DrivesSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect drives.
+        /// </summary>
+        internal static string DisconnectConfirmTitle {
+            get {
+                return ResourceManager.GetString("DisconnectConfirmTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This drive will be unmounted. Anything you have open on it may fail to save..
+        /// </summary>
+        internal static string DisconnectConfirmOne {
+            get {
+                return ResourceManager.GetString("DisconnectConfirmOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} drives will be unmounted. Anything you have open on them may fail to save..
+        /// </summary>
+        internal static string DisconnectConfirmMany {
+            get {
+                return ResourceManager.GetString("DisconnectConfirmMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear search.
+        /// </summary>
+        internal static string ClearSearch {
+            get {
+                return ResourceManager.GetString("ClearSearch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No drives match.
+        /// </summary>
+        internal static string NoDrivesMatchTitle {
+            get {
+                return ResourceManager.GetString("NoDrivesMatchTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing here matches what you typed. Clear the search to see every drive again..
+        /// </summary>
+        internal static string NoDrivesMatchMessage {
+            get {
+                return ResourceManager.GetString("NoDrivesMatchMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No entries match.
+        /// </summary>
+        internal static string NoAuditlogsMatchTitle {
+            get {
+                return ResourceManager.GetString("NoAuditlogsMatchTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing in the log matches what you typed. Clear the search to see the whole history again..
+        /// </summary>
+        internal static string NoAuditlogsMatchMessage {
+            get {
+                return ResourceManager.GetString("NoAuditlogsMatchMessage", resourceCulture);
             }
         }
         

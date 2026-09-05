@@ -1,7 +1,8 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Core.Drives;
 using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
@@ -13,9 +14,10 @@ namespace Helix.Application.Features.DriveGroups.Commands;
 /// </summary>
 /// <remarks>
 /// One handler for both directions rather than two nearly identical ones: everything
-/// around the mount — resolving the group, filtering to the drives that exist and are
-/// owned, deciding which of them are in the wrong state, collecting the failures — is the
-/// same either way, and only the call in the middle differs.
+/// around the mount is the same either way, and only the call in the middle differs. All
+/// of that lives in <see cref="DriveMountBatch"/>, which an ad-hoc selection of rows hands
+/// the same list to; what stays here is resolving the group to drives that exist and are
+/// owned, in the order the user arranged them.
 ///
 /// This is the explicit instruction the user pressed a button for, so a drive's own
 /// <c>AutoConnect</c> flag does not apply: that flag holds a drive back from the
@@ -73,59 +75,13 @@ public sealed class ConnectDriveGroup(
             return Result.Success();
         }
 
-        HashSet<string> connected = nasConnector.GetConnectedLetters();
-
-        Drive[] targets = [.. members.Where(drive => connected.Contains(drive.Letter) == request.Disconnect)];
-        if (targets.Length == 0)
-        {
-            return Result.Success();
-        }
-
-        // Pressing a group button is Helix changing these letters on purpose, in both
-        // directions, so the monitor is told to expect it — otherwise taking a group down
-        // is followed by the watchdog putting it back up.
-        using IDisposable suppression = driveMonitor.Suppress(targets.Select(drive => drive.Letter));
-
-        // Neither call throws for an expected failure, so WhenAll cannot fault and the
-        // per-drive outcomes are aggregated rather than thrown.
-        Result[] results = await Task.WhenAll(targets.Select(drive => request.Disconnect
-            ? nasConnector.DisconnectAsync(drive, cancellationToken)
-            : nasConnector.ConnectAsync(drive, cancellationToken)));
-
-        List<string> failures = [];
-        bool anyConnected = false;
-
-        // Stamped on this thread rather than inside the parallel work, so the change
-        // tracker is only ever touched from one.
-        for (int i = 0; i < results.Length; i++)
-        {
-            if (results[i].IsFailure)
-            {
-                failures.Add($"{targets[i].Letter}: {results[i].Error.Description}");
-                continue;
-            }
-
-            if (!request.Disconnect)
-            {
-                targets[i].MarkConnected(dateTimeProvider.UtcNow);
-                anyConnected = true;
-            }
-        }
-
-        if (anyConnected)
-        {
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-        }
-
-        if (failures.Count == 0)
-        {
-            return Result.Success();
-        }
-
-        string detail = string.Join(Environment.NewLine, failures);
-
-        return Result.Failure(request.Disconnect
-            ? DriveErrors.FailedToDisconnect(detail)
-            : DriveErrors.FailedToConnect(detail));
+        return await DriveMountBatch.RunAsync(
+            members,
+            request.Disconnect,
+            nasConnector,
+            driveMonitor,
+            unitOfWork,
+            dateTimeProvider,
+            cancellationToken);
     }
 }

@@ -66,6 +66,8 @@ internal sealed class MacNasConnector : INasConnector
             failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
             cancellationToken);
 
+    public string GetMountPath(string letter) => MountPointFor(letter);
+
     public bool IsConnected(string letter)
     {
         if (string.IsNullOrWhiteSpace(letter))
