@@ -726,4 +726,19 @@
   <data name="NoAuditlogsMatchMessage" xml:space="preserve">
     <value>ログ内に入力と一致するものはありません。検索をクリアすると、履歴全体が再び表示されます。</value>
   </data>
+  <data name="DeleteDriveConfirm" xml:space="preserve">
+    <value>'{0}' を削除してもよろしいですか？</value>
+  </data>
+  <data name="DeleteDriveConfirmGeneric" xml:space="preserve">
+    <value>このドライブを削除してもよろしいですか？</value>
+  </data>
+  <data name="DriveNotReady" xml:space="preserve">
+    <value>ドライブの準備ができていません</value>
+  </data>
+  <data name="InvalidDriveLetter" xml:space="preserve">
+    <value>無効なドライブ文字</value>
+  </data>
+  <data name="StorageUsedOf" xml:space="preserve">
+    <value>{1} TB 中 {0} TB 使用</value>
+  </data>
 </root>

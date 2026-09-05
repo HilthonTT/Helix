@@ -726,4 +726,19 @@
   <data name="NoAuditlogsMatchMessage" xml:space="preserve">
     <value>Nichts im Protokoll passt zu Ihrer Eingabe. Setzen Sie die Suche zurück, um den gesamten Verlauf wieder zu sehen.</value>
   </data>
+  <data name="DeleteDriveConfirm" xml:space="preserve">
+    <value>Soll '{0}' wirklich gelöscht werden?</value>
+  </data>
+  <data name="DeleteDriveConfirmGeneric" xml:space="preserve">
+    <value>Soll dieses Laufwerk wirklich gelöscht werden?</value>
+  </data>
+  <data name="DriveNotReady" xml:space="preserve">
+    <value>Laufwerk nicht bereit</value>
+  </data>
+  <data name="InvalidDriveLetter" xml:space="preserve">
+    <value>Ungültiger Laufwerksbuchstabe</value>
+  </data>
+  <data name="StorageUsedOf" xml:space="preserve">
+    <value>{0} TB von {1} TB belegt</value>
+  </data>
 </root>

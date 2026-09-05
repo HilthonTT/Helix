@@ -43,11 +43,22 @@ internal sealed class NumberField : ContentView
         BindingMode.TwoWay,
         propertyChanged: (bindable, _, _) => ((NumberField)bindable).Render());
 
+    // Both redraw: the stepper opacity says whether there is anywhere left to go, and a
+    // bound Maximum arrives after the first Render has already decided that with the
+    // default in hand.
     public static readonly BindableProperty MinimumProperty = BindableProperty.Create(
-        nameof(Minimum), typeof(int), typeof(NumberField), 0);
+        nameof(Minimum),
+        typeof(int),
+        typeof(NumberField),
+        0,
+        propertyChanged: (bindable, _, _) => ((NumberField)bindable).Render());
 
     public static readonly BindableProperty MaximumProperty = BindableProperty.Create(
-        nameof(Maximum), typeof(int), typeof(NumberField), int.MaxValue);
+        nameof(Maximum),
+        typeof(int),
+        typeof(NumberField),
+        int.MaxValue,
+        propertyChanged: (bindable, _, _) => ((NumberField)bindable).Render());
 
     public static readonly BindableProperty StepProperty = BindableProperty.Create(
         nameof(Step), typeof(int), typeof(NumberField), 1);

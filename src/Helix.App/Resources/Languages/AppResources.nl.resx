@@ -726,4 +726,19 @@
   <data name="NoAuditlogsMatchMessage" xml:space="preserve">
     <value>Niets in het logboek komt overeen met wat je hebt getypt. Wis de zoekopdracht om de volledige geschiedenis weer te zien.</value>
   </data>
+  <data name="DeleteDriveConfirm" xml:space="preserve">
+    <value>Weet je zeker dat je '{0}' wilt verwijderen?</value>
+  </data>
+  <data name="DeleteDriveConfirmGeneric" xml:space="preserve">
+    <value>Weet je zeker dat je deze schijf wilt verwijderen?</value>
+  </data>
+  <data name="DriveNotReady" xml:space="preserve">
+    <value>Schijf niet gereed</value>
+  </data>
+  <data name="InvalidDriveLetter" xml:space="preserve">
+    <value>Ongeldige stationsletter</value>
+  </data>
+  <data name="StorageUsedOf" xml:space="preserve">
+    <value>{0} TB gebruikt van {1} TB</value>
+  </data>
 </root>

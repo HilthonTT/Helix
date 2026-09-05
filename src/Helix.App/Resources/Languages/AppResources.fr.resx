@@ -726,4 +726,19 @@
   <data name="NoAuditlogsMatchMessage" xml:space="preserve">
     <value>Rien dans le journal ne correspond à votre saisie. Effacez la recherche pour revoir tout l'historique.</value>
   </data>
+  <data name="DeleteDriveConfirm" xml:space="preserve">
+    <value>Voulez-vous vraiment supprimer '{0}' ?</value>
+  </data>
+  <data name="DeleteDriveConfirmGeneric" xml:space="preserve">
+    <value>Voulez-vous vraiment supprimer ce lecteur ?</value>
+  </data>
+  <data name="DriveNotReady" xml:space="preserve">
+    <value>Lecteur non prêt</value>
+  </data>
+  <data name="InvalidDriveLetter" xml:space="preserve">
+    <value>Lettre de lecteur invalide</value>
+  </data>
+  <data name="StorageUsedOf" xml:space="preserve">
+    <value>{0} To utilisés sur {1} To</value>
+  </data>
 </root>

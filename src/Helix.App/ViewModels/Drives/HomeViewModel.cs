@@ -87,10 +87,23 @@ internal sealed partial class HomeViewModel : BaseViewModel
     /// Re-subscribes when the whole collection is swapped out — a search, or a reload.
     /// </summary>
     /// <remarks>
-    /// The old rows are dropped along with the collection holding them, so their
-    /// subscriptions go with it; nothing else references them.
+    /// The rows are <b>reused</b> across the swap — the same objects go into the new
+    /// collection so a tick and a mount in flight survive typing — so their subscriptions
+    /// do not go with the old collection. They have to be removed here, or every keystroke
+    /// in the search box adds another handler to every visible row, and one tick then
+    /// recomputes the selection once per keystroke ever typed.
     /// </remarks>
-    partial void OnDrivesChanged(ObservableCollection<DriveDisplay> value) => WatchSelection(value);
+    partial void OnDrivesChanged(ObservableCollection<DriveDisplay> oldValue, ObservableCollection<DriveDisplay> newValue)
+    {
+        // Null on the constructor's seeding assignment, whatever the generated signature
+        // says: nothing has been assigned before it.
+        foreach (DriveDisplay drive in oldValue ?? [])
+        {
+            drive.PropertyChanged -= OnDrivePropertyChanged;
+        }
+
+        WatchSelection(newValue);
+    }
 
     private void OnDrivePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -555,8 +568,13 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
 
         // Counted over every drive, because DisconnectAllDrives is going to take down
-        // every drive — including any the filter is hiding.
-        if (!await ConfirmDisconnectAsync(_allDrives.Count(drive => drive.Connected)))
+        // every drive — including any the filter is hiding. Asked of the connector rather
+        // than read off the rows: a row the list has not realized yet has never been told
+        // whether its drive is up, and a confirmation skipped on that basis would unmount
+        // thirteen shares without the question this dialog exists to ask.
+        HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+
+        if (!await ConfirmDisconnectAsync(_allDrives.Count(drive => connectedLetters.Contains(drive.Letter))))
         {
             return;
         }
@@ -638,11 +656,35 @@ internal sealed partial class HomeViewModel : BaseViewModel
         _allDrives.Clear();
         _allDrives.AddRange(drives.Select(d => new DriveDisplay(d)));
 
+        // Before the sort, so a list ordered by status is right on the first draw rather
+        // than after each row has been realized and asked the connector for itself.
+        SyncConnectivity(_nasConnector.GetConnectedLetters());
+
         ApplyFilterAndSort();
 
         await RefreshTotalsAsync();
 
         return drives;
+    }
+
+    /// <summary>
+    /// Pushes what is actually mounted onto every row, realized or not.
+    /// </summary>
+    /// <remarks>
+    /// The row template refreshes its own drive when it is bound and when a connectivity
+    /// message names it, and that is the only place <see cref="DriveDisplay.Connected"/>
+    /// used to be written. A row the list has not realized — scrolled out of view, or
+    /// filtered out — was therefore never told, and read as disconnected to everything
+    /// that consults the master list: the status sort, and the count the disconnect-all
+    /// confirmation is skipped on. The template still owns the capacity line, which is
+    /// I/O against the share and not worth doing for rows nobody can see.
+    /// </remarks>
+    private void SyncConnectivity(HashSet<string> connectedLetters)
+    {
+        foreach (DriveDisplay drive in _allDrives)
+        {
+            drive.Connected = connectedLetters.Contains(drive.Letter);
+        }
     }
 
     /// <summary>
@@ -721,6 +763,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
     private string ValidateTotalConnected()
     {
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+
+        // The same reading the tiles are built from, so the rows can never disagree
+        // with the number above them.
+        SyncConnectivity(connectedLetters);
+
         int count = _allDrives.Count(d => connectedLetters.Contains(d.Letter));
 
         ConnectedCount = count;
@@ -769,6 +816,33 @@ internal sealed partial class HomeViewModel : BaseViewModel
             // Counted against the drives on screen, so a drive arriving changes what an
             // existing group can resolve — an import is the case that matters.
             _ = FetchDriveGroupsAsync();
+        });
+
+        WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) =>
+        {
+            // Applied to the master row, not left to the row template. The template only
+            // hears about a drive it is currently bound to, and a row that is filtered
+            // out or scrolled out of a recycling list has no template — so a rename made
+            // while the search box was narrowing the list past it came back with the old
+            // name, and the filter went on matching against it.
+            DriveDisplay? existingDrive = _allDrives.FirstOrDefault(d => d.Id == m.UpdatedDrive.Id);
+            if (existingDrive is null)
+            {
+                return;
+            }
+
+            existingDrive.Letter = m.UpdatedDrive.Letter;
+            existingDrive.Name = m.UpdatedDrive.Name;
+            existingDrive.Host = m.UpdatedDrive.Host;
+
+            // A changed letter is a changed mount: the handler unmounted the old one.
+            SyncConnectivity(_nasConnector.GetConnectedLetters());
+
+            // Re-projected, because the name or the letter is what the list is sorted
+            // and filtered by, and both may just have changed.
+            ApplyFilterAndSort();
+
+            _ = RefreshTotalsAsync();
         });
 
         WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(this, (r, m) =>

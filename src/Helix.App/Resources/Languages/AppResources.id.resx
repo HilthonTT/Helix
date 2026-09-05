@@ -726,4 +726,19 @@
   <data name="NoAuditlogsMatchMessage" xml:space="preserve">
     <value>Tidak ada dalam log yang cocok dengan yang Anda ketik. Hapus pencarian untuk melihat seluruh riwayat lagi.</value>
   </data>
+  <data name="DeleteDriveConfirm" xml:space="preserve">
+    <value>Yakin ingin menghapus '{0}'?</value>
+  </data>
+  <data name="DeleteDriveConfirmGeneric" xml:space="preserve">
+    <value>Yakin ingin menghapus drive ini?</value>
+  </data>
+  <data name="DriveNotReady" xml:space="preserve">
+    <value>Drive belum siap</value>
+  </data>
+  <data name="InvalidDriveLetter" xml:space="preserve">
+    <value>Huruf drive tidak valid</value>
+  </data>
+  <data name="StorageUsedOf" xml:space="preserve">
+    <value>{0} TB terpakai dari {1} TB</value>
+  </data>
 </root>

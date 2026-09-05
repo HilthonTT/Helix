@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
 using Helix.App.Models;
+using Helix.App.Resources.Languages;
 using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
@@ -20,9 +21,13 @@ internal sealed partial class DeleteDriveViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(Description))]
     public partial DriveDisplay? Drive { get; set; }
 
-    public string Description => Drive is null 
-        ? "Are you sure you want to delete this drive?"
-        : $"Are you sure you want to delete '{Drive?.Name}'?";
+    /// <summary>
+    /// The question the sheet asks, in the user's language — it was the one string on the
+    /// dashboard still written in English.
+    /// </summary>
+    public string Description => Drive is null
+        ? AppResources.DeleteDriveConfirmGeneric
+        : string.Format(AppResources.DeleteDriveConfirm, Drive.Name);
 
     [RelayCommand]
     private async Task DeleteAsync()

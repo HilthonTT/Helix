@@ -1785,5 +1785,50 @@ namespace Helix.App.Resources.Languages {
             }
         }
         
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to delete '{0}'?.
+        /// </summary>
+        internal static string DeleteDriveConfirm {
+            get {
+                return ResourceManager.GetString("DeleteDriveConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to delete this drive?.
+        /// </summary>
+        internal static string DeleteDriveConfirmGeneric {
+            get {
+                return ResourceManager.GetString("DeleteDriveConfirmGeneric", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drive not ready.
+        /// </summary>
+        internal static string DriveNotReady {
+            get {
+                return ResourceManager.GetString("DriveNotReady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid drive letter.
+        /// </summary>
+        internal static string InvalidDriveLetter {
+            get {
+                return ResourceManager.GetString("InvalidDriveLetter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} TB used of {1} TB.
+        /// </summary>
+        internal static string StorageUsedOf {
+            get {
+                return ResourceManager.GetString("StorageUsedOf", resourceCulture);
+            }
+        }
     }
 }

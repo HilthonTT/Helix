@@ -60,7 +60,14 @@ public sealed partial class DriveTemplate : ContentView
 
     private static async Task RefreshStorageUsageAsync(DriveDisplay drive)
     {
-        string usage = await StorageUsageHelper.GetStorageUsageAsync(drive.Letter);
+        // The three strings the helper can answer with are handed in translated: the
+        // helper is a static utility with no view behind it, and left to its defaults it
+        // wrote "Drive not ready" in English on every offline row of a page in Japanese.
+        string usage = await StorageUsageHelper.GetStorageUsageAsync(
+            drive.Letter,
+            AppResources.DriveNotReady,
+            AppResources.InvalidDriveLetter,
+            AppResources.StorageUsedOf);
 
         // The row may have been rebound to another drive while the probe ran.
         MainThread.BeginInvokeOnMainThread(() => drive.StorageUsage = usage);

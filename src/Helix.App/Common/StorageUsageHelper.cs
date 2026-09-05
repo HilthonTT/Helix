@@ -15,15 +15,23 @@ public static class StorageUsageHelper
     /// long as the network takes to fail, so once the monitor started refreshing rows
     /// on a timer these could no longer be called on the UI thread.
     /// </summary>
+    /// <param name="usedOfFormat">
+    /// The sentence for a readable drive, with the used and total figures as
+    /// <c>{0}</c> and <c>{1}</c>. Passed in rather than written here so the row can hand
+    /// over its translation; the default is only for callers with none.
+    /// </param>
     public static Task<string> GetStorageUsageAsync(
         string driveLetter,
         string driveNotReadyMessage = "Drive not ready",
-        string invalidDriveMessage = "Invalid drive letter")
+        string invalidDriveMessage = "Invalid drive letter",
+        string usedOfFormat = DefaultUsedOfFormat)
     {
         return ProbeAsync(
-            () => GetStorageUsage(driveLetter, driveNotReadyMessage, invalidDriveMessage),
+            () => GetStorageUsage(driveLetter, driveNotReadyMessage, invalidDriveMessage, usedOfFormat),
             driveNotReadyMessage);
     }
+
+    private const string DefaultUsedOfFormat = "{0} TB used of {1} TB";
 
     /// <summary>Off-thread <see cref="GetCompactUsage"/>.</summary>
     public static Task<string> GetCompactUsageAsync(string driveLetter, string fallback = "0 TB")
@@ -70,34 +78,27 @@ public static class StorageUsageHelper
     }
 
     public static string GetStorageUsage(
-        string driveLetter, 
+        string driveLetter,
         string driveNotReadyMessage = "Drive not ready",
-        string invalidDriveMessage = "Invalid drive letter")
+        string invalidDriveMessage = "Invalid drive letter",
+        string usedOfFormat = DefaultUsedOfFormat)
     {
         try
         {
             var driveInfo = new DriveInfo(driveLetter);
 
-            if (!driveInfo.IsReady)
+            // A zero-sized volume has nothing to report either; it reads as not ready
+            // rather than as a fourth sentence nobody translated.
+            if (!driveInfo.IsReady || driveInfo.TotalSize == 0)
             {
                 return driveNotReadyMessage;
             }
 
-            if (driveInfo.TotalSize == 0)
-            {
-                return "Drive size is zero.";
-            }
-
             double totalSizeInTB = driveInfo.TotalSize * BytesToTB;
             double availableSpaceInTB = driveInfo.AvailableFreeSpace * BytesToTB;
-            double usedSpaceInTB = totalSizeInTB - availableSpaceInTB;
+            double usedSpaceInTB = Math.Max(0, totalSizeInTB - availableSpaceInTB);
 
-            if (usedSpaceInTB < 0)
-            {
-                usedSpaceInTB = 0;
-            }
-
-            return $"{usedSpaceInTB:F1}TB used of {totalSizeInTB:F1}TB";
+            return string.Format(usedOfFormat, usedSpaceInTB.ToString("F1"), totalSizeInTB.ToString("F1"));
         }
         catch (IOException)
         {

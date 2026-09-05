@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Helix.Application.Abstractions.Time;
+using Microsoft.Extensions.Logging;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
@@ -8,12 +9,15 @@ namespace Helix.Infrastructure.Time;
 internal sealed partial class CountdownService : ObservableObject, ICountdownService, IDisposable
 {
     private readonly Timer _countdownTimer;
+    private readonly ILogger<CountdownService> _logger;
 
     public event EventHandler<int>? CountdownTick;
     public event EventHandler? CountdownFinished;
 
-    public CountdownService()
+    public CountdownService(ILogger<CountdownService> logger)
     {
+        _logger = logger;
+
         _countdownTimer = new Timer(1000);
         _countdownTimer.Elapsed += OnCountdownTick;
     }
@@ -77,8 +81,11 @@ internal sealed partial class CountdownService : ObservableObject, ICountdownSer
         catch (Exception ex)
         {
             Stop();
-            // Optionally, log the exception or handle it accordingly.
-            Console.WriteLine($"Error in Countdown Tick: {ex.Message}");
+
+            // A subscriber threw on the timer thread. Stopped rather than left ticking,
+            // and written to the log file rather than the console, which no released
+            // build has.
+            _logger.LogError(ex, "The auto-minimize countdown stopped because a tick handler threw.");
         }
     }
 
