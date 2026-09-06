@@ -171,6 +171,22 @@ public class CreateDriveTests
         result.IsSuccess.Should().BeTrue();
     }
 
+    [Theory]
+    [InlineData("É")]
+    [InlineData("1")]
+    [InlineData("ß")]
+    public async Task Handle_Should_ReturnNotALetter_WhenLetterIsNotAToZ(string letter)
+    {
+        // char.IsLetter accepts every letter in Unicode; the picker offers A to Z, and a
+        // drive saved under anything else fails at every connect with an error naming no field.
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        Result<Drive> result = await _createDrive.Handle(Request with { Letter = letter });
+
+        result.Error.Should().Be(DriveErrors.NotALetter);
+    }
+
     [Fact]
     public async Task Handle_Should_ReturnLetterInUse_WhenLetterIsMountedFromSomethingElse()
     {

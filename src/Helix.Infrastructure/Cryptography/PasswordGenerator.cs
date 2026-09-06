@@ -1,3 +1,4 @@
+using Helix.Infrastructure.Database;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 
@@ -33,11 +34,32 @@ public static class PasswordGenerator
                 return;
             }
 
-            string? existing = await TryReadFromSecureStorageAsync(logger).ConfigureAwait(false);
+            (bool readable, string? existing) = await TryReadFromSecureStorageAsync(logger).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(existing))
             {
                 _cachedPassword = existing;
                 return;
+            }
+
+            // Never generate over a database that already exists. A key that cannot be
+            // read is not the same as no key: a DPAPI hiccup at logon used to be
+            // answered by generating a fresh one and writing it over the real one, at
+            // which point the database was unreadable for good - even after the hiccup
+            // cleared. Refusing here costs a start-up that fails with a message; the
+            // alternative cost every drive the user had.
+            if (File.Exists(DatabaseLocation.Path))
+            {
+                throw new InvalidOperationException(readable
+                    ? "Secure storage holds no key for the existing database, so it cannot be opened. " +
+                      "The key lives in the Settings folder beside the Data folder; restore it from a backup."
+                    : "The database key could not be read from secure storage, so the existing database " +
+                      "cannot be opened. Nothing was changed; sign out of Windows and back in, then try again.");
+            }
+
+            if (!readable)
+            {
+                throw new InvalidOperationException(
+                    "Secure storage cannot be read, so no database key can be kept safely.");
             }
 
             // Information, not Debug: a fresh key on a machine that already has a
@@ -51,7 +73,7 @@ public static class PasswordGenerator
             // If the key was not actually persisted, refuse to continue: creating the
             // database with an in-memory-only key means it can never be reopened after
             // a restart — silent, unrecoverable loss of all user data.
-            string? persisted = await TryReadFromSecureStorageAsync(logger).ConfigureAwait(false);
+            (_, string? persisted) = await TryReadFromSecureStorageAsync(logger).ConfigureAwait(false);
             if (!string.Equals(persisted, fresh, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(
@@ -78,16 +100,20 @@ public static class PasswordGenerator
                 $"{nameof(PasswordGenerator)}.{nameof(InitializeAsync)} must be awaited before the database is opened.");
     }
 
-    private static async Task<string?> TryReadFromSecureStorageAsync(ILogger? logger)
+    /// <summary>
+    /// Reads the key, telling "there is none" apart from "it could not be read": the
+    /// first is a fresh install, the second is a store that must not be written to.
+    /// </summary>
+    private static async Task<(bool Readable, string? Key)> TryReadFromSecureStorageAsync(ILogger? logger)
     {
         try
         {
-            return await SecureStorage.Default.GetAsync(PasswordKey).ConfigureAwait(false);
+            return (true, await SecureStorage.Default.GetAsync(PasswordKey).ConfigureAwait(false));
         }
         catch (Exception ex)
         {
             logger?.LogError(ex, "Reading the database key from secure storage failed.");
-            return null;
+            return (false, null);
         }
     }
 

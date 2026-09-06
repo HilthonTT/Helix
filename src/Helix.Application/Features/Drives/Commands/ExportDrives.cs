@@ -89,6 +89,13 @@ public sealed class ExportDrives(
         {
             return Result.Failure(FolderPickerErrors.UnauthorizedFileAccess);
         }
+        catch (IOException ex)
+        {
+            // The folder picked is as likely as not a NAS share - the app's own subject -
+            // and one that dropped between the picker closing and the write is an
+            // outcome, not a crash.
+            return Result.Failure(FolderPickerErrors.WriteFailed(ex.Message));
+        }
 
         return Result.Success();
     }

@@ -30,11 +30,11 @@ public sealed class GetStorageAlerts(
     INasConnector nasConnector,
     IStorageProbe storageProbe) : IHandler
 {
-    public async Task<Result<List<StorageAlert>>> Handle(CancellationToken cancellationToken = default)
+    public async Task<Result<StorageAlertReport>> Handle(CancellationToken cancellationToken = default)
     {
         if (!loggedInUser.IsLoggedIn)
         {
-            return Result.Failure<List<StorageAlert>>(AuthenticationErrors.InvalidPermissions);
+            return Result.Failure<StorageAlertReport>(AuthenticationErrors.InvalidPermissions);
         }
 
         SettingsModel? settings = await settingsRepository.GetByUserIdAsNoTrackingAsync(
@@ -46,19 +46,19 @@ public sealed class GetStorageAlerts(
         // unattended, and a background check is no place to be creating rows.
         if (settings is null)
         {
-            return Result.Success<List<StorageAlert>>([]);
+            return Result.Success(StorageAlertReport.Empty);
         }
 
         int threshold = settings.StorageAlertThresholdPercent;
         if (threshold <= 0)
         {
-            return Result.Success<List<StorageAlert>>([]);
+            return Result.Success(StorageAlertReport.Empty);
         }
 
         List<Drive> drives = await driveRepository.GetAsNoTrackingAsync(loggedInUser.UserId, cancellationToken);
         if (drives.Count == 0)
         {
-            return Result.Success<List<StorageAlert>>([]);
+            return Result.Success(StorageAlertReport.Empty);
         }
 
         HashSet<string> connected = nasConnector.GetConnectedLetters();
@@ -68,7 +68,7 @@ public sealed class GetStorageAlerts(
         List<string> letters = [.. drives.Select(d => d.Letter).Where(connected.Contains)];
         if (letters.Count == 0)
         {
-            return Result.Success<List<StorageAlert>>([]);
+            return Result.Success(StorageAlertReport.Empty);
         }
 
         IReadOnlyList<VolumeUsage> volumes = await storageProbe.ProbeAsync(letters, cancellationToken);
@@ -90,6 +90,8 @@ public sealed class GetStorageAlerts(
                     volume.FreePercent))
         ];
 
-        return Result.Success(alerts);
+        return Result.Success(new StorageAlertReport(
+            alerts,
+            new HashSet<string>(volumes.Select(volume => volume.VolumeId), StringComparer.Ordinal)));
     }
 }

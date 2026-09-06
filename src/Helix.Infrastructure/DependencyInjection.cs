@@ -58,6 +58,12 @@ public static class DependencyInjection
 
         services.AddSingleton<IDiagnosticsLog, DiagnosticsLog>();
 
+        // EF Core reports every executed command at Information, which put every query
+        // into the file the user is asked to send and rolled it over the reconnect lines
+        // it exists for. The commands are still there at Debug in a debug build.
+        services.AddLogging(logging =>
+            logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning));
+
         services.AddSingleton<ILoggerProvider>(sp => new FileLoggerProvider(
             sp.GetRequiredService<LogFileWriter>(),
 #if DEBUG

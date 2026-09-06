@@ -18,11 +18,21 @@ public sealed partial class App : AppBase
 
         RegisterGlobalExceptionHandlers();
 
-        using IServiceScope scope = serviceProvider.CreateScope();
+        ILogger<App> logger = serviceProvider.GetRequiredService<ILogger<App>>();
 
-        DatabaseInitializer.Initialize(
-            scope.ServiceProvider.GetRequiredService<AppDbContext>(),
-            serviceProvider.GetRequiredService<ILogger<App>>());
+        try
+        {
+            using IServiceScope scope = serviceProvider.CreateScope();
+
+            DatabaseInitializer.Initialize(scope.ServiceProvider.GetRequiredService<AppDbContext>(), logger);
+        }
+        catch (Exception ex)
+        {
+            // A database that will not open - wrong key, corrupt file, a migration that
+            // failed - used to throw out of this constructor into nowhere. There is no
+            // window yet, so this is the one place that can still say what happened.
+            StartupFailure.Exit(logger, ex);
+        }
     }
 
     /// <summary>

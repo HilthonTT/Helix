@@ -129,7 +129,7 @@ internal sealed class StorageAlertService
             generation = _generation;
         }
 
-        Result<List<StorageAlert>> result = await ScopedHandler.HandleAsync((GetStorageAlerts h) => h.Handle());
+        Result<StorageAlertReport> result = await ScopedHandler.HandleAsync((GetStorageAlerts h) => h.Handle());
         if (result.IsFailure)
         {
             _logger.LogDebug("The storage check could not run: {Reason}", result.Error.Description);
@@ -137,7 +137,8 @@ internal sealed class StorageAlertService
             return;
         }
 
-        List<StorageAlert> alerts = result.Value;
+        IReadOnlyList<StorageAlert> alerts = result.Value.Alerts;
+        IReadOnlySet<string> measured = result.Value.MeasuredVolumeIds;
 
         List<StorageAlert> fresh = [];
 
@@ -153,8 +154,11 @@ internal sealed class StorageAlertService
             HashSet<string> current = [.. alerts.Select(alert => alert.VolumeId)];
 
             // A volume that is no longer short of space is forgotten, so that if it fills
-            // up again months later the user hears about it again.
-            _warned.RemoveWhere(volumeId => !current.Contains(volumeId));
+            // up again months later the user hears about it again. Only one that was
+            // measured and found fine, though: a pool whose drives were unmounted for one
+            // check, or whose probe ran past the timeout, was forgotten too and warned
+            // about again a quarter of an hour later.
+            _warned.RemoveWhere(volumeId => measured.Contains(volumeId) && !current.Contains(volumeId));
 
             foreach (StorageAlert alert in alerts)
             {

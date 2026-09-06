@@ -17,4 +17,12 @@ internal static class FolderPickerErrors
     public static readonly Error UnauthorizedFileAccess = Error.Problem(
         "FolderPicker.UnauthorizedFileAccess",
         "You don't have the necessary permissions to access this file or folder. Please check your permissions and try again.");
+
+    public static Error WriteFailed(string message) => Error.Problem(
+        "FolderPicker.WriteFailed",
+        $"The file could not be written: {message}");
+
+    public static Error ReadFailed(string message) => Error.Problem(
+        "FolderPicker.ReadFailed",
+        $"The file could not be read: {message}");
 }

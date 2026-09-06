@@ -91,7 +91,7 @@ public class GetStorageAlertsTests
     {
         _loggedInUserMock.IsLoggedIn.Returns(false);
 
-        Result<List<StorageAlert>> result = await _getStorageAlerts.Handle();
+        Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
 
         result.Error.Should().Be(AuthenticationErrors.InvalidPermissions);
     }
@@ -101,11 +101,31 @@ public class GetStorageAlertsTests
     {
         WithVolumes(Volume(4 * Terabyte, freePercent: 4, "Z"));
 
-        Result<List<StorageAlert>> result = await _getStorageAlerts.Handle();
+        Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
 
-        result.Value.Should().ContainSingle();
-        result.Value[0].FreePercent.Should().Be(4);
-        result.Value[0].DriveNames.Should().Equal("Media Vault");
+        result.Value.Alerts.Should().ContainSingle();
+        result.Value.Alerts[0].FreePercent.Should().Be(4);
+        result.Value.Alerts[0].DriveNames.Should().Equal("Media Vault");
+    }
+
+    [Fact]
+    public async Task Handle_Should_ReportEveryVolumeItMeasured_NotOnlyTheFullOnes()
+    {
+        // What lets the caller forget a warning only for a volume that was measured and
+        // found fine, rather than for one that simply was not measured this time.
+        Drive second = Drive.Create(UserId, "Y", "192.168.0.2", "Backups", "Username", "Password");
+
+        _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>()).Returns([_drive, second]);
+        _nasConnectorMock.GetConnectedLetters().Returns(["Z", "Y"]);
+
+        WithVolumes(
+            Volume(4 * Terabyte, freePercent: 2, "Z"),
+            Volume(2 * Terabyte, freePercent: 50, "Y"));
+
+        Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
+
+        result.Value.Alerts.Should().ContainSingle();
+        result.Value.MeasuredVolumeIds.Should().HaveCount(2);
     }
 
     [Fact]
@@ -115,9 +135,9 @@ public class GetStorageAlertsTests
         // who asks to hear at 10% hears at 10%, every time, forever.
         WithVolumes(Volume(4 * Terabyte, freePercent: 10, "Z"));
 
-        Result<List<StorageAlert>> result = await _getStorageAlerts.Handle();
+        Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
 
-        result.Value.Should().BeEmpty();
+        result.Value.Alerts.Should().BeEmpty();
     }
 
     [Fact]
@@ -126,9 +146,9 @@ public class GetStorageAlertsTests
         WithThreshold(0);
         WithVolumes(Volume(4 * Terabyte, freePercent: 1, "Z"));
 
-        Result<List<StorageAlert>> result = await _getStorageAlerts.Handle();
+        Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
 
-        result.Value.Should().BeEmpty();
+        result.Value.Alerts.Should().BeEmpty();
 
         // Nothing measured either: a volume nobody asked about is a blocking read against
         // a network share for no reason.
@@ -167,10 +187,10 @@ public class GetStorageAlertsTests
 
         WithVolumes(Volume(4 * Terabyte, freePercent: 2, "Z", "Y"));
 
-        Result<List<StorageAlert>> result = await _getStorageAlerts.Handle();
+        Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
 
-        result.Value.Should().ContainSingle();
-        result.Value[0].DriveNames.Should().BeEquivalentTo("Media Vault", "Backups");
+        result.Value.Alerts.Should().ContainSingle();
+        result.Value.Alerts[0].DriveNames.Should().BeEquivalentTo("Media Vault", "Backups");
     }
 
     [Fact]
@@ -185,10 +205,10 @@ public class GetStorageAlertsTests
             Volume(4 * Terabyte, freePercent: 2, "Z"),
             Volume(2 * Terabyte, freePercent: 1, "Y"));
 
-        Result<List<StorageAlert>> result = await _getStorageAlerts.Handle();
+        Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
 
-        result.Value.Should().HaveCount(2);
-        result.Value.Select(alert => alert.VolumeId).Should().OnlyHaveUniqueItems();
+        result.Value.Alerts.Should().HaveCount(2);
+        result.Value.Alerts.Select(alert => alert.VolumeId).Should().OnlyHaveUniqueItems();
     }
 
     [Fact]
@@ -200,10 +220,10 @@ public class GetStorageAlertsTests
             .GetByUserIdAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>())
             .Returns((SettingsModel?)null);
 
-        Result<List<StorageAlert>> result = await _getStorageAlerts.Handle();
+        Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEmpty();
+        result.Value.Alerts.Should().BeEmpty();
     }
 
     [Fact]
@@ -213,8 +233,8 @@ public class GetStorageAlertsTests
         // ever disagree the warning still has to identify something.
         WithVolumes(Volume(4 * Terabyte, freePercent: 3, "Q"));
 
-        Result<List<StorageAlert>> result = await _getStorageAlerts.Handle();
+        Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
 
-        result.Value.Should().ContainSingle().Which.DriveNames.Should().Equal("Q");
+        result.Value.Alerts.Should().ContainSingle().Which.DriveNames.Should().Equal("Q");
     }
 }

@@ -254,6 +254,15 @@ prevent. Switching the drives back to the IP address "fixed" both, which is how 
 reported. The short timeout was only ever guarding against an absent host, and the probe
 answers that in two seconds, once per host.
 
+The per-host gate is held until the **mount itself** finishes, not until the caller has
+been answered: a timed-out mount is still building the server session, and releasing the
+gate at the timeout let the next drive in, whose conflict handling dropped the session the
+first was creating. `RunWithTimeoutAsync` hands the underlying task back through
+`onStarted` for exactly that, and logs what a timed-out mount eventually did. `HostSpelling`
+caches answers, including "nothing", for the life of the process, but **not a lookup that
+timed out** — that switched `ConnectByHostname` off for a host until restart because DNS
+was slow at logon.
+
 The row says which of the two it is. `DriveDisplay.OfflineReason` carries
 `HostUnreachable` or `Refused`, and the status pill has one for each — amber "Unreachable"
 against red "Failed" — beside the plain "Disconnected" that a drive the user put down
@@ -267,7 +276,15 @@ share's own words, since the domain's error descriptions are not translated.
 
 `DriveWatchdog` reads that error code and puts the drive back at a flat 30-second interval
 without counting it as a failure, so a laptop returning to the NAS's network reconnects in
-seconds rather than at whatever the exponential backoff had escalated to. It logs those at
+seconds rather than at whatever the exponential backoff had escalated to.
+A `NotFound` from `ReconnectDrive` is terminal — the drive was deleted while queued — and
+`RefreshWatchedDrivesAsync` prunes the pending queue of drives that are gone or have their
+own auto-connect off, since otherwise a deleted drive was retried and logged as a warning
+every five minutes for the session. Drops are handled **in parallel**; the connector's gate
+serializes the mounts anyway, and one hung share used to hold every other drive's drop
+record and pill behind it. `DriveAttemptFailedMessage` is applied by `HomeViewModel` to the
+master list, for the same reason `DriveUpdatedMessage` is: a row scrolled out of the
+recycling list or hidden by the filter has no template to hear it. It logs those at
 Debug rather than Warning — on a laptop this is the ordinary state of affairs for most of
 the day, and a warning per drive per sweep buries the real failures in the file the user is
 asked to send on. The sweep is skipped outright when `Connectivity` reports no network.
@@ -313,7 +330,11 @@ has not been asked.
 `StorageAlertService` runs it on its own 15-minute timer — free space moves over days, and
 each reading is a blocking call against a share — and remembers which volumes it has
 already warned about, so a full pool is reported once rather than every quarter of an hour.
-A volume that recovers is forgotten, so it can warn again months later. It starts a minute
+A volume that recovers is forgotten, so it can warn again months later.
+"Recovers" means **measured and found fine**: `StorageAlertReport` carries every volume the
+check measured alongside the alerts, and only those are eligible to be forgotten. A pool
+whose drives were unmounted for one check, or whose probe ran past the timeout, is absent
+from the alerts without having recovered, and forgetting it re-fired the warning. It starts a minute
 after the dashboard does, because the drives are still being connected at that moment.
 
 ### Closing the window
@@ -338,6 +359,15 @@ one. A failed read leaves the last known values rather than reverting to the def
 
 Neither switch is offered on macOS: `SettingsViewModel.SupportsTray` reports
 `ITrayIcon.IsSupported`, and the rows are hidden rather than shown and ignored.
+
+Every tray-menu action reports its failure through the balloon (`TrayIconService.Report`)
+and a warning in the log; the tray is used while the window is away, so there is no banner
+to land on, and a "connect all" with a wrong password used to produce nothing at all. The
+dashboard's "disconnect all" reads its result too — connect-all always did. At logon Helix
+can be up before the taskbar is, and the shell refuses the icon; `WindowsTrayIcon.Show`
+now adds the icon whenever it is missing and the service retries `Show` every ten seconds
+for three minutes, because the earlier "no tray" verdict left an icon with an empty menu
+and a close button that quit.
 
 ### Drive groups
 
@@ -416,6 +446,13 @@ round trip, and have the results replace the list — four interactions and a qu
 thirteen rows. `SearchDrives` and `SearchAuditlogs` were deleted along with the sheets;
 `GetDrives` and `GetAuditlogs` already load everything, so the queries were narrowing a set
 the app was holding anyway.
+
+A drive letter is `GeneralValidation.IsDriveLetter`: one character, A to Z. `char.IsLetter`
+let a hand-edited vault save `É` as a letter the edit modal could not even offer. Export and
+import catch `IOException` — the folder picked is as likely as not a NAS share — and a vault
+that adds nothing is `JsonErrors.NothingToImport`, not a success banner. EF Core's command
+logging is filtered to Warning in `AddInfrastructure`, because every query at Information
+rolled the 2 MB log over the reconnect lines it exists for.
 
 Filtering in the viewmodel buys two things the queries could not have. The drive rows are
 **reused** rather than rebuilt, so a tick, a mount in flight and a drive's offline reason
@@ -542,7 +579,26 @@ build again: 2.2.0 "updated" to 2.2.1, restarted, and was still 2.2.0. PowerShel
 process's current directory, and it is the process handle that holds the folder.
 
 The move is retried for `MoveAttempts` seconds, because an indexer or a virus scanner
-holding the folder for a moment should not cost the release. Whatever happens is appended
+holding the folder for a moment should not cost the release.
+
+The helper replaces the **whole folder** the executable runs from, and the release zip has
+no wrapper folder, so "extract here" in Downloads puts `Helix.App.exe` straight into
+Downloads. `IsSafeToReplace` refuses to stage or apply from a shell folder, a drive root, a
+folder without the executable, or anywhere under the staging root, with
+`UpdateErrors.UnsafeInstallLocation`; without it the swap would have moved Downloads aside
+and deleted it. The helper also **gives up if Helix is still running** after its wait,
+rather than starting a second copy beside the first; restarts Helix with
+`-WorkingDirectory $install` so the new process does not inherit the helper's folder; and,
+when a restore finds the install folder still standing because a half-copied file is
+held, copies the backup's contents back over it rather than `Move-Item`, which would have
+put the backup *inside* the broken install. A stale `.old` that cannot be removed is
+logged and the update skipped, so the script never dies before the restart line. Only
+assets ending in `.zip` are considered, so a future `.sha256` sidecar cannot be staged as
+the build.
+
+`MauiProgram` holds a named mutex per logon session and a second instance brings the
+first's window forward and exits: two Helixes on one database is what the helper
+produced, and what a shortcut double-clicked while the first is in the tray produces. Whatever happens is appended
 to `helix-updates.log` in the log directory, named so `LogFileWriter` collects it into the
 diagnostics zip: the helper outlives the logger, and its failure path puts the old version
 back and starts it, which is indistinguishable from success unless it is written down.
@@ -847,6 +903,11 @@ for something the control could simply not have allowed. The low-space ceiling i
 from `Settings.MaximumStorageAlertThresholdPercent` rather than written into the page, so
 the two cannot drift. `UpdateSettings` still validates — this is a keyboard, not a trust
 boundary.
+`UpdateSettings` touches the startup and desktop shortcuts **only when their switch
+moved**: rewriting both on every save meant a Startup folder that had become unwritable
+failed the timer, the retention and the language with an error about a shortcut nobody
+had touched. Language has a rollback like every other setting, switching the culture
+back, since the page had already switched it before the write.
 
 The typed value is committed on Enter or on leaving the field, never per keystroke.
 The `−`/`+` step is per field: the countdown moves by one second, because a user tuning it
@@ -956,6 +1017,14 @@ missing when a user reported exactly that. `PasswordGenerator` logs when it has 
 generate a key rather than read one, since a fresh key on a machine that already has a
 database is what makes that database unreadable. Before a migration runs against an
 existing database, a copy is left beside it as `helix.db.bak`, overwritten by the next one.
+
+`PasswordGenerator` **never generates a key while `helix.db` exists.** A read that threw
+used to be indistinguishable from "no key", so one DPAPI failure at logon generated a
+fresh key, wrote it over the real one, and the database was unreadable for good even
+after the failure cleared. It now throws, and both that and a database that will not
+open or migrate go through `Common/StartupFailure`, which logs at Critical, puts up one
+native message box naming the reason and the log folder, and exits. There is no window
+yet at either point, so nothing else could have said anything.
 
 
 ### Localization

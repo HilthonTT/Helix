@@ -583,13 +583,20 @@ internal sealed partial class HomeViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            await ScopedHandler.HandleAsync((DisconnectAllDrives h) => h.Handle());
+            Result result = await ScopedHandler.HandleAsync((DisconnectAllDrives h) => h.Handle());
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
             foreach (DriveDisplay drive in Drives)
             {
                 WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
+            }
+
+            // A share with a file open on it refuses to unmount, and the row staying
+            // green was the only sign of it. Connect-all has always reported its result.
+            if (result.IsFailure)
+            {
+                await DisplayErrorAsync(result.Error);
             }
         }
         finally
@@ -848,6 +855,17 @@ internal sealed partial class HomeViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(this, (r, m) =>
         {
             _ = FetchDriveGroupsAsync();
+        });
+
+        // Applied to the master row for the same reason DriveUpdatedMessage is: the row
+        // template only hears about a drive it is bound to at that moment, and a row
+        // scrolled out of the recycling list or hidden by the filter has no template. The
+        // watchdog's verdict for those rows was dropped, so scrolling down showed plain
+        // "Disconnected" pills under a run of amber "Unreachable" ones.
+        WeakReferenceMessenger.Default.Register<DriveAttemptFailedMessage>(this, (r, m) =>
+        {
+            _allDrives.FirstOrDefault(d => d.Id == m.DriveId)
+                ?.MarkOffline(Error.Problem(m.ErrorCode, m.Description));
         });
     }
 }

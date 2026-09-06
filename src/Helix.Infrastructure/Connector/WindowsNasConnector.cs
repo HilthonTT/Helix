@@ -60,17 +60,20 @@ internal sealed class WindowsNasConnector(
             drive,
             () => WithHostGateAsync(
                 drive,
-                () => RunWithTimeoutAsync(
+                started => RunWithTimeoutAsync(
+                    drive.Letter,
                     () => Connect(drive),
                     timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
                     failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
-                    cancellationToken),
+                    cancellationToken,
+                    started),
                 failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                 cancellationToken),
             cancellationToken);
 
     public Task<Result> DisconnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
         RunWithTimeoutAsync(
+            drive.Letter,
             () => Disconnect(drive),
             timeoutError: () => Result.Failure(DriveErrors.FailedToDisconnect("Disconnection timed out.")),
             failure: message => Result.Failure(DriveErrors.FailedToDisconnect(message)),
@@ -81,11 +84,13 @@ internal sealed class WindowsNasConnector(
             drive,
             () => WithHostGateAsync(
                 drive,
-                () => RunWithTimeoutAsync(
+                started => RunWithTimeoutAsync(
+                    drive.Letter,
                     () => Test(drive),
                     timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
                     failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
-                    cancellationToken),
+                    cancellationToken,
+                    started),
                 failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                 cancellationToken),
             cancellationToken);
@@ -579,7 +584,7 @@ internal sealed class WindowsNasConnector(
     /// </remarks>
     private async Task<Result> WithHostGateAsync(
         Drive drive,
-        Func<Task<Result>> work,
+        Func<Action<Task>, Task<Result>> work,
         Func<string, Result> failure,
         CancellationToken cancellationToken)
     {
@@ -596,38 +601,71 @@ internal sealed class WindowsNasConnector(
             return failure("Operation canceled by user.");
         }
 
+        // The gate is held until the mount itself is over, not until the caller has been
+        // answered. A timed-out mount is still running - WNetAddConnection2 cannot be
+        // cancelled - and it is still building the server session; releasing the gate
+        // at the timeout let the next drive of the same NAS in, whose conflict handling
+        // then dropped the session the first one was in the middle of creating.
+        Task completion = Task.CompletedTask;
+
         try
         {
-            return await work();
+            return await work(started => completion = started);
         }
         finally
         {
             if (held)
             {
-                gate.Release();
+                _ = completion.ContinueWith(
+                    _ => gate.Release(),
+                    CancellationToken.None,
+                    TaskContinuationOptions.ExecuteSynchronously,
+                    TaskScheduler.Default);
             }
         }
     }
 
-    private static async Task<Result> RunWithTimeoutAsync(
+    /// <param name="onStarted">Handed the underlying mount task, which outlives a timeout.</param>
+    private async Task<Result> RunWithTimeoutAsync(
+        string letter,
         Func<Result> work,
         Func<Result> timeoutError,
         Func<string, Result> failure,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<Task>? onStarted = null)
     {
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(MountTimeoutMilliseconds);
+        // No token on the work itself: the WNet call ignores it, and the task has to be
+        // observed either way so a late failure does not surface as an unobserved
+        // exception on the finalizer thread.
+        Task<Result> task = Task.Run(work, CancellationToken.None);
+        onStarted?.Invoke(task);
 
         try
         {
-            Task<Result> task = Task.Run(work, cts.Token);
-            return await task.WaitAsync(cts.Token);
+            return await task.WaitAsync(TimeSpan.FromMilliseconds(MountTimeoutMilliseconds), cancellationToken);
+        }
+        catch (TimeoutException)
+        {
+            // What happens after the caller has been told "timed out" is worth a line:
+            // the row said the mount failed, and a minute later the letter is up.
+            _ = task.ContinueWith(
+                finished => logger.LogInformation(
+                    "Drive {Letter}: the mount that timed out finished afterwards - {Outcome}.",
+                    letter,
+                    finished.IsFaulted
+                        ? finished.Exception?.GetBaseException().Message
+                        : finished.Result.IsSuccess ? "it is now mounted" : finished.Result.Error.Description),
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+
+            return timeoutError();
         }
         catch (OperationCanceledException)
         {
-            return cancellationToken.IsCancellationRequested
-                ? failure("Operation canceled by user.")
-                : timeoutError();
+            _ = task.ContinueWith(_ => { }, TaskContinuationOptions.OnlyOnFaulted);
+
+            return failure("Operation canceled by user.");
         }
         catch (Exception ex)
         {
@@ -670,8 +708,12 @@ internal sealed class WindowsNasConnector(
     private const int ERROR_NOT_CONNECTED = 2250;
     private const int ERROR_SESSION_CREDENTIAL_CONFLICT = 1219;
 
-    /// <summary>Buffer size for <c>WNetGetConnection</c>, in characters.</summary>
-    private const int MaxPathLength = 260;
+    /// <summary>
+    /// Buffer size for <c>WNetGetConnection</c>, in characters: the extended path limit
+    /// rather than MAX_PATH, so a long share name does not come back as ERROR_MORE_DATA
+    /// and read as "not a mapping".
+    /// </summary>
+    private const int MaxPathLength = 32_767;
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct NETRESOURCE

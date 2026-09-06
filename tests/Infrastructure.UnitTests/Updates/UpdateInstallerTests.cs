@@ -33,6 +33,79 @@ public sealed class UpdateInstallerTests : IDisposable
     {
         Directory.CreateDirectory(InstallDirectory);
         Directory.CreateDirectory(StagingRoot);
+
+        // What makes the folder an install: the swap replaces the whole folder, so one
+        // that does not hold the executable is refused before anything is downloaded.
+        File.WriteAllText(Path.Combine(InstallDirectory, "Helix.App.exe"), "binary");
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_Refuse_AFolderThatDoesNotHoldHelix()
+    {
+        File.Delete(Path.Combine(InstallDirectory, "Helix.App.exe"));
+
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        Result<string> result = await installer.StageAsync(Update());
+
+        result.Error.Should().Be(UpdateErrors.UnsafeInstallLocation);
+        Directory.EnumerateFileSystemEntries(StagingRoot).Should().BeEmpty();
+    }
+
+    [Fact]
+    public void IsSafeToReplace_Should_RefuseTheShellFolders_AndDriveRoots()
+    {
+        // "Extract here" on the release zip in Downloads puts Helix.App.exe straight into
+        // Downloads, and the swap would then replace Downloads.
+        string downloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+
+        UpdateInstaller.IsSafeToReplace(downloads).Should().BeFalse();
+        UpdateInstaller.IsSafeToReplace(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)).Should().BeFalse();
+        UpdateInstaller.IsSafeToReplace(Path.GetPathRoot(_root)!).Should().BeFalse();
+
+        UpdateInstaller.IsSafeToReplace(InstallDirectory).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_Refuse_AnInstallUnderTheStagingRoot()
+    {
+        string nested = Path.Combine(StagingRoot, "v2.0.0", "unpacked");
+        Directory.CreateDirectory(nested);
+        File.WriteAllText(Path.Combine(nested, "Helix.App.exe"), "binary");
+
+        UpdateInstaller installer = new(
+            new HttpClient(new StubHandler(() => Zip(("Helix.App.exe", "binary")))),
+            NullLogger<UpdateInstaller>.Instance,
+            () => nested,
+            () => StagingRoot,
+            () => LogDirectory);
+
+        Result<string> result = await installer.StageAsync(Update());
+
+        result.Error.Should().Be(UpdateErrors.UnsafeInstallLocation);
+
+        // Not pruned out from under itself.
+        File.Exists(Path.Combine(nested, "Helix.App.exe")).Should().BeTrue();
+    }
+
+    [Fact]
+    public void SwapScript_Should_NotStartASecondInstance_WhileTheFirstIsStillRunning()
+    {
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        string staged = Path.Combine(StagingRoot, "v9.9.9", "unpacked");
+        Directory.CreateDirectory(staged);
+
+        string script = File.ReadAllText(installer.WriteSwapScript(staged, InstallDirectory));
+
+        int stillRunning = script.IndexOf("was still running", StringComparison.Ordinal);
+        int move = script.IndexOf("Move-Item", StringComparison.Ordinal);
+
+        stillRunning.Should().BeGreaterThan(0);
+        stillRunning.Should().BeLessThan(move);
+
+        // The restarted app must not inherit the helper's working directory.
+        script.Should().Contain("-WorkingDirectory $install");
     }
 
     public void Dispose()

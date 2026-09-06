@@ -210,19 +210,19 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 
     private void Poll()
     {
-        long snapshotStartedAt;
-
-        lock (_gate)
-        {
-            snapshotStartedAt = _clock;
-        }
-
-        HashSet<string> connected = _nasConnector.GetConnectedLetters();
-
         List<DriveConnectivityChange> changes = [];
 
+        // Read and compared under one lock. The timer loop and PollAsync run this
+        // concurrently, and a set read outside the lock by one could be compared inside
+        // it after the other had already moved the baseline - a stale snapshot reported
+        // as a fresh drop, a toast and an audit row for a drive that had just come up.
+        // The read is a logical-drive bitmask; holding the lock across it costs nothing.
         lock (_gate)
         {
+            long snapshotStartedAt = _clock;
+
+            HashSet<string> connected = _nasConnector.GetConnectedLetters();
+
             foreach ((string letter, WatchedDrive drive) in _watched)
             {
                 if (_suppressed.ContainsKey(letter) || WasReleasedAfter(letter, snapshotStartedAt))

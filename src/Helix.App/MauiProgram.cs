@@ -22,8 +22,27 @@ namespace Helix.App;
 
 public static class MauiProgram
 {
+#if WINDOWS
+    /// <summary>
+    /// Held for the life of the process, so a second copy can tell there is a first.
+    /// </summary>
+    /// <remarks>
+    /// Two Helixes on one database is what the update helper produced when it gave up
+    /// waiting for the old one to exit and started the new one anyway, and what a user
+    /// gets from double-clicking a shortcut while the first is hidden in the tray. The
+    /// second would open the same SQLCipher file, put up a second tray icon and run a
+    /// second watchdog against the same letters. It brings the first one's window forward
+    /// where it can, and goes away.
+    /// </remarks>
+    private static Mutex? _singleInstance;
+#endif
+
     public static MauiApp CreateMauiApp()
     {
+#if WINDOWS
+        ExitIfAlreadyRunning();
+#endif
+
         MauiAppBuilder builder = MauiApp.CreateBuilder();
 
         builder
@@ -94,7 +113,17 @@ public static class MauiProgram
         // Resolve the SQLCipher key from SecureStorage on a background thread before
         // any DbContext is constructed. Wrapped in Task.Run so no UI/MAUI sync context
         // is captured by the underlying SecureStorage call.
-        Task.Run(() => PasswordGenerator.InitializeAsync(startupLogger)).GetAwaiter().GetResult();
+        try
+        {
+            Task.Run(() => PasswordGenerator.InitializeAsync(startupLogger)).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            // The generator refuses to make a key while a database exists that it cannot
+            // read - the alternative was overwriting the real key. Said out loud, since
+            // there is no window yet to say it in.
+            StartupFailure.Exit(startupLogger, ex);
+        }
 
         // The global hook backs the Ctrl+Enter shortcut on the sign-in pages. It runs on
         // both heads as of SharpHook 8, which ships a Mac Catalyst assembly and the
@@ -140,6 +169,47 @@ public static class MauiProgram
 #endif
 
 #if WINDOWS
+    private static void ExitIfAlreadyRunning()
+    {
+        // Local\ rather than Global\: one per logon session, which is also how the
+        // database and the mapped letters are scoped.
+        _singleInstance = new Mutex(initiallyOwned: true, @"Local\Helix.App.SingleInstance", out bool createdNew);
+
+        if (createdNew)
+        {
+            return;
+        }
+
+        try
+        {
+            Process current = Process.GetCurrentProcess();
+
+            foreach (Process other in Process.GetProcessesByName(current.ProcessName))
+            {
+                if (other.Id != current.Id && other.MainWindowHandle != IntPtr.Zero)
+                {
+                    ShowWindow(other.MainWindowHandle, SW_RESTORE);
+                    SetForegroundWindow(other.MainWindowHandle);
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Best effort: the running copy may be hidden in the tray with no main window
+            // to bring forward, and that is still not a reason to start a second one.
+        }
+
+        Environment.Exit(0);
+    }
+
+    private const int SW_RESTORE = 9;
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
     /// <summary>
     /// Turns the title bar's close button into hide-to-tray, where the user asked for
     /// that.

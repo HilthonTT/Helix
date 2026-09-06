@@ -46,19 +46,39 @@ internal static class HostSpelling
     /// The alternate spelling of <paramref name="uncHost"/>, or null when DNS has nothing
     /// to say about it — which is not an error, just an option this machine does not have.
     /// </summary>
-    internal static string? AlternateOf(string uncHost) => Cache.GetOrAdd(uncHost, Lookup);
-
-    private static string? Lookup(string uncHost)
+    internal static string? AlternateOf(string uncHost)
     {
-        string? resolved = Within(() => IPAddress.TryParse(uncHost, out IPAddress? address)
+        if (Cache.TryGetValue(uncHost, out string? cached))
+        {
+            return cached;
+        }
+
+        (bool answered, string? resolved) = Lookup(uncHost);
+
+        // An answer is cached for the life of the process, including "nothing": a home
+        // router with no PTR records is the normal case and is not going to change. A
+        // lookup that did not answer in time is not an answer, and caching it would
+        // switch ConnectByHostname off for that host until the next restart because DNS
+        // happened to be slow at logon.
+        if (answered)
+        {
+            Cache.TryAdd(uncHost, resolved);
+        }
+
+        return resolved;
+    }
+
+    private static (bool Answered, string? Spelling) Lookup(string uncHost)
+    {
+        (bool answered, string? resolved) = Within(() => IPAddress.TryParse(uncHost, out IPAddress? address)
             ? NameOf(address)
             : AddressOf(uncHost));
 
         // A lookup that hands back what it was given is not an alternate spelling, and
         // mounting under it a second time would repeat the conflict rather than dodge it.
         return string.Equals(resolved, uncHost, StringComparison.OrdinalIgnoreCase)
-            ? null
-            : resolved;
+            ? (answered, null)
+            : (answered, resolved);
     }
 
     /// <summary>Reverse lookup: the address's name, unqualified if it has one.</summary>
@@ -108,20 +128,20 @@ internal static class HostSpelling
     /// platforms. Abandoning costs a thread-pool thread until the resolver gives up, which
     /// is bounded by the OS resolver's own timeout and happens at most once per host.
     /// </remarks>
-    private static string? Within(Func<string?> lookup)
+    private static (bool Answered, string? Spelling) Within(Func<string?> lookup)
     {
         try
         {
             Task<string?> task = Task.Run(lookup);
 
-            return task.Wait(LookupTimeoutMilliseconds) ? task.Result : null;
+            return task.Wait(LookupTimeoutMilliseconds) ? (true, task.Result) : (false, null);
         }
         catch (Exception)
         {
             // Every failure here means the same thing to the caller — there is no other
             // spelling to try — so a socket error, a bad name and a resolver that is not
-            // running are not worth telling apart.
-            return null;
+            // running are not worth telling apart. They are answers, though, and cached.
+            return (true, null);
         }
     }
 }

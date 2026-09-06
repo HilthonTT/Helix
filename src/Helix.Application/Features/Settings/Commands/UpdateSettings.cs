@@ -98,6 +98,13 @@ public sealed class UpdateSettings(
             return Result.Failure(SettingsErrors.NotFound);
         }
 
+        // Read before the update, so the shortcuts are only touched when their switch
+        // moved. Rewriting both on every save meant a Startup folder that had become
+        // unwritable failed every other setting on the page - the timer, the retention,
+        // the language - with an error about a shortcut nobody had touched.
+        bool startupChanged = settings.SetOnStartup != request.SetOnStartup;
+        bool desktopChanged = settings.SetDesktopShortcut != request.SetDesktopShortcut;
+
         settings.Update(
             request.AutoConnect,
             request.AutoMinimize,
@@ -116,9 +123,15 @@ public sealed class UpdateSettings(
         // convert to a Result so the settings page shows an alert instead of crashing.
         try
         {
-            startupService.ToggleStartup(settings.SetOnStartup);
+            if (startupChanged)
+            {
+                startupService.ToggleStartup(settings.SetOnStartup);
+            }
 
-            desktopService.ToggleDesktopShortcut(settings.SetDesktopShortcut);
+            if (desktopChanged)
+            {
+                desktopService.ToggleDesktopShortcut(settings.SetDesktopShortcut);
+            }
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException)
         {

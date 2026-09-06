@@ -140,6 +140,20 @@ internal sealed class DriveWatchdog
         }
 
         _monitor.Watch([.. result.Value.Select(drive => new WatchedDrive(drive.Id, drive.Letter, drive.AutoConnect))]);
+
+        // A drive that was queued for reconnect and has since been deleted, or had its
+        // own auto-connect switched off, is dropped from the queue here. Left in it, a
+        // deleted drive was retried - and logged as a warning - every five minutes for
+        // the rest of the session, since NotFound counted as one more failure.
+        HashSet<Guid> stillWanted = [.. result.Value.Where(drive => drive.AutoConnect).Select(drive => drive.Id)];
+
+        lock (_gate)
+        {
+            foreach (Guid driveId in _pending.Keys.Where(id => !stillWanted.Contains(id)).ToList())
+            {
+                _pending.Remove(driveId);
+            }
+        }
     }
 
     private void OnConnectivityChanged(object? sender, IReadOnlyList<DriveConnectivityChange> changes)
@@ -154,6 +168,8 @@ internal sealed class DriveWatchdog
         try
         {
             bool autoConnectEnabled = await IsAutoConnectEnabledAsync();
+
+            List<Task> attempts = [];
 
             foreach (DriveConnectivityChange change in changes)
             {
@@ -170,8 +186,13 @@ internal sealed class DriveWatchdog
                 // is the other half of what this handler is for.
                 bool reconnect = autoConnectEnabled && change.AutoConnect;
 
-                await AttemptAsync(change.DriveId, change.Letter, reconnect, recordDrop: true);
+                // In parallel, as the connector's per-host gate serializes the mounts
+                // anyway: one share hanging its mount used to hold the drop record and
+                // the status pill of every drive behind it for up to a minute each.
+                attempts.Add(AttemptAsync(change.DriveId, change.Letter, reconnect, recordDrop: true));
             }
+
+            await Task.WhenAll(attempts);
         }
         catch (Exception ex)
         {
@@ -291,6 +312,15 @@ internal sealed class DriveWatchdog
                 // Stop() ran while the reconnect was in flight. The outcome belongs to a
                 // session that is over; scheduling anything from it would queue this
                 // drive under whoever signs in next.
+                return;
+            }
+
+            // Gone, not failing: the drive was deleted while it was queued. Nothing to
+            // retry, and nothing worth a warning in the log the user is asked to send.
+            if (result.IsFailure && result.Error.Code == DriveErrors.NotFound(driveId).Code)
+            {
+                Forget(driveId);
+
                 return;
             }
 

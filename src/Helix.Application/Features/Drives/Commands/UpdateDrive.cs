@@ -98,7 +98,7 @@ public sealed class UpdateDrive(
 
     private static Result Validate(Request request)
     {
-        if (string.IsNullOrWhiteSpace(request.Letter) || request.Letter.Length != 1 || !char.IsLetter(request.Letter[0]))
+        if (!GeneralValidation.IsDriveLetter(request.Letter))
         {
             return Result.Failure(DriveErrors.NotALetter);
         }

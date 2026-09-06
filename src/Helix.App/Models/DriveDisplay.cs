@@ -140,6 +140,23 @@ internal sealed partial class DriveDisplay : ObservableObject
     }
 
     /// <summary>
+    /// The one mapping from a failed attempt's error to what the pill says: the
+    /// unreachable code gets the localized sentence, anything else the share's own words,
+    /// since the domain's descriptions are not translated.
+    /// </summary>
+    public void MarkOffline(Error error)
+    {
+        if (error.Code == DriveErrors.HostUnreachableCode)
+        {
+            MarkOffline(DriveOfflineReason.HostUnreachable, AppResources.StatusUnreachableHint);
+
+            return;
+        }
+
+        MarkOffline(DriveOfflineReason.Refused, error.Description);
+    }
+
+    /// <summary>
     /// A drive that came up has no reason to be offline any more, whoever mounted it. Left
     /// behind, a stale reason would resurface as soon as the drive next dropped and blame
     /// the new outage on the old one.

@@ -159,17 +159,7 @@ public sealed partial class DriveTemplate : ContentView
     /// something to say about — the domain's descriptions are not translated. A refusal is
     /// reported in the share's own words, which is the whole value of it.
     /// </remarks>
-    private static void MarkOffline(DriveDisplay drive, Error error)
-    {
-        if (error.Code == DriveErrors.HostUnreachableCode)
-        {
-            drive.MarkOffline(DriveOfflineReason.HostUnreachable, AppResources.StatusUnreachableHint);
-
-            return;
-        }
-
-        drive.MarkOffline(DriveOfflineReason.Refused, error.Description);
-    }
+    private static void MarkOffline(DriveDisplay drive, Error error) => drive.MarkOffline(error);
 
     private void ToggleSelected(object? sender, TappedEventArgs e)
     {
@@ -248,19 +238,8 @@ public sealed partial class DriveTemplate : ContentView
             RefreshStatus(drive);
         });
 
-        WeakReferenceMessenger.Default.Unregister<DriveAttemptFailedMessage>(this);
-
-        // What the watchdog learned on the user's behalf while nobody was looking. Without
-        // it the row can only say the drive is down, which is the same thing it says about
-        // a drive the user disconnected themselves.
-        WeakReferenceMessenger.Default.Register<DriveAttemptFailedMessage>(this, (r, m) =>
-        {
-            if (BindingContext is not DriveDisplay drive || drive.Id != m.DriveId)
-            {
-                return;
-            }
-
-            MarkOffline(drive, Error.Problem(m.ErrorCode, m.Description));
-        });
+        // DriveAttemptFailedMessage - what the watchdog learned while nobody was looking -
+        // is applied by HomeViewModel to the master list, so it reaches rows this
+        // template is not currently bound to as well.
     }
 }

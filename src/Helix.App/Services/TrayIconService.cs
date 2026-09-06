@@ -56,6 +56,12 @@ internal sealed class TrayIconService
     private bool _running;
     private bool _announcedHiding;
 
+    /// <summary>How long, and how often, to keep asking the shell for the icon after it refused.</summary>
+    private static readonly TimeSpan ShowRetryInterval = TimeSpan.FromSeconds(10);
+    private const int ShowRetryAttempts = 18;
+
+    private CancellationTokenSource? _showRetry;
+
     // The two settings that have to be answered without awaiting anything: the window's
     // Closing handler is a WinUI event that must decide before it returns, and the
     // notification goes up at the moment the window is put away. Read on the UI and tray
@@ -125,6 +131,12 @@ internal sealed class TrayIconService
         {
             _logger.LogWarning("The tray icon is unavailable; the window will minimize to the taskbar instead.");
 
+            // Started at logon, Helix can be up before the taskbar is: the shell refuses
+            // the icon, then adds it a few seconds later when TaskbarCreated arrives -
+            // and this service had already recorded "no tray", leaving an icon with an
+            // empty menu and a close button that quit. Asked again until it is there.
+            _ = RetryShowAsync();
+
             return;
         }
 
@@ -132,6 +144,49 @@ internal sealed class TrayIconService
         await LoadPreferencesAsync();
 
         await RefreshAsync();
+    }
+
+    private async Task RetryShowAsync()
+    {
+        _showRetry?.Cancel();
+
+        var retry = new CancellationTokenSource();
+        _showRetry = retry;
+
+        try
+        {
+            for (int attempt = 0; attempt < ShowRetryAttempts; attempt++)
+            {
+                await Task.Delay(ShowRetryInterval, retry.Token);
+
+                if (_running || !_trayIcon.Show(AppInfo.Current.Name))
+                {
+                    continue;
+                }
+
+                _running = true;
+
+                _logger.LogInformation("The tray icon came up on attempt {Attempt}.", attempt + 1);
+
+                await LoadPreferencesAsync();
+                await RefreshAsync();
+
+                return;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Stop() ran: the session this icon was for is over.
+        }
+        finally
+        {
+            if (ReferenceEquals(_showRetry, retry))
+            {
+                _showRetry = null;
+            }
+
+            retry.Dispose();
+        }
     }
 
     /// <summary>
@@ -145,13 +200,14 @@ internal sealed class TrayIconService
             return;
         }
 
-        _running = false;
+        _showRetry?.Cancel();
 
         // The next user gets the explanation too — they have not seen it.
         _announcedHiding = false;
 
         lock (_gate)
         {
+            _running = false;
             _drives = [];
             _groups = [];
         }
@@ -223,27 +279,28 @@ internal sealed class TrayIconService
 
         List<DriveGroup> groups = groupsResult.IsSuccess ? groupsResult.Value : [];
 
-        // Re-checked after the awaits: a refresh started just before sign-out would
-        // otherwise resume past Stop() and put the icon back up, listing the previous
-        // user's drives over the sign-in page.
-        if (!_running)
-        {
-            return;
-        }
-
-        lock (_gate)
-        {
-            _drives = drives;
-            _groups = groups;
-        }
-
         HashSet<string> connected = _nasConnector.GetConnectedLetters();
 
-        _trayIcon.SetMenu(BuildMenu(drives, groups, connected));
+        // Re-checked after the awaits, and under the lock Stop() takes: a refresh started
+        // just before sign-out would otherwise resume past Stop() and put the icon back
+        // up, listing the previous user's drives over the sign-in page.
+        lock (_gate)
+        {
+            if (!_running)
+            {
+                return;
+            }
 
-        // Also re-checks that the icon is still there — Explorer can restart and refuse
-        // it — so the window stops being hidable the moment the way back disappears.
-        _running = _trayIcon.Show($"{AppInfo.Current.Name} — {CountConnected(drives, connected)}/{drives.Count}");
+            _drives = drives;
+            _groups = groups;
+
+            _trayIcon.SetMenu(BuildMenu(drives, groups, connected));
+
+            // Also re-checks that the icon is still there — Explorer can restart and
+            // refuse it — so the window stops being hidable the moment the way back
+            // disappears.
+            _running = _trayIcon.Show($"{AppInfo.Current.Name} — {CountConnected(drives, connected)}/{drives.Count}");
+        }
     }
 
     private static int CountConnected(List<Drive> drives, HashSet<string> connected) =>
@@ -323,11 +380,11 @@ internal sealed class TrayIconService
                     return;
 
                 case ConnectAllId:
-                    await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle());
+                    Report(await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle()));
                     break;
 
                 case DisconnectAllId:
-                    await ScopedHandler.HandleAsync((DisconnectAllDrives h) => h.Handle());
+                    Report(await ScopedHandler.HandleAsync((DisconnectAllDrives h) => h.Handle()));
                     break;
 
                 default:
@@ -376,7 +433,28 @@ internal sealed class TrayIconService
             return;
         }
 
-        await ScopedHandler.HandleAsync((ConnectDriveGroup h) => h.Handle(new ConnectDriveGroup.Request(groupId)));
+        Report(await ScopedHandler.HandleAsync((ConnectDriveGroup h) => h.Handle(new ConnectDriveGroup.Request(groupId))));
+    }
+
+    /// <summary>
+    /// Says what a menu action came back with, when it is not success.
+    /// </summary>
+    /// <remarks>
+    /// The tray is used when the window is away, so there is no banner to land on, and
+    /// the handlers write no log of their own: a "connect all" with a wrong password
+    /// produced no toast, no log line and no audit row, and the menu simply rebuilt with
+    /// the drive still marked disconnected. The balloon is what the tray has.
+    /// </remarks>
+    private void Report(Result result)
+    {
+        if (result.IsSuccess)
+        {
+            return;
+        }
+
+        _logger.LogWarning("A tray action failed: {Reason}", result.Error.Description);
+
+        _trayIcon.Notify(AppInfo.Current.Name, result.Error.Description);
     }
 
     private async Task ToggleDriveAsync(string rawDriveId)
@@ -401,11 +479,11 @@ internal sealed class TrayIconService
 
         if (_nasConnector.IsConnected(drive.Letter))
         {
-            await ScopedHandler.HandleAsync((DisconnectDrive h) => h.Handle(new DisconnectDrive.Request(driveId)));
+            Report(await ScopedHandler.HandleAsync((DisconnectDrive h) => h.Handle(new DisconnectDrive.Request(driveId))));
             return;
         }
 
-        await ScopedHandler.HandleAsync((ConnectDrive h) => h.Handle(new ConnectDrive.Request(driveId)));
+        Report(await ScopedHandler.HandleAsync((ConnectDrive h) => h.Handle(new ConnectDrive.Request(driveId))));
     }
 
     /// <summary>

@@ -149,6 +149,11 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             return Result.Failure<string>(UpdateErrors.NotWritable);
         }
 
+        if (!IsSafeInstall())
+        {
+            return Result.Failure<string>(UpdateErrors.UnsafeInstallLocation);
+        }
+
         string releaseDirectory = Path.Combine(_stagingRoot(), Sanitize(update.LatestVersion));
 
         // Anything else under the staging root is a release that was installed or given
@@ -243,6 +248,11 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         if (!IsSupported)
         {
             return Result.Failure(UpdateErrors.NotWritable);
+        }
+
+        if (!IsSafeInstall())
+        {
+            return Result.Failure(UpdateErrors.UnsafeInstallLocation);
         }
 
         try
@@ -532,6 +542,114 @@ internal sealed class UpdateInstaller : IUpdateInstaller
     }
 
     /// <summary>Whether the current user can actually write where Helix is installed.</summary>
+    /// <summary>
+    /// Whether the install folder is one the helper may move aside and replace wholesale.
+    /// </summary>
+    /// <remarks>
+    /// The swap replaces the <b>whole folder</b> the executable runs from, and the
+    /// release zip has no wrapper folder: "extract here" in Downloads puts
+    /// <c>Helix.App.exe</c> straight into Downloads, which is writable and would have
+    /// passed <see cref="IsSupported"/>. The helper would then have moved Downloads
+    /// aside, recreated it holding only Helix, and deleted the rest. So the folder must
+    /// hold the executable, must not be one of the shell's own folders or a drive root,
+    /// and must not sit under the staging root, where <see cref="StageAsync"/> deletes
+    /// sibling folders before every download.
+    /// </remarks>
+    private bool IsSafeInstall()
+    {
+        string install = _installDirectory();
+
+        if (!IsSafeToReplace(install))
+        {
+            _logger.LogWarning("Refusing to update: the install folder is not one that can be replaced wholesale.");
+
+            return false;
+        }
+
+        // StageAsync deletes every sibling of the release it is about to download. An
+        // install that is itself one of those siblings - somebody ran the unpacked copy
+        // from under the staging root - would be deleted out from under itself.
+        if (ReleaseFolderOf(install) is not null)
+        {
+            _logger.LogWarning("Refusing to update: Helix is running from inside the update staging folder.");
+
+            return false;
+        }
+
+        return true;
+    }
+
+    internal static bool IsSafeToReplace(string directory)
+    {
+        string install;
+
+        try
+        {
+            install = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
+        }
+        catch (Exception ex) when (ex is ArgumentException or PathTooLongException or NotSupportedException)
+        {
+            return false;
+        }
+
+        // A drive root, or a folder with no parent, is never an install folder.
+        if (Path.GetDirectoryName(install) is null)
+        {
+            return false;
+        }
+
+#if !MACCATALYST
+        if (!File.Exists(Path.Combine(install, WindowsExecutable)))
+        {
+            return false;
+        }
+#endif
+
+        Environment.SpecialFolder[] shellFolders =
+        [
+            Environment.SpecialFolder.UserProfile,
+            Environment.SpecialFolder.Desktop,
+            Environment.SpecialFolder.DesktopDirectory,
+            Environment.SpecialFolder.MyDocuments,
+            Environment.SpecialFolder.MyMusic,
+            Environment.SpecialFolder.MyPictures,
+            Environment.SpecialFolder.MyVideos,
+            Environment.SpecialFolder.LocalApplicationData,
+            Environment.SpecialFolder.ApplicationData,
+            Environment.SpecialFolder.CommonApplicationData,
+            Environment.SpecialFolder.ProgramFiles,
+            Environment.SpecialFolder.ProgramFilesX86,
+            Environment.SpecialFolder.Windows,
+            Environment.SpecialFolder.System,
+        ];
+
+        foreach (Environment.SpecialFolder folder in shellFolders)
+        {
+            string path = Environment.GetFolderPath(folder);
+
+            if (!string.IsNullOrEmpty(path) && SamePath(path, install))
+            {
+                return false;
+            }
+        }
+
+        // Downloads has no SpecialFolder value; it is the case that started this.
+        string profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        if (!string.IsNullOrEmpty(profile) && SamePath(Path.Combine(profile, "Downloads"), install))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool SamePath(string left, string right) =>
+        string.Equals(
+            Path.TrimEndingDirectorySeparator(Path.GetFullPath(left)),
+            Path.TrimEndingDirectorySeparator(Path.GetFullPath(right)),
+            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
     /// <remarks>
     /// Asked by writing, not by reading permissions: the answer that matters is what the
     /// filesystem does, and every other way of asking is an approximation of it.
@@ -657,19 +775,35 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             "}",
             $"try {{ Wait-Process -Id {processId} -Timeout {ExitWaitSeconds} -ErrorAction Stop }} catch {{ }}",
 
+            // Still running means its files are still held, and starting the new build
+            // beside it would be two Helixes on one database. The old one is left exactly
+            // as it is, so there is nothing to restart either.
+            $"if (Get-Process -Id {processId} -ErrorAction SilentlyContinue) {{",
+            $"    Write-Log 'Helix was still running after {ExitWaitSeconds} seconds, so the update was not applied.'",
+            "    exit",
+            "}",
+
             // The process object is gone before every handle it held is.
             "Start-Sleep -Seconds 2",
-            "if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Recurse -Force }",
             "$moved = $false",
             "$reason = 'the folder was still held after every attempt'",
-            $"foreach ($attempt in 1..{MoveAttempts}) {{",
-            "    try {",
-            "        Move-Item -LiteralPath $install -Destination $backup -Force",
-            "        $moved = $true",
-            "        break",
-            "    } catch {",
-            "        $reason = $_.Exception.Message",
-            "        Start-Sleep -Seconds 1",
+            "$stale = $false",
+            "try {",
+            "    if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Recurse -Force }",
+            "} catch {",
+            "    $stale = $true",
+            "    Write-Log \"A previous backup at $backup could not be removed: $($_.Exception.Message). The update was not applied.\"",
+            "}",
+            "if (-not $stale) {",
+            $"    foreach ($attempt in 1..{MoveAttempts}) {{",
+            "        try {",
+            "            Move-Item -LiteralPath $install -Destination $backup -Force",
+            "            $moved = $true",
+            "            break",
+            "        } catch {",
+            "            $reason = $_.Exception.Message",
+            "            Start-Sleep -Seconds 1",
+            "        }",
             "    }",
             "}",
             "if ($moved) {",
@@ -685,15 +819,31 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             "        Write-Log 'The update was applied.'",
             "    } catch {",
             "        Write-Log \"The update could not be copied over the install: $($_.Exception.Message). The previous version was put back.\"",
-            "        if (Test-Path -LiteralPath $install) {",
-            "            Remove-Item -LiteralPath $install -Recurse -Force -ErrorAction SilentlyContinue",
+            "        try {",
+            "            if (Test-Path -LiteralPath $install) {",
+            "                Remove-Item -LiteralPath $install -Recurse -Force -ErrorAction SilentlyContinue",
+            "            }",
+
+            // A half-copied file that something is holding leaves the folder standing,
+            // and moving the backup at a folder that exists would put it inside. The
+            // contents are copied back over instead.
+            "            if (Test-Path -LiteralPath $install) {",
+            "                Get-ChildItem -LiteralPath $backup -Force | Copy-Item -Destination $install -Recurse -Force",
+            "            } else {",
+            "                Move-Item -LiteralPath $backup -Destination $install -Force",
+            "            }",
+            "        } catch {",
+            "            Write-Log \"The previous version could not be put back either: $($_.Exception.Message). It is still at $backup.\"",
             "        }",
-            "        Move-Item -LiteralPath $backup -Destination $install -Force",
             "    }",
-            "} else {",
+            "} elseif (-not $stale) {",
             "    Write-Log \"The install folder could not be moved aside, so the update was not applied and the previous version is still installed: $reason\"",
             "}",
-            "if (Test-Path -LiteralPath $exe) { Start-Process -FilePath $exe }",
+
+            // The working directory is set on purpose: an app started without one
+            // inherits this script's, which is under the staging root and is deleted by
+            // the next update - and a process holding a folder is what stops it moving.
+            "if (Test-Path -LiteralPath $exe) { Start-Process -FilePath $exe -WorkingDirectory $install }",
         ];
 #else
         string scriptPath = Path.Combine(scriptDirectory, "apply-update.sh");
@@ -710,8 +860,16 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             $"  kill -0 {processId} 2>/dev/null || break",
             "  sleep 1",
             "done",
+            $"if kill -0 {processId} 2>/dev/null; then",
+            $"  write_log 'Helix was still running after {ExitWaitSeconds} seconds, so the update was not applied.'",
+            "  exit 0",
+            "fi",
             "sleep 2",
-            "rm -rf \"$backup\"",
+            "if ! rm -rf \"$backup\"; then",
+            "  write_log 'A previous backup could not be removed, so the update was not applied.'",
+            "  open \"$install\"",
+            "  exit 0",
+            "fi",
             "if mv \"$install\" \"$backup\"; then",
 
             // ditto rather than cp: a .app is symlinks, permissions and extended
@@ -721,9 +879,13 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             "    [ -n \"$release\" ] && rm -rf \"$release\"",
             "    write_log 'The update was applied.'",
             "  else",
-            "    rm -rf \"$install\"",
-            "    mv \"$backup\" \"$install\"",
             "    write_log 'The update could not be copied over the install. The previous version was put back.'",
+            "    rm -rf \"$install\"",
+            "    if [ -e \"$install\" ]; then",
+            "      ditto \"$backup\" \"$install\" || write_log 'The previous version could not be put back either; it is still beside the install as .old.'",
+            "    else",
+            "      mv \"$backup\" \"$install\" || write_log 'The previous version could not be put back either; it is still beside the install as .old.'",
+            "    fi",
             "  fi",
             "else",
             "  write_log 'The install folder could not be moved aside, so the update was not applied and the previous version is still installed.'",

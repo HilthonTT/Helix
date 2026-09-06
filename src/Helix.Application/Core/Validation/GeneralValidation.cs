@@ -21,6 +21,19 @@ internal static partial class GeneralValidation
     /// home network, and a name is the only address that survives the server's DHCP
     /// lease moving, so refusing one made the app unusable for that setup.
     /// </remarks>
+    /// <summary>
+    /// Whether the text is a drive letter Helix can use: exactly one character, A to Z.
+    /// </summary>
+    /// <remarks>
+    /// <c>char.IsLetter</c> accepts every letter in Unicode, and a hand-edited vault
+    /// with <c>"É"</c> passed, was saved, and then failed at every connect with a Windows
+    /// error naming no field - a drive whose letter the edit modal could not even offer.
+    /// </remarks>
+    internal static bool IsDriveLetter(string? letter) =>
+        !string.IsNullOrWhiteSpace(letter) &&
+        letter.Length == 1 &&
+        char.ToUpperInvariant(letter[0]) is >= 'A' and <= 'Z';
+
     internal static bool IsValidHost(string? host)
     {
         if (string.IsNullOrWhiteSpace(host))

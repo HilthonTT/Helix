@@ -46,7 +46,16 @@ public sealed class ImportDrives(
             return Result.Failure<List<Drive>>(JsonErrors.PassphraseMissing);
         }
 
-        string vault = await File.ReadAllTextAsync(file.FullPath, cancellationToken);
+        string vault;
+
+        try
+        {
+            vault = await File.ReadAllTextAsync(file.FullPath, cancellationToken);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return Result.Failure<List<Drive>>(FolderPickerErrors.ReadFailed(ex.Message));
+        }
 
         Result<string> decryptResult = vaultCipher.Decrypt(vault, passphrase);
         if (decryptResult.IsFailure)
@@ -151,7 +160,7 @@ public sealed class ImportDrives(
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(dto.Letter) || dto.Letter.Length != 1 || !char.IsLetter(dto.Letter[0]))
+        if (!GeneralValidation.IsDriveLetter(dto.Letter))
         {
             return false;
         }
@@ -183,9 +192,10 @@ public sealed class ImportDrives(
                 { DevicePlatform.macOS, new[] { FileExtension } },
             });
 
+        // No title: this layer has no access to the translated strings, and the OS
+        // dialog's own default is at least in the user's language.
         return new PickOptions
         {
-            PickerTitle = "Import drives",
             FileTypes = fileTypes,
         };
     }

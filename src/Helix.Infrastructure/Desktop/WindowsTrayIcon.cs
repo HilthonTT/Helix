@@ -115,6 +115,12 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
                 // The menu is modal and the loop is a classic Win32 pump; neither wants
                 // an apartment that pumps COM messages behind its back.
                 _thread.SetApartmentState(ApartmentState.STA);
+
+                // A loop that ended by itself - the window could not be created - left
+                // this set, and the next Show would have read _iconAdded before the new
+                // loop had got anywhere.
+                _ready.Reset();
+
                 _thread.Start();
             }
         }
@@ -125,6 +131,18 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         {
             _logger.LogWarning("The tray icon window did not come up within the timeout; no icon will be shown.");
             return false;
+        }
+
+        // Asked again on every Show rather than only when the loop started: the shell
+        // refuses NIM_ADD while the taskbar is still coming up at logon, and the
+        // TaskbarCreated message that follows is only sent to windows that already
+        // existed when Explorer restarted, not on the first logon.
+        lock (_gate)
+        {
+            if (!_iconAdded)
+            {
+                AddIcon();
+            }
         }
 
         UpdateTooltip();
@@ -414,8 +432,11 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         // Explorer restarted and threw away every tray icon; put ours back.
         if (_taskbarCreatedMessage != 0 && message == _taskbarCreatedMessage)
         {
-            _iconAdded = false;
-            AddIcon();
+            lock (_gate)
+            {
+                _iconAdded = false;
+                AddIcon();
+            }
 
             return IntPtr.Zero;
         }

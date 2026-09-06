@@ -36,6 +36,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
     // And the idle lock, where a stray intermediate value would lock the screen.
     private readonly System.Timers.Timer _idleLockDebounceTimer;
     private int _persistedIdleLockMinutes;
+    private Language _persistedLanguage;
 
     [ObservableProperty]
     public partial Guid Id { get; set; }
@@ -221,7 +222,17 @@ internal sealed partial class SettingsDisplay : ObservableObject
             return;
         }
 
-        await UpdatePropertyAsync(builder => builder.Language = value);
+        if (await UpdatePropertyAsync(builder => builder.Language = value))
+        {
+            _persistedLanguage = value;
+            return;
+        }
+
+        // The only hook that used to have no rollback: the page had already switched
+        // culture, so a rejected write left the UI in the new language until the next
+        // sign-in put the stored one back.
+        RollBack(() => Language = _persistedLanguage);
+        CultureSwitcher.SwitchCulture(_persistedLanguage);
     }
 
     public SettingsDisplay(Settings settings)
@@ -269,6 +280,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
         TimerCount = settings.TimerCount;
         _persistedTimerCount = settings.TimerCount;
         Language = settings.Language;
+        _persistedLanguage = settings.Language;
         AuditlogRetentionDays = settings.AuditlogRetentionDays;
         _persistedRetentionDays = settings.AuditlogRetentionDays;
         StorageAlertThresholdPercent = settings.StorageAlertThresholdPercent;

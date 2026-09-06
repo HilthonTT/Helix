@@ -70,6 +70,15 @@ public static class UpdateErrors
         "Update.NotWritable",
         "Helix cannot replace its own files where it is installed. Update it by hand, or move it somewhere you own.");
 
+    /// <remarks>
+    /// The updater replaces the whole folder the executable sits in. Run from Downloads,
+    /// the Desktop or a drive root — the result of "extract here" on the release zip,
+    /// which has no wrapper folder — that would replace everything else in there too.
+    /// </remarks>
+    public static readonly Error UnsafeInstallLocation = Error.Problem(
+        "Update.UnsafeInstallLocation",
+        "Helix is running from a folder it shares with other files, so it cannot replace that folder safely. Move it into a folder of its own and try again.");
+
     public static Error InstallFailed(string message) => Error.Problem(
         "Update.InstallFailed",
         $"The update could not be started: {message}");

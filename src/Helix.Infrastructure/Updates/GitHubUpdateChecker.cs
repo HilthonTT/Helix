@@ -190,9 +190,13 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
                 continue;
             }
 
+            // The archive itself, not a sidecar named after it: a checksum or signature
+            // file published as Helix-v2.3.0-win-x64.zip.sha256 carries the same moniker
+            // and would be staged as the build, then fail to unpack on every install.
             GitHubAsset? match = release.Assets.FirstOrDefault(asset =>
                 !string.IsNullOrWhiteSpace(asset.Name) &&
                 !string.IsNullOrWhiteSpace(asset.BrowserDownloadUrl) &&
+                asset.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
                 asset.Name.Contains($"-{moniker}.", StringComparison.OrdinalIgnoreCase));
 
             if (match is null)
