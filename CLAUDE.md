@@ -242,6 +242,18 @@ that is not the host declining to answer reads as reachable**, deliberately: a f
 "unreachable" would stop Helix reconnecting a drive that would have come back, which is
 the one thing the watchdog exists to do.
 
+Both connectors also probe for themselves, before the gate and the mount, so a row
+connected by hand and a batch get the same amber "Unreachable" as the watchdog. That is
+what lets the **mount timeout be thirty seconds** rather than five. Neither `WNetAddConnection2`
+nor `NetFSMountURLSync` takes a token: a timeout only abandons the thread the mount is on,
+and the mount then finishes on its own. At five seconds a NAS addressed by name — a NetBIOS
+or mDNS lookup and then the session — regularly came up a moment after its row had been told
+"Connection timed out", and the other twelve drives, whose gate wait was capped at the same
+five seconds, burst through ungated into the credential conflicts the gate exists to
+prevent. Switching the drives back to the IP address "fixed" both, which is how it was
+reported. The short timeout was only ever guarding against an absent host, and the probe
+answers that in two seconds, once per host.
+
 The row says which of the two it is. `DriveDisplay.OfflineReason` carries
 `HostUnreachable` or `Refused`, and the status pill has one for each — amber "Unreachable"
 against red "Failed" — beside the plain "Disconnected" that a drive the user put down
@@ -380,6 +392,21 @@ come down, because a confirmation for a no-op teaches the user to dismiss them u
 it has a singular and a plural form rather than one string with a number in it. The tray's
 own "disconnect all" is not confirmed and should not be: there is no window to put a dialog
 on when it is used.
+
+### Importing over live mappings
+
+`ImportDrives` and `CreateDrive` refuse a letter the connector reports as mounted — a USB
+stick, an optical drive, another account's mapping would save fine and then fail at every
+connect. The exception is a letter mounted **from the share being described**, which
+`INasConnector.IsMountedFrom` answers: on Windows by comparing what `WNetGetConnection`
+reports the letter points at with `\\host\share` under either spelling of the host, on
+macOS by the volume being under Helix's own mount root. That is the normal state of a
+machine a backup is restored on — persistent mappings survive a reinstall and live ones
+survive an update, so the drives are up before the records that describe them are back —
+and treating them as taken meant a vault of thirteen drives imported nothing until every
+share had been disconnected by hand. A vault that ends up importing nothing is reported as
+`JsonErrors.NothingToImport` rather than announced as a success.
+
 
 ### Finding a drive, and a row in the log
 
@@ -822,6 +849,8 @@ the two cannot drift. `UpdateSettings` still validates — this is a keyboard, n
 boundary.
 
 The typed value is committed on Enter or on leaving the field, never per keystroke.
+The `−`/`+` step is per field: the countdown moves by one second, because a user tuning it
+wants 12 rather than 10 or 15; days, percent and minutes move by a stride.
 `SettingsDisplay` debounces these by 500ms precisely because "9" on the way to "90" used to
 be saved and acted on; committing whole values means there is no such intermediate, and the
 timer stays as a backstop rather than as the thing standing between the user and a wrong
@@ -902,6 +931,32 @@ Handlers are scoped and must never be cached in viewmodel/page fields. The prese
 `AppDbContext` (`src/Helix.Infrastructure/Database/AppDbContext.cs`) implements both `IDbContext` and `IUnitOfWork` (abstractions in `Helix.Application/Abstractions/Data/`). The SQLite database is encrypted: the connection string is built with a password from `PasswordGenerator.GetOrCreatePassword()`, and `IRelationalCommandBuilderFactory` is replaced with a custom builder (`Database/Sqlite/CustomRelationalCommandBuilderFactory`) to support the cipher. `InsertAuditLogsInterceptor` is registered as a singleton and attached to the context to write audit logs automatically on save. Entity configurations are picked up via `ApplyConfigurationsFromAssembly` from `Database/Configurations/`.
 
 The `DbContext` lifetime and threading were a recurring issue historically; the fix is the per-operation scope pattern above (`ScopedHandler`). Do not resolve `AppDbContext` (or anything scoped) from the root provider, and do not share a context instance across concurrent operations.
+
+#### Where the data lives
+
+`DatabaseLocation` is the one place that knows: `helix.db` in `FileSystem.AppDataDirectory`,
+with the SQLCipher key beside it in MAUI's `Settings/securestorage.dat`. On an unpackaged
+Windows build that directory is `%LOCALAPPDATA%\<publisher>\<package>\Data`, and **both
+names come out of the build**: the AppInfo metadata the resizetizer stamps from a
+`Package.appxmanifest` when the project has one, and the assembly's company and title
+(`Helix.App`) when it does not. The release workflow builds from a checkout with no
+manifest — `Platforms/Windows/Package.appxmanifest` is gitignored — so every published
+build reads and writes `%LOCALAPPDATA%\Helix.App\Helix.App\Data`. A machine that builds
+with a manifest in place resolves to whatever that manifest says; this one produced
+`%LOCALAPPDATA%\YourName\com.companyname.helix.app\Data` until late August 2026, and both
+folders are still there. A copy of the app built that way keeps its account and drives in a
+folder the published builds never look in, so updating it to a release comes up with an
+empty database and the register page, while the Windows mappings it made are still up.
+**Do not add a manifest, or a `Company`/`AssemblyTitle`, without deciding what happens to
+the data in the old folder.**
+
+`DatabaseInitializer` runs the migrations at startup and logs, at Information, the
+directory it used and whether a database was there — the one line the diagnostics zip was
+missing when a user reported exactly that. `PasswordGenerator` logs when it has to
+generate a key rather than read one, since a fresh key on a machine that already has a
+database is what makes that database unreadable. Before a migration runs against an
+existing database, a copy is left beside it as `helix.db.bak`, overwritten by the next one.
+
 
 ### Localization
 

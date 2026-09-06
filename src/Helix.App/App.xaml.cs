@@ -1,5 +1,4 @@
 ﻿using Helix.Infrastructure.Database;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using AppBase = Microsoft.Maui.Controls.Application;
 using Helix.App.Resources.Languages;
@@ -20,7 +19,10 @@ public sealed partial class App : AppBase
         RegisterGlobalExceptionHandlers();
 
         using IServiceScope scope = serviceProvider.CreateScope();
-        scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+
+        DatabaseInitializer.Initialize(
+            scope.ServiceProvider.GetRequiredService<AppDbContext>(),
+            serviceProvider.GetRequiredService<ILogger<App>>());
     }
 
     /// <summary>

@@ -31,7 +31,13 @@ namespace Helix.Infrastructure.Connector;
 [SupportedOSPlatform("maccatalyst")]
 internal sealed class MacNasConnector : INasConnector
 {
-    private const int ConnectionTimeoutMilliseconds = 5_000;
+    /// <summary>
+    /// How long one mount may take before it is reported as timed out. The same value,
+    /// for the same reason, as the Windows connector: NetFS cannot be cancelled either,
+    /// so a timeout abandons a mount that then completes anyway, and the absent-host
+    /// case is settled by the reachability probe first.
+    /// </summary>
+    private const int MountTimeoutMilliseconds = 30_000;
 
     /// <summary>Directory the mount points live under, one per drive letter.</summary>
     private static readonly string MountRoot = Path.Combine(
@@ -39,17 +45,22 @@ internal sealed class MacNasConnector : INasConnector
         "Helix Drives");
 
     private readonly ILogger<MacNasConnector> _logger;
+    private readonly IHostReachability _hostReachability;
 
-    public MacNasConnector(ILogger<MacNasConnector> logger)
+    public MacNasConnector(ILogger<MacNasConnector> logger, IHostReachability hostReachability)
     {
         _logger = logger;
+        _hostReachability = hostReachability;
     }
 
     public Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
-        RunWithTimeoutAsync(
-            () => Connect(drive),
-            timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
-            failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+        WhenReachableAsync(
+            drive,
+            () => RunWithTimeoutAsync(
+                () => Connect(drive),
+                timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                cancellationToken),
             cancellationToken);
 
     public Task<Result> DisconnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
@@ -60,13 +71,42 @@ internal sealed class MacNasConnector : INasConnector
             cancellationToken);
 
     public Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default) =>
-        RunWithTimeoutAsync(
-            () => Test(drive),
-            timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
-            failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+        WhenReachableAsync(
+            drive,
+            () => RunWithTimeoutAsync(
+                () => Test(drive),
+                timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                cancellationToken),
             cancellationToken);
 
     public string GetMountPath(string letter) => MountPointFor(letter);
+
+    /// <summary>
+    /// A live volume at the letter's own mount point. Which share it carries is not
+    /// checked: nothing but Helix mounts under <see cref="MountRoot"/>, so a volume there
+    /// is one of Helix's own, and the Windows connector's concern — a letter held by a
+    /// USB stick or another account's mapping — has no equivalent in a private directory.
+    /// </summary>
+    public bool IsMountedFrom(Drive drive) => IsConnected(drive.Letter);
+
+    /// <summary>
+    /// Runs the work only if the drive's server answers on an SMB port; otherwise reports
+    /// it as unreachable, with <see cref="DriveErrors.HostUnreachableCode"/>, without
+    /// asking NetFS to wait out its own timeout.
+    /// </summary>
+    private async Task<Result> WhenReachableAsync(
+        Drive drive,
+        Func<Task<Result>> work,
+        CancellationToken cancellationToken)
+    {
+        if (!await _hostReachability.IsReachableAsync(drive.Host, cancellationToken))
+        {
+            return Result.Failure(DriveErrors.HostUnreachable(drive.Host));
+        }
+
+        return await work();
+    }
 
     public bool IsConnected(string letter)
     {
@@ -261,7 +301,7 @@ internal sealed class MacNasConnector : INasConnector
         CancellationToken cancellationToken)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(ConnectionTimeoutMilliseconds);
+        cts.CancelAfter(MountTimeoutMilliseconds);
 
         try
         {

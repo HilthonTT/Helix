@@ -19,4 +19,8 @@ public static class JsonErrors
 
     public static readonly Error VaultInvalidDriveData = Error.Problem(
         "Vault.InvalidDriveData", "The vault contains an invalid drive entry and cannot be imported.");
+
+    public static readonly Error NothingToImport = Error.Problem(
+        "Vault.NothingToImport",
+        "Nothing was imported: every drive in this file already exists, or its letter is mapped to something else.");
 }

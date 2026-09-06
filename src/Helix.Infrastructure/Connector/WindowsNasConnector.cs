@@ -17,9 +17,24 @@ namespace Helix.Infrastructure.Connector;
 /// passwords.
 /// </summary>
 [SupportedOSPlatform("windows")]
-internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) : INasConnector
+internal sealed class WindowsNasConnector(
+    ILogger<WindowsNasConnector> logger,
+    IHostReachability hostReachability) : INasConnector
 {
-    private const int ConnectionTimeoutMilliseconds = 5_000;
+    /// <summary>
+    /// How long one mount may take before it is reported as timed out.
+    /// </summary>
+    /// <remarks>
+    /// Generous on purpose, because the mount cannot be cancelled: <c>WNetAddConnection2</c>
+    /// takes no token, so a timeout here only abandons the thread it is running on, and
+    /// the mount then finishes on its own. At five seconds a NAS addressed by name — a
+    /// NetBIOS or mDNS lookup, then the session — regularly came up a moment after the
+    /// row had already been told it had timed out, which is the one message that is
+    /// wrong on both counts. The absent-NAS case that the short value guarded against is
+    /// answered by <see cref="IHostReachability"/> before the mount is attempted, in two
+    /// seconds and once per host rather than once per drive.
+    /// </remarks>
+    private const int MountTimeoutMilliseconds = 30_000;
 
     /// <summary>
     /// One gate per server, so two shares of the same NAS are never mounted at the same
@@ -41,14 +56,17 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
         new(StringComparer.OrdinalIgnoreCase);
 
     public Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
-        WithHostGateAsync(
+        WhenReachableAsync(
             drive,
-            () => RunWithTimeoutAsync(
-                () => Connect(drive),
-                timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+            () => WithHostGateAsync(
+                drive,
+                () => RunWithTimeoutAsync(
+                    () => Connect(drive),
+                    timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                    failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                    cancellationToken),
                 failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                 cancellationToken),
-            failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
             cancellationToken);
 
     public Task<Result> DisconnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
@@ -59,17 +77,74 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
             cancellationToken);
 
     public Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default) =>
-        WithHostGateAsync(
+        WhenReachableAsync(
             drive,
-            () => RunWithTimeoutAsync(
-                () => Test(drive),
-                timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+            () => WithHostGateAsync(
+                drive,
+                () => RunWithTimeoutAsync(
+                    () => Test(drive),
+                    timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                    failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                    cancellationToken),
                 failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                 cancellationToken),
-            failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
             cancellationToken);
 
     public string GetMountPath(string letter) => $"{letter.Trim().ToUpperInvariant()}:\\";
+
+    public bool IsMountedFrom(Drive drive)
+    {
+        if (string.IsNullOrWhiteSpace(drive.Letter))
+        {
+            return false;
+        }
+
+        string? remote = RemoteNameOf($"{drive.Letter.Trim().ToUpperInvariant()}:");
+        if (remote is null)
+        {
+            return false;
+        }
+
+        // Either spelling of the server counts: the mapping may have been made under the
+        // name while the drive carries the address, or the other way round, and both are
+        // the same share on the same machine.
+        string host = ToUncHost(drive.Host);
+
+        return RemoteIs(remote, host, drive.Name) ||
+               (HostSpelling.AlternateOf(host) is string alternate && RemoteIs(remote, alternate, drive.Name));
+    }
+
+    /// <summary>Whether a mapping's remote name is one particular share on one server.</summary>
+    private static bool RemoteIs(string remote, string uncHost, string share) =>
+        string.Equals(
+            remote.TrimEnd('\\'),
+            ShareOn(uncHost, share),
+            StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Runs the work only if the drive's server answers on an SMB port; otherwise reports
+    /// it as unreachable without touching the redirector.
+    /// </summary>
+    /// <remarks>
+    /// The reason the mount timeout can afford to be long. Away from the NAS's network a
+    /// mount waits out the platform's own SMB timeout, and thirteen of them behind one
+    /// gate would turn "connect all" into minutes; a two-second probe, cached and shared
+    /// across the drives of one host, settles that first. The error carries
+    /// <see cref="DriveErrors.HostUnreachableCode"/>, so a row connected by hand shows the
+    /// same amber pill the watchdog's attempts do.
+    /// </remarks>
+    private async Task<Result> WhenReachableAsync(
+        Drive drive,
+        Func<Task<Result>> work,
+        CancellationToken cancellationToken)
+    {
+        if (!await hostReachability.IsReachableAsync(drive.Host, cancellationToken))
+        {
+            return Result.Failure(DriveErrors.HostUnreachable(drive.Host));
+        }
+
+        return await work();
+    }
 
     public bool IsConnected(string letter)
     {
@@ -492,10 +567,15 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
     /// <remarks>
     /// The wait is capped at the same timeout one mount gets. Nothing holds the gate for
     /// longer than a single attempt, so the cap only bites when that attempt is hanging
-    /// on an absent NAS — and queueing behind it is then the wrong answer, because
-    /// "connect all" against a NAS that has gone away would take five seconds per drive
-    /// instead of five seconds in total. Going ahead ungated costs nothing there: the
-    /// race the gate exists for cannot happen on a server that is not answering.
+    /// on a NAS that stopped answering after the reachability probe let it through — and
+    /// queueing behind it is then the wrong answer, because "connect all" would take the
+    /// timeout per drive instead of once in total. Going ahead ungated costs nothing
+    /// there: the race the gate exists for cannot happen on a server that is not
+    /// answering.
+    ///
+    /// The cap used to be five seconds, which a NAS addressed by name exceeded on its
+    /// first mount often enough that the other twelve drives burst through ungated into
+    /// the very credential conflicts the gate is for.
     /// </remarks>
     private async Task<Result> WithHostGateAsync(
         Drive drive,
@@ -509,7 +589,7 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
 
         try
         {
-            held = await gate.WaitAsync(ConnectionTimeoutMilliseconds, cancellationToken);
+            held = await gate.WaitAsync(MountTimeoutMilliseconds, cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -536,7 +616,7 @@ internal sealed class WindowsNasConnector(ILogger<WindowsNasConnector> logger) :
         CancellationToken cancellationToken)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(ConnectionTimeoutMilliseconds);
+        cts.CancelAfter(MountTimeoutMilliseconds);
 
         try
         {

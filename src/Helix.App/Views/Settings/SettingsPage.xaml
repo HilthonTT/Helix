@@ -247,7 +247,7 @@
                                                       Value="{Binding Settings.TimerCount}"
                                                       Minimum="1"
                                                       Maximum="3600"
-                                                      Step="5"
+                                                      Step="1"
                                                       Unit="{l10n:Translate UnitSeconds}"
                                                       IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>

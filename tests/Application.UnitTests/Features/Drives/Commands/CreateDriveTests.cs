@@ -170,4 +170,50 @@ public class CreateDriveTests
         // Assert
         result.IsSuccess.Should().BeTrue();
     }
+
+    [Fact]
+    public async Task Handle_Should_ReturnLetterInUse_WhenLetterIsMountedFromSomethingElse()
+    {
+        // Arrange
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        _driveRepositoryMock.IsLetterUniqueAsync(Arg.Is<string>(e => e == Request.Letter), _loggedInUserMock.UserId)
+            .Returns(true);
+
+        // A USB stick, an optical drive, another account's mapping: mounted, but not this share.
+        _nasConnectorMock.GetConnectedLetters().Returns([Request.Letter]);
+        _nasConnectorMock.IsMountedFrom(Arg.Any<Drive>()).Returns(false);
+
+        // Act
+        Result<Drive> result = await _createDrive.Handle(Request);
+
+        // Assert
+        result.Error.Should().Be(DriveErrors.LetterInUse(Request.Letter));
+        _driveRepositoryMock.DidNotReceive().Insert(Arg.Any<Drive>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ReturnSuccess_WhenLetterIsAlreadyMountedFromThisShare()
+    {
+        // Arrange
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        _driveRepositoryMock.IsLetterUniqueAsync(Arg.Is<string>(e => e == Request.Letter), _loggedInUserMock.UserId)
+            .Returns(true);
+
+        // The mapping outlived the record describing it, as after a reinstall: the drive
+        // being created is the one already on the letter, not a collision with it.
+        _nasConnectorMock.GetConnectedLetters().Returns([Request.Letter]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == Request.Letter && d.Name == Request.Name))
+            .Returns(true);
+
+        // Act
+        Result<Drive> result = await _createDrive.Handle(Request);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _driveRepositoryMock.Received(1).Insert(Arg.Any<Drive>());
+    }
 }

@@ -5,7 +5,6 @@ using Helix.Domain.Drives;
 using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using Helix.Infrastructure.Cryptography;
-using Helix.Infrastructure.Database.Constants;
 using Helix.Infrastructure.Database.Sqlite;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -42,11 +41,9 @@ public sealed class AppDbContext : DbContext, IUnitOfWork, IDbContext
             return;
         }
 
-        string dbPath = Path.Combine(FileSystem.AppDataDirectory, DatabaseConfiguration.DatabaseName);
-
         string connectionString = new SqliteConnectionStringBuilder
         {
-            DataSource = dbPath,
+            DataSource = DatabaseLocation.Path,
             Mode = SqliteOpenMode.ReadWriteCreate,
             Password = PasswordGenerator.GetOrCreatePassword(),
         }.ToString();

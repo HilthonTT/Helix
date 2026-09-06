@@ -40,4 +40,19 @@ public interface INasConnector
     /// rather than calling <see cref="IsConnected"/> in a loop.
     /// </summary>
     HashSet<string> GetConnectedLetters();
+
+    /// <summary>
+    /// Whether the drive's letter is currently mounted <em>and</em> what it is mounted from
+    /// is this drive's own share.
+    /// </summary>
+    /// <remarks>
+    /// Tells a letter that is genuinely taken — a USB stick, another account's mapping —
+    /// from one that is already carrying the share being described. The second is the
+    /// normal state of a machine whose mappings outlived Helix's database: a persistent
+    /// mapping survives a reinstall, and a live one survives an update, so the drives
+    /// come back mounted before the records that describe them are restored. Refusing
+    /// those letters as "in use" made a backup impossible to import until every share
+    /// had been disconnected by hand.
+    /// </remarks>
+    bool IsMountedFrom(Drive drive);
 }

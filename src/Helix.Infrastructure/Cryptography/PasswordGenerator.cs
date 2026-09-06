@@ -40,6 +40,11 @@ public static class PasswordGenerator
                 return;
             }
 
+            // Information, not Debug: a fresh key on a machine that already has a
+            // database is the one event that makes that database unreadable, and the
+            // log the user is asked to send has to be able to say it happened.
+            logger?.LogInformation("No database key in secure storage; generating one.");
+
             string fresh = GenerateRandomPassword(PasswordLength);
             await TryWriteToSecureStorageAsync(fresh, logger).ConfigureAwait(false);
 

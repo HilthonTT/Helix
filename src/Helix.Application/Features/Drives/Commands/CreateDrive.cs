@@ -58,24 +58,26 @@ public sealed class CreateDrive(
             return Result.Failure<Drive>(DriveErrors.LetterNotUnique(request.Letter));
         }
 
-        // The repository only knows about this user's drives. A letter taken by a USB
-        // stick, an optical drive or another account's mapping used to save fine and then
-        // fail at connect time with a Windows error that named no field.
-        if (nasConnector.GetConnectedLetters().Contains(request.Letter.ToUpperInvariant()))
-        {
-            return Result.Failure<Drive>(DriveErrors.LetterInUse(request.Letter));
-        }
-
         var drive = Drive.Create(
             loggedInUser.UserId,
-            request.Letter, 
-            request.Host, 
+            request.Letter,
+            request.Host,
             request.Name,
             request.Username,
             request.Password,
             request.AutoConnect,
             request.Persistent,
             request.ConnectByHostname);
+
+        // The repository only knows about this user's drives. A letter taken by a USB
+        // stick, an optical drive or another account's mapping used to save fine and then
+        // fail at connect time with a Windows error that named no field. A letter already
+        // carrying this very share is the opposite case — a mapping that outlived the
+        // record describing it — and is the drive being put back, not a collision.
+        if (nasConnector.GetConnectedLetters().Contains(drive.Letter) && !nasConnector.IsMountedFrom(drive))
+        {
+            return Result.Failure<Drive>(DriveErrors.LetterInUse(request.Letter));
+        }
 
         driveRepository.Insert(drive);
 
