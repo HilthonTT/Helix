@@ -289,6 +289,65 @@ Debug rather than Warning — on a laptop this is the ordinary state of affairs 
 the day, and a warning per drive per sweep buries the real failures in the file the user is
 asked to send on. The sweep is skipped outright when `Connectivity` reports no network.
 
+### Diagnosing a drive that will not connect
+
+Everything above is what Helix knows about *why* a mount failed, and until now all of it
+collapsed into one pill and one banner: a drive that is off, a drive whose share was
+renamed, a drive whose password is wrong and a drive whose server is held by somebody
+else's session all read as "Failed". The stethoscope chip on the row runs `DiagnoseDrive`
+and reports the chain step by step, so the user can answer for themselves the question
+that otherwise becomes an email.
+
+Four steps, in this order, and the order is the narrative: the server's **name**, then
+**reaching** it, then the **share and credentials**, then the **drive letter**.
+
+- **Name.** `IHostDiagnostics` asks `HostSpelling` for the host's other spelling and says
+  what it found. A miss is a warning, not a failure — a home router with no PTR records
+  for its leases is the normal case, and Helix mounts by what was typed regardless.
+- **Reaching it.** A fresh TCP probe of 445 then 139, and it names the port that answered.
+  Deliberately **not** `IHostReachability`: that one caches for ten seconds and shares its
+  in-flight task so a sweep of thirteen shares costs one handshake, which is exactly wrong
+  for a check the user just pressed a button to run. A failure here stops the chain and
+  the share step is reported as **skipped** rather than guessed at.
+- **Share and credentials.** `INasConnector.TestAsync`, whose deviceless mount never
+  touches the drive's own letter. Three outcomes rather than two, and the third is the
+  point: **`SessionConflict`** is now a distinct error code from the Windows connector
+  rather than a sentence inside `FailedToConnect`, so "the password is wrong" and "Windows
+  is signed in to this server as somebody else" stop looking identical.
+- **Letter.** Always runs, even when the server never answered — a letter taken by a USB
+  stick is worth knowing about while the NAS is off. It tells "already mounted from this
+  share" apart from "in use by something else", which are the same letter and opposite
+  problems.
+
+The step this exists for is the **warning** on a share that tested fine.
+`INasConnector.HasOtherMountsOn` answers whether another letter is already mounted from
+this drive's server; when it is, Windows reuses that credential context and the stored
+password is never actually checked, so the check reports success **and says so**. That is
+the limit documented above — "editing a password and reconnecting that one drive will
+appear to work whatever you type" — finally said out loud at the moment it is misleading
+somebody. On macOS `HasOtherMountsOn` is `false` and means it: NetFS authenticates per
+mount, so there is no session to inherit and nothing to warn about.
+
+A share Helix already has mounted is reported as such and **not tested again**. Testing it
+would either join its own session or conflict with it, and both answers would be about the
+test rather than about the drive.
+
+`IHostDiagnostics` is **not** a platform seam. Like `IFileBrowser`, it has one
+implementation for both heads and is registered outside `AddPlatformServices()` — a TCP
+connect and a DNS lookup are the same on either OS.
+
+Nothing here composes a sentence. Each step carries a `DiagnosticStep`, a
+`DiagnosticOutcome`, a `DiagnosticFinding` and at most one piece of data — a resolved name,
+a port, a letter — and `DiagnosticStepDisplay` builds the sentence from `AppResources` at
+display time, in the user's language, the same way `AuditlogDisplay` does. The one
+exception is a rejected credential, which shows the connector's own words, because the
+domain's error descriptions are not translated and paraphrasing "The network name cannot be
+found" into something vaguer would lose the only part that identifies the problem.
+
+The report is a modal sheet, which is not a contradiction of the no-alerts rule: that rule
+is about announcing the *outcome of work the user asked for and watched happen*. This is a
+document the user opened, reads, and closes — and it is too long to be a banner.
+
 ### Telling a deliberate disconnect from a drop
 
 `IDriveMonitor.Suppress` hands back a handle; while it is held, the letters it names are
@@ -814,6 +873,16 @@ of every reconnect. Lookups are capped at 1.5s and abandoned rather than cancell
 the BCL's synchronous resolver takes no token. A lookup that answers nothing leaves the
 address as typed — failing a mount because DNS was quiet would turn an optional improvement
 into a new way to lose a drive.
+
+That normal case reaches the BCL as an **exception**: `Dns.GetHostEntry` throws
+`SocketException` for an address with no PTR record, and `GetHostAddresses` does the same
+for a name that does not resolve. Both are caught where they are raised, so "nothing" is a
+return value rather than something for the blanket `catch` in `Within` to mop up — which
+matters now that the drive diagnosis calls this on the ordinary path rather than only on a
+credential conflict. A lookup that outlives its 1.5s cap is abandoned, and its exception is
+observed on the way past: an abandoned task that faults with nobody watching is an
+`UnobservedTaskException` raised from the finalizer, minutes later, with no way to tell
+what asked for it.
 
 The limit worth knowing, because no amount of code moves it: while other shares of a NAS
 are mounted, a drive on that NAS mounts on the existing session and its stored password

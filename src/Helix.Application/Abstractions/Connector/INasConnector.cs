@@ -17,4 +17,6 @@ public interface INasConnector
     HashSet<string> GetConnectedLetters();
 
     bool IsMountedFrom(Drive drive);
+
+    bool HasOtherMountsOn(Drive drive);
 }

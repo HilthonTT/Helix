@@ -59,6 +59,8 @@ internal sealed class MacNasConnector : INasConnector
 
     public bool IsMountedFrom(Drive drive) => IsConnected(drive.Letter);
 
+    public bool HasOtherMountsOn(Drive drive) => false;
+
     private async Task<Result> WhenReachableAsync(
         Drive drive,
         Func<Task<Result>> work,

@@ -692,4 +692,73 @@
   <data name="StorageUsedOf" xml:space="preserve">
     <value>{0} To utilisés sur {1} To</value>
   </data>
+  <data name="DiagnoseDrive" xml:space="preserve">
+    <value>Diagnostiquer</value>
+  </data>
+  <data name="DiagnoseTitle" xml:space="preserve">
+    <value>Vérification de la connexion</value>
+  </data>
+  <data name="DiagnoseSubtitle" xml:space="preserve">
+    <value>{0} sur {1}</value>
+  </data>
+  <data name="DiagnoseRunning" xml:space="preserve">
+    <value>Vérification en cours…</value>
+  </data>
+  <data name="DiagnoseHealthy" xml:space="preserve">
+    <value>Rien n'empêche ce lecteur de fonctionner.</value>
+  </data>
+  <data name="DiagnoseProblem" xml:space="preserve">
+    <value>Voici ce qui empêche le lecteur de se connecter.</value>
+  </data>
+  <data name="DiagnoseRunAgain" xml:space="preserve">
+    <value>Vérifier à nouveau</value>
+  </data>
+  <data name="DiagnoseStepHostResolution" xml:space="preserve">
+    <value>Nom du serveur</value>
+  </data>
+  <data name="DiagnoseStepHostReachable" xml:space="preserve">
+    <value>Accès au serveur</value>
+  </data>
+  <data name="DiagnoseStepShareAndCredentials" xml:space="preserve">
+    <value>Partage et identifiants</value>
+  </data>
+  <data name="DiagnoseStepLetterAvailable" xml:space="preserve">
+    <value>Lettre de lecteur</value>
+  </data>
+  <data name="DiagnoseSkipped" xml:space="preserve">
+    <value>Non vérifié, car le serveur n'a pas répondu.</value>
+  </data>
+  <data name="DiagnoseHostSpellingResolved" xml:space="preserve">
+    <value>Le serveur répond également à « {0} ».</value>
+  </data>
+  <data name="DiagnoseHostSpellingUnknown" xml:space="preserve">
+    <value>Aucun autre nom n'a pu être trouvé pour ce serveur. Helix utilisera l'adresse telle que vous l'avez saisie.</value>
+  </data>
+  <data name="DiagnosePortOpen" xml:space="preserve">
+    <value>Le serveur a répondu sur le port SMB {0}.</value>
+  </data>
+  <data name="DiagnoseHostSilent" xml:space="preserve">
+    <value>« {0} » n'a répondu ni sur le port 445 ni sur le port 139. Il est éteint, en veille, ou sur un autre réseau.</value>
+  </data>
+  <data name="DiagnoseAlreadyMounted" xml:space="preserve">
+    <value>Ce partage est déjà monté ; il n'a donc pas été testé à nouveau.</value>
+  </data>
+  <data name="DiagnoseCredentialsAccepted" xml:space="preserve">
+    <value>Le partage existe et les identifiants enregistrés ont été acceptés.</value>
+  </data>
+  <data name="DiagnoseCredentialsUntested" xml:space="preserve">
+    <value>Le partage a répondu, mais un autre lecteur est déjà connecté à « {0} ». Cette session est réutilisée, donc le mot de passe enregistré n'a pas réellement été vérifié.</value>
+  </data>
+  <data name="DiagnoseSessionConflict" xml:space="preserve">
+    <value>Ce serveur est déjà connecté avec d'autres identifiants et cette session n'a pas pu être fermée. Déconnectez tous les lecteurs et fenêtres de l'Explorateur qui l'utilisent, puis réessayez.</value>
+  </data>
+  <data name="DiagnoseLetterFree" xml:space="preserve">
+    <value>« {0} » est libre.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByThisShare" xml:space="preserve">
+    <value>« {0} » est déjà monté depuis ce partage.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
+    <value>« {0} » est utilisé par autre chose sur cet ordinateur. Choisissez une lettre libre.</value>
+  </data>
 </root>

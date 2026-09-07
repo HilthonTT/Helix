@@ -1830,5 +1830,212 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("StorageUsedOf", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Diagnose.
+        /// </summary>
+        internal static string DiagnoseDrive {
+            get {
+                return ResourceManager.GetString("DiagnoseDrive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection check.
+        /// </summary>
+        internal static string DiagnoseTitle {
+            get {
+                return ResourceManager.GetString("DiagnoseTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} on {1}.
+        /// </summary>
+        internal static string DiagnoseSubtitle {
+            get {
+                return ResourceManager.GetString("DiagnoseSubtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Checking….
+        /// </summary>
+        internal static string DiagnoseRunning {
+            get {
+                return ResourceManager.GetString("DiagnoseRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing is standing in this drive's way..
+        /// </summary>
+        internal static string DiagnoseHealthy {
+            get {
+                return ResourceManager.GetString("DiagnoseHealthy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This is what is stopping the drive from connecting..
+        /// </summary>
+        internal static string DiagnoseProblem {
+            get {
+                return ResourceManager.GetString("DiagnoseProblem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check again.
+        /// </summary>
+        internal static string DiagnoseRunAgain {
+            get {
+                return ResourceManager.GetString("DiagnoseRunAgain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server name.
+        /// </summary>
+        internal static string DiagnoseStepHostResolution {
+            get {
+                return ResourceManager.GetString("DiagnoseStepHostResolution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reaching the server.
+        /// </summary>
+        internal static string DiagnoseStepHostReachable {
+            get {
+                return ResourceManager.GetString("DiagnoseStepHostReachable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Share and credentials.
+        /// </summary>
+        internal static string DiagnoseStepShareAndCredentials {
+            get {
+                return ResourceManager.GetString("DiagnoseStepShareAndCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drive letter.
+        /// </summary>
+        internal static string DiagnoseStepLetterAvailable {
+            get {
+                return ResourceManager.GetString("DiagnoseStepLetterAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not checked, because the server did not answer..
+        /// </summary>
+        internal static string DiagnoseSkipped {
+            get {
+                return ResourceManager.GetString("DiagnoseSkipped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The server also answers to '{0}'..
+        /// </summary>
+        internal static string DiagnoseHostSpellingResolved {
+            get {
+                return ResourceManager.GetString("DiagnoseHostSpellingResolved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No other name for this server could be looked up. Helix will use the address as you typed it..
+        /// </summary>
+        internal static string DiagnoseHostSpellingUnknown {
+            get {
+                return ResourceManager.GetString("DiagnoseHostSpellingUnknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The server answered on SMB port {0}..
+        /// </summary>
+        internal static string DiagnosePortOpen {
+            get {
+                return ResourceManager.GetString("DiagnosePortOpen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to '{0}' did not answer on port 445 or 139. It is switched off, asleep, or on another network..
+        /// </summary>
+        internal static string DiagnoseHostSilent {
+            get {
+                return ResourceManager.GetString("DiagnoseHostSilent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This share is already mounted, so it was not tested again..
+        /// </summary>
+        internal static string DiagnoseAlreadyMounted {
+            get {
+                return ResourceManager.GetString("DiagnoseAlreadyMounted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The share exists and the stored credentials were accepted..
+        /// </summary>
+        internal static string DiagnoseCredentialsAccepted {
+            get {
+                return ResourceManager.GetString("DiagnoseCredentialsAccepted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The share answered, but another drive is already signed in to '{0}'. That session is reused, so the stored password was not actually checked..
+        /// </summary>
+        internal static string DiagnoseCredentialsUntested {
+            get {
+                return ResourceManager.GetString("DiagnoseCredentialsUntested", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This server is already signed in under different credentials and that session could not be cleared. Disconnect every drive and Explorer window using it, then try again..
+        /// </summary>
+        internal static string DiagnoseSessionConflict {
+            get {
+                return ResourceManager.GetString("DiagnoseSessionConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to '{0}' is free..
+        /// </summary>
+        internal static string DiagnoseLetterFree {
+            get {
+                return ResourceManager.GetString("DiagnoseLetterFree", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to '{0}' is already mounted from this share..
+        /// </summary>
+        internal static string DiagnoseLetterHeldByThisShare {
+            get {
+                return ResourceManager.GetString("DiagnoseLetterHeldByThisShare", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to '{0}' is in use by something else on this computer. Choose a free letter..
+        /// </summary>
+        internal static string DiagnoseLetterHeldByAnother {
+            get {
+                return ResourceManager.GetString("DiagnoseLetterHeldByAnother", resourceCulture);
+            }
+        }
     }
 }

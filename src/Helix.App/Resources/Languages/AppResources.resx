@@ -692,4 +692,73 @@
   <data name="StorageUsedOf" xml:space="preserve">
     <value>{0} TB used of {1} TB</value>
   </data>
+  <data name="DiagnoseDrive" xml:space="preserve">
+    <value>Diagnose</value>
+  </data>
+  <data name="DiagnoseTitle" xml:space="preserve">
+    <value>Connection check</value>
+  </data>
+  <data name="DiagnoseSubtitle" xml:space="preserve">
+    <value>{0} on {1}</value>
+  </data>
+  <data name="DiagnoseRunning" xml:space="preserve">
+    <value>Checking…</value>
+  </data>
+  <data name="DiagnoseHealthy" xml:space="preserve">
+    <value>Nothing is standing in this drive's way.</value>
+  </data>
+  <data name="DiagnoseProblem" xml:space="preserve">
+    <value>This is what is stopping the drive from connecting.</value>
+  </data>
+  <data name="DiagnoseRunAgain" xml:space="preserve">
+    <value>Check again</value>
+  </data>
+  <data name="DiagnoseStepHostResolution" xml:space="preserve">
+    <value>Server name</value>
+  </data>
+  <data name="DiagnoseStepHostReachable" xml:space="preserve">
+    <value>Reaching the server</value>
+  </data>
+  <data name="DiagnoseStepShareAndCredentials" xml:space="preserve">
+    <value>Share and credentials</value>
+  </data>
+  <data name="DiagnoseStepLetterAvailable" xml:space="preserve">
+    <value>Drive letter</value>
+  </data>
+  <data name="DiagnoseSkipped" xml:space="preserve">
+    <value>Not checked, because the server did not answer.</value>
+  </data>
+  <data name="DiagnoseHostSpellingResolved" xml:space="preserve">
+    <value>The server also answers to '{0}'.</value>
+  </data>
+  <data name="DiagnoseHostSpellingUnknown" xml:space="preserve">
+    <value>No other name for this server could be looked up. Helix will use the address as you typed it.</value>
+  </data>
+  <data name="DiagnosePortOpen" xml:space="preserve">
+    <value>The server answered on SMB port {0}.</value>
+  </data>
+  <data name="DiagnoseHostSilent" xml:space="preserve">
+    <value>'{0}' did not answer on port 445 or 139. It is switched off, asleep, or on another network.</value>
+  </data>
+  <data name="DiagnoseAlreadyMounted" xml:space="preserve">
+    <value>This share is already mounted, so it was not tested again.</value>
+  </data>
+  <data name="DiagnoseCredentialsAccepted" xml:space="preserve">
+    <value>The share exists and the stored credentials were accepted.</value>
+  </data>
+  <data name="DiagnoseCredentialsUntested" xml:space="preserve">
+    <value>The share answered, but another drive is already signed in to '{0}'. That session is reused, so the stored password was not actually checked.</value>
+  </data>
+  <data name="DiagnoseSessionConflict" xml:space="preserve">
+    <value>This server is already signed in under different credentials and that session could not be cleared. Disconnect every drive and Explorer window using it, then try again.</value>
+  </data>
+  <data name="DiagnoseLetterFree" xml:space="preserve">
+    <value>'{0}' is free.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByThisShare" xml:space="preserve">
+    <value>'{0}' is already mounted from this share.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
+    <value>'{0}' is in use by something else on this computer. Choose a free letter.</value>
+  </data>
 </root>

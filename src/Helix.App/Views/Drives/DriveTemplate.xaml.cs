@@ -146,6 +146,16 @@ public sealed partial class DriveTemplate : ContentView
         }
     }
 
+    private void HandleDiagnose(object? sender, TappedEventArgs e)
+    {
+        if (BindingContext is not DriveDisplay drive)
+        {
+            return;
+        }
+
+        WeakReferenceMessenger.Default.Send(new DiagnoseDriveMessage(true, drive));
+    }
+
     private void HandleUpdate(object? sender, TappedEventArgs e)
     {
         if (BindingContext is not DriveDisplay drive)

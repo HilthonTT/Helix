@@ -692,4 +692,73 @@
   <data name="StorageUsedOf" xml:space="preserve">
     <value>{0} TB gebruikt van {1} TB</value>
   </data>
+  <data name="DiagnoseDrive" xml:space="preserve">
+    <value>Diagnose</value>
+  </data>
+  <data name="DiagnoseTitle" xml:space="preserve">
+    <value>Verbindingscontrole</value>
+  </data>
+  <data name="DiagnoseSubtitle" xml:space="preserve">
+    <value>{0} op {1}</value>
+  </data>
+  <data name="DiagnoseRunning" xml:space="preserve">
+    <value>Bezig met controleren…</value>
+  </data>
+  <data name="DiagnoseHealthy" xml:space="preserve">
+    <value>Niets staat deze schijf in de weg.</value>
+  </data>
+  <data name="DiagnoseProblem" xml:space="preserve">
+    <value>Dit weerhoudt de schijf ervan verbinding te maken.</value>
+  </data>
+  <data name="DiagnoseRunAgain" xml:space="preserve">
+    <value>Opnieuw controleren</value>
+  </data>
+  <data name="DiagnoseStepHostResolution" xml:space="preserve">
+    <value>Servernaam</value>
+  </data>
+  <data name="DiagnoseStepHostReachable" xml:space="preserve">
+    <value>De server bereiken</value>
+  </data>
+  <data name="DiagnoseStepShareAndCredentials" xml:space="preserve">
+    <value>Share en aanmeldgegevens</value>
+  </data>
+  <data name="DiagnoseStepLetterAvailable" xml:space="preserve">
+    <value>Stationsletter</value>
+  </data>
+  <data name="DiagnoseSkipped" xml:space="preserve">
+    <value>Niet gecontroleerd, omdat de server niet antwoordde.</value>
+  </data>
+  <data name="DiagnoseHostSpellingResolved" xml:space="preserve">
+    <value>De server reageert ook op '{0}'.</value>
+  </data>
+  <data name="DiagnoseHostSpellingUnknown" xml:space="preserve">
+    <value>Er kon geen andere naam voor deze server worden gevonden. Helix gebruikt het adres zoals u het hebt ingevoerd.</value>
+  </data>
+  <data name="DiagnosePortOpen" xml:space="preserve">
+    <value>De server antwoordde op SMB-poort {0}.</value>
+  </data>
+  <data name="DiagnoseHostSilent" xml:space="preserve">
+    <value>'{0}' antwoordde niet op poort 445 of 139. De server staat uit, slaapt, of zit op een ander netwerk.</value>
+  </data>
+  <data name="DiagnoseAlreadyMounted" xml:space="preserve">
+    <value>Deze share is al gekoppeld en is daarom niet opnieuw getest.</value>
+  </data>
+  <data name="DiagnoseCredentialsAccepted" xml:space="preserve">
+    <value>De share bestaat en de opgeslagen aanmeldgegevens zijn geaccepteerd.</value>
+  </data>
+  <data name="DiagnoseCredentialsUntested" xml:space="preserve">
+    <value>De share antwoordde, maar een andere schijf is al aangemeld bij '{0}'. Die sessie wordt hergebruikt, dus het opgeslagen wachtwoord is niet echt gecontroleerd.</value>
+  </data>
+  <data name="DiagnoseSessionConflict" xml:space="preserve">
+    <value>Bij deze server is al aangemeld met andere gegevens en die sessie kon niet worden opgeheven. Verbreek alle schijven en Verkenner-vensters die hem gebruiken en probeer het opnieuw.</value>
+  </data>
+  <data name="DiagnoseLetterFree" xml:space="preserve">
+    <value>'{0}' is vrij.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByThisShare" xml:space="preserve">
+    <value>'{0}' is al gekoppeld vanaf deze share.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
+    <value>'{0}' wordt door iets anders op deze computer gebruikt. Kies een vrije letter.</value>
+  </data>
 </root>

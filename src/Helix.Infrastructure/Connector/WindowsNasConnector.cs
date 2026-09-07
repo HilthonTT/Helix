@@ -81,6 +81,44 @@ internal sealed class WindowsNasConnector(
                (HostSpelling.AlternateOf(host) is string alternate && RemoteIs(remote, alternate, drive.Name));
     }
 
+    public bool HasOtherMountsOn(Drive drive)
+    {
+        string host = ToUncHost(drive.Host);
+        string? alternate = HostSpelling.AlternateOf(host);
+        string ownLetter = drive.Letter.Trim().ToUpperInvariant();
+
+        foreach (DriveInfo volume in DriveInfo.GetDrives())
+        {
+            if (volume.DriveType != DriveType.Network || volume.Name.Length == 0)
+            {
+                continue;
+            }
+
+            string letter = volume.Name[0].ToString().ToUpperInvariant();
+            if (string.Equals(letter, ownLetter, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            string? remote = RemoteNameOf($"{letter}:");
+            if (remote is null)
+            {
+                continue;
+            }
+
+            if (RemoteHostIs(remote, host) ||
+                (alternate is not null && RemoteHostIs(remote, alternate)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool RemoteHostIs(string remote, string uncHost) =>
+        remote.StartsWith($@"\\{uncHost}\", StringComparison.OrdinalIgnoreCase);
+
     private static bool RemoteIs(string remote, string uncHost, string share) =>
         string.Equals(
             remote.TrimEnd('\\'),
@@ -204,7 +242,7 @@ internal sealed class WindowsNasConnector(
             return alternate;
         }
 
-        return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code)));
+        return Result.Failure(DriveErrors.SessionConflict(DescribeWNetError(code)));
     }
 
     private Result? TryAlternateSpelling(Drive drive, string local, string host, uint flags)
@@ -316,6 +354,11 @@ internal sealed class WindowsNasConnector(
             DropIdleServerSession(host);
 
             code = AddConnection(local: null, remoteName, drive.Username, drive.Password, CONNECT_TEMPORARY);
+        }
+
+        if (code == ERROR_SESSION_CREDENTIAL_CONFLICT)
+        {
+            return Result.Failure(DriveErrors.SessionConflict(DescribeWNetError(code)));
         }
 
         if (code != NO_ERROR)

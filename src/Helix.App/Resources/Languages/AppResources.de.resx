@@ -692,4 +692,73 @@
   <data name="StorageUsedOf" xml:space="preserve">
     <value>{0} TB von {1} TB belegt</value>
   </data>
+  <data name="DiagnoseDrive" xml:space="preserve">
+    <value>Diagnose</value>
+  </data>
+  <data name="DiagnoseTitle" xml:space="preserve">
+    <value>Verbindungsprüfung</value>
+  </data>
+  <data name="DiagnoseSubtitle" xml:space="preserve">
+    <value>{0} auf {1}</value>
+  </data>
+  <data name="DiagnoseRunning" xml:space="preserve">
+    <value>Wird geprüft…</value>
+  </data>
+  <data name="DiagnoseHealthy" xml:space="preserve">
+    <value>Diesem Laufwerk steht nichts im Weg.</value>
+  </data>
+  <data name="DiagnoseProblem" xml:space="preserve">
+    <value>Das hindert das Laufwerk an der Verbindung.</value>
+  </data>
+  <data name="DiagnoseRunAgain" xml:space="preserve">
+    <value>Erneut prüfen</value>
+  </data>
+  <data name="DiagnoseStepHostResolution" xml:space="preserve">
+    <value>Servername</value>
+  </data>
+  <data name="DiagnoseStepHostReachable" xml:space="preserve">
+    <value>Server erreichen</value>
+  </data>
+  <data name="DiagnoseStepShareAndCredentials" xml:space="preserve">
+    <value>Freigabe und Anmeldedaten</value>
+  </data>
+  <data name="DiagnoseStepLetterAvailable" xml:space="preserve">
+    <value>Laufwerkbuchstabe</value>
+  </data>
+  <data name="DiagnoseSkipped" xml:space="preserve">
+    <value>Nicht geprüft, da der Server nicht geantwortet hat.</value>
+  </data>
+  <data name="DiagnoseHostSpellingResolved" xml:space="preserve">
+    <value>Der Server antwortet auch auf '{0}'.</value>
+  </data>
+  <data name="DiagnoseHostSpellingUnknown" xml:space="preserve">
+    <value>Es konnte kein anderer Name für diesen Server ermittelt werden. Helix verwendet die Adresse wie eingegeben.</value>
+  </data>
+  <data name="DiagnosePortOpen" xml:space="preserve">
+    <value>Der Server hat auf SMB-Port {0} geantwortet.</value>
+  </data>
+  <data name="DiagnoseHostSilent" xml:space="preserve">
+    <value>'{0}' hat auf Port 445 und 139 nicht geantwortet. Der Server ist ausgeschaltet, im Ruhezustand oder in einem anderen Netzwerk.</value>
+  </data>
+  <data name="DiagnoseAlreadyMounted" xml:space="preserve">
+    <value>Diese Freigabe ist bereits eingebunden und wurde daher nicht erneut geprüft.</value>
+  </data>
+  <data name="DiagnoseCredentialsAccepted" xml:space="preserve">
+    <value>Die Freigabe existiert und die gespeicherten Anmeldedaten wurden akzeptiert.</value>
+  </data>
+  <data name="DiagnoseCredentialsUntested" xml:space="preserve">
+    <value>Die Freigabe hat geantwortet, aber ein anderes Laufwerk ist bereits bei '{0}' angemeldet. Diese Sitzung wird wiederverwendet, sodass das gespeicherte Passwort nicht wirklich geprüft wurde.</value>
+  </data>
+  <data name="DiagnoseSessionConflict" xml:space="preserve">
+    <value>Bei diesem Server ist bereits eine Anmeldung mit anderen Anmeldedaten aktiv, die nicht aufgehoben werden konnte. Trennen Sie alle Laufwerke und Explorer-Fenster, die ihn verwenden, und versuchen Sie es erneut.</value>
+  </data>
+  <data name="DiagnoseLetterFree" xml:space="preserve">
+    <value>'{0}' ist frei.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByThisShare" xml:space="preserve">
+    <value>'{0}' ist bereits von dieser Freigabe eingebunden.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
+    <value>'{0}' wird von etwas anderem auf diesem Computer verwendet. Wählen Sie einen freien Buchstaben.</value>
+  </data>
 </root>

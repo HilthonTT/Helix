@@ -19,6 +19,7 @@ public sealed partial class HomePage : ContentPage
     private const string CreateDrive = "create-drive";
     private const string UpdateDrive = "update-drive";
     private const string DeleteDrive = "delete-drive";
+    private const string DiagnoseDrive = "diagnose-drive";
     private const string DriveGroups = "drive-groups";
 
     private static bool _isFirstView = true;
@@ -51,6 +52,7 @@ public sealed partial class HomePage : ContentPage
         _modals.Register(CreateDrive, CreateDriveLayout, CreateDriveView);
         _modals.Register(UpdateDrive, UpdateDriveLayout, UpdateDriveView);
         _modals.Register(DeleteDrive, DeleteDriveLayout, DeleteDriveView);
+        _modals.Register(DiagnoseDrive, DiagnoseDriveLayout, DiagnoseDriveView);
         _modals.Register(DriveGroups, DriveGroupsLayout, DriveGroupsView);
         _modals.AttachEscapeToDismiss(this);
 
@@ -215,6 +217,9 @@ public sealed partial class HomePage : ContentPage
 
         WeakReferenceMessenger.Default.Register<DeleteDriveMessage>(
             this, async (r, m) => await _modals.ToggleAsync(DeleteDrive, m.Value));
+
+        WeakReferenceMessenger.Default.Register<DiagnoseDriveMessage>(
+            this, async (r, m) => await _modals.ToggleAsync(DiagnoseDrive, m.Value));
 
         WeakReferenceMessenger.Default.Register<DriveGroupsMessage>(
             this, async (r, m) => await _modals.ToggleAsync(DriveGroups, m.Show));

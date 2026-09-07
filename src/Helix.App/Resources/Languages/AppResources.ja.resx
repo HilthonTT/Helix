@@ -692,4 +692,73 @@
   <data name="StorageUsedOf" xml:space="preserve">
     <value>{1} TB 中 {0} TB 使用</value>
   </data>
+  <data name="DiagnoseDrive" xml:space="preserve">
+    <value>診断</value>
+  </data>
+  <data name="DiagnoseTitle" xml:space="preserve">
+    <value>接続の確認</value>
+  </data>
+  <data name="DiagnoseSubtitle" xml:space="preserve">
+    <value>{1} の {0}</value>
+  </data>
+  <data name="DiagnoseRunning" xml:space="preserve">
+    <value>確認しています…</value>
+  </data>
+  <data name="DiagnoseHealthy" xml:space="preserve">
+    <value>このドライブを妨げているものはありません。</value>
+  </data>
+  <data name="DiagnoseProblem" xml:space="preserve">
+    <value>ドライブが接続できない原因は次のとおりです。</value>
+  </data>
+  <data name="DiagnoseRunAgain" xml:space="preserve">
+    <value>もう一度確認</value>
+  </data>
+  <data name="DiagnoseStepHostResolution" xml:space="preserve">
+    <value>サーバー名</value>
+  </data>
+  <data name="DiagnoseStepHostReachable" xml:space="preserve">
+    <value>サーバーへの到達</value>
+  </data>
+  <data name="DiagnoseStepShareAndCredentials" xml:space="preserve">
+    <value>共有と資格情報</value>
+  </data>
+  <data name="DiagnoseStepLetterAvailable" xml:space="preserve">
+    <value>ドライブ文字</value>
+  </data>
+  <data name="DiagnoseSkipped" xml:space="preserve">
+    <value>サーバーが応答しなかったため、確認していません。</value>
+  </data>
+  <data name="DiagnoseHostSpellingResolved" xml:space="preserve">
+    <value>このサーバーは「{0}」でも応答します。</value>
+  </data>
+  <data name="DiagnoseHostSpellingUnknown" xml:space="preserve">
+    <value>このサーバーの別名は見つかりませんでした。Helix は入力されたアドレスをそのまま使用します。</value>
+  </data>
+  <data name="DiagnosePortOpen" xml:space="preserve">
+    <value>サーバーが SMB ポート {0} で応答しました。</value>
+  </data>
+  <data name="DiagnoseHostSilent" xml:space="preserve">
+    <value>「{0}」はポート 445 でも 139 でも応答しませんでした。電源が入っていないか、スリープ中か、別のネットワーク上にあります。</value>
+  </data>
+  <data name="DiagnoseAlreadyMounted" xml:space="preserve">
+    <value>この共有はすでにマウントされているため、再テストしていません。</value>
+  </data>
+  <data name="DiagnoseCredentialsAccepted" xml:space="preserve">
+    <value>共有が存在し、保存された資格情報が受け入れられました。</value>
+  </data>
+  <data name="DiagnoseCredentialsUntested" xml:space="preserve">
+    <value>共有は応答しましたが、別のドライブがすでに「{0}」にサインインしています。そのセッションが再利用されるため、保存されたパスワードは実際には確認されていません。</value>
+  </data>
+  <data name="DiagnoseSessionConflict" xml:space="preserve">
+    <value>このサーバーには別の資格情報ですでにサインインしており、そのセッションを解除できませんでした。使用中のすべてのドライブとエクスプローラーのウィンドウを切断してから、もう一度お試しください。</value>
+  </data>
+  <data name="DiagnoseLetterFree" xml:space="preserve">
+    <value>「{0}」は空いています。</value>
+  </data>
+  <data name="DiagnoseLetterHeldByThisShare" xml:space="preserve">
+    <value>「{0}」はこの共有からすでにマウントされています。</value>
+  </data>
+  <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
+    <value>「{0}」はこのコンピューター上の別のものが使用しています。空いている文字を選んでください。</value>
+  </data>
 </root>

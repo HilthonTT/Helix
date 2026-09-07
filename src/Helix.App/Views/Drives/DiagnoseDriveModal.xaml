@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
+             xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:DataType="vm:DiagnoseDriveViewModel"
+             x:Class="Helix.App.Views.Drives.DiagnoseDriveModal"
+             BackgroundColor="Transparent">
+
+    <Border Style="{StaticResource Sheet}" WidthRequest="520">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{l10n:Translate DiagnoseTitle}"
+                           Style="{StaticResource Title1}"/>
+
+                    <Label Text="{Binding Subtitle}"
+                           Style="{StaticResource Caption}"
+                           LineBreakMode="TailTruncation"
+                           MaxLines="1"/>
+                </VerticalStackLayout>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{l10n:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+            </Grid>
+
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="12" Padding="24,4,24,20">
+
+                    <HorizontalStackLayout Spacing="10" IsVisible="{Binding IsBusy}">
+                        <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                           WidthRequest="14"
+                                           HeightRequest="14"
+                                           VerticalOptions="Center"/>
+                        <Label Text="{l10n:Translate DiagnoseRunning}"
+                               Style="{StaticResource Muted}"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <Border Style="{StaticResource CardInset}"
+                            Padding="14,12"
+                            IsVisible="{Binding ShowSummary}">
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="{x:Static icons:IconFont.CheckCircle}"
+                                   Style="{StaticResource IconSm}"
+                                   VerticalOptions="Center"
+                                   IsVisible="{Binding ShowHealthy}"
+                                   TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+
+                            <Label Text="{x:Static icons:IconFont.ExclamationCircle}"
+                                   Style="{StaticResource IconSm}"
+                                   VerticalOptions="Center"
+                                   IsVisible="{Binding ShowProblem}"
+                                   TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+
+                            <Label Text="{Binding Summary}"
+                                   Style="{StaticResource BodyStrong}"
+                                   VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </Border>
+
+                    <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Steps}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:DiagnosticStepDisplay">
+                                <Border Style="{StaticResource Row}" Padding="12,10">
+                                    <Grid ColumnDefinitions="20,*" ColumnSpacing="12">
+                                        <Label Text="{Binding Glyph}"
+                                               Style="{StaticResource IconSm}"
+                                               VerticalOptions="Start"
+                                               Margin="0,2,0,0"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsPassed}" Value="True">
+                                                    <Setter Property="TextColor"
+                                                            Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsWarned}" Value="True">
+                                                    <Setter Property="TextColor"
+                                                            Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"/>
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsFailed}" Value="True">
+                                                    <Setter Property="TextColor"
+                                                            Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                            <Label Text="{Binding Title}" Style="{StaticResource BodyStrong}"/>
+
+                                            <Label Text="{Binding Message}"
+                                                   Style="{StaticResource Caption}"
+                                                   LineBreakMode="WordWrap"/>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,4,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Close}"
+                        Command="{Binding CloseCommand}"/>
+
+                <Button Grid.Column="1"
+                        Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate DiagnoseRunAgain}"
+                        Command="{Binding RunCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+        </Grid>
+    </Border>
+
+</ContentView>

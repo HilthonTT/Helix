@@ -7,7 +7,7 @@ public static class Ensure
 {
     public static void NotNullOrEmpty(
         [NotNull] string? value,
-        [CallerArgumentExpression("value")] string? paramName = default)
+        [CallerArgumentExpression(nameof(value))] string? paramName = default)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -17,7 +17,7 @@ public static class Ensure
 
     public static void NotNullOrEmpty(
         [NotNull] Guid value,
-        [CallerArgumentExpression("value")] string? paramName = default)
+        [CallerArgumentExpression(nameof(value))] string? paramName = default)
     {
         if (value == Guid.Empty)
         {
@@ -27,7 +27,7 @@ public static class Ensure
 
     public static void NotNull(
         [NotNull] object? value,
-        [CallerArgumentExpression("value")] string? paramName = default)
+        [CallerArgumentExpression(nameof(value))] string? paramName = default)
     {
         if (value is null)
         {
@@ -37,7 +37,7 @@ public static class Ensure
 
     public static void MustBeOneChar(
         [NotNull] string? value,
-        [CallerArgumentExpression("value")] string? paramName = default)
+        [CallerArgumentExpression(nameof(value))] string? paramName = default)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -52,7 +52,7 @@ public static class Ensure
 
     public static void MustBePositive(
         int value,
-        [CallerArgumentExpression("value")] string? paramName = default)
+        [CallerArgumentExpression(nameof(value))] string? paramName = default)
     {
         if (!int.IsPositive(value))
         {
@@ -62,7 +62,7 @@ public static class Ensure
 
     public static void MustNotBeNegative(
         int value,
-        [CallerArgumentExpression("value")] string? paramName = default)
+        [CallerArgumentExpression(nameof(value))] string? paramName = default)
     {
         if (int.IsNegative(value))
         {

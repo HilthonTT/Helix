@@ -44,4 +44,20 @@ public sealed class HostSpellingTests
 
         second.Should().Be(first);
     }
+
+    [Fact]
+    public void AlternateOf_Should_AnswerNull_ForAnAddressWithNoReverseRecord()
+    {
+        Func<string?> lookup = () => HostSpelling.AlternateOf("192.0.2.1");
+
+        lookup.Should().NotThrow().Which.Should().BeNull();
+    }
+
+    [Fact]
+    public void AlternateOf_Should_AnswerNull_ForAnIpv6AddressWithNoReverseRecord()
+    {
+        Func<string?> lookup = () => HostSpelling.AlternateOf("2001:db8::1");
+
+        lookup.Should().NotThrow().Which.Should().BeNull();
+    }
 }

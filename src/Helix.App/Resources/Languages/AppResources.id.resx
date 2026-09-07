@@ -692,4 +692,73 @@
   <data name="StorageUsedOf" xml:space="preserve">
     <value>{0} TB terpakai dari {1} TB</value>
   </data>
+  <data name="DiagnoseDrive" xml:space="preserve">
+    <value>Diagnosa</value>
+  </data>
+  <data name="DiagnoseTitle" xml:space="preserve">
+    <value>Pemeriksaan koneksi</value>
+  </data>
+  <data name="DiagnoseSubtitle" xml:space="preserve">
+    <value>{0} di {1}</value>
+  </data>
+  <data name="DiagnoseRunning" xml:space="preserve">
+    <value>Memeriksa…</value>
+  </data>
+  <data name="DiagnoseHealthy" xml:space="preserve">
+    <value>Tidak ada yang menghalangi drive ini.</value>
+  </data>
+  <data name="DiagnoseProblem" xml:space="preserve">
+    <value>Ini yang membuat drive gagal terhubung.</value>
+  </data>
+  <data name="DiagnoseRunAgain" xml:space="preserve">
+    <value>Periksa lagi</value>
+  </data>
+  <data name="DiagnoseStepHostResolution" xml:space="preserve">
+    <value>Nama server</value>
+  </data>
+  <data name="DiagnoseStepHostReachable" xml:space="preserve">
+    <value>Menjangkau server</value>
+  </data>
+  <data name="DiagnoseStepShareAndCredentials" xml:space="preserve">
+    <value>Share dan kredensial</value>
+  </data>
+  <data name="DiagnoseStepLetterAvailable" xml:space="preserve">
+    <value>Huruf drive</value>
+  </data>
+  <data name="DiagnoseSkipped" xml:space="preserve">
+    <value>Tidak diperiksa, karena server tidak menjawab.</value>
+  </data>
+  <data name="DiagnoseHostSpellingResolved" xml:space="preserve">
+    <value>Server juga menjawab sebagai '{0}'.</value>
+  </data>
+  <data name="DiagnoseHostSpellingUnknown" xml:space="preserve">
+    <value>Tidak ada nama lain untuk server ini yang dapat ditemukan. Helix akan memakai alamat seperti yang Anda ketik.</value>
+  </data>
+  <data name="DiagnosePortOpen" xml:space="preserve">
+    <value>Server menjawab pada port SMB {0}.</value>
+  </data>
+  <data name="DiagnoseHostSilent" xml:space="preserve">
+    <value>'{0}' tidak menjawab di port 445 maupun 139. Server mati, tertidur, atau berada di jaringan lain.</value>
+  </data>
+  <data name="DiagnoseAlreadyMounted" xml:space="preserve">
+    <value>Share ini sudah terpasang, jadi tidak diuji ulang.</value>
+  </data>
+  <data name="DiagnoseCredentialsAccepted" xml:space="preserve">
+    <value>Share ada dan kredensial yang tersimpan diterima.</value>
+  </data>
+  <data name="DiagnoseCredentialsUntested" xml:space="preserve">
+    <value>Share menjawab, tetapi drive lain sudah masuk ke '{0}'. Sesi itu dipakai ulang, sehingga kata sandi yang tersimpan tidak benar-benar diperiksa.</value>
+  </data>
+  <data name="DiagnoseSessionConflict" xml:space="preserve">
+    <value>Server ini sudah masuk dengan kredensial berbeda dan sesi tersebut tidak dapat dihapus. Putuskan semua drive dan jendela Explorer yang memakainya, lalu coba lagi.</value>
+  </data>
+  <data name="DiagnoseLetterFree" xml:space="preserve">
+    <value>'{0}' masih kosong.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByThisShare" xml:space="preserve">
+    <value>'{0}' sudah terpasang dari share ini.</value>
+  </data>
+  <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
+    <value>'{0}' sedang dipakai hal lain di komputer ini. Pilih huruf yang kosong.</value>
+  </data>
 </root>

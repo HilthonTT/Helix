@@ -105,6 +105,8 @@ public static class DependencyInjection
 
         services.AddSingleton<IHostReachability, HostReachability>();
 
+        services.AddSingleton<IHostDiagnostics, HostDiagnostics>();
+
         services.AddSingleton<IUpdateChecker>(sp => new GitHubUpdateChecker(
             UpdateConfiguration.CreateHttpClient(),
             sp.GetRequiredService<ILogger<GitHubUpdateChecker>>(),

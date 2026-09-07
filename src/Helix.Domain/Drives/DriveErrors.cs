@@ -18,6 +18,10 @@ public static class DriveErrors
 
     public const string HostUnreachableCode = "Drive.HostUnreachable";
 
+    public static Error SessionConflict(string message) => Error.Conflict(SessionConflictCode, message);
+
+    public const string SessionConflictCode = "Drive.SessionConflict";
+
     public static Error FailedToDisconnect(string message) => Error.Problem("Drive.FailedToDisconnect", message);
 
     public static readonly Error MountNotAvailable = Error.NotFound(

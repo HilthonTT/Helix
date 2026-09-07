@@ -17,7 +17,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=StorageColumnWidth, x:DataType=common:DriveListLayout}"/>
                 <ColumnDefinition Width="140"/>
-                <ColumnDefinition Width="112"/>
+                <ColumnDefinition Width="152"/>
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center">
@@ -185,6 +185,17 @@
                         <TapGestureRecognizer Tapped="HandleOpen"/>
                     </Border.GestureRecognizers>
                     <Label Text="{x:Static icons:IconFont.FolderOpen}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+
+                <Border Style="{StaticResource IconChip}"
+                        ToolTipProperties.Text="{l10n:Translate DiagnoseDrive}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="HandleDiagnose"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Stethoscope}"
                            Style="{StaticResource IconSm}"
                            InputTransparent="True"
                            TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>

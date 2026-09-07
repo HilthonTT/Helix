@@ -379,7 +379,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=StorageColumnWidth, x:DataType=common:DriveListLayout}"/>
                                     <ColumnDefinition Width="140"/>
-                                    <ColumnDefinition Width="112"/>
+                                    <ColumnDefinition Width="152"/>
                                 </Grid.ColumnDefinitions>
 
                                 <Grid VerticalOptions="Center"
@@ -624,6 +624,12 @@
             <views:DriveGroupsModal x:Name="DriveGroupsView"
                                           WidthRequest="480"
                                           MaximumHeightRequest="600"
+                                          AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                          AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="DiagnoseDriveLayout" IsVisible="False">
+            <views:DiagnoseDriveModal x:Name="DiagnoseDriveView"
                                           AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
                                           AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>

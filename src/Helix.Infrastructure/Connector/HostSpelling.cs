@@ -43,7 +43,7 @@ internal static class HostSpelling
 
     private static string? NameOf(IPAddress address)
     {
-        string name = Dns.GetHostEntry(address).HostName;
+        string? name = Answered(() => Dns.GetHostEntry(address).HostName);
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -57,7 +57,12 @@ internal static class HostSpelling
 
     private static string? AddressOf(string name)
     {
-        IPAddress[] addresses = Dns.GetHostAddresses(name);
+        IPAddress[]? addresses = Answered(() => Dns.GetHostAddresses(name));
+
+        if (addresses is null)
+        {
+            return null;
+        }
 
         IPAddress? preferred =
             Array.Find(addresses, a => a.AddressFamily == AddressFamily.InterNetwork) ??
@@ -66,17 +71,42 @@ internal static class HostSpelling
         return preferred is null ? null : WindowsNasConnector.ToUncHost(preferred.ToString());
     }
 
+    private static T? Answered<T>(Func<T> lookup) where T : class
+    {
+        try
+        {
+            return lookup();
+        }
+        catch (Exception ex) when (ex is SocketException or ArgumentException)
+        {
+            return null;
+        }
+    }
+
     private static (bool Answered, string? Spelling) Within(Func<string?> lookup)
     {
         try
         {
             Task<string?> task = Task.Run(lookup);
 
-            return task.Wait(LookupTimeoutMilliseconds) ? (true, task.Result) : (false, null);
+            if (task.Wait(LookupTimeoutMilliseconds))
+            {
+                return (true, task.Result);
+            }
+
+            Abandon(task);
+
+            return (false, null);
         }
         catch (Exception)
         {
             return (true, null);
         }
     }
+
+    private static void Abandon(Task task) => _ = task.ContinueWith(
+        static finished => _ = finished.Exception,
+        CancellationToken.None,
+        TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+        TaskScheduler.Default);
 }
