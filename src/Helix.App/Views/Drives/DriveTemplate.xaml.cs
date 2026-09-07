@@ -89,6 +89,7 @@ public sealed partial class DriveTemplate : ContentView
                 if (request is ConnectDrive.Request)
                 {
                     MarkOffline(drive, result.Error);
+                    RefreshStatus(drive);
                 }
 
                 Notifier.Error(result.Error);

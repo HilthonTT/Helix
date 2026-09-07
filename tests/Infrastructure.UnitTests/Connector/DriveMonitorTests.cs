@@ -390,4 +390,22 @@ public sealed class DriveMonitorTests
 
         monitor.Stop();
     }
+
+
+    [Fact]
+    public async Task Watch_Should_Keep_The_Baseline_Of_A_Drive_It_Already_Watches()
+    {
+        DriveMonitor monitor = CreateMonitor("M");
+        monitor.Watch([new WatchedDrive(MediaId, "M")]);
+
+        List<DriveConnectivityChange> changes = Capture(monitor);
+
+        Connected();
+        monitor.Watch([new WatchedDrive(MediaId, "M"), new WatchedDrive(BackupId, "N")]);
+
+        await monitor.PollAsync();
+
+        changes.Should().ContainSingle("a drop between two polls must not be hidden by a re-watch")
+            .Which.DriveId.Should().Be(MediaId);
+    }
 }

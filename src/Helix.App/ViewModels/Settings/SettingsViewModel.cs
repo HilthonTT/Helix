@@ -43,6 +43,26 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial SettingsDisplay? Settings { get; set; }
+    partial void OnSettingsChanged(SettingsDisplay? oldValue, SettingsDisplay? newValue)
+    {
+        if (oldValue is not null)
+        {
+            oldValue.PropertyChanged -= OnSettingsPropertyChanged;
+        }
+
+        if (newValue is not null)
+        {
+            newValue.PropertyChanged += OnSettingsPropertyChanged;
+        }
+    }
+
+    private void OnSettingsPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(SettingsDisplay.Language) && Settings is not null)
+        {
+            SelectedLanguage = CultureSwitcher.LanguageToString(Settings.Language);
+        }
+    }
 
     public bool SupportsTray =>
         App.ServiceProvider.GetRequiredService<TrayIconService>().IsSupported;

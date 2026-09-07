@@ -124,4 +124,20 @@ public class TestDriveConnectionTests
 
         result.Error.Should().Be(expected);
     }
+
+
+    [Fact]
+    public async Task Handle_Should_TestUnderTheSpellingTheDriveWillUse()
+    {
+        SignIn();
+
+        _nasConnectorMock.TestAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+
+        await _testDriveConnection.Handle(Request with { ConnectByHostname = true });
+
+        await _nasConnectorMock.Received(1).TestAsync(
+            Arg.Is<Drive>(d => d.ConnectByHostname),
+            Arg.Any<CancellationToken>());
+    }
 }

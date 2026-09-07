@@ -211,6 +211,8 @@ internal sealed class DriveWatchdog
             return;
         }
 
+        List<Task> attempts = [];
+
         foreach (PendingReconnect pending in due)
         {
             if (_nasConnector.IsConnected(pending.Letter))
@@ -219,8 +221,10 @@ internal sealed class DriveWatchdog
                 continue;
             }
 
-            await AttemptAsync(pending.DriveId, pending.Letter, reconnect: true, recordDrop: false);
+            attempts.Add(AttemptAsync(pending.DriveId, pending.Letter, reconnect: true, recordDrop: false));
         }
+
+        await Task.WhenAll(attempts);
     }
 
     private async Task AttemptAsync(Guid driveId, string letter, bool reconnect, bool recordDrop)

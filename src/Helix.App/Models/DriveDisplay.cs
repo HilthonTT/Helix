@@ -85,6 +85,11 @@ internal sealed partial class DriveDisplay : ObservableObject
 
     public void MarkOffline(Error error)
     {
+        if (Connected)
+        {
+            return;
+        }
+
         if (error.Code == DriveErrors.HostUnreachableCode)
         {
             MarkOffline(DriveOfflineReason.HostUnreachable, AppResources.StatusUnreachableHint);

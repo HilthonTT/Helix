@@ -43,7 +43,11 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
                 .GroupBy(drive => Normalize(drive.Letter))
                 .ToDictionary(group => group.Key, group => group.First());
 
-            _baseline = _watched.Keys.ToDictionary(letter => letter, connected.Contains);
+            Dictionary<string, bool> previous = _baseline;
+
+            _baseline = _watched.Keys.ToDictionary(
+                letter => letter,
+                letter => previous.TryGetValue(letter, out bool known) ? known : connected.Contains(letter));
         }
     }
 

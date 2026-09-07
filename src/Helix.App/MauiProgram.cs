@@ -24,6 +24,10 @@ public static class MauiProgram
 {
 #if WINDOWS
     private static Mutex? _singleInstance;
+    private static EventWaitHandle? _activationSignal;
+
+    private const string SingleInstanceMutexName = @"Local\Helix.App.SingleInstance";
+    private const string ActivationSignalName = @"Local\Helix.App.Activate";
 #endif
 
     public static MauiApp CreateMauiApp()
@@ -124,15 +128,20 @@ public static class MauiProgram
 #if WINDOWS
     private static void ExitIfAlreadyRunning()
     {
-        _singleInstance = new Mutex(initiallyOwned: true, @"Local\Helix.App.SingleInstance", out bool createdNew);
+        _singleInstance = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out bool createdNew);
+        _activationSignal = new EventWaitHandle(initialState: false, EventResetMode.AutoReset, ActivationSignalName);
 
         if (createdNew)
         {
+            ListenForActivation(_activationSignal);
+
             return;
         }
 
         try
         {
+            _activationSignal.Set();
+
             Process current = Process.GetCurrentProcess();
 
             foreach (Process other in Process.GetProcessesByName(current.ProcessName))
@@ -149,6 +158,32 @@ public static class MauiProgram
         }
 
         Environment.Exit(0);
+    }
+
+    private static void ListenForActivation(EventWaitHandle signal)
+    {
+        var listener = new Thread(() =>
+        {
+            while (true)
+            {
+                try
+                {
+                    signal.WaitOne();
+                }
+                catch (ObjectDisposedException)
+                {
+                    return;
+                }
+
+                MainWindow.Restore();
+            }
+        })
+        {
+            IsBackground = true,
+            Name = "Helix.SingleInstance"
+        };
+
+        listener.Start();
     }
 
     private const int SW_RESTORE = 9;

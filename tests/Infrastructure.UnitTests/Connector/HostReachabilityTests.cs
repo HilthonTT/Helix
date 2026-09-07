@@ -135,4 +135,34 @@ public sealed class HostReachabilityTests
         reachable.Should().BeTrue();
         probe.Attempts.Should().BeEmpty();
     }
+
+
+    [Fact]
+    public async Task ProbeNowAsync_Should_IgnoreACachedReading()
+    {
+        bool answers = false;
+        var probe = new FakeReachability(ClockAt(Now), (_, _) => answers);
+
+        (await probe.IsReachableAsync("nas.local")).Should().BeFalse();
+
+        answers = true;
+
+        (await probe.IsReachableAsync("nas.local")).Should().BeFalse();
+        (await probe.ProbeNowAsync("nas.local")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ProbeNowAsync_Should_RefreshTheCachedReading()
+    {
+        bool answers = false;
+        var probe = new FakeReachability(ClockAt(Now), (_, _) => answers);
+
+        await probe.IsReachableAsync("nas.local");
+
+        answers = true;
+
+        await probe.ProbeNowAsync("nas.local");
+
+        (await probe.IsReachableAsync("nas.local")).Should().BeTrue();
+    }
 }

@@ -73,6 +73,13 @@ public abstract partial class BaseViewModel : ObservableObject
         TimerCancelled = true;
     }
 
+    private void ClearCountdown()
+    {
+        SecondsRemaining = 0;
+        ShowRedoButton = false;
+        TimerCancelled = false;
+    }
+
     public static void ResetCountdown()
     {
         App.ServiceProvider.GetRequiredService<ICountdownService>().Reset();
@@ -146,12 +153,14 @@ public abstract partial class BaseViewModel : ObservableObject
             (GetSettings h) => h.Handle(cancellationToken));
         if (result.IsFailure)
         {
+            ClearCountdown();
             return;
         }
 
         SettingsModel settings = result.Value;
         if (!settings.AutoMinimize)
         {
+            ClearCountdown();
             return;
         }
 

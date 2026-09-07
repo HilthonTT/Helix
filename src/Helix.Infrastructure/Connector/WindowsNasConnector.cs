@@ -23,6 +23,7 @@ internal sealed class WindowsNasConnector(
     public Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
         WhenReachableAsync(
             drive,
+            fresh: false,
             () => WithHostGateAsync(
                 drive,
                 started => RunWithTimeoutAsync(
@@ -47,6 +48,7 @@ internal sealed class WindowsNasConnector(
     public Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default) =>
         WhenReachableAsync(
             drive,
+            fresh: true,
             () => WithHostGateAsync(
                 drive,
                 started => RunWithTimeoutAsync(
@@ -127,10 +129,15 @@ internal sealed class WindowsNasConnector(
 
     private async Task<Result> WhenReachableAsync(
         Drive drive,
+        bool fresh,
         Func<Task<Result>> work,
         CancellationToken cancellationToken)
     {
-        if (!await hostReachability.IsReachableAsync(drive.Host, cancellationToken))
+        bool reachable = fresh
+            ? await hostReachability.ProbeNowAsync(drive.Host, cancellationToken)
+            : await hostReachability.IsReachableAsync(drive.Host, cancellationToken);
+
+        if (!reachable)
         {
             return Result.Failure(DriveErrors.HostUnreachable(drive.Host));
         }
@@ -289,7 +296,7 @@ internal sealed class WindowsNasConnector(
                 continue;
             }
 
-            string? remote = RemoteNameOf($"{drive.Name[0]}:");
+            string? remote = RemoteNameOf($"{drive.Name[0]}:", liveOnly: true);
 
             if (remote is not null && remote.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
@@ -300,12 +307,15 @@ internal sealed class WindowsNasConnector(
         return false;
     }
 
-    private static string? RemoteNameOf(string localName)
+    private static string? RemoteNameOf(string localName, bool liveOnly = false)
     {
         var buffer = new char[MaxPathLength];
         int length = buffer.Length;
 
-        if (WNetGetConnectionW(localName, buffer, ref length) != NO_ERROR)
+        int code = WNetGetConnectionW(localName, buffer, ref length);
+
+        bool known = code == NO_ERROR || (!liveOnly && code == ERROR_CONNECTION_UNAVAIL);
+        if (!known)
         {
             return null;
         }
@@ -498,6 +508,8 @@ internal sealed class WindowsNasConnector(
     private const uint CONNECT_TEMPORARY = 0x00000004;
 
     private const int NO_ERROR = 0;
+
+    private const int ERROR_CONNECTION_UNAVAIL = 1201;
     private const int ERROR_ACCESS_DENIED = 5;
     private const int ERROR_ALREADY_ASSIGNED = 85;
     private const int ERROR_BAD_DEV_TYPE = 66;

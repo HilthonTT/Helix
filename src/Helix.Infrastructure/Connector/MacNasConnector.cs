@@ -31,6 +31,7 @@ internal sealed class MacNasConnector : INasConnector
     public Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
         WhenReachableAsync(
             drive,
+            fresh: false,
             () => RunWithTimeoutAsync(
                 () => Connect(drive),
                 timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
@@ -48,6 +49,7 @@ internal sealed class MacNasConnector : INasConnector
     public Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default) =>
         WhenReachableAsync(
             drive,
+            fresh: true,
             () => RunWithTimeoutAsync(
                 () => Test(drive),
                 timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
@@ -63,10 +65,15 @@ internal sealed class MacNasConnector : INasConnector
 
     private async Task<Result> WhenReachableAsync(
         Drive drive,
+        bool fresh,
         Func<Task<Result>> work,
         CancellationToken cancellationToken)
     {
-        if (!await _hostReachability.IsReachableAsync(drive.Host, cancellationToken))
+        bool reachable = fresh
+            ? await _hostReachability.ProbeNowAsync(drive.Host, cancellationToken)
+            : await _hostReachability.IsReachableAsync(drive.Host, cancellationToken);
+
+        if (!reachable)
         {
             return Result.Failure(DriveErrors.HostUnreachable(drive.Host));
         }

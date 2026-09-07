@@ -94,7 +94,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 Form.Host,
                 Form.Name,
                 Form.Username,
-                Form.Password);
+                Form.Password,
+                Form.ConnectByHostname);
 
             Result result = await ScopedHandler.HandleAsync((TestDriveConnection h) => h.Handle(request));
             if (result.IsFailure)

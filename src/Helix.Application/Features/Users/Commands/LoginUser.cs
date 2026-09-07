@@ -5,13 +5,16 @@ using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
 using Helix.Domain.Users;
 
+using Microsoft.Extensions.Logging;
+
 namespace Helix.Application.Features.Users.Commands;
 
 public sealed class LoginUser(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
     ILoggedInUser loggedInUser,
-    IUnitOfWork unitOfWork) : IHandler
+    IUnitOfWork unitOfWork,
+    ILogger<LoginUser> logger) : IHandler
 {
     public sealed record Request(string Username, string Password);
 
@@ -37,8 +40,15 @@ public sealed class LoginUser(
 
         if (passwordHasher.NeedsRehash(user.PasswordHash))
         {
-            user.ChangePassword(passwordHasher.Hash(request.Password));
-            await unitOfWork.SaveChangesAsync(cancellationToken);
+            try
+            {
+                user.ChangePassword(passwordHasher.Hash(request.Password));
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not store the upgraded password hash; the sign-in continues on the existing one.");
+            }
         }
 
         loggedInUser.Login(user.Id, user.Username);

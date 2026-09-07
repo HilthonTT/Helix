@@ -48,6 +48,25 @@ internal class HostReachability : IHostReachability
         }
     }
 
+    public Task<bool> ProbeNowAsync(string host, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(host))
+        {
+            return Task.FromResult(true);
+        }
+
+        DateTime now = _dateTimeProvider.UtcNow;
+
+        lock (_gate)
+        {
+            Task<bool> probe = ProbeAsync(host);
+
+            _cache[host] = new CachedProbe(probe, now + CacheDuration);
+
+            return probe;
+        }
+    }
+
     protected virtual async Task<bool> CanConnectAsync(string host, int port, CancellationToken cancellationToken)
     {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

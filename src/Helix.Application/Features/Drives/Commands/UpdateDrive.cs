@@ -61,14 +61,29 @@ public sealed class UpdateDrive(
 
             if (nasConnector.GetConnectedLetters().Contains(request.Letter.ToUpperInvariant()))
             {
-                return Result.Failure(DriveErrors.LetterInUse(request.Letter));
+                var candidate = Drive.Create(
+                    loggedInUser.UserId,
+                    request.Letter,
+                    request.Host,
+                    request.Name,
+                    request.Username,
+                    request.Password);
+
+                if (!nasConnector.IsMountedFrom(candidate))
+                {
+                    return Result.Failure(DriveErrors.LetterInUse(request.Letter));
+                }
             }
 
             if (nasConnector.GetConnectedLetters().Contains(drive.Letter))
             {
                 using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
 
-                await nasConnector.DisconnectAsync(drive, cancellationToken);
+                Result unmount = await nasConnector.DisconnectAsync(drive, cancellationToken);
+                if (unmount.IsFailure)
+                {
+                    return unmount;
+                }
             }
         }
 

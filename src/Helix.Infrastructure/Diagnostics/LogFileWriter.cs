@@ -21,7 +21,9 @@ internal sealed class LogFileWriter : IDisposable
     private int _sequence;
     private bool _disposed;
 
-    private bool _broken;
+    private static readonly TimeSpan RetryAfter = TimeSpan.FromSeconds(30);
+
+    private DateTime _brokenUntilUtc = DateTime.MinValue;
 
     public LogFileWriter(Func<string> directoryFactory, int retainedDays)
     {
@@ -48,7 +50,7 @@ internal sealed class LogFileWriter : IDisposable
 
     public void Write(string line)
     {
-        if (_disposed || _broken)
+        if (_disposed || DateTime.UtcNow < _brokenUntilUtc)
         {
             return;
         }
@@ -64,7 +66,7 @@ internal sealed class LogFileWriter : IDisposable
             }
             catch (Exception)
             {
-                _broken = true;
+                _brokenUntilUtc = DateTime.UtcNow + RetryAfter;
 
                 CloseWriter();
             }

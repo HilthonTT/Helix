@@ -95,7 +95,8 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 Drive.Host,
                 Drive.Name,
                 Drive.Username,
-                Drive.Password);
+                Drive.Password,
+                Drive.ConnectByHostname);
 
             Result result = await ScopedHandler.HandleAsync((TestDriveConnection h) => h.Handle(request));
             if (result.IsFailure)

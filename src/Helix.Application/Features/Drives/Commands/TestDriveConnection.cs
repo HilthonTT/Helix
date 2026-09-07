@@ -12,7 +12,13 @@ public sealed class TestDriveConnection(
     ILoggedInUser loggedInUser,
     INasConnector nasConnector) : IHandler
 {
-    public sealed record Request(string Letter, string Host, string Name, string Username, string Password);
+    public sealed record Request(
+        string Letter,
+        string Host,
+        string Name,
+        string Username,
+        string Password,
+        bool ConnectByHostname = false);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -33,7 +39,8 @@ public sealed class TestDriveConnection(
             request.Host,
             request.Name,
             request.Username,
-            request.Password);
+            request.Password,
+            connectByHostname: request.ConnectByHostname);
 
         return await nasConnector.TestAsync(candidate, cancellationToken);
     }
