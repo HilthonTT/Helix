@@ -17,14 +17,8 @@ public sealed partial class AppShell : Shell
 {
     private readonly ILoggedInUser _loggedInUser;
 
-    /// <summary>Public source, linked from the sidebar footer.</summary>
     public string RepositoryUrl => "https://github.com/HilthonTT/Helix";
 
-    /// <summary>
-    /// Shipping version, read from the build rather than hard-coded here. Windows reports
-    /// it as four parts ("2.0.0.0") for an unpackaged app, so <see cref="VersionInfo"/>
-    /// trims it back to the three the release is actually tagged with.
-    /// </summary>
     public string AppVersion => $"Helix v{VersionInfo.Display}";
 
     public string Author => "by Hilthon";
@@ -45,11 +39,6 @@ public sealed partial class AppShell : Shell
 
     private string? _selectedRoute;
 
-    /// <summary>
-    /// Route backing the sidebar's radio group. It is the group's selected value, so it
-    /// has to be set for an item to look active — an <c>IsChecked</c> in XAML is cleared
-    /// by the group as soon as the binding applies.
-    /// </summary>
     public string? SelectedRoute
     {
         get { return _selectedRoute; }
@@ -65,15 +54,10 @@ public sealed partial class AppShell : Shell
         }
     }
 
-    /// <summary>
-    /// Set while the sidebar selection is being brought in line with a navigation that
-    /// already happened, so the resulting <c>CheckedChanged</c> does not navigate again.
-    /// </summary>
     private bool _syncingSelection;
 
     private string _username = string.Empty;
 
-    /// <summary>Name shown on the sidebar's account card.</summary>
     public string Username
     {
         get { return _username; }
@@ -98,9 +82,6 @@ public sealed partial class AppShell : Shell
 
         Shell? shell = Current;
 
-        // The rail is built lazily the first time the flyout unlocks, and the group
-        // checks the matching item as it appears — navigating again for a page we are
-        // already on would only reload it.
         if (shell is null || shell.CurrentItem?.Route == _selectedRoute)
         {
             return;
@@ -118,24 +99,14 @@ public sealed partial class AppShell : Shell
             return;
         }
 
-        // Stop watching before the user is gone: every poll and reconnect runs against
-        // the signed-in user, so leaving it running would work on the next one's behalf.
         App.ServiceProvider.GetRequiredService<DriveWatchdog>().Stop();
 
-        // The tray menu lists that user's drives and its commands run as them, so it
-        // comes down with the session rather than lingering over the login page.
         App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
 
-        // The threshold, and the drives measured against it, belong to that user too.
         App.ServiceProvider.GetRequiredService<StorageAlertService>().Stop();
 
-        // Nothing left to lock, and the idle watch would otherwise put the lock screen
-        // over the login page.
         App.ServiceProvider.GetRequiredService<IdleLockService>().Stop();
 
-        // Same reasoning for the two pieces of once-per-session state: the countdown
-        // would otherwise keep running and minimize the window over the login page, and
-        // the dashboard's startup pass would never run again for the next user.
         BaseViewModel.ResetCountdown();
         HomePage.ResetSessionState();
 
@@ -150,7 +121,6 @@ public sealed partial class AppShell : Shell
         }
         catch (Exception ex)
         {
-            // A missing browser association is not worth an alert over.
             AppLog.For<AppShell>().LogWarning(ex, "Could not open the repository URL.");
         }
     }
@@ -164,9 +134,6 @@ public sealed partial class AppShell : Shell
 
         ShellItem currentItem = Current.CurrentItem;
 
-        // The lock screen belongs with the sign-in pages here, not with the pages behind
-        // it: a locked session that still shows the sidebar is a locked session anyone
-        // can click straight past, into the drive list it was put up to cover.
         if (currentItem.Route is PageNames.LoginPage or PageNames.RegisterPage or PageNames.LockPage)
         {
             FlyoutBehavior = FlyoutBehavior.Disabled;
@@ -175,13 +142,8 @@ public sealed partial class AppShell : Shell
         {
             FlyoutBehavior = FlyoutBehavior.Locked;
 
-            // The sidebar follows navigation rather than the other way round, so the
-            // item for the page we landed on is highlighted even when we got there
-            // without clicking it — signing in, for instance, which used to leave the
-            // rail with nothing selected until the user clicked Dashboard.
             SyncSelection(currentItem.Route);
 
-            // The shell outlives a sign-out, so refresh rather than caching once.
             Username = _loggedInUser.Username;
         }
 

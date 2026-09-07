@@ -9,9 +9,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.UnitTests.Database;
 
-/// <summary>
-/// Covers what the audit log records, and — just as important — what it declines to.
-/// </summary>
 public sealed class InsertAuditLogsInterceptorTests : IDisposable
 {
     private readonly SqliteConnection _connection = new("DataSource=:memory:");
@@ -36,7 +33,6 @@ public sealed class InsertAuditLogsInterceptorTests : IDisposable
         return context;
     }
 
-    /// <summary>A saved user for the drive's foreign key to point at.</summary>
     private async Task<Drive> SeedDriveAsync(AppDbContext context)
     {
         User user = User.Create("ada", "hash");
@@ -71,7 +67,6 @@ public sealed class InsertAuditLogsInterceptorTests : IDisposable
         entry.EntityName.Should().Be("Media");
         entry.EntityLetter.Should().Be("Z");
 
-        // Nothing composes prose any more; the sentence is built at display time.
         entry.Message.Should().BeNull();
     }
 
@@ -91,10 +86,6 @@ public sealed class InsertAuditLogsInterceptorTests : IDisposable
         entries[1].Action.Should().Be(AuditAction.DriveUpdated);
     }
 
-    /// <summary>
-    /// The reason the filter exists: every connect stamps the drive, and without this
-    /// each one would file a "the drive was changed" entry and bury the real events.
-    /// </summary>
     [Fact]
     public async Task SaveChanges_Should_RecordNothing_WhenOnlyTheConnectionStampMoves()
     {
@@ -107,7 +98,6 @@ public sealed class InsertAuditLogsInterceptorTests : IDisposable
 
         List<Auditlog> entries = await EntriesAsync(context);
 
-        // Only the creation entry from the seed.
         entries.Should().ContainSingle().Which.Action.Should().Be(AuditAction.DriveCreated);
     }
 
@@ -145,8 +135,6 @@ public sealed class InsertAuditLogsInterceptorTests : IDisposable
         entries.Should().HaveCount(2);
         entries[1].Action.Should().Be(AuditAction.DriveDeleted);
 
-        // The name is copied into the entry, not read back through a relationship —
-        // there is no drive left to read it from.
         entries[1].EntityName.Should().Be("Media");
     }
 

@@ -17,7 +17,6 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
 {
     public UpdateDriveViewModel()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Drive = new();
         HideSecrets = true;
         AvailableLetters = [];
@@ -28,30 +27,14 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
     [ObservableProperty]
     public partial UpdateDriveModel Drive { get; set; }
 
-    /// <summary>
-    /// Free letters, plus this drive's own — see
-    /// <see cref="GetAvailableDriveLetters.Request.ExcludeDriveId"/>.
-    /// </summary>
     [ObservableProperty]
     public partial ObservableCollection<string> AvailableLetters { get; set; }
 
-    /// <summary>
-    /// Masks the address, share user and password by default; one reveal toggle covers
-    /// all three so a typo in the address can still be checked.
-    /// </summary>
     [ObservableProperty]
     public partial bool HideSecrets { get; set; }
 
-    /// <summary>
-    /// Hides the "remember at sign-in" switch on platforms that cannot honour it — see
-    /// <see cref="DrivePlatform.SupportsPersistentMappings"/>.
-    /// </summary>
     public bool SupportsPersistentMappings => DrivePlatform.SupportsPersistentMappings;
 
-    /// <summary>
-    /// Hides the "connect by server name" switch where it would buy nothing — see
-    /// <see cref="DrivePlatform.SupportsHostnameConnect"/>.
-    /// </summary>
     public bool SupportsHostnameConnect => DrivePlatform.SupportsHostnameConnect;
 
     [RelayCommand]
@@ -95,10 +78,6 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
         }
     }
 
-    /// <summary>
-    /// Verifies the details on screen against the server without saving them, so an
-    /// edit that breaks the connection is caught before it replaces a working one.
-    /// </summary>
     [RelayCommand]
     private async Task TestConnectionAsync()
     {
@@ -155,9 +134,6 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
 
     private void RegisterMessages()
     {
-        // The body is guarded because the messenger's handler returns void, making this an
-        // async void: anything thrown past the first await lands on the thread pool with
-        // nothing to observe it and takes the process down.
         WeakReferenceMessenger.Default.Register<UpdateDriveMessage>(this, async (r, m) =>
         {
             if (m.DriveId == Guid.Empty)
@@ -176,11 +152,6 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                     return;
                 }
 
-                // Letters first, then the drive. The picker's SelectedItem is bound
-                // two-way, so assigning a drive whose letter is not yet in ItemsSource
-                // makes the control fall back to "nothing selected" and write that
-                // emptiness straight back into Drive.Letter — the modal opened blank and
-                // refused to save.
                 await LoadAvailableLettersAsync(m.DriveId);
 
                 Drive = new UpdateDriveModel(result.Value);

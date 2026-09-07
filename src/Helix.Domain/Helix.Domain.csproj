@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<!--
-	The domain is deliberately framework-free: entities, domain errors and the
-	repository interfaces only. No MAUI, no EF Core, no infrastructure concerns.
-	-->
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 	</PropertyGroup>

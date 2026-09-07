@@ -1,11 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<!--
-		One head per OS. Each target framework is gated on the host that can actually
-		build it: Mac Catalyst needs Xcode, so it only appears on macOS, and the Windows
-		head only on Windows. Helix.App gates its own the same way.
-		-->
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">$(TargetFrameworks);net10.0-maccatalyst</TargetFrameworks>
 		<UseMaui>true</UseMaui>

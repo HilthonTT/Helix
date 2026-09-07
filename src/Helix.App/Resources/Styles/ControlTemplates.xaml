@@ -5,13 +5,6 @@
                     xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
                     x:Class="Helix.App.Resources.Styles.ControlTemplates">
 
-    <!--
-    Templates for the selectable surfaces: the sidebar rail, the settings section
-    list, and the segmented sort-order toggle. Each one names its icon and label
-    parts so the checked state can tint them, not just swap a background.
-    -->
-
-    <!-- Sidebar rail item: brand indicator bar + tinted glyph and label -->
     <ControlTemplate x:Key="NavItemTemplate" x:DataType="controls:NavItem">
         <Grid Padding="10,3" behaviors:Hover.Cursor="True">
             <VisualStateManager.VisualStateGroups>
@@ -79,7 +72,6 @@
         </Grid>
     </ControlTemplate>
 
-    <!-- Settings section entry: glyph, title and supporting description -->
     <ControlTemplate x:Key="NavSectionTemplate" x:DataType="controls:NavItem">
         <Grid Padding="8,3" behaviors:Hover.Cursor="True">
             <VisualStateManager.VisualStateGroups>
@@ -152,7 +144,6 @@
         </Grid>
     </ControlTemplate>
 
-    <!-- Segmented toggle used by the search/filter sheets -->
     <ControlTemplate x:Key="SegmentTemplate" x:DataType="RadioButton">
         <Border x:Name="Segment"
                 Stroke="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"
@@ -195,7 +186,6 @@
         </Border>
     </ControlTemplate>
 
-    <!-- Legacy aliases -->
     <ControlTemplate x:Key="ButtonRadioTemplate" x:DataType="RadioButton">
         <Border x:Name="Segment"
                 Stroke="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"

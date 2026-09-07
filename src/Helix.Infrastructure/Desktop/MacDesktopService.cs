@@ -5,16 +5,6 @@ using System.Runtime.Versioning;
 
 namespace Helix.Infrastructure.Desktop;
 
-/// <summary>
-/// Puts a link to the app bundle on the Desktop — the macOS counterpart of the Windows
-/// .lnk shortcut.
-/// </summary>
-/// <remarks>
-/// A symlink rather than a Finder alias: aliases are an opaque resource-fork format
-/// that only Cocoa's bookmark APIs can write, whereas a symlink to a <c>.app</c> is
-/// launched by Finder exactly like the real thing and can be created and removed with
-/// plain file APIs.
-/// </remarks>
 [SupportedOSPlatform("maccatalyst")]
 internal sealed class MacDesktopService : IDesktopService
 {
@@ -59,8 +49,6 @@ internal sealed class MacDesktopService : IDesktopService
     {
         try
         {
-            // Only ever remove our own symlink. Resolving the link target first means a
-            // real folder that happens to share the name is left alone.
             var link = new DirectoryInfo(ShortcutPath);
 
             if (link.Exists && link.LinkTarget is not null)

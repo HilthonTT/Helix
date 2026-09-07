@@ -15,21 +15,6 @@ public sealed class CreateDrive(
     ILoggedInUser loggedInUser,
     INasConnector nasConnector) : IHandler
 {
-    /// <param name="AutoConnect">
-    /// Whether the drive joins the unattended connect passes. Defaults to true so a
-    /// drive added without thinking about it behaves the way every drive did before
-    /// the flag existed.
-    /// </param>
-    /// <param name="Persistent">
-    /// Whether Windows should remember the mapping across sign-ins. Defaults to false:
-    /// a mapping that outlives the app is a change to the user machine, so it is opted
-    /// into rather than out of.
-    /// </param>
-    /// <param name="ConnectByHostname">
-    /// Whether to mount under the server's DNS name instead of the address as typed.
-    /// Defaults to false: it costs a reverse lookup and only matters when something else
-    /// on the machine already holds the NAS under different credentials.
-    /// </param>
     public sealed record Request(
         string Letter,
         string Host,
@@ -69,11 +54,6 @@ public sealed class CreateDrive(
             request.Persistent,
             request.ConnectByHostname);
 
-        // The repository only knows about this user's drives. A letter taken by a USB
-        // stick, an optical drive or another account's mapping used to save fine and then
-        // fail at connect time with a Windows error that named no field. A letter already
-        // carrying this very share is the opposite case — a mapping that outlived the
-        // record describing it — and is the drive being put back, not a collision.
         if (nasConnector.GetConnectedLetters().Contains(drive.Letter) && !nasConnector.IsMountedFrom(drive))
         {
             return Result.Failure<Drive>(DriveErrors.LetterInUse(request.Letter));

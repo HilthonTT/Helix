@@ -12,7 +12,6 @@ internal sealed partial class UpdateUsernameViewModel : BaseViewModel
 {
     public UpdateUsernameViewModel()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Username = string.Empty;
 
         RegisterMessages();

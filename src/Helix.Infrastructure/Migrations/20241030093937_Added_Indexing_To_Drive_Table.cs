@@ -4,10 +4,8 @@
 
 namespace Helix.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class Added_Indexing_To_Drive_Table : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateIndex(
@@ -16,7 +14,6 @@ namespace Helix.Infrastructure.Migrations
                 columns: new[] { "Name", "Letter" });
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(

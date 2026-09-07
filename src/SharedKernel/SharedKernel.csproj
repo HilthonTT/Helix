@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<!--
-	Deliberately a plain .NET library: the SharedKernel holds framework-agnostic
-	primitives (Result, Error, Entity, guards) and must not drag MAUI in behind them.
-	-->
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 	</PropertyGroup>

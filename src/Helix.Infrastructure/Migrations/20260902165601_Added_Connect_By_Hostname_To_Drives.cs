@@ -4,10 +4,8 @@
 
 namespace Helix.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class Added_Connect_By_Hostname_To_Drives : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
@@ -18,7 +16,6 @@ namespace Helix.Infrastructure.Migrations
                 defaultValue: false);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

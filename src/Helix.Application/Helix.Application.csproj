@@ -1,15 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<!--
-	UseMaui is on because a few use cases reach the user directly through MAUI Essentials
-	(the folder picker behind drive export/import). Everything else in here is plain .NET.
-	-->
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<!-- A dropped await in a handler silently loses the operation's failure. -->
 		<WarningsAsErrors>CS4014</WarningsAsErrors>
 	</PropertyGroup>
 

@@ -6,15 +6,12 @@ internal sealed partial class CreateDriveModel : ObservableObject
 {
     public CreateDriveModel()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Letter = string.Empty;
         Host = string.Empty;
         Name = string.Empty;
         Username = string.Empty;
         Password = string.Empty;
 
-        // Matches the handler's own default: a drive added without touching the switch
-        // takes part in the automatic passes, the way every drive did before the flag.
         AutoConnect = true;
         Persistent = false;
         ConnectByHostname = false;

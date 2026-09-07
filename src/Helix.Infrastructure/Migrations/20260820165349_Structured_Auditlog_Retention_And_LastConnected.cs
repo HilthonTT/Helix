@@ -5,17 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Helix.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class Structured_Auditlog_Retention_And_LastConnected : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Zero — "keep everything" — for accounts that already exist, deliberately,
-            // even though a newly created account gets 90 days. Those users have audit
-            // history they never agreed to have deleted, and an upgrade that silently
-            // discarded the older half of it would be the wrong way to introduce the
-            // setting. It is on the settings page for anyone who wants it.
             migrationBuilder.AddColumn<int>(
                 name: "AuditlogRetentionDays",
                 table: "Settings",
@@ -37,9 +30,6 @@ namespace Helix.Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT");
 
-            // Zero is AuditAction.Legacy, which is exactly right for every row already in
-            // the table: their text is in Message and there is nothing to reconstruct an
-            // action from. The audit page renders those verbatim.
             migrationBuilder.AddColumn<int>(
                 name: "Action",
                 table: "AuditLogs",
@@ -72,7 +62,6 @@ namespace Helix.Infrastructure.Migrations
                 nullable: true);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

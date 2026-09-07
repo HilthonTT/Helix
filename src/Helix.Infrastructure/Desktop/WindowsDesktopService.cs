@@ -4,10 +4,6 @@ using System.Runtime.Versioning;
 
 namespace Helix.Infrastructure.Desktop;
 
-/// <summary>
-/// Creates and removes the Helix desktop shortcut (.lnk) through late-bound
-/// WScript.Shell, so no COM reference is needed at compile time.
-/// </summary>
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsDesktopService : IDesktopService
 {
@@ -37,10 +33,8 @@ internal sealed class WindowsDesktopService : IDesktopService
             throw new InvalidOperationException("The process path is null or invalid.");
         }
 
-        // Late binding - no COM reference needed at compile time
         try
         {
-            // Create WScript.Shell dynamically
             Type? shellType = Type.GetTypeFromProgID("WScript.Shell")
                 ?? throw new InvalidOperationException("WScript.Shell is not available.");
 
@@ -55,7 +49,6 @@ internal sealed class WindowsDesktopService : IDesktopService
                 shortcut.TargetPath = processPath;
                 shortcut.WorkingDirectory = Path.GetDirectoryName(processPath);
                 shortcut.Description = "Helix desktop shortcut.";
-                // Optional: shortcut.IconLocation = "...";
 
                 shortcut.Save();
             }

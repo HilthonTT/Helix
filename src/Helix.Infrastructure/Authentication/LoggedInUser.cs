@@ -7,7 +7,6 @@ internal sealed partial class LoggedInUser : ObservableObject, ILoggedInUser
 {
     public LoggedInUser()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Username = string.Empty;
     }
 

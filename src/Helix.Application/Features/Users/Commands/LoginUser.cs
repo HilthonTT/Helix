@@ -35,9 +35,6 @@ public sealed class LoginUser(
             return Result.Failure<User>(AuthenticationErrors.InvalidUsernameOrPassword);
         }
 
-        // Transparent migration: if the stored hash uses an older format or weaker
-        // KDF parameters than the current configuration, rehash with the verified
-        // plaintext and persist. The user keeps the same credentials.
         if (passwordHasher.NeedsRehash(user.PasswordHash))
         {
             user.ChangePassword(passwordHasher.Hash(request.Password));

@@ -3,43 +3,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Helix.Infrastructure.Connector;
 
-/// <summary>
-/// Polls <see cref="INasConnector.GetConnectedLetters"/> on an interval and reports
-/// which watched drives changed state.
-/// </summary>
-/// <remarks>
-/// Only the cheap half of the connectivity question is asked here. Enumerating logical
-/// drive letters is a bitmask query, whereas reading a volume's size or free space
-/// performs I/O against the share and can hang for as long as the network takes to
-/// give up. Capacity is therefore left to the caller to fetch off the UI thread.
-/// </remarks>
 internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 {
     private readonly INasConnector _nasConnector;
     private readonly ILogger<DriveMonitor> _logger;
     private readonly Lock _gate = new();
 
-    /// <summary>Watched drives, keyed by uppercase letter.</summary>
     private Dictionary<string, WatchedDrive> _watched = [];
 
-    /// <summary>Last observed connectivity per watched letter — the diff baseline.</summary>
     private Dictionary<string, bool> _baseline = [];
 
-    /// <summary>
-    /// Letters whose state Helix is changing on purpose, and how many callers are
-    /// currently saying so. Counted rather than a flag: two overlapping operations may
-    /// name the same letter, and the first to finish must not uncover it for the second.
-    /// </summary>
     private readonly Dictionary<string, int> _suppressed = [];
 
-    /// <summary>
-    /// When each letter's suppression was last released, on <see cref="_clock"/>. A poll
-    /// reads the mounted set outside the gate, so a release can land between that read
-    /// and the compare: the release re-seeds the baseline from the finished operation,
-    /// and the stale snapshot then differs from it by exactly the change the suppression
-    /// existed to swallow. A poll skips a letter released after its snapshot began, and
-    /// only that poll — the next one reads a set that already reflects the release.
-    /// </summary>
     private readonly Dictionary<string, long> _releasedAt = [];
 
     private long _clock;
@@ -68,8 +43,6 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
                 .GroupBy(drive => Normalize(drive.Letter))
                 .ToDictionary(group => group.Key, group => group.First());
 
-            // Seed from reality rather than from the previous baseline: a drive that is
-            // already offline when it starts being watched has not just dropped.
             _baseline = _watched.Keys.ToDictionary(letter => letter, connected.Contains);
         }
     }
@@ -97,20 +70,8 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         return new Suppression(this, normalized);
     }
 
-    /// <summary>
-    /// Ends one suppression and re-seeds the baseline of the letters it covered from
-    /// what is actually mounted now.
-    /// </summary>
-    /// <remarks>
-    /// Re-seeding rather than simply resuming: the caller has just mounted or unmounted
-    /// these letters, so their new state is the state everything downstream should
-    /// consider normal. Resuming with the old baseline would hand the next poll exactly
-    /// the change the suppression existed to swallow.
-    /// </remarks>
     private void Release(string[] letters)
     {
-        // Read outside the lock — it is a bitmask query, but it is still not this
-        // object's business to hold its own gate across a platform call.
         HashSet<string> connected = _nasConnector.GetConnectedLetters();
 
         lock (_gate)
@@ -124,8 +85,6 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 
                 if (count > 1)
                 {
-                    // Somebody else is still working on this letter; leave the baseline
-                    // to whoever releases last.
                     _suppressed[letter] = count - 1;
                     continue;
                 }
@@ -170,7 +129,6 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         }
         catch (ObjectDisposedException)
         {
-            // Already torn down by a concurrent Stop/Dispose — nothing to do.
         }
         finally
         {
@@ -182,7 +140,6 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 
     public Task PollAsync(CancellationToken cancellationToken = default)
     {
-        // Task.Run so a caller on the UI thread is never blocked by the sweep.
         return Task.Run(Poll, cancellationToken);
     }
 
@@ -199,11 +156,9 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Stop() was called.
         }
         catch (Exception ex)
         {
-            // The loop is fire-and-forget; never let a fault reach the finalizer thread.
             _logger.LogError(ex, "The drive monitor loop faulted and has stopped polling.");
         }
     }
@@ -212,11 +167,6 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
     {
         List<DriveConnectivityChange> changes = [];
 
-        // Read and compared under one lock. The timer loop and PollAsync run this
-        // concurrently, and a set read outside the lock by one could be compared inside
-        // it after the other had already moved the baseline - a stale snapshot reported
-        // as a fresh drop, a toast and an audit row for a drive that had just come up.
-        // The read is a logical-drive bitmask; holding the lock across it costs nothing.
         lock (_gate)
         {
             long snapshotStartedAt = _clock;
@@ -227,10 +177,6 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
             {
                 if (_suppressed.ContainsKey(letter) || WasReleasedAfter(letter, snapshotStartedAt))
                 {
-                    // Helix is mid-mount or mid-unmount on this one. The baseline is
-                    // left untouched as well as unreported: whatever it reads right now
-                    // is a half-finished operation, and the release re-seeds it from the
-                    // finished one.
                     continue;
                 }
 
@@ -257,16 +203,12 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 
     private static string Normalize(string letter) => letter.Trim().ToUpperInvariant();
 
-    /// <summary>The handle handed back by <see cref="Suppress"/>.</summary>
     private sealed class Suppression(DriveMonitor monitor, string[] letters) : IDisposable
     {
         private bool _released;
 
         public void Dispose()
         {
-            // Idempotent: a `using` inside a method that also disposes by hand, or a
-            // double dispose from a retry, must not decrement the count twice and
-            // uncover a letter another caller is still holding.
             if (_released)
             {
                 return;
@@ -278,7 +220,6 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         }
     }
 
-    /// <summary>Returned when there is nothing to suppress, so callers can still `using`.</summary>
     private sealed class NullSuppression : IDisposable
     {
         public static readonly NullSuppression Instance = new();

@@ -3,15 +3,6 @@ using Helix.Infrastructure.Connector;
 
 namespace Infrastructure.UnitTests.Connector;
 
-/// <summary>
-/// Covers the host rendering, which is the only part of the Windows connector that can
-/// be exercised without a NAS on the other end.
-/// </summary>
-/// <remarks>
-/// It is also the part most likely to be wrong: a UNC path cannot contain a colon, so an
-/// IPv6 address has to be re-spelled into the <c>ipv6-literal.net</c> form before it can
-/// be handed to the redirector.
-/// </remarks>
 public sealed class WindowsNasConnectorTests
 {
     [Theory]
@@ -40,10 +31,6 @@ public sealed class WindowsNasConnectorTests
         WindowsNasConnector.ToUncHost(host).Should().Be(expected);
     }
 
-    /// <summary>
-    /// The literal is built from the parsed address, not the typed text, so that the
-    /// several legal spellings of one address all reach the same server name.
-    /// </summary>
     [Fact]
     public void ToUncHost_Should_NormalizeEquivalentSpellingsOfOneAddress()
     {

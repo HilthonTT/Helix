@@ -12,7 +12,6 @@
     <Border Style="{StaticResource Sheet}">
         <Grid RowDefinitions="Auto,*,Auto">
 
-            <!-- Header -->
             <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
                 <Label Text="{l10n:Translate DriveGroups}"
                        Style="{StaticResource Title1}"
@@ -35,7 +34,6 @@
             <ScrollView Grid.Row="1">
                 <VerticalStackLayout Spacing="16" Padding="24,4,24,20">
 
-                    <!-- Existing groups: tap one to edit it, or the bin to be rid of it -->
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding Groups.Count, Converter={StaticResource CountToBoolConverter}}">
                         <Label Text="{l10n:Translate YourGroups}" Style="{StaticResource FieldLabel}"/>
 
@@ -90,7 +88,6 @@
                         <BoxView Style="{StaticResource Divider}" Margin="0,6"/>
                     </VerticalStackLayout>
 
-                    <!-- Editor: the same fields whether a group is being made or changed -->
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Text="{Binding EditorTitle}" Style="{StaticResource Title3}" VerticalOptions="Center"/>
 
@@ -131,7 +128,6 @@
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
 
-                        <!-- A group of nothing is a button that does nothing -->
                         <Label Text="{l10n:Translate NoDrivesForGroup}"
                                Style="{StaticResource Caption}"
                                IsVisible="{Binding HasDrives, Converter={StaticResource InvertedBoolConverter}}"/>

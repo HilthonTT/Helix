@@ -4,22 +4,8 @@ public static class StorageUsageHelper
 {
     private const double BytesToTB = 1.0 / (1024.0 * 1024.0 * 1024.0 * 1024.0);
 
-    /// <summary>
-    /// How long a capacity probe may take before the caller gives up on it.
-    /// </summary>
     private static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(3);
 
-    /// <summary>
-    /// Off-thread <see cref="GetStorageUsage"/>. Reading <c>IsReady</c>, <c>TotalSize</c>
-    /// or <c>AvailableFreeSpace</c> performs I/O against the share and blocks for as
-    /// long as the network takes to fail, so once the monitor started refreshing rows
-    /// on a timer these could no longer be called on the UI thread.
-    /// </summary>
-    /// <param name="usedOfFormat">
-    /// The sentence for a readable drive, with the used and total figures as
-    /// <c>{0}</c> and <c>{1}</c>. Passed in rather than written here so the row can hand
-    /// over its translation; the default is only for callers with none.
-    /// </param>
     public static Task<string> GetStorageUsageAsync(
         string driveLetter,
         string driveNotReadyMessage = "Drive not ready",
@@ -33,23 +19,11 @@ public static class StorageUsageHelper
 
     private const string DefaultUsedOfFormat = "{0} TB used of {1} TB";
 
-    /// <summary>Off-thread <see cref="GetCompactUsage"/>.</summary>
     public static Task<string> GetCompactUsageAsync(string driveLetter, string fallback = "0 TB")
     {
         return ProbeAsync(() => GetCompactUsage(driveLetter, fallback), fallback);
     }
 
-    /// <summary>
-    /// Renders an already-totalled pair of byte counts as the compact "1.2 / 4.0 TB"
-    /// form the dashboard tile uses.
-    /// </summary>
-    /// <remarks>
-    /// Formatting only. Working out which drives to add up is deliberately not done
-    /// here: several mapped drives are often shares of one NAS pool and each reports
-    /// that pool's whole size, so adding letters together triple-counts a server mapped
-    /// three times. Deciding what counts as one volume needs the platform, and lives
-    /// behind <c>IStorageProbe</c> in Infrastructure.
-    /// </remarks>
     public static string FormatCombined(long usedBytes, long totalBytes, string fallback = "0 TB")
     {
         if (totalBytes <= 0)
@@ -67,8 +41,6 @@ public static class StorageUsageHelper
     {
         try
         {
-            // A blocking DriveInfo read cannot be cancelled, so the abandoned task is
-            // left to finish on its own; what matters is that the caller is released.
             return await Task.Run(probe).WaitAsync(ProbeTimeout);
         }
         catch (Exception)
@@ -87,8 +59,6 @@ public static class StorageUsageHelper
         {
             var driveInfo = new DriveInfo(driveLetter);
 
-            // A zero-sized volume has nothing to report either; it reads as not ready
-            // rather than as a fourth sentence nobody translated.
             if (!driveInfo.IsReady || driveInfo.TotalSize == 0)
             {
                 return driveNotReadyMessage;
@@ -110,10 +80,6 @@ public static class StorageUsageHelper
         }
     }
 
-    /// <summary>
-    /// Short "1.2 / 4.0 TB" form for the dashboard stat tile, where the sentence-length
-    /// <see cref="GetStorageUsage"/> string reads as a paragraph rather than a figure.
-    /// </summary>
     public static string GetCompactUsage(string driveLetter, string fallback = "0 TB")
     {
         try

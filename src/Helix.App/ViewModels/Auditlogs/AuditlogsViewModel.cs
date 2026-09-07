@@ -11,40 +11,23 @@ namespace Helix.App.ViewModels.Auditlogs;
 
 internal sealed partial class AuditlogsViewModel : BaseViewModel
 {
-    /// <summary>
-    /// Every entry that was loaded, whatever the filter is showing.
-    /// </summary>
     private readonly List<AuditlogDisplay> _allAuditlogs = [];
 
     public AuditlogsViewModel()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Auditlogs = [];
         SearchTerm = string.Empty;
         SortOrder = SortOrder.Descending;
     }
 
-    /// <summary>What the list is showing: <see cref="_allAuditlogs"/> filtered and sorted.</summary>
     [ObservableProperty]
     public partial ObservableCollection<AuditlogDisplay> Auditlogs { get; set; }
 
-    /// <summary>
-    /// The live filter, applied as the user types.
-    /// </summary>
-    /// <remarks>
-    /// Matched against the sentence the row actually shows, which the query it replaced
-    /// could not do: the sentence is composed at display time in the user's language and
-    /// does not exist in the database. Searching for "disconnected" used to find nothing
-    /// while the page was full of the word.
-    /// </remarks>
     [ObservableProperty]
     public partial string SearchTerm { get; set; }
 
     partial void OnSearchTermChanged(string value) => ApplyFilterAndSort();
 
-    /// <summary>
-    /// Newest first by default, which is the end of a log anyone opening it wants.
-    /// </summary>
     [ObservableProperty]
     public partial SortOrder SortOrder { get; set; }
 
@@ -54,7 +37,6 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
 
     public bool ShowNoMatches => Auditlogs.Count == 0 && HasSearchTerm;
 
-    /// <summary>The caret on the date column.</summary>
     public string SortGlyph => SortOrder == SortOrder.Ascending ? IconFont.CaretUp : IconFont.CaretDown;
 
     [RelayCommand]
@@ -100,13 +82,6 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
         OnPropertyChanged(nameof(ShowNoMatches));
     }
 
-    /// <summary>
-    /// Matches the rendered sentence, and the drive letter behind it.
-    /// </summary>
-    /// <remarks>
-    /// The letter is matched separately because a one-character term is worth honouring
-    /// against it and the sentence would swallow it — "Z" appears in plenty of words.
-    /// </remarks>
     private static bool Matches(AuditlogDisplay log, string term) =>
         log.Description.Contains(term, StringComparison.CurrentCultureIgnoreCase) ||
         (log.EntityLetter?.Equals(term, StringComparison.OrdinalIgnoreCase) ?? false);

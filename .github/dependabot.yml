@@ -1,7 +1,6 @@
 version: 2
 
 updates:
-  # NuGet packages across the solution (src/ and tests/).
   - package-ecosystem: nuget
     directories:
       - "/"
@@ -20,7 +19,6 @@ updates:
       - dependencies
       - nuget
     groups:
-      # MAUI/Windows SDK packages move together — a partial bump usually fails to build.
       maui:
         patterns:
           - "Microsoft.Maui.*"
@@ -39,13 +37,11 @@ updates:
           - "Microsoft.NET.Test.Sdk"
           - "coverlet.*"
           - "NetArchTest.*"
-      # Everything else: batch low-risk updates into a single PR.
       minor-and-patch:
         update-types:
           - minor
           - patch
 
-  # GitHub Actions used by the workflows in .github/workflows.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:

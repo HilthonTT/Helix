@@ -10,13 +10,6 @@
              x:DataType="models:DriveDisplay">
 
     <Border Style="{StaticResource Row}" IsEnabled="{Binding IsNotBusy}">
-        <!--
-        Must match the column header grid on HomePage exactly. The storage column binds
-        DriveListLayout with a static Source, never RelativeSource: a ColumnDefinition is
-        not an Element, so an ancestor lookup on it has nothing to walk and failed inside
-        the item template — taking every row with it. The twelve-DIP column gap beside an
-        empty column is the one thing this cannot remove, and is accepted.
-        -->
         <Grid ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="28"/>
@@ -27,12 +20,6 @@
                 <ColumnDefinition Width="112"/>
             </Grid.ColumnDefinitions>
 
-
-            <!--
-            Selection tick. A Border rather than a CheckBox: the platform control brings
-            its own accent colour and metrics, and this sits in a row built entirely out of
-            the app's own pills and chips.
-            -->
             <Grid Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center">
                 <Grid.GestureRecognizers>
                     <TapGestureRecognizer Tapped="ToggleSelected"/>
@@ -55,7 +42,6 @@
                 </Border>
             </Grid>
 
-            <!-- Drive letter, monospaced so the column stays optically aligned -->
             <Border Grid.Column="1"
                     Style="{StaticResource CardInset}"
                     Padding="10,6"
@@ -67,11 +53,6 @@
                        HorizontalTextAlignment="Center"/>
             </Border>
 
-            <!--
-            Name over host and last-connected: "offline" alone says nothing about whether
-            the share dropped a minute ago or has never been reachable, and the name alone
-            is whatever the user called it — the host is what two drives actually differ by.
-            -->
             <VerticalStackLayout Grid.Column="2" Spacing="1" VerticalOptions="Center">
                 <Label Text="{Binding Name}"
                        Style="{StaticResource BodyStrong}"
@@ -93,21 +74,6 @@
                    MaxLines="1"
                    IsVisible="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=ShowStorage, x:DataType=common:DriveListLayout}"/>
 
-            <!--
-            The status is the toggle. Pills swap rather than one pill retinted by a
-            trigger, so the resting colours stay plain style values and the hover
-            animation has a stable colour to return to.
-
-            Three of them are ways of being offline, because "Disconnected" alone covered
-            a drive the user put down, a NAS that is on another network, and a share that
-            refused the password — and away from the NAS that is every row on the page,
-            all day, in the same red.
-
-            The busy one replaces all the others while a mount is in flight: the row is
-            disabled for the duration, so leaving the old pill up left the user pressing
-            "Disconnected" with nothing appearing to happen for as long as the share took
-            to answer.
-            -->
             <Grid Grid.Column="4" VerticalOptions="Center">
                 <Border Style="{StaticResource PillSuccess}"
                         IsVisible="{Binding ShowConnected}"
@@ -151,13 +117,6 @@
                     </HorizontalStackLayout>
                 </Border>
 
-                <!--
-                Offline, but the NAS never answered — the ordinary state of a laptop away
-                from it, so amber rather than red, and it says what it is instead of
-                sharing a word with a wrong password. Tappable like the others: pressing
-                it is a deliberate attempt, which is worth making even when the last
-                unattended one found nothing.
-                -->
                 <Border Style="{StaticResource PillWarning}"
                         IsVisible="{Binding ShowUnreachable}"
                         ToolTipProperties.Text="{Binding OfflineDetail}"
@@ -179,8 +138,6 @@
                     </HorizontalStackLayout>
                 </Border>
 
-                <!-- The NAS answered and the mount was refused: a real failure, and the
-                     tooltip carries what it said. -->
                 <Border Style="{StaticResource PillDanger}"
                         IsVisible="{Binding ShowFailed}"
                         ToolTipProperties.Text="{Binding OfflineDetail}"
@@ -217,16 +174,10 @@
                 </Border>
             </Grid>
 
-            <!-- Row actions -->
             <HorizontalStackLayout Grid.Column="5"
                                    Spacing="8"
                                    HorizontalOptions="End"
                                    VerticalOptions="Center">
-                <!--
-                The point of the whole app is that Z: exists; there was no way to go and
-                look at it. Only while the drive is mounted, because otherwise there is
-                nothing behind the folder — and the connect pill is right there for that.
-                -->
                 <Border Style="{StaticResource IconChip}"
                         IsVisible="{Binding Connected}"
                         ToolTipProperties.Text="{l10n:Translate OpenInFileManager}">

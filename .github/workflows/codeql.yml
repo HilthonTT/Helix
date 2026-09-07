@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    # Weekly scan so newly published queries are applied to unchanged code too.
     - cron: "27 5 * * 1"
   workflow_dispatch:
 
@@ -29,8 +28,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # build-mode "none" analyses the C# sources directly, so the MAUI
-          # workload and a Windows runner are not needed here.
           - language: csharp
             build-mode: none
           - language: actions

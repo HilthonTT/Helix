@@ -8,11 +8,6 @@
              x:Class="Helix.App.Views.Drives.DriveGroupTemplate"
              x:DataType="models:DriveGroupDisplay">
 
-    <!--
-    One chip per group: the name, how many drives are in it, and the two things anyone
-    ever wants to do to a group. Editing lives in the manager sheet rather than here —
-    a chip with three actions on it is a chip that gets misclicked.
-    -->
     <Border Style="{StaticResource Chip}" IsEnabled="{Binding IsNotBusy}">
         <HorizontalStackLayout Spacing="10">
             <Label Text="{Binding Name}"

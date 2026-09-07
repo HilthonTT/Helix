@@ -12,7 +12,6 @@ internal sealed partial class UpdatePasswordViewModel : BaseViewModel
 {
     public UpdatePasswordViewModel()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         CurrentPassword = string.Empty;
         NewPassword = string.Empty;
         ConfirmedNewPassword = string.Empty;

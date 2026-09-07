@@ -34,7 +34,6 @@ internal sealed partial class UpdateDriveModel : ObservableObject
 
     public UpdateDriveModel()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Letter = string.Empty;
         Host = string.Empty;
         Name = string.Empty;

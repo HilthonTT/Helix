@@ -4,16 +4,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!--
-    Design tokens.
-
-    Raw palette only. Nothing here is theme-aware — semantic pairs are suffixed
-    "Light"/"Dark" and resolved with {AppThemeBinding} inside Styles.xaml, so pages
-    apply styles rather than naming colours directly. The brand ramp is sampled from
-    the Helix logomark (Resources/Images/logoipsum.svg).
-    -->
-
-    <!-- ===== Brand ===== -->
     <Color x:Key="BrandAmber">#FFC212</Color>
     <Color x:Key="BrandGold">#F99419</Color>
     <Color x:Key="BrandOrange">#F77C1C</Color>
@@ -21,13 +11,11 @@
     <Color x:Key="BrandDeep">#D33F1A</Color>
     <Color x:Key="BrandInk">#422520</Color>
 
-    <!-- Brand washes: brand at low alpha, for selected rows and soft fills (#AARRGGBB) -->
     <Color x:Key="BrandWashDark">#24F14E23</Color>
     <Color x:Key="BrandWashLight">#16F14E23</Color>
     <Color x:Key="BrandWashStrongDark">#3DF14E23</Color>
     <Color x:Key="BrandWashStrongLight">#28F14E23</Color>
 
-    <!-- ===== Neutrals — warm stone, tuned to sit under the brand orange ===== -->
     <Color x:Key="CanvasDark">#121110</Color>
     <Color x:Key="SurfaceDark">#1B1918</Color>
     <Color x:Key="SurfaceAltDark">#242120</Color>
@@ -48,7 +36,6 @@
     <Color x:Key="TextMutedLight">#57534E</Color>
     <Color x:Key="TextFaintLight">#8A827C</Color>
 
-    <!-- ===== Status ===== -->
     <Color x:Key="SuccessDark">#34D399</Color>
     <Color x:Key="SuccessLight">#0E9F6E</Color>
     <Color x:Key="SuccessWashDark">#2634D399</Color>
@@ -66,7 +53,6 @@
 
     <Color x:Key="ScrimColor">#B3000000</Color>
 
-    <!-- ===== Brushes for the raw palette ===== -->
     <SolidColorBrush x:Key="BrandBrush" Color="{StaticResource Brand}"/>
     <SolidColorBrush x:Key="BrandAmberBrush" Color="{StaticResource BrandAmber}"/>
     <SolidColorBrush x:Key="BrandDeepBrush" Color="{StaticResource BrandDeep}"/>
@@ -94,19 +80,12 @@
     <SolidColorBrush x:Key="WarningWashDarkBrush" Color="{StaticResource WarningWashDark}"/>
     <SolidColorBrush x:Key="WarningWashLightBrush" Color="{StaticResource WarningWashLight}"/>
 
-    <!-- The brand gradient, lifted straight off the logomark. Used sparingly:
-         the sign-in panel and the dashboard's primary call to action. -->
     <LinearGradientBrush x:Key="BrandGradientBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="{StaticResource BrandAmber}" Offset="0.0"/>
         <GradientStop Color="{StaticResource BrandOrange}" Offset="0.5"/>
         <GradientStop Color="{StaticResource Brand}" Offset="1.0"/>
     </LinearGradientBrush>
 
-    <!--
-    ===== Legacy aliases =====
-    Kept so any stray reference outside the styled surface keeps resolving. Prefer
-    the styles in Styles.xaml over these.
-    -->
     <Color x:Key="Primary">#F14E23</Color>
     <Color x:Key="Secondary">#302C2A</Color>
     <Color x:Key="Tertiary">#F77C1C</Color>

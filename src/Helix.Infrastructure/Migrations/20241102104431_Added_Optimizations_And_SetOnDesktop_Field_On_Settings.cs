@@ -4,10 +4,8 @@
 
 namespace Helix.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class Added_Optimizations_And_SetOnDesktop_Field_On_Settings : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
@@ -43,7 +41,6 @@ namespace Helix.Infrastructure.Migrations
                 column: "CreatedOnUtc");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(

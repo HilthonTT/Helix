@@ -6,67 +6,27 @@ using System.Runtime.Versioning;
 
 namespace Helix.Infrastructure.Desktop;
 
-/// <summary>
-/// A Shell_NotifyIcon tray icon, owned by a hidden window on its own thread.
-/// </summary>
-/// <remarks>
-/// Why its own thread and not the UI one: a tray icon is driven entirely by window
-/// messages, and the menu it shows is modal — <c>TrackPopupMenuEx</c> does not return
-/// until the user picks something or clicks away. Running that on the MAUI dispatcher
-/// would freeze the app for as long as the menu is open. A private thread with its own
-/// message loop keeps the two independent, and means the icon still answers while the
-/// UI thread is busy connecting a drive.
-///
-/// The window is a real top-level window rather than a message-only one, even though it
-/// is never shown. A message-only window cannot be made foreground, and a popup menu
-/// whose owner is not foreground does not dismiss when the user clicks elsewhere — it
-/// hangs around over everything else until it is clicked directly.
-///
-/// Every public method may be called from any thread. Shell_NotifyIcon itself is safe to
-/// call from one, so only the menu — read on the message-loop thread, written from the
-/// caller's — needs the lock.
-/// </remarks>
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 {
     private const uint IconId = 1;
 
-    /// <summary>How long <see cref="Show"/> waits for the window and icon to appear.</summary>
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(5);
 
-    /// <summary>
-    /// How long teardown waits for the message loop to finish. Bounded because a thread
-    /// stuck in a modal menu must not hold sign-out or shutdown open.
-    /// </summary>
     private static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(2);
 
     private readonly ILogger<WindowsTrayIcon> _logger;
     private readonly Lock _gate = new();
     private readonly ManualResetEventSlim _ready = new(false);
 
-    /// <summary>The menu as it will be built the next time the user right-clicks.</summary>
     private IReadOnlyList<TrayMenuItem> _menu = [];
 
     private Thread? _thread;
     private IntPtr _windowHandle;
     private IntPtr _icon;
 
-    /// <summary>
-    /// Whether <see cref="_icon"/> is ours to destroy.
-    /// </summary>
-    /// <remarks>
-    /// The two sources differ: an icon extracted from the executable is a handle this
-    /// class allocated and must free, while the generic fallback is a shared system icon
-    /// that belongs to Windows and must be left alone. Destroying the latter corrupts it
-    /// for every other process that asked for it.
-    /// </remarks>
     private bool _ownsIcon;
 
-    /// <summary>
-    /// The registered window class, kept so it can be unregistered again. Each run uses a
-    /// fresh name, so without this every sign-in would leave one behind for the life of
-    /// the process.
-    /// </summary>
     private string? _className;
 
     private IntPtr _instanceHandle;
@@ -75,14 +35,8 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
     private bool _iconAdded;
     private bool _disposed;
 
-    /// <summary>
-    /// Held in a field for as long as the window lives. The window class stores a raw
-    /// function pointer, which is not a GC reference — letting the delegate be collected
-    /// leaves Windows calling into freed memory the next time a message arrives.
-    /// </summary>
     private WndProcDelegate? _wndProc;
 
-    /// <summary>Sent by the shell when Explorer restarts and every tray icon is lost.</summary>
     private uint _taskbarCreatedMessage;
 
     public WindowsTrayIcon(ILogger<WindowsTrayIcon> logger)
@@ -112,31 +66,20 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
                     Name = "Helix tray icon",
                 };
 
-                // The menu is modal and the loop is a classic Win32 pump; neither wants
-                // an apartment that pumps COM messages behind its back.
                 _thread.SetApartmentState(ApartmentState.STA);
 
-                // A loop that ended by itself - the window could not be created - left
-                // this set, and the next Show would have read _iconAdded before the new
-                // loop had got anywhere.
                 _ready.Reset();
 
                 _thread.Start();
             }
         }
 
-        // Wait for the window to exist before the first Shell_NotifyIcon call, which
-        // needs its handle. Bounded, so a failure to create it cannot hang sign-in.
         if (!_ready.Wait(StartupTimeout))
         {
             _logger.LogWarning("The tray icon window did not come up within the timeout; no icon will be shown.");
             return false;
         }
 
-        // Asked again on every Show rather than only when the loop started: the shell
-        // refuses NIM_ADD while the taskbar is still coming up at logon, and the
-        // TaskbarCreated message that follows is only sent to windows that already
-        // existed when Explorer restarted, not on the first logon.
         lock (_gate)
         {
             if (!_iconAdded)
@@ -147,9 +90,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
         UpdateTooltip();
 
-        // The loop sets this before signalling, so the wait above is what makes it safe
-        // to read from here. False means the shell refused the icon or the window was
-        // never created — either way there is nothing in the tray to click.
         return _iconAdded;
     }
 
@@ -193,8 +133,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
             RemoveIcon();
 
-            // Ends the message loop, which tears the window down on its own thread —
-            // DestroyWindow is only legal from the thread that created the window.
             PostMessageW(_windowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
 
             _windowHandle = IntPtr.Zero;
@@ -205,14 +143,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
             _ready.Reset();
         }
 
-        // Waited on outside the lock, and that placement is load-bearing: the loop thread
-        // takes this same lock to copy the menu when the user right-clicks, so joining
-        // while holding it would deadlock the two against each other.
-        //
-        // Waiting at all is what keeps a sign-out followed straight by a sign-in from
-        // running two loops at once. The second would overwrite the icon handle and class
-        // name while the first was still draining, and the first would then destroy the
-        // second's icon and un-root the delegate its window class still points at.
         JoinLoop(loop);
     }
 
@@ -232,7 +162,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         }
         catch (Exception ex)
         {
-            // A thread that will not come back is not worth blocking sign-out over.
             _logger.LogDebug(ex, "The tray icon thread did not join cleanly.");
         }
     }
@@ -246,17 +175,10 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
         _disposed = true;
 
-        // Hide waits for the loop to finish, so by the time it returns nothing is left to
-        // signal on the handle. Without that wait, disposing here raced the thread's own
-        // finally: the Set would throw from outside the catch guarding the loop, which is
-        // an unhandled exception on a background thread and takes the process down on the
-        // way out. The Set is guarded as well, for the case where the join times out.
         Hide();
 
         _ready.Dispose();
     }
-
-    // --- message loop -----------------------------------------------------
 
     private void RunMessageLoop()
     {
@@ -282,23 +204,13 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         }
         catch (Exception ex)
         {
-            // The tray is a convenience. A failure here must never take the app with it.
             _logger.LogError(ex, "The tray icon message loop faulted; the icon is gone for this session.");
         }
         finally
         {
-            // The loop is over, so the window is already gone (WM_DESTROY is what posted
-            // the quit message). Everything it allocated goes with it — otherwise each
-            // sign-out and back in leaves another icon handle and class registration
-            // behind for the life of the process.
             ReleaseIcon();
             UnregisterWindowClass();
 
-            // Let go of the thread slot if this loop is still the one occupying it, so a
-            // start that failed can be retried. Hide has usually cleared it already; what
-            // this covers is the loop ending by itself — a window that could not be
-            // created would otherwise leave the field set and every later Show would
-            // decline to start a replacement, with no tray for the rest of the session.
             lock (_gate)
             {
                 if (ReferenceEquals(_thread, Thread.CurrentThread))
@@ -307,15 +219,12 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
                 }
             }
 
-            // Unblocks anyone still waiting in Show() after a failed start. Guarded: a
-            // Dispose that gave up waiting may already have taken the handle away.
             try
             {
                 _ready.Set();
             }
             catch (ObjectDisposedException)
             {
-                // Shutting down, and nobody is left to wait on it.
             }
         }
     }
@@ -351,8 +260,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
             return;
         }
 
-        // Safe here and only here: a class cannot be unregistered while a window of it
-        // still exists, and by this point the window has been destroyed.
         if (!UnregisterClassW(className, _instanceHandle))
         {
             _logger.LogDebug(
@@ -365,8 +272,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
     {
         _wndProc = WindowProcedure;
 
-        // Unique per instance: registering a class name twice in one process fails, and
-        // a stale registration from a previous sign-in would otherwise collide.
         string className = $"HelixTrayIcon_{Guid.NewGuid():N}";
 
         var windowClass = new WNDCLASSEXW
@@ -383,12 +288,9 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
             return false;
         }
 
-        // Remembered so the loop can hand it back when it ends.
         _className = className;
         _instanceHandle = windowClass.hInstance;
 
-        // Never shown: no WS_VISIBLE, and zero size. It exists to own messages and the
-        // popup menu, both of which need a real top-level window.
         _windowHandle = CreateWindowExW(
             0,
             className,
@@ -413,7 +315,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
     {
         if (message == WM_TRAY_CALLBACK)
         {
-            // The mouse message is in the low word of lParam; the icon id is in the high.
             switch ((uint)(lParam.ToInt64() & 0xFFFF))
             {
                 case WM_LBUTTONUP:
@@ -429,7 +330,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
             return IntPtr.Zero;
         }
 
-        // Explorer restarted and threw away every tray icon; put ours back.
         if (_taskbarCreatedMessage != 0 && message == _taskbarCreatedMessage)
         {
             lock (_gate)
@@ -477,8 +377,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
         try
         {
-            // Command ids are 1-based: TrackPopupMenuEx returns 0 for "dismissed", so 0
-            // cannot also mean "the first item".
             for (int index = 0; index < items.Length; index++)
             {
                 TrayMenuItem item = items[index];
@@ -496,8 +394,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
             GetCursorPos(out POINT cursor);
 
-            // Required by the docs: without it the menu does not close when the user
-            // clicks away, because this window is not the foreground one.
             SetForegroundWindow(hWnd);
 
             int selected = TrackPopupMenuEx(
@@ -508,7 +404,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
                 hWnd,
                 IntPtr.Zero);
 
-            // Also from the docs: gives the menu a chance to finish tidying up.
             PostMessageW(hWnd, WM_NULL, IntPtr.Zero, IntPtr.Zero);
 
             if (selected <= 0 || selected > items.Length)
@@ -518,8 +413,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
             TrayMenuItem chosen = items[selected - 1];
 
-            // Handlers run use cases and touch the UI, and this thread is inside a modal
-            // menu's aftermath — hand the work off rather than blocking the loop on it.
             EventHandler<string>? handler = MenuItemSelected;
             if (handler is not null)
             {
@@ -531,8 +424,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
             DestroyMenu(menu);
         }
     }
-
-    // --- icon plumbing ----------------------------------------------------
 
     private void AddIcon()
     {
@@ -592,15 +483,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         szInfoTitle = string.Empty,
     };
 
-    /// <summary>
-    /// The icon Explorer already shows for this executable, so the tray matches the
-    /// taskbar. Falls back to the generic application icon rather than showing nothing —
-    /// an icon-less entry is a blank gap the user cannot click with any confidence.
-    /// </summary>
-    /// <returns>
-    /// The icon, and whether it is ours to destroy — see <see cref="_ownsIcon"/>. The
-    /// extracted one is; the shared fallback is not.
-    /// </returns>
     private (IntPtr Icon, bool Owned) LoadApplicationIcon()
     {
         try
@@ -611,7 +493,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
             {
                 IntPtr extracted = ExtractIconW(GetModuleHandleW(null), executable, 0);
 
-                // ExtractIcon returns 1 for "the file has no icons at all".
                 if (extracted != IntPtr.Zero && extracted != 1)
                 {
                     return (extracted, true);
@@ -648,11 +529,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         }
     }
 
-    /// <summary>
-    /// Clips to what the fixed-size buffer in NOTIFYICONDATAW holds. Marshalling a
-    /// longer string into a ByValTStr field throws, which would turn a long drive name
-    /// into a crash.
-    /// </summary>
     private static string Truncate(string? value, int maximumLength)
     {
         if (string.IsNullOrEmpty(value))
@@ -663,9 +539,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         return value.Length <= maximumLength ? value : value[..maximumLength];
     }
 
-    // --- Win32 interop ----------------------------------------------------
-
-    private const uint WM_TRAY_CALLBACK = 0x0400 + 1; // WM_APP + 1
+    private const uint WM_TRAY_CALLBACK = 0x0400 + 1;
     private const uint WM_NULL = 0x0000;
     private const uint WM_DESTROY = 0x0002;
     private const uint WM_CLOSE = 0x0010;

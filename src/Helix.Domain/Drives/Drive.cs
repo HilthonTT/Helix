@@ -40,15 +40,8 @@ public sealed class Drive : Entity, IAuditable
         ModifiedOnUtc = utcNow;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Drive"/> class.
-    /// </summary>
-    /// <remarks>
-    /// Required by EF Core.
-    /// </remarks>
     private Drive()
     {
-        // EF Core materializes these from the database right after this constructor runs.
         Letter = null!;
         Host = null!;
         Name = null!;
@@ -60,16 +53,6 @@ public sealed class Drive : Entity, IAuditable
 
     public string Letter { get; private set; }
 
-    /// <summary>
-    /// Where the share lives: an IPv4 address, an IPv6 address, or a hostname —
-    /// <c>192.168.0.10</c>, <c>fd00::5</c>, <c>nas.local</c> or plain <c>MYNAS</c>.
-    /// </summary>
-    /// <remarks>
-    /// This was <c>IpAddress</c> and accepted a dotted quad only, which meant a NAS
-    /// reached by name — the normal case on a home network, and the only stable one
-    /// when the server's lease moves — could not be entered at all. The connectors
-    /// each render this into their platform's own form.
-    /// </remarks>
     public string Host { get; private set; }
 
     public string Name { get; private set; }
@@ -78,65 +61,18 @@ public sealed class Drive : Entity, IAuditable
 
     public string Password { get; private set; }
 
-    /// <summary>
-    /// Whether this drive takes part in unattended connecting: the startup pass and the
-    /// watchdog's reconnect-after-a-drop. Off means the drive is only ever connected
-    /// when the user asks for it by name.
-    /// </summary>
-    /// <remarks>
-    /// The user-level <c>Settings.AutoConnect</c> stays the master switch; this narrows
-    /// it per drive. Both must be on for a drive to be connected unattended. Pressing
-    /// "connect all" is an explicit request and ignores this flag entirely.
-    /// </remarks>
     public bool AutoConnect { get; private set; }
 
-    /// <summary>
-    /// Whether the mapping is written into the Windows user profile, so Explorer
-    /// restores it at sign-in without Helix running. Ignored on macOS, which has no
-    /// equivalent of a remembered mapping.
-    /// </summary>
     public bool Persistent { get; private set; }
 
-    /// <summary>
-    /// Whether to mount this share under the server's DNS name rather than the address
-    /// typed into <see cref="Host"/>. Off by default, does nothing unless the host is an
-    /// IP literal, and ignored on macOS.
-    /// </summary>
-    /// <remarks>
-    /// Windows keys its one credential context per server <i>name string</i>, so
-    /// <c>\192.168.1.6</c> and <c>\NAS</c> get a slot each despite being one machine.
-    /// When another application holds the address under its own credentials — a backup
-    /// client that mounts the NAS at boot is the case this exists for — connecting under
-    /// the name sidesteps the collision rather than mounting on somebody else's session.
-    ///
-    /// That buys a guarantee the connector's fallbacks cannot: the drive comes up on its
-    /// <i>own</i> credentials, so a wrong stored password is still reported as one. The
-    /// cost is a reverse DNS lookup a home network may not answer, in which case the
-    /// address is used as typed and nothing is worse than before.
-    /// </remarks>
     public bool ConnectByHostname { get; private set; }
 
-    /// <summary>
-    /// When this drive last connected successfully, or null if it never has.
-    /// </summary>
-    /// <remarks>
-    /// The dashboard could previously only say whether a drive was up right now, which
-    /// answers nothing useful about one that is down: "offline" reads very differently
-    /// depending on whether it was last seen ten minutes or three months ago.
-    /// </remarks>
     public DateTime? LastConnectedOnUtc { get; private set; }
 
     public DateTime CreatedOnUtc { get; set; }
 
     public DateTime? ModifiedOnUtc { get; set; }
 
-    /// <summary>Stamps a successful connection.</summary>
-    /// <remarks>
-    /// Deliberately the only mutation that is not part of <see cref="Update"/>: it
-    /// records something that happened rather than something the user chose, and the
-    /// audit interceptor skips a save that changes nothing else — otherwise every
-    /// connect would file a "drive was changed" entry.
-    /// </remarks>
     public void MarkConnected(DateTime utcNow)
     {
         LastConnectedOnUtc = utcNow;
@@ -168,11 +104,6 @@ public sealed class Drive : Entity, IAuditable
         return drive;
     }
 
-    /// <remarks>
-    /// Every field is required, deliberately — no defaults on the flags. An update
-    /// replaces the whole drive, so a caller that forgot to pass them would silently
-    /// reset the user's choices rather than leave them alone.
-    /// </remarks>
     public void Update(
         string letter,
         string host,

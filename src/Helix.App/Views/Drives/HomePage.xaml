@@ -51,7 +51,6 @@
         </MenuBarItem>
     </ContentPage.MenuBarItems>
 
-    <!-- Root layers: content, scrim, then one AbsoluteLayout per modal sheet -->
     <Grid>
 
         <Grid RowDefinitions="Auto,*"
@@ -60,7 +59,6 @@
               ColumnSpacing="20"
               Padding="28,24">
 
-            <!-- ===== Page header ===== -->
             <Grid Grid.ColumnSpan="2" ColumnDefinitions="*,Auto" VerticalOptions="Center">
                 <VerticalStackLayout Spacing="2">
                     <Label Text="{l10n:Translate Dashboard}" Style="{StaticResource Display}"/>
@@ -68,13 +66,7 @@
                            Text="{Binding Source={x:Static l10n:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=l10n:LocalizationResourceManager}"/>
                 </VerticalStackLayout>
 
-                <!-- Adding a drive used to live only in the menu bar; it is the page's
-                     primary action, so it gets a primary button. Import/export are still
-                     in the Drives menu too, but they were undiscoverable there, so they
-                     sit alongside as secondary actions. -->
                 <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
-                    <!-- The auto-minimize countdown, present only while one is running.
-                         Its cancel and resume chips are the same two the stat card had. -->
                     <Border Style="{StaticResource Chip}"
                             Padding="12,7"
                             IsVisible="{Binding ShowCountdown}"
@@ -129,15 +121,10 @@
                 </HorizontalStackLayout>
             </Grid>
 
-            <!-- ===== Left column: stats over the drive list ===== -->
             <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" RowSpacing="20">
 
-                <!-- Two cards, not three. The auto-minimize countdown used to sit here
-                     as the third, level with how much storage the NAS has and how many
-                     drives are up; it is app chrome, and it is a chip in the header now. -->
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
 
-                    <!-- Storage -->
                     <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18">
                         <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
                             <HorizontalStackLayout Spacing="12">
@@ -162,7 +149,6 @@
                         </Grid>
                     </Border>
 
-                    <!-- Connections -->
                     <Border Grid.Column="1" Style="{StaticResource Card}" Padding="18">
                         <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
                             <HorizontalStackLayout Spacing="12">
@@ -189,10 +175,6 @@
 
                 </Grid>
 
-                <!-- ===== Groups ===== -->
-                <!-- Only when there are any: an empty strip is a band of nothing above
-                     the list, and the manager is reachable from the card header and the
-                     Drives menu regardless. -->
                 <Border Grid.Row="1"
                         Style="{StaticResource Card}"
                         Padding="20,14"
@@ -214,11 +196,9 @@
                     </Grid>
                 </Border>
 
-                <!-- ===== Drive list ===== -->
                 <Border x:Name="DriveCard" Grid.Row="2" Style="{StaticResource Card}">
                     <Grid RowDefinitions="Auto,Auto,*" Padding="20">
 
-                        <!-- Card header -->
                         <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,16">
                             <Label Text="{l10n:Translate YourDrives}"
                                    Style="{StaticResource Title1}"
@@ -242,27 +222,6 @@
                                        FontSize="12"/>
                             </Border>
 
-                            <!--
-                            Always on screen, filtering as it is typed. It replaced a
-                            modal with a Search button: four interactions and a database
-                            round trip to narrow a list that is already in memory.
-                            -->
-                            <!--
-                            End with a ceiling, never a fixed width, and never Fill.
-                            A WidthRequest of 240 in a star column that can be narrower
-                            than 240 does not shrink: the border overflowed into the chips
-                            beside it and was clipped, losing its right edge and the clear
-                            button with it. Fill fixed that and introduced the opposite
-                            problem — a child clamped by MaximumWidthRequest is arranged at
-                            the *start* of its column, so on a wide window the box sat by
-                            the title with a gulf between it and the buttons.
-
-                            End is what gets both. The border's content is a grid with a
-                            star column, so it still asks for the whole column and is
-                            capped at 300; End then puts that against the chips. It shrinks
-                            with the column rather than overflowing it, which is the one
-                            thing a WidthRequest could never do.
-                            -->
                             <Border Grid.Column="4"
                                     Style="{StaticResource Field}"
                                     MaximumWidthRequest="300"
@@ -275,9 +234,6 @@
                                            VerticalOptions="Center"
                                            TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
 
-                                    <!-- Right margin as well as left: with no clear
-                                         button showing there is nothing else holding the
-                                         text off the border. -->
                                     <Entry x:Name="DriveSearch"
                                            Grid.Column="1"
                                            Margin="8,0,10,0"
@@ -311,9 +267,6 @@
                             <HorizontalStackLayout Grid.Column="5"
                                                    Spacing="8"
                                                    IsVisible="{Binding HasSelection, Converter={StaticResource InvertedBoolConverter}}">
-                                <!-- Labels hide when the card is compact; the tooltip
-                                     says the same thing, so an icon-only chip is still
-                                     explained. -->
                                 <Border Style="{StaticResource Chip}"
                                         IsEnabled="{Binding IsNotBusy}"
                                         Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}"
@@ -371,12 +324,6 @@
 
                             </HorizontalStackLayout>
 
-                            <!--
-                            Replaces the all-drives chips rather than sitting beside them.
-                            Two pairs of Connect/Disconnect buttons on one line, one
-                            meaning "every drive" and the other "the three you ticked", is
-                            the kind of ambiguity that gets a NAS unmounted by accident.
-                            -->
                             <HorizontalStackLayout Grid.Column="5"
                                                    Spacing="8"
                                                    IsVisible="{Binding HasSelection}">
@@ -422,19 +369,9 @@
                             </HorizontalStackLayout>
                         </Grid>
 
-                        <!-- Column headers, aligned to DriveTemplate's grid -->
                         <VerticalStackLayout Grid.Row="1"
                                              Spacing="10"
                                              IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
-                            <!--
-                            Sized to what each column holds and nothing more, because
-                            every DIP taken here is taken from the name. 112 for the
-                            actions, not Auto: a connected drive shows three chips and a
-                            disconnected one shows two, so an Auto column made every
-                            other column in that row a different width from its
-                            neighbours. Storage is bound: it collapses to 0 when the card
-                            is compact. Must match DriveTemplate's grid exactly.
-                            -->
                             <Grid ColumnSpacing="12" Padding="12,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="28"/>
@@ -445,7 +382,6 @@
                                     <ColumnDefinition Width="112"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Select-all, in the column the rows put their tick in. -->
                                 <Grid VerticalOptions="Center"
                                       HorizontalOptions="Center"
                                       ToolTipProperties.Text="{l10n:Translate SelectAll}">
@@ -470,11 +406,6 @@
                                     </Border>
                                 </Grid>
 
-                                <!--
-                                Three of the five order the list. Storage usage does not:
-                                the column holds a sentence built for reading, and sorting
-                                drives by the text of it would put 9 GB after 40 TB.
-                                -->
                                 <HorizontalStackLayout Grid.Column="1"
                                                        Spacing="5"
                                                        behaviors:Hover.Cursor="True">
@@ -531,13 +462,6 @@
                             <BoxView Style="{StaticResource Divider}"/>
                         </VerticalStackLayout>
 
-                        <!-- Rows -->
-                        <!--
-                        A CollectionView rather than a BindableLayout in a ScrollView:
-                        that realized every row up front, which is fine for thirteen
-                        drives and is the same shape the audit log was built in, where it
-                        is ninety days of history. This one recycles.
-                        -->
                         <CollectionView Grid.Row="2"
                                         Margin="0,8,0,0"
                                         ItemsSource="{Binding Drives}"
@@ -553,8 +477,6 @@
                             </CollectionView.ItemTemplate>
                         </CollectionView>
 
-                        <!-- Nothing matched the filter. Distinct from having no drives:
-                             the answer is to clear the box, not to add a drive. -->
                         <VerticalStackLayout Grid.Row="1"
                                              Grid.RowSpan="2"
                                              Spacing="10"
@@ -586,7 +508,6 @@
                                     Command="{Binding ClearSearchCommand}"/>
                         </VerticalStackLayout>
 
-                        <!-- Empty state -->
                         <VerticalStackLayout Grid.Row="1"
                                              Grid.RowSpan="2"
                                              Spacing="10"
@@ -621,7 +542,6 @@
                 </Border>
             </Grid>
 
-            <!-- ===== Right column: connectivity ===== -->
             <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Card}">
                 <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="20" RowSpacing="16">
                     <Label Text="{l10n:Translate Connectivity}" Style="{StaticResource Title1}"/>
@@ -679,7 +599,6 @@
             </Border>
         </Grid>
 
-        <!-- ===== Modal layer ===== -->
         <BoxView x:Name="BlockScreen"
                  Color="{StaticResource Black}"
                  Opacity="0"
@@ -716,8 +635,6 @@
                                           AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
-        <!-- Last child of the root grid, so a banner sits above the modal layer too:
-             a failure raised from inside a sheet has to be readable without closing it. -->
         <controls:NotificationHost/>
 
     </Grid>

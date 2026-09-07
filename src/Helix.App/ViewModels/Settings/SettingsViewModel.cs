@@ -30,7 +30,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     {
         _loggedInUser = App.ServiceProvider.GetRequiredService<ILoggedInUser>();
 
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Languages = [];
         SelectedLanguage = string.Empty;
         CurrentSection = AccountSection;
@@ -45,37 +44,12 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     [ObservableProperty]
     public partial SettingsDisplay? Settings { get; set; }
 
-    /// <summary>
-    /// Whether this head has a system tray at all, so the two switches that only mean
-    /// something with one are hidden rather than shown and ignored.
-    /// </summary>
-    /// <remarks>
-    /// The tray service's own answer rather than a platform check of its own: it is the
-    /// same question, and macOS answers it with a no-op icon. Read once per page rather
-    /// than stored, because it cannot change while the app runs.
-    /// </remarks>
     public bool SupportsTray =>
         App.ServiceProvider.GetRequiredService<TrayIconService>().IsSupported;
 
-    /// <summary>
-    /// The ceiling the low-space field clamps to, taken from the domain rather than
-    /// written into the page, so the control cannot let through a figure
-    /// <c>UpdateSettings</c> will then reject.
-    /// </summary>
-    /// <remarks>
-    /// An instance property, not a static one: the page binds to it, and a compiled
-    /// binding resolves against the DataType's instance members.
-    /// </remarks>
     public int MaximumStorageAlertThresholdPercent =>
         SettingsModel.MaximumStorageAlertThresholdPercent;
 
-    /// <summary>
-    /// What the updater is doing, or empty while it is doing nothing.
-    /// </summary>
-    /// <remarks>
-    /// A release is a couple of hundred megabytes, which is long enough that a button
-    /// that merely goes disabled reads as a button that did nothing.
-    /// </remarks>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUpdateStatus))]
     public partial string UpdateStatus { get; set; }
@@ -89,7 +63,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     public partial string SelectedLanguage { get; set; }
     partial void OnSelectedLanguageChanged(string value)
     {
-        // "no selection yet" is not a language — StringToLanguage would throw on it.
         if (string.IsNullOrEmpty(value))
         {
             return;
@@ -127,10 +100,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Send(new UpdatePasswordMessage(true));
     }
 
-    /// <summary>
-    /// Writes the log files to a folder the user picks, so they have something concrete
-    /// to attach to a bug report.
-    /// </summary>
     [RelayCommand]
     private async Task ExportDiagnosticsAsync()
     {
@@ -146,13 +115,10 @@ internal sealed partial class SettingsViewModel : BaseViewModel
             Result<string> result = await ScopedHandler.HandleAsync((ExportDiagnostics h) => h.Handle());
             if (result.IsFailure)
             {
-                // Cancelling the folder picker reports itself as a failure here, the same
-                // way the drive export does; both surface it as a plain message.
                 await DisplayErrorAsync(result.Error);
                 return;
             }
 
-            // The path is the useful part — the user has to go and find the file.
             await DisplaySuccessAsync($"{AppResources.DiagnosticsExported}{Environment.NewLine}{result.Value}");
         }
         finally
@@ -161,17 +127,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         }
     }
 
-    /// <summary>
-    /// Asks GitHub whether a newer Helix has been released, and offers to install it.
-    /// </summary>
-    /// <remarks>
-    /// Manual on purpose: replacing the app is not something to do behind the user's
-    /// back, and the check itself is one HTTP call they can make when it suits them.
-    ///
-    /// Opening the release page stays as the other option, and is the only one where a
-    /// release carries no build for this machine, where the app was put somewhere the
-    /// user cannot write to, or where they would simply rather do it themselves.
-    /// </remarks>
     [RelayCommand]
     private async Task CheckForUpdatesAsync()
     {
@@ -204,8 +159,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
                 check.LatestVersion,
                 check.CurrentVersion);
 
-            // Only offered where it can actually be carried out: an install button that
-            // fails on the last step is worse than not offering one.
             bool canInstall = check.CanInstall &&
                 App.ServiceProvider.GetRequiredService<IUpdateInstaller>().IsSupported;
 
@@ -250,19 +203,8 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         }
     }
 
-    /// <summary>
-    /// Downloads the release, asks once more, and hands the swap over.
-    /// </summary>
-    /// <remarks>
-    /// The confirmation comes after the download rather than before it, so what the user
-    /// is agreeing to is a file that is already on disk and already looks like Helix.
-    /// Everything up to that point leaves the install untouched and can be abandoned at
-    /// no cost; everything after it happens in a helper process that outlives this one.
-    /// </remarks>
     private async Task InstallAsync(UpdateCheck check)
     {
-        // Created here so its callbacks land on the UI thread, which is where the bound
-        // status text has to be written.
         var progress = new Progress<double>(fraction =>
             UpdateStatus = string.Format(AppResources.UpdateDownloading, (int)(fraction * 100)));
 
@@ -289,8 +231,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
         if (!install)
         {
-            // The staged copy is left where it is: they may come back to it, and the next
-            // attempt at this version clears the folder before using it again.
             return;
         }
 
@@ -309,13 +249,8 @@ internal sealed partial class SettingsViewModel : BaseViewModel
             "Quitting to let the update to {Version} be applied.",
             check.LatestVersion);
 
-        // Taken down first: an icon whose process has gone stays in the tray until the
-        // user happens to mouse over it, and this one would sit there through the swap.
         App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
 
-        // The helper is waiting on this process to exit before it moves anything, so
-        // there is nothing to do here but go — and go without the close button putting
-        // the window away instead of closing it.
         MainWindow.Exit();
     }
 
@@ -327,8 +262,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            // A missing browser association is not worth an alert over — the same
-            // treatment the repository link in the sidebar gets.
             AppLog.For<SettingsViewModel>().LogWarning(ex, "Could not open the release page.");
         }
     }
@@ -337,8 +270,6 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     {
         try
         {
-            // The page instance is cached by Shell across logins — re-read the
-            // username so a different account doesn't see the previous one.
             Username = _loggedInUser.Username;
 
             Result<SettingsModel> result = await ScopedHandler.HandleAsync(

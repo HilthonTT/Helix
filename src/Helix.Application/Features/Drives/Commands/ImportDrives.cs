@@ -78,8 +78,6 @@ public sealed class ImportDrives(
             return Result.Failure<List<Drive>>(JsonErrors.VaultInvalidDriveData);
         }
 
-        // Validate every DTO with the same rules as CreateDrive.Validate. Reject the
-        // entire vault on the first invalid entry — partial imports are confusing.
         foreach (DriveImportDto dto in dtos)
         {
             if (!IsValidDto(dto))
@@ -88,15 +86,11 @@ public sealed class ImportDrives(
             }
         }
 
-        // Case-insensitive dedup so that "C" and "c" collapse to one entry, matching
-        // the server-side uniqueness check in DriveRepository.IsLetterUniqueAsync.
         List<DriveImportDto> distinct = dtos
             .GroupBy(d => d.Letter.ToUpperInvariant())
             .Select(g => g.First())
             .ToList();
 
-        // Build candidate Drive entities (with fresh Ids + correct UserId) so that
-        // the existing-letter check can use the same repository method.
         List<Drive> candidates = distinct
             .Select(d => Drive.Create(
                 loggedInUser.UserId,
@@ -115,22 +109,8 @@ public sealed class ImportDrives(
             loggedInUser.UserId,
             cancellationToken);
 
-        // Case-insensitively, like every other comparison of a drive letter in the app.
-        // A plain Contains is ordinal, and this one silently depended on Drive.Create
-        // having uppercased both sides: any row that ever reached the table with a
-        // lowercase letter would not match its candidate and would be imported a second
-        // time, under a letter already in use.
         var taken = new HashSet<string>(existingDriveLetters, StringComparer.OrdinalIgnoreCase);
 
-        // The same check CreateDrive makes: a letter held by a USB stick, an optical
-        // drive or another account's mapping would import fine and then fail at every
-        // connect with a Windows error that named no field.
-        //
-        // A letter that is mounted from the very share being imported is not that. It is
-        // the usual state of the machine a backup is restored on: the mappings outlived
-        // the records — persistent ones survive a reinstall, live ones an update — and
-        // treating them as taken meant a vault of thirteen drives imported nothing until
-        // every share had been disconnected by hand.
         HashSet<string> connected = nasConnector.GetConnectedLetters();
 
         List<Drive> newDrives = candidates
@@ -138,9 +118,6 @@ public sealed class ImportDrives(
             .Where(drive => !connected.Contains(drive.Letter) || nasConnector.IsMountedFrom(drive))
             .ToList();
 
-        // Reported rather than announced as a success: "your drives have been imported"
-        // over an unchanged list is what sent one user disconnecting every share to find
-        // out why.
         if (newDrives.Count == 0)
         {
             return Result.Failure<List<Drive>>(JsonErrors.NothingToImport);
@@ -192,8 +169,6 @@ public sealed class ImportDrives(
                 { DevicePlatform.macOS, new[] { FileExtension } },
             });
 
-        // No title: this layer has no access to the translated strings, and the OS
-        // dialog's own default is at least in the user's language.
         return new PickOptions
         {
             FileTypes = fileTypes,

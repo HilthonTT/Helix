@@ -62,11 +62,6 @@ public sealed class GetAvailableDriveLettersTests
         result.Value.Should().HaveCount(26).And.StartWith("A").And.EndWith("Z");
     }
 
-    /// <summary>
-    /// The gap the old uniqueness check left: a letter belonging to a USB stick, an
-    /// optical drive or another account's mapping is not in this user's drive list, and
-    /// used to be offered right up until the connect failed.
-    /// </summary>
     [Fact]
     public async Task Handle_Should_ExcludeLettersTheOperatingSystemAlreadyHas()
     {
@@ -93,8 +88,6 @@ public sealed class GetAvailableDriveLettersTests
         Drive edited = DriveOn("Z");
         HaveDrives(edited, DriveOn("Y"));
 
-        // Its own letter is in use by itself; excluding it would force a letter change
-        // on anyone editing an unrelated field.
         Result<List<string>> result = await _getAvailableDriveLetters.Handle(
             new GetAvailableDriveLetters.Request(edited.Id));
 

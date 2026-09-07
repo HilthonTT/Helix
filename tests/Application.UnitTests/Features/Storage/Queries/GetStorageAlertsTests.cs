@@ -73,12 +73,6 @@ public class GetStorageAlertsTests
             .ProbeAsync(Arg.Any<IReadOnlyCollection<string>>(), Arg.Any<CancellationToken>())
             .Returns(volumes);
 
-    /// <summary>A volume of <paramref name="total"/> bytes with <paramref name="freePercent"/> left.</summary>
-    /// <remarks>
-    /// Rounded up, because the handler compares a percentage the probe rounds down: take
-    /// the exact share of a terabyte-sized volume and integer division lands a byte or
-    /// two short, which reads back as one percent less than the test asked for.
-    /// </remarks>
     private static VolumeUsage Volume(long total, int freePercent, params string[] letters)
     {
         long free = (long)Math.Ceiling(total * freePercent / 100.0);
@@ -111,8 +105,6 @@ public class GetStorageAlertsTests
     [Fact]
     public async Task Handle_Should_ReportEveryVolumeItMeasured_NotOnlyTheFullOnes()
     {
-        // What lets the caller forget a warning only for a volume that was measured and
-        // found fine, rather than for one that simply was not measured this time.
         Drive second = Drive.Create(UserId, "Y", "192.168.0.2", "Backups", "Username", "Password");
 
         _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>()).Returns([_drive, second]);
@@ -131,8 +123,6 @@ public class GetStorageAlertsTests
     [Fact]
     public async Task Handle_Should_SayNothing_AboutAVolumeAtTheThreshold()
     {
-        // Exactly at the threshold is not yet below it. Warning here would mean a user
-        // who asks to hear at 10% hears at 10%, every time, forever.
         WithVolumes(Volume(4 * Terabyte, freePercent: 10, "Z"));
 
         Result<StorageAlertReport> result = await _getStorageAlerts.Handle();
@@ -150,8 +140,6 @@ public class GetStorageAlertsTests
 
         result.Value.Alerts.Should().BeEmpty();
 
-        // Nothing measured either: a volume nobody asked about is a blocking read against
-        // a network share for no reason.
         await _storageProbeMock.DidNotReceive()
             .ProbeAsync(Arg.Any<IReadOnlyCollection<string>>(), Arg.Any<CancellationToken>());
     }
@@ -168,7 +156,6 @@ public class GetStorageAlertsTests
 
         await _getStorageAlerts.Handle();
 
-        // A drive that is not connected has not run out of space — it has not been asked.
         await _storageProbeMock.Received(1).ProbeAsync(
             Arg.Is<IReadOnlyCollection<string>>(letters => letters.SequenceEqual(new[] { "Z" })),
             Arg.Any<CancellationToken>());
@@ -177,9 +164,6 @@ public class GetStorageAlertsTests
     [Fact]
     public async Task Handle_Should_ReportOnePoolOnce_NamingEveryShareOfIt()
     {
-        // The whole reason the probe answers in volumes: thirteen shares of one NAS are
-        // one thing running out of room, and thirteen notifications about it would teach
-        // the user to dismiss them.
         Drive second = Drive.Create(UserId, "Y", "192.168.0.1", "Backups", "Username", "Password");
 
         _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>()).Returns([_drive, second]);
@@ -214,8 +198,6 @@ public class GetStorageAlertsTests
     [Fact]
     public async Task Handle_Should_SayNothing_WhenTheUserHasNoSettingsYet()
     {
-        // Runs unattended, so it reports nothing rather than creating the row a signed-in
-        // user would have got from opening the settings page.
         _settingsRepositoryMock
             .GetByUserIdAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>())
             .Returns((SettingsModel?)null);
@@ -229,8 +211,6 @@ public class GetStorageAlertsTests
     [Fact]
     public async Task Handle_Should_FallBackToTheLetter_WhenAVolumeIsMountedByADriveThatIsGone()
     {
-        // The probe answers about letters; the names come from the drive rows. If the two
-        // ever disagree the warning still has to identify something.
         WithVolumes(Volume(4 * Terabyte, freePercent: 3, "Q"));
 
         Result<StorageAlertReport> result = await _getStorageAlerts.Handle();

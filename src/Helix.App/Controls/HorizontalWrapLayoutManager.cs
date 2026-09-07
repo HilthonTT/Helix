@@ -62,7 +62,6 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
             }
         }
 
-        // Account for the last row
         totalWidth = Math.Max(totalWidth, currentRowWidth);
         totalHeight += currentRowHeight;
 
@@ -132,11 +131,6 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
         return CalculateActualSize(maxStackWidth, currentRowTop, currentRowHeight, bounds);
     }
 
-    /// <summary>
-    /// Starts the next row back at <paramref name="rowStartX"/> — the same origin the
-    /// first row used. Resetting to the padding alone dropped the bounds' own left
-    /// offset, so every row after the first was arranged that much too far left.
-    /// </summary>
     private void MoveToNextRow(ref double currentX, ref double currentRowTop, double currentRowHeight, double rowStartX)
     {
         currentX = rowStartX;

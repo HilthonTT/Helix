@@ -9,12 +9,6 @@ public abstract class Entity
         Id = id;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Entity"/> class.
-    /// </summary>
-    /// <remarks>
-    /// Required by EF Core.
-    /// </remarks>
     protected Entity()
     {
     }

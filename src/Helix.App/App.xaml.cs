@@ -28,19 +28,10 @@ public sealed partial class App : AppBase
         }
         catch (Exception ex)
         {
-            // A database that will not open - wrong key, corrupt file, a migration that
-            // failed - used to throw out of this constructor into nowhere. There is no
-            // window yet, so this is the one place that can still say what happened.
             StartupFailure.Exit(logger, ex);
         }
     }
 
-    /// <summary>
-    /// Last-resort safety net. Without these hooks any exception that escapes an
-    /// <c>async void</c> handler, a background task, or the WinUI dispatcher tears the
-    /// whole process down. Here we log every fault and, for the WinUI UI thread,
-    /// mark it handled so the app stays alive and shows an alert instead of crashing.
-    /// </summary>
     private static void RegisterGlobalExceptionHandlers()
     {
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
@@ -57,12 +48,8 @@ public sealed partial class App : AppBase
         {
             AppLog.For<App>().LogError(e.Exception, "Unhandled WinUI exception; the app was kept alive.");
 
-            // Keep the app alive; surface the failure without killing the process.
             e.Handled = true;
 
-            // Notifier holds this until a page with a banner host is on screen, which
-            // matters here more than anywhere: a fault during startup or navigation used
-            // to have no window to raise an alert on and was reported to nobody.
             Notifier.Error(e.Exception?.Message ?? AppResources.UnexpectedError);
         };
 #endif
@@ -73,10 +60,6 @@ public sealed partial class App : AppBase
         var window = new Window(new AppShell());
 
 #if MACCATALYST
-        // Windows sizes its window through AppWindow in a lifecycle event; Catalyst has
-        // no equivalent, so the same WindowSizing rule is applied to MAUI's own window
-        // geometry. DisplayInfo reports physical pixels and these properties take
-        // device-independent units, hence the density divide.
         DisplayInfo display = DeviceDisplay.Current.MainDisplayInfo;
         double density = display.Density > 0 ? display.Density : 1;
 

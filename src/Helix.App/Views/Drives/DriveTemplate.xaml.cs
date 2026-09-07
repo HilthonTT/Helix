@@ -21,16 +21,12 @@ public sealed partial class DriveTemplate : ContentView
     {
         InitializeComponent();
 
-        // Both singletons, so holding them in fields is allowed where a scoped handler
-        // would not be.
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
         _fileBrowser = App.ServiceProvider.GetRequiredService<IFileBrowser>();
     }
 
     protected override void OnBindingContextChanged()
     {
-        // Without the base call the BindingContext is never propagated to Content,
-        // leaving every {Binding} in the template unresolved.
         base.OnBindingContextChanged();
 
         if (BindingContext is DriveDisplay drive)
@@ -40,17 +36,6 @@ public sealed partial class DriveTemplate : ContentView
         }
     }
 
-    /// <summary>
-    /// Pushes live connectivity onto the bound model. The row's status pill, capacity
-    /// line and enabled state are all data-bound, so refreshing the model is all the
-    /// view needs — no imperative control updates.
-    /// </summary>
-    /// <remarks>
-    /// Connectivity is a cheap logical-drive lookup and stays inline, but capacity does
-    /// I/O against the share and can block for seconds on an unreachable NAS. Since the
-    /// monitor now refreshes rows on a timer, that probe is pushed off the UI thread —
-    /// leaving it inline would stall the app on every poll while a drive was down.
-    /// </remarks>
     private void RefreshStatus(DriveDisplay drive)
     {
         drive.Connected = _nasConnector.IsConnected(drive.Letter);
@@ -60,23 +45,17 @@ public sealed partial class DriveTemplate : ContentView
 
     private static async Task RefreshStorageUsageAsync(DriveDisplay drive)
     {
-        // The three strings the helper can answer with are handed in translated: the
-        // helper is a static utility with no view behind it, and left to its defaults it
-        // wrote "Drive not ready" in English on every offline row of a page in Japanese.
         string usage = await StorageUsageHelper.GetStorageUsageAsync(
             drive.Letter,
             AppResources.DriveNotReady,
             AppResources.InvalidDriveLetter,
             AppResources.StorageUsedOf);
 
-        // The row may have been rebound to another drive while the probe ran.
         MainThread.BeginInvokeOnMainThread(() => drive.StorageUsage = usage);
     }
 
     private async void ToggleConnect(object? sender, TappedEventArgs e)
     {
-        // Event handler is `async void`: an escaping exception would tear down the
-        // whole app. Guard it so connection problems always surface in the banner.
         try
         {
             await ToggleConnectInternalAsync();
@@ -100,8 +79,6 @@ public sealed partial class DriveTemplate : ContentView
             ? new DisconnectDrive.Request(drive.Id)
             : new ConnectDrive.Request(drive.Id);
 
-        // Blocks a second click while the mount is in flight — the row binds its
-        // IsEnabled to this.
         drive.IsBusy = true;
 
         try
@@ -109,9 +86,6 @@ public sealed partial class DriveTemplate : ContentView
             Result result = await HandleDriveConnection(request);
             if (result.IsFailure)
             {
-                // The row keeps the reason as well as reporting it: the banner is gone in
-                // a few seconds and the pill is what is still there next time the user
-                // looks at the page.
                 if (request is ConnectDrive.Request)
                 {
                     MarkOffline(drive, result.Error);
@@ -121,8 +95,6 @@ public sealed partial class DriveTemplate : ContentView
                 return;
             }
 
-            // Mirrors what ConnectDrive just persisted, so the row's "last connected"
-            // line is right without refetching the drive to read it back.
             if (request is ConnectDrive.Request)
             {
                 drive.LastConnectedOnUtc = DateTime.UtcNow;
@@ -150,23 +122,12 @@ public sealed partial class DriveTemplate : ContentView
         };
     }
 
-    /// <summary>
-    /// Files why an attempt did not mount the drive, from whichever path made it.
-    /// </summary>
-    /// <remarks>
-    /// The unreachable case gets the localized sentence rather than the error's own
-    /// description, because it is the one the user sees daily and the one there is
-    /// something to say about — the domain's descriptions are not translated. A refusal is
-    /// reported in the share's own words, which is the whole value of it.
-    /// </remarks>
     private static void MarkOffline(DriveDisplay drive, Error error) => drive.MarkOffline(error);
 
     private void ToggleSelected(object? sender, TappedEventArgs e)
     {
         if (BindingContext is DriveDisplay drive)
         {
-            // The row is disabled while a mount is in flight, which takes the tick with
-            // it, so there is no guard needed here beyond the cast.
             drive.IsSelected = !drive.IsSelected;
         }
     }
@@ -216,9 +177,6 @@ public sealed partial class DriveTemplate : ContentView
                 return;
             }
 
-            // Mutate the bound DriveDisplay too — it lives in HomeViewModel.Drives,
-            // and leaving it stale makes later connectivity refreshes revert the row
-            // to the old letter/name.
             drive.Letter = m.UpdatedDrive.Letter;
             drive.Name = m.UpdatedDrive.Name;
             drive.Host = m.UpdatedDrive.Host;
@@ -238,8 +196,5 @@ public sealed partial class DriveTemplate : ContentView
             RefreshStatus(drive);
         });
 
-        // DriveAttemptFailedMessage - what the watchdog learned while nobody was looking -
-        // is applied by HomeViewModel to the master list, so it reaches rows this
-        // template is not currently bound to as well.
     }
 }

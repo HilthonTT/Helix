@@ -10,17 +10,6 @@ namespace Helix.App.ViewModels;
 
 public abstract partial class BaseViewModel : ObservableObject
 {
-    /// <summary>
-    /// Whether the auto-minimize countdown has already been armed this session.
-    /// </summary>
-    /// <remarks>
-    /// The countdown is a once-per-sign-in affair, not a once-per-page-visit one. Shell
-    /// caches the dashboard and raises <c>OnAppearing</c> every time the user navigates
-    /// back to it, so without this flag the countdown was re-armed — and the window
-    /// minimized again — on each return. Static because the countdown service behind it
-    /// is a singleton that outlives any single viewmodel; <see cref="ResetCountdown"/>
-    /// clears it on sign-out.
-    /// </remarks>
     private static bool _countdownStarted;
 
     private readonly ICountdownService _countdownService;
@@ -38,13 +27,6 @@ public abstract partial class BaseViewModel : ObservableObject
 
     public bool IsNotBusy => !IsBusy;
 
-    /// <summary>
-    /// The running version, as the sign-in pages show it under the wordmark.
-    /// </summary>
-    /// <remarks>
-    /// Plain rather than observable: it is fixed for the life of the process, and the
-    /// same string the sidebar footer is built from, so the two can never disagree.
-    /// </remarks>
     public string AppVersion => $"v{VersionInfo.Display}";
 
     [ObservableProperty]
@@ -59,29 +41,8 @@ public abstract partial class BaseViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowCountdown))]
     public partial int SecondsRemaining { get; set; }
 
-    /// <summary>
-    /// The countdown as the header chip shows it.
-    /// </summary>
-    /// <remarks>
-    /// <c>m:ss</c> rather than a sentence. It used to be <c>$"{SecondsRemaining} seconds"</c>,
-    /// which was English in an app translated into five languages and said "1 seconds" on
-    /// the way past. Digits and a colon are the same in all of them, and a clock face is
-    /// what a countdown looks like anyway — the chip's icon and tooltip say what it counts
-    /// down to.
-    /// </remarks>
     public string CountdownDisplay => TimeSpan.FromSeconds(Math.Max(SecondsRemaining, 0)).ToString(@"m\:ss");
 
-    /// <summary>
-    /// Whether the auto-minimize countdown is worth any room on screen.
-    /// </summary>
-    /// <remarks>
-    /// It used to hold a third of the dashboard's stat row, level with how much storage
-    /// the NAS has and how many drives are up — app chrome given the same weight as the
-    /// two facts the page exists to report, and shown even to the users who have
-    /// auto-minimize switched off and will never see it move. It is a chip in the header
-    /// now, and only while something is actually counting: nothing is armed when both of
-    /// these are at rest.
-    /// </remarks>
     public bool ShowCountdown => SecondsRemaining > 0 || TimerCancelled;
 
     [RelayCommand]
@@ -93,9 +54,6 @@ public abstract partial class BaseViewModel : ObservableObject
     [RelayCommand]
     private async Task ResumeTimerAsync()
     {
-        // Resume only picks up a countdown that still has time left on it. Once it has
-        // run out there is nothing to resume, so the chip has to arm a fresh one —
-        // otherwise it looked live but did nothing after the app had minimized once.
         if (SecondsRemaining > 0)
         {
             _countdownService.Resume();
@@ -115,12 +73,6 @@ public abstract partial class BaseViewModel : ObservableObject
         TimerCancelled = true;
     }
 
-    /// <summary>
-    /// Stops the countdown and re-arms it for the next sign-in. The countdown service is
-    /// a singleton that outlives the session: left running, it would minimize the window
-    /// while the login page is on screen, and the next user would inherit its remaining
-    /// seconds instead of their own setting.
-    /// </summary>
     public static void ResetCountdown()
     {
         App.ServiceProvider.GetRequiredService<ICountdownService>().Reset();
@@ -128,16 +80,6 @@ public abstract partial class BaseViewModel : ObservableObject
         _countdownStarted = false;
     }
 
-    /// <summary>
-    /// Reports a failure in the page's notification banner.
-    /// </summary>
-    /// <remarks>
-    /// Both of these used to raise a modal alert, which is why they still return a task
-    /// nobody awaits anything real on: every call site already writes
-    /// <c>await DisplayErrorAsync(...)</c>, and the signature is what keeps them from all
-    /// having to change to say the same thing. See <see cref="Notifier"/> for why the
-    /// dialog went.
-    /// </remarks>
     public static Task DisplayErrorAsync(Error error)
     {
         Notifier.Error(error);
@@ -152,20 +94,6 @@ public abstract partial class BaseViewModel : ObservableObject
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Puts the window away when the auto-minimize countdown runs out — into the tray
-    /// where there is one, otherwise onto the taskbar.
-    /// </summary>
-    /// <remarks>
-    /// Hiding is only offered while the tray icon is up, because the icon is then the
-    /// way back. Without it the window would go somewhere with no route to return, so
-    /// the old plain-minimize behaviour stands.
-    ///
-    /// Mac Catalyst exposes no public API for either — the AppKit route needs a private
-    /// selector that would fail App Review — so there the countdown still runs and still
-    /// offers its redo chip, it just leaves the window where it is. Better a setting
-    /// that under-delivers than one that crashes.
-    /// </remarks>
     public static void MinimizeApp()
     {
         TrayIconService tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
@@ -181,14 +109,8 @@ public abstract partial class BaseViewModel : ObservableObject
         MainWindow.Minimize();
     }
 
-    /// <summary>
-    /// Wires up the countdown service events. Synchronous — safe to call from a ctor.
-    /// Must be paired with <see cref="InitializeCountdownAsync"/> for the I/O half.
-    /// </summary>
     public void InitializeCountdownEvents()
     {
-        // The service is a singleton, so a second subscription would never be collected
-        // and every tick would run this viewmodel's handlers twice.
         if (_countdownEventsWired)
         {
             return;
@@ -196,9 +118,6 @@ public abstract partial class BaseViewModel : ObservableObject
 
         _countdownEventsWired = true;
 
-        // The countdown timer raises these events on a thread-pool thread; the
-        // properties are bound to UI, so marshal onto the main thread — WinUI throws
-        // when PropertyChanged for a bound property fires off the UI thread.
         _countdownService.CountdownTick += (sender, remaining) =>
             MainThread.BeginInvokeOnMainThread(() => SecondsRemaining = remaining);
 
@@ -211,11 +130,6 @@ public abstract partial class BaseViewModel : ObservableObject
             });
     }
 
-    /// <summary>
-    /// Starts the countdown once per sign-in if <c>AutoMinimize</c> is enabled. Awaited
-    /// from page lifecycle methods, which fire again on every return to the page — the
-    /// repeat calls are deliberately no-ops.
-    /// </summary>
     public Task InitializeCountdownAsync(CancellationToken cancellationToken = default)
     {
         if (_countdownStarted)
@@ -238,8 +152,6 @@ public abstract partial class BaseViewModel : ObservableObject
         SettingsModel settings = result.Value;
         if (!settings.AutoMinimize)
         {
-            // Nothing was armed, so nothing has been used up: leaving the flag clear
-            // lets the countdown start if the setting is switched on later this session.
             return;
         }
 

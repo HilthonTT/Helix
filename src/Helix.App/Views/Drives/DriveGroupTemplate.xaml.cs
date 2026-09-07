@@ -16,8 +16,6 @@ public sealed partial class DriveGroupTemplate : ContentView
 
     protected override void OnBindingContextChanged()
     {
-        // Without the base call the BindingContext is never propagated to Content,
-        // leaving every {Binding} in the template unresolved.
         base.OnBindingContextChanged();
     }
 
@@ -25,14 +23,6 @@ public sealed partial class DriveGroupTemplate : ContentView
 
     private void Disconnect(object? sender, TappedEventArgs e) => _ = ToggleAsync(disconnect: true);
 
-    /// <summary>
-    /// Connects or disconnects the whole group, then tells the dashboard to catch up.
-    /// </summary>
-    /// <remarks>
-    /// The failure of one drive does not hide the success of the others: the handler
-    /// mounts what it can and reports the rest, so the alert lists the drives that
-    /// refused rather than replacing the whole action with an error.
-    /// </remarks>
     private async Task ToggleAsync(bool disconnect)
     {
         if (BindingContext is not DriveGroupDisplay group || group.IsBusy)
@@ -48,12 +38,6 @@ public sealed partial class DriveGroupTemplate : ContentView
 
             Result result = await ScopedHandler.HandleAsync((ConnectDriveGroup h) => h.Handle(request));
 
-            // Sent either way: whatever did work has changed the drive list underneath.
-            // Both messages are needed and they are not interchangeable —
-            // CheckDrivesStatusMessage recomputes the dashboard tiles and the chart,
-            // while each row in "Your drives" only re-reads its own connectivity when it
-            // hears NotifyDriveConnectivityMessage naming it. Sending the first alone
-            // left the pie chart right and every row's status pill stale.
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
             foreach (Guid driveId in group.DriveIds)

@@ -12,23 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.UnitTests;
 
-/// <summary>
-/// Locks down the per-OS half of <c>AddInfrastructure</c>.
-/// </summary>
-/// <remarks>
-/// The three platform services are chosen by <c>#if WINDOWS</c> / <c>#elif MACCATALYST</c>.
-/// A preprocessor symbol that stopped being defined would not break the build — it would
-/// silently fall through to the <c>#else</c> and throw on the first drive connection
-/// instead. These assertions turn that into a test failure. This suite only runs on the
-/// Windows head, so the macOS bindings are covered by the macOS CI job compiling at all.
-/// </remarks>
 public sealed class PlatformServicesTests
 {
     private static ServiceProvider BuildProvider()
     {
-        // Logging is normally brought in by the MAUI host, and several of these services
-        // take an ILogger<T>. Added here so the container under test is the same shape as
-        // the real one.
         return new ServiceCollection()
             .AddLogging()
             .AddInfrastructure()
@@ -69,8 +56,6 @@ public sealed class PlatformServicesTests
     {
         using ServiceProvider provider = BuildProvider();
 
-        // It owns a window and a message-loop thread; a second instance would put a
-        // second icon in the tray.
         provider.GetRequiredService<ITrayIcon>()
             .Should().BeSameAs(provider.GetRequiredService<ITrayIcon>());
     }
@@ -88,7 +73,6 @@ public sealed class PlatformServicesTests
     {
         using ServiceProvider provider = BuildProvider();
 
-        // Viewmodels cache this in a field across per-operation scopes.
         provider.GetRequiredService<INasConnector>()
             .Should().BeSameAs(provider.GetRequiredService<INasConnector>());
     }

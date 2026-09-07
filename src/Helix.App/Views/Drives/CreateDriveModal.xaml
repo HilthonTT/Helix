@@ -11,7 +11,6 @@
     <Border Style="{StaticResource Sheet}">
         <Grid RowDefinitions="Auto,*,Auto">
 
-            <!-- Header -->
             <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
                 <Label Text="{l10n:Translate AddDrive}"
                        Style="{StaticResource Title1}"
@@ -31,23 +30,12 @@
                 </Border>
             </Grid>
 
-            <!-- Form -->
             <ScrollView Grid.Row="1">
                 <VerticalStackLayout Spacing="14" Padding="24,4,24,20">
 
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate Letter}" Style="{StaticResource FieldLabel}"/>
-                        <!--
-                        A picker rather than a free-text box: it can only offer letters
-                        that are actually free, which is the whole point of asking the
-                        operating system what it already has mounted.
 
-                        No Title: on Windows that maps to the ComboBox's Header, which
-                        renders above the control rather than inside it, and the Field
-                        border it sits in is a fixed 46px — so the picker itself was
-                        squeezed into whatever was left. The label above already names
-                        this field, the same way the language picker in Settings does.
-                        -->
                         <Border Style="{StaticResource Field}">
                             <Picker Margin="8,0"
                                     BackgroundColor="Transparent"
@@ -69,9 +57,6 @@
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate NasHost}" Style="{StaticResource FieldLabel}"/>
                         <Border Style="{StaticResource Field}">
-                            <!-- Not masked by HideSecrets, unlike the two fields below it: a host is
-                                 an address, not a secret, and hiding it made the one field the user
-                                 most often has to check against their NAS unreadable. -->
                             <Entry Placeholder="{l10n:Translate AddNasHostPlaceholder}"
                                    Text="{Binding Form.Host}"
                                    IsEnabled="{Binding IsNotBusy}"/>
@@ -118,7 +103,6 @@
                                 IsToggled="{Binding Form.AutoConnect, Mode=TwoWay}"/>
                     </Grid>
 
-                    <!-- Hidden on macOS, which has no remembered-mapping equivalent. -->
                     <Grid ColumnDefinitions="*,Auto"
                           Margin="0,2,0,0"
                           IsVisible="{Binding SupportsPersistentMappings}">
@@ -131,10 +115,6 @@
                                 IsToggled="{Binding Form.Persistent, Mode=TwoWay}"/>
                     </Grid>
 
-                    <!--
-                    Only Windows keeps one credential context per server name, so only
-                    there does a different spelling of the same NAS buy a slot of its own.
-                    -->
                     <Grid ColumnDefinitions="*,Auto"
                           Margin="0,2,0,0"
                           IsVisible="{Binding SupportsHostnameConnect}">
@@ -150,12 +130,6 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <!--
-            Footer. The middle column is Auto, not a third share: "Test connection" is
-            longer than the other two labels and three equal columns clipped it to
-            "Test connectio". Auto lets it take the width its own text needs, in whatever
-            language that text happens to be, and the other two split the remainder.
-            -->
             <Grid Grid.Row="2" ColumnDefinitions="*,Auto,*" ColumnSpacing="12" Padding="24,16,24,24">
                 <Button Style="{StaticResource ButtonSecondary}"
                         HorizontalOptions="Fill"

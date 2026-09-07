@@ -7,22 +7,12 @@ using System.Text;
 
 namespace Infrastructure.UnitTests.Updates;
 
-/// <summary>
-/// Covers how the checker reads GitHub's answers, including the ones that are not a
-/// release: offline, rate-limited, nothing published yet, and a tag that is not a version.
-/// </summary>
 public sealed class GitHubUpdateCheckerTests
 {
-    /// <summary>
-    /// The shape Windows reports for the running build: <c>ApplicationDisplayVersion</c>
-    /// with <c>ApplicationVersion</c> as a fourth component, which no release is tagged
-    /// with. It is compared in full and shown three-part.
-    /// </summary>
     private const string CurrentVersion = "2.0.0.3";
 
     private const string CurrentVersionDisplayed = "2.0.0";
 
-    /// <summary>Answers every request with a canned response, or throws.</summary>
     private sealed class StubHandler(Func<HttpResponseMessage> respond) : HttpMessageHandler
     {
         public HttpRequestMessage? LastRequest { get; private set; }
@@ -42,11 +32,6 @@ public sealed class GitHubUpdateCheckerTests
         Content = new StringContent(body, Encoding.UTF8, "application/json"),
     };
 
-    /// <param name="moniker">The build this machine would rather have.</param>
-    /// <param name="fallbacks">
-    /// Builds it can run where that one is not published, in order — what Arm64 supplies
-    /// so that a release carrying only the x64 archive is still installable.
-    /// </param>
     private static GitHubUpdateChecker Checker(
         StubHandler handler,
         string current = CurrentVersion,
@@ -62,7 +47,6 @@ public sealed class GitHubUpdateCheckerTests
         { "tag_name": "{{tag}}", "html_url": "{{url}}", "name": "Helix {{tag}}" }
         """;
 
-    /// <summary>A release carrying the three archives the release workflow publishes.</summary>
     private static string ReleaseWithAssetsJson(string tag) =>
         $$"""
         {
@@ -76,7 +60,6 @@ public sealed class GitHubUpdateCheckerTests
         }
         """;
 
-    /// <summary>A release carrying only the x64 archive, and a digest for it.</summary>
     private static string ReleaseWithX64AssetJson(string tag, string? digest = null) =>
         $$"""
         {
@@ -106,8 +89,6 @@ public sealed class GitHubUpdateCheckerTests
     [Fact]
     public async Task CheckAsync_Should_NotHandAnArmMachineTheX64Build()
     {
-        // The failure this guards is quiet and total: the wrong architecture installs
-        // perfectly and then will not start.
         var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithAssetsJson("v2.1.0")));
 
         Result<UpdateCheck> result = await Checker(handler, moniker: "win-arm64").CheckAsync();
@@ -128,8 +109,6 @@ public sealed class GitHubUpdateCheckerTests
     [Fact]
     public async Task CheckAsync_Should_StillReportTheUpdate_WhenTheReleaseHasNoAssetForThisMachine()
     {
-        // A release published before its build finished uploading, or an old one named
-        // differently. The release page is still somewhere to send the user.
         var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseJson("v2.1.0")));
 
         Result<UpdateCheck> result = await Checker(handler).CheckAsync();
@@ -163,10 +142,6 @@ public sealed class GitHubUpdateCheckerTests
         result.Value.ReleaseUrl.Should().Be("https://github.com/HilthonTT/Helix/releases/tag/v2.1.0");
     }
 
-    /// <summary>
-    /// The build this repository currently produces, against the tag it was released
-    /// under. It must not announce an update to itself.
-    /// </summary>
     [Fact]
     public async Task CheckAsync_Should_ReportNoUpdate_WhenTheReleaseIsTheRunningBuild()
     {
@@ -185,7 +160,6 @@ public sealed class GitHubUpdateCheckerTests
 
         var client = UpdateConfiguration.CreateHttpClient();
 
-        // GitHub answers 403 to a request with no User-Agent, so this is not optional.
         client.DefaultRequestHeaders.UserAgent.Should().NotBeEmpty();
         client.DefaultRequestHeaders.Accept.Should().Contain(h => h.MediaType == "application/vnd.github+json");
 
@@ -219,7 +193,6 @@ public sealed class GitHubUpdateCheckerTests
     [InlineData(HttpStatusCode.TooManyRequests)]
     public async Task CheckAsync_Should_ReportRateLimiting_Distinctly(HttpStatusCode status)
     {
-        // "Try again later" is actionable; a bare 403 reads like something is broken.
         var handler = new StubHandler(() => Json(status, "{}"));
 
         Result<UpdateCheck> result = await Checker(handler).CheckAsync();
@@ -270,10 +243,6 @@ public sealed class GitHubUpdateCheckerTests
         result.Value.ReleaseUrl.Should().Be(UpdateConfiguration.ReleasesPageUrl);
     }
 
-    /// <summary>
-    /// The digest GitHub publishes for an asset is carried through, because the installer
-    /// is the only thing that can act on it and this is the only thing that reads the API.
-    /// </summary>
     [Fact]
     public async Task CheckAsync_Should_CarryTheDigestGitHubPublishesForTheAsset()
     {
@@ -286,10 +255,6 @@ public sealed class GitHubUpdateCheckerTests
         result.Value.AssetDigest.Should().Be(digest);
     }
 
-    /// <summary>
-    /// A release published before GitHub returned digests has none, and that is not a
-    /// reason to refuse to install it.
-    /// </summary>
     [Fact]
     public async Task CheckAsync_Should_ReportNoDigest_WhenTheReleaseCarriesNone()
     {
@@ -301,9 +266,6 @@ public sealed class GitHubUpdateCheckerTests
         result.Value.CanInstall.Should().BeTrue();
     }
 
-    /// <summary>
-    /// An Arm64 machine takes the Arm64 build when the release has one.
-    /// </summary>
     [Fact]
     public async Task CheckAsync_Should_PreferTheNativeBuild_WhenTheReleaseCarriesBoth()
     {
@@ -314,10 +276,6 @@ public sealed class GitHubUpdateCheckerTests
         result.Value.AssetName.Should().Be("Helix-v2.1.0-win-arm64.zip");
     }
 
-    /// <summary>
-    /// And falls back to the x64 build when it does not: Windows on Arm runs that under
-    /// emulation, so it is a working install rather than nothing at all.
-    /// </summary>
     [Fact]
     public async Task CheckAsync_Should_FallBackToTheEmulatedBuild_WhenTheNativeOneIsNotPublished()
     {
@@ -329,10 +287,6 @@ public sealed class GitHubUpdateCheckerTests
         result.Value.CanInstall.Should().BeTrue();
     }
 
-    /// <summary>
-    /// The fallback only ever runs downhill. An x64 machine handed the Arm64 build would
-    /// install it cleanly and then not start, so no list ever offers it one.
-    /// </summary>
     [Fact]
     public async Task CheckAsync_Should_OfferNothing_WhenOnlyTheOtherArchitectureIsPublished()
     {

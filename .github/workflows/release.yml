@@ -67,7 +67,6 @@ jobs:
 
   publish-macos:
     name: Publish maccatalyst
-    # Catalyst compilation needs Xcode, so this half cannot run on the Windows runner.
     runs-on: macos-latest
 
     env:
@@ -88,16 +87,6 @@ jobs:
       - name: Install .NET MAUI workload
         run: dotnet workload install maui
 
-      # One universal .app covering both Intel and Apple Silicon, rather than a build per
-      # architecture: the RuntimeIdentifiers the project already declares are lipo'd
-      # together into a single bundle. They are deliberately not repeated as a -p: switch
-      # here - MSBuild splits a -p: argument on ';' into several properties, so
-      # -p:RuntimeIdentifiers="a;b" reaches it as a property 'a' and a stray switch 'b'
-      # (MSB1006), quotes or no quotes.
-      #
-      # Unsigned on purpose. Signing needs a Developer ID certificate and an Apple
-      # Developer account, which cannot live in a public repository without secrets — see
-      # the release notes for what that means for anyone downloading it.
       - name: Publish (maccatalyst)
         run: >
           dotnet publish src/Helix.App/Helix.App.csproj
@@ -106,20 +95,13 @@ jobs:
           -p:CreatePackage=false
           -p:EnableCodeSigning=false
 
-      # ditto, not zip: a .app is a bundle of symlinks, permissions and extended
-      # attributes, and a plain zip flattens the ones that make it launchable.
       - name: Create archive
         run: |
           TAG="${{ inputs.tag }}"
           if [ -z "$TAG" ]; then TAG="${{ github.ref_name }}"; fi
 
-          # The publish above deliberately has no -o. On Apple targets -o sets PublishDir,
-          # and the bundle's *contents* are written into it rather than a .app wrapper, so
-          # the wrapper stays at its default path and the archive step finds nothing.
           BIN="src/Helix.App/bin/Release/net10.0-maccatalyst"
 
-          # The universal bundle sits at the top; the per-RID folder below it is where a
-          # single-architecture build would land, and is worth archiving over failing.
           APP="$(find "$BIN" -maxdepth 1 -type d -name '*.app' -print -quit)"
           if [ -z "$APP" ]; then
             APP="$(find "$BIN" -maxdepth 2 -type d -name '*.app' -print -quit)"
@@ -131,8 +113,6 @@ jobs:
             exit 1
           fi
 
-          # Both architectures or one is worth knowing in the log: an unnoticed
-          # single-architecture build is a bundle half the Macs out there cannot run.
           echo "Archiving $APP"
           file "$APP/Contents/MacOS/"* | head -5
 

@@ -6,27 +6,8 @@ using AppBase = Microsoft.Maui.Controls.Application;
 
 namespace Helix.App.Common;
 
-/// <summary>
-/// The two things the tray needs to do to the app window: put it away, and bring it
-/// back.
-/// </summary>
-/// <remarks>
-/// Windows-only in effect. Mac Catalyst exposes no public API for minimizing or hiding a
-/// window scene — the AppKit route needs a private selector that would fail App Review —
-/// and the Catalyst head has no tray to drive this from anyway, so both calls are no-ops
-/// there.
-///
-/// Every call marshals to the UI thread itself. Callers are tray handlers and countdown
-/// callbacks, none of which run on it, and reading <c>Application.Windows</c> off the UI
-/// thread is not safe.
-/// </remarks>
 internal static class MainWindow
 {
-    /// <summary>
-    /// Minimizes and then takes the window off the taskbar, leaving the tray icon as the
-    /// way back. Falls back to a plain minimize where hiding is not available, so the
-    /// window can never end up somewhere the user cannot reach it.
-    /// </summary>
     public static void HideToTray()
     {
 #if WINDOWS
@@ -42,7 +23,6 @@ internal static class MainWindow
 #endif
     }
 
-    /// <summary>Minimizes the window, leaving it on the taskbar.</summary>
     public static void Minimize()
     {
 #if WINDOWS
@@ -56,7 +36,6 @@ internal static class MainWindow
 #endif
     }
 
-    /// <summary>Shows, un-minimizes and focuses the window.</summary>
     public static void Restore()
     {
 #if WINDOWS
@@ -69,26 +48,13 @@ internal static class MainWindow
                 presenter.Restore();
             }
 
-            // Show() alone leaves the window behind whatever the user was looking at.
             appWindow.MoveInZOrderAtTop();
         });
 #endif
     }
 
-    /// <summary>
-    /// Whether a real shutdown has been asked for, so the close button stops being
-    /// treated as "hide me" on the way out.
-    /// </summary>
     public static bool IsExiting { get; private set; }
 
-    /// <summary>
-    /// Quits for real, rather than closing to the tray.
-    /// </summary>
-    /// <remarks>
-    /// The tray's Exit item is the only way out once the close button hides the window,
-    /// so it goes through here: the flag is what tells the window's Closing handler to
-    /// let the close through instead of cancelling it again.
-    /// </remarks>
     public static void Exit()
     {
         IsExiting = true;
@@ -99,9 +65,6 @@ internal static class MainWindow
 #if WINDOWS
     private static void Dispatch(Action<AppWindow> action)
     {
-        // The checks live inside the dispatch, not before it: this is called from timer
-        // and tray threads, where the window list read a moment earlier would describe a
-        // different instant — and App.Current can be null on the way out of the process.
         MainThread.BeginInvokeOnMainThread(() =>
         {
             AppBase? app = AppBase.Current;

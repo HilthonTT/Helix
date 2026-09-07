@@ -10,36 +10,11 @@ using System.Runtime.Versioning;
 
 namespace Helix.Infrastructure.Connector;
 
-/// <summary>
-/// Mounts SMB shares through <c>NetFSMountURLSync</c>, the same NetFS entry point
-/// Finder uses for "Connect to Server".
-/// </summary>
-/// <remarks>
-/// The password is handed over as its own CFString argument rather than embedded in
-/// the URL or a command line, which keeps it out of <c>ps</c> output and shell
-/// history — the same reason the Windows side uses the WNet APIs instead of shelling
-/// out to <c>net.exe</c>. Do not "simplify" this to <c>mount_smbfs //user:pass@host</c>.
-///
-/// macOS has no drive letters, so a drive's letter names a directory under
-/// <see cref="MountRoot"/> instead: <c>Z:</c> on Windows is <c>~/Helix Drives/Z</c>
-/// here. That keeps the persisted domain model identical across the two platforms and
-/// makes "is it connected?" a plain mount-point lookup.
-///
-/// Mounting a network volume is not possible from inside the App Sandbox, so the
-/// Catalyst head ships with the sandbox disabled — see Platforms/MacCatalyst/Entitlements.plist.
-/// </remarks>
 [SupportedOSPlatform("maccatalyst")]
 internal sealed class MacNasConnector : INasConnector
 {
-    /// <summary>
-    /// How long one mount may take before it is reported as timed out. The same value,
-    /// for the same reason, as the Windows connector: NetFS cannot be cancelled either,
-    /// so a timeout abandons a mount that then completes anyway, and the absent-host
-    /// case is settled by the reachability probe first.
-    /// </summary>
     private const int MountTimeoutMilliseconds = 30_000;
 
-    /// <summary>Directory the mount points live under, one per drive letter.</summary>
     private static readonly string MountRoot = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
         "Helix Drives");
@@ -82,19 +57,8 @@ internal sealed class MacNasConnector : INasConnector
 
     public string GetMountPath(string letter) => MountPointFor(letter);
 
-    /// <summary>
-    /// A live volume at the letter's own mount point. Which share it carries is not
-    /// checked: nothing but Helix mounts under <see cref="MountRoot"/>, so a volume there
-    /// is one of Helix's own, and the Windows connector's concern — a letter held by a
-    /// USB stick or another account's mapping — has no equivalent in a private directory.
-    /// </summary>
     public bool IsMountedFrom(Drive drive) => IsConnected(drive.Letter);
 
-    /// <summary>
-    /// Runs the work only if the drive's server answers on an SMB port; otherwise reports
-    /// it as unreachable, with <see cref="DriveErrors.HostUnreachableCode"/>, without
-    /// asking NetFS to wait out its own timeout.
-    /// </summary>
     private async Task<Result> WhenReachableAsync(
         Drive drive,
         Func<Task<Result>> work,
@@ -118,11 +82,6 @@ internal sealed class MacNasConnector : INasConnector
         return GetConnectedLetters().Contains(Normalize(letter));
     }
 
-    /// <summary>
-    /// The letters whose mount point is currently a live mounted volume. Reads the
-    /// mount table rather than the filesystem, so a leftover empty directory from a
-    /// failed mount does not read as connected.
-    /// </summary>
     public HashSet<string> GetConnectedLetters()
     {
         var letters = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -139,9 +98,6 @@ internal sealed class MacNasConnector : INasConnector
         return letters;
     }
 
-    /// <summary>
-    /// Maps <c>~/Helix Drives/Z</c> back to <c>Z</c>, or null for any other volume.
-    /// </summary>
     private static string? LetterForMountPoint(string mountPoint)
     {
         string trimmed = mountPoint.TrimEnd(Path.DirectorySeparatorChar);
@@ -161,17 +117,6 @@ internal sealed class MacNasConnector : INasConnector
 
     private static Result Connect(Drive drive) => Mount(drive, MountPointFor(drive.Letter));
 
-    /// <summary>
-    /// Mounts the share, checks it, and unmounts it again — leaving neither the volume
-    /// mounted nor the drive letter's own mount point touched.
-    /// </summary>
-    /// <remarks>
-    /// The Windows side answers this with a deviceless WNet connection, which has no
-    /// NetFS equivalent: the only way to know NetFS accepts the host, share and password
-    /// is to let it mount. So the mount goes to a scratch directory beside the real ones
-    /// and is torn down immediately, which keeps a test on a half-finished form from
-    /// disturbing whatever is currently mounted at the drive's own letter.
-    /// </remarks>
     private Result Test(Drive drive)
     {
         string mountPoint = Path.Combine(MountRoot, $".test-{Guid.NewGuid():N}");
@@ -182,7 +127,6 @@ internal sealed class MacNasConnector : INasConnector
         }
         finally
         {
-            // Best-effort teardown; the caller already has its answer either way.
             unmount(mountPoint, MntForce);
 
             try
@@ -208,7 +152,6 @@ internal sealed class MacNasConnector : INasConnector
                 $"Could not prepare the mount point '{mountPoint}': {ex.Message}"));
         }
 
-        // The share name is the drive's Name, matching the Windows side's \\host\name.
         var url = new NSUrl($"smb://{ToUrlHost(drive.Host)}/{Uri.EscapeDataString(drive.Name)}");
         var mountPath = NSUrl.FromFilename(mountPoint);
         var user = new NSString(drive.Username);
@@ -249,8 +192,6 @@ internal sealed class MacNasConnector : INasConnector
     {
         string mountPoint = MountPointFor(drive.Letter);
 
-        // MNT_FORCE (0x080000) mirrors the Windows side's fForce: a share whose server
-        // has gone away otherwise refuses to unmount and the row stays stuck.
         if (unmount(mountPoint, MntForce) == 0)
         {
             return Result.Success();
@@ -258,8 +199,6 @@ internal sealed class MacNasConnector : INasConnector
 
         int errno = Marshal.GetLastPInvokeError();
 
-        // EINVAL means "not a mount point" — already disconnected, which is the
-        // outcome the caller asked for.
         return errno == Einval
             ? Result.Success()
             : Result.Failure(DriveErrors.FailedToDisconnect(DescribeErrno(errno)));
@@ -269,15 +208,6 @@ internal sealed class MacNasConnector : INasConnector
 
     private static string Normalize(string letter) => letter.Trim().ToUpperInvariant();
 
-    /// <summary>
-    /// Renders a host into the authority of an <c>smb://</c> URL.
-    /// </summary>
-    /// <remarks>
-    /// IPv4 addresses and hostnames go in as they are. An IPv6 literal has to be
-    /// bracketed, or the colons in the address are read as the port separator and the URL
-    /// silently addresses the wrong thing. Where Windows needs <c>ipv6-literal.net</c>
-    /// because a UNC path cannot hold a colon, a URL only needs the brackets.
-    /// </remarks>
     internal static string ToUrlHost(string host)
     {
         string candidate = host.Trim();
@@ -341,8 +271,6 @@ internal sealed class MacNasConnector : INasConnector
             : Marshal.PtrToStringUTF8(message) ?? $"The operation failed (code {code}).";
     }
 
-    // --- native interop ---------------------------------------------------
-
     private const int MntForce = 0x00080000;
 
     private const int Enoent = 2;
@@ -354,10 +282,6 @@ internal sealed class MacNasConnector : INasConnector
     private const int Ehostdown = 64;
     private const int Eauth = 80;
 
-    /// <summary>
-    /// NetFS mount. CFURLRef/CFStringRef are toll-free bridged with NSUrl/NSString, so
-    /// the managed handles can be passed straight through.
-    /// </summary>
     [DllImport("/System/Library/Frameworks/NetFS.framework/NetFS")]
     private static extern int NetFSMountURLSync(
         IntPtr url,

@@ -24,8 +24,6 @@ public sealed class ConnectDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        // Tracked, not AsNoTracking: a successful connect stamps the drive so the
-        // dashboard can say when it was last up.
         Drive? drive = await driveRepository.GetByIdAsync(request.DriveId, cancellationToken);
         if (drive is null)
         {
@@ -37,8 +35,6 @@ public sealed class ConnectDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        // The monitor cannot tell this from a share coming back on its own, and the
-        // tray would announce a drive the user is watching themselves connect.
         using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
 
         Result result = await nasConnector.ConnectAsync(drive, cancellationToken);

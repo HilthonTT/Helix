@@ -17,7 +17,6 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 {
     public CreateDriveViewModel()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Form = new();
         HideSecrets = true;
         AvailableLetters = [];
@@ -28,35 +27,14 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
     [ObservableProperty]
     public partial CreateDriveModel Form { get; set; }
 
-    /// <summary>
-    /// The letters the form is allowed to offer — free on this machine and not already
-    /// taken by one of this user's drives. Refreshed each time the modal opens, because
-    /// a USB stick plugged in since the last time changes the answer.
-    /// </summary>
     [ObservableProperty]
     public partial ObservableCollection<string> AvailableLetters { get; set; }
 
-    /// <summary>
-    /// The address, share user and password are masked by default so the form is safe
-    /// to fill in while sharing a screen. One reveal toggle covers all three, because
-    /// checking a typo in the address is otherwise impossible.
-    /// </summary>
     [ObservableProperty]
     public partial bool HideSecrets { get; set; }
 
-    /// <summary>
-    /// Hides the "remember at sign-in" switch on platforms that cannot honour it.
-    /// </summary>
-    /// <remarks>
-    /// macOS has no equivalent of a remembered drive mapping, so the switch is not shown
-    /// there at all rather than offered and quietly ignored.
-    /// </remarks>
     public bool SupportsPersistentMappings => DrivePlatform.SupportsPersistentMappings;
 
-    /// <summary>
-    /// Hides the "connect by server name" switch where it would buy nothing — see
-    /// <see cref="DrivePlatform.SupportsHostnameConnect"/>.
-    /// </summary>
     public bool SupportsHostnameConnect => DrivePlatform.SupportsHostnameConnect;
 
     [RelayCommand]
@@ -99,10 +77,6 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
         }
     }
 
-    /// <summary>
-    /// Verifies the details against the server without saving them, so a wrong password
-    /// is reported here rather than at the first connect long after the modal is gone.
-    /// </summary>
     [RelayCommand]
     private async Task TestConnectionAsync()
     {
@@ -146,9 +120,6 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 
     private void RegisterMessages()
     {
-        // The body is guarded because the messenger's handler returns void, making this an
-        // async void: anything thrown past the first await lands on the thread pool with
-        // nothing to observe it and takes the process down.
         WeakReferenceMessenger.Default.Register<CreateDriveMessage>(this, async (r, m) =>
         {
             if (!m.Value)
@@ -162,7 +133,6 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
             }
             catch (Exception ex)
             {
-                // The modal still opens; it just opens without a preselected letter.
                 AppLog.For<CreateDriveViewModel>().LogError(ex, "Could not load the available drive letters.");
             }
         });
@@ -179,11 +149,6 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 
         AvailableLetters = new(result.Value);
 
-        // Preselect the *highest* free letter, not the lowest, so the common case is one
-        // less decision. Lowest-first meant the form opened on A: — the legacy floppy
-        // slot, which is free on every modern machine — and a user who filled in the rest
-        // and pressed Save got their NAS mapped there without ever touching the field.
-        // Highest-first is also what the Windows "Map network drive" dialog does.
         if (string.IsNullOrEmpty(Form.Letter) && AvailableLetters.Count > 0)
         {
             Form.Letter = AvailableLetters[^1];

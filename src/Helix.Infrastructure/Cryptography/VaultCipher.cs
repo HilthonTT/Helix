@@ -11,9 +11,9 @@ internal sealed class VaultCipher : IVaultCipher
 {
     private const int CurrentVersion = 1;
     private const int SaltSize = 16;
-    private const int NonceSize = 12; // AES-GCM standard
+    private const int NonceSize = 12;
     private const int TagSize = 16;
-    private const int KeySize = 32;   // AES-256
+    private const int KeySize = 32;
     private const int CurrentIterations = 600_000;
     private const int MaxAllowedIterations = 5_000_000;
     private const string Kdf = "PBKDF2-SHA512";
@@ -142,22 +142,22 @@ internal sealed class VaultCipher : IVaultCipher
 
     private sealed class VaultEnvelope
     {
-        [JsonPropertyName("v")] 
+        [JsonPropertyName("v")]
         public int Version { get; set; }
 
-        [JsonPropertyName("kdf")] 
+        [JsonPropertyName("kdf")]
         public string? Kdf { get; set; }
 
         [JsonPropertyName("iters")]
         public int Iterations { get; set; }
 
-        [JsonPropertyName("salt")] 
+        [JsonPropertyName("salt")]
         public string? Salt { get; set; }
 
         [JsonPropertyName("nonce")]
         public string? Nonce { get; set; }
 
-        [JsonPropertyName("ct")] 
+        [JsonPropertyName("ct")]
         public string? Ciphertext { get; set; }
 
         [JsonPropertyName("tag")]

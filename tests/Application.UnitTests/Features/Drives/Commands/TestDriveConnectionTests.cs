@@ -42,43 +42,34 @@ public class TestDriveConnectionTests
     [Fact]
     public async Task Handle_Should_ReturnError_WhenNotSignedIn()
     {
-        // Arrange
         _loggedInUserMock.IsLoggedIn.Returns(false);
 
-        // Act
         Result result = await _testDriveConnection.Handle(Request);
 
-        // Assert
         result.Error.Should().Be(AuthenticationErrors.InvalidPermissions);
     }
 
     [Fact]
     public async Task Handle_Should_ReturnError_WhenHostIsInvalid()
     {
-        // Arrange
         SignIn();
 
         TestDriveConnection.Request invalidRequest = Request with { Host = "999.999.999.999" };
 
-        // Act
         Result result = await _testDriveConnection.Handle(invalidRequest);
 
-        // Assert
         result.Error.Should().Be(ValidationErrors.InvalidHost);
     }
 
     [Fact]
     public async Task Handle_Should_NotReachTheNetwork_WhenTheFormIsIncomplete()
     {
-        // Arrange
         SignIn();
 
         TestDriveConnection.Request invalidRequest = Request with { Password = "  " };
 
-        // Act
         Result result = await _testDriveConnection.Handle(invalidRequest);
 
-        // Assert
         result.Error.Should().Be(ValidationErrors.MissingFields);
 
         await _nasConnectorMock.DidNotReceive().TestAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
@@ -87,16 +78,13 @@ public class TestDriveConnectionTests
     [Fact]
     public async Task Handle_Should_TestTheDetailsOnTheForm()
     {
-        // Arrange
         SignIn();
 
         _nasConnectorMock.TestAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>())
             .Returns(Result.Success());
 
-        // Act
         Result result = await _testDriveConnection.Handle(Request);
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
 
         await _nasConnectorMock.Received(1).TestAsync(
@@ -109,30 +97,22 @@ public class TestDriveConnectionTests
             Arg.Any<CancellationToken>());
     }
 
-    /// <summary>
-    /// The candidate exists only to carry the form's values to the connector. Saving it
-    /// would create a drive the user never asked for, out of a form they may yet cancel.
-    /// </summary>
     [Fact]
     public async Task Handle_Should_NeverConnectOrMountTheCandidate()
     {
-        // Arrange
         SignIn();
 
         _nasConnectorMock.TestAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>())
             .Returns(Result.Success());
 
-        // Act
         await _testDriveConnection.Handle(Request);
 
-        // Assert
         await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Handle_Should_SurfaceTheConnectorsFailure()
     {
-        // Arrange
         SignIn();
 
         Error expected = DriveErrors.FailedToConnect("The password is incorrect.");
@@ -140,10 +120,8 @@ public class TestDriveConnectionTests
         _nasConnectorMock.TestAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>())
             .Returns(Result.Failure(expected));
 
-        // Act
         Result result = await _testDriveConnection.Handle(Request);
 
-        // Assert
         result.Error.Should().Be(expected);
     }
 }

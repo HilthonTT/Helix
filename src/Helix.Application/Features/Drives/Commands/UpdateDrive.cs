@@ -51,8 +51,6 @@ public sealed class UpdateDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        // Letters are stored uppercase, so compare case-insensitively — otherwise
-        // re-saving your own drive with a lowercase letter is falsely rejected.
         bool isSameLetter = string.Equals(drive.Letter, request.Letter, StringComparison.OrdinalIgnoreCase);
         if (!isSameLetter)
         {
@@ -61,18 +59,11 @@ public sealed class UpdateDrive(
                 return Result.Failure(DriveErrors.LetterNotUnique(request.Letter));
             }
 
-            // Only when the letter is actually changing. This drive's own letter is in
-            // use by this drive whenever it is connected, and rejecting that would make
-            // an edit to any other field impossible while the share was mounted.
             if (nasConnector.GetConnectedLetters().Contains(request.Letter.ToUpperInvariant()))
             {
                 return Result.Failure(DriveErrors.LetterInUse(request.Letter));
             }
 
-            // The old letter is about to belong to no row. Left mounted, a persistent
-            // mapping would be restored by Explorer at every sign-in with nothing in
-            // Helix able to remove it — the orphan DeleteDrive exists to prevent. Best
-            // effort, like there: an unreachable share must not block the edit.
             if (nasConnector.GetConnectedLetters().Contains(drive.Letter))
             {
                 using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);

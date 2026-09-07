@@ -37,8 +37,6 @@ public class ReconnectDriveTests
         _hostReachabilityMock = Substitute.For<IHostReachability>();
         _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
-        // The NAS is there unless a test says otherwise; every case below that is not
-        // about reachability is about what happens once the host has answered.
         _hostReachabilityMock
             .IsReachableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(true);
@@ -59,15 +57,9 @@ public class ReconnectDriveTests
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
-        // Tracked, because a successful reconnect stamps LastConnectedOnUtc on the drive.
         _driveRepositoryMock.GetByIdAsync(_drive.Id).Returns(_drive);
     }
 
-    /// <summary>
-    /// Captures the entries as they are written. Asserted on by action and entity rather
-    /// than by prose — the sentence no longer exists at this layer, which is the point of
-    /// the structured log.
-    /// </summary>
     private List<Auditlog> CapturedEntries()
     {
         List<Auditlog> entries = [];
@@ -82,26 +74,20 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_ReturnError_WhenNotLoggedIn()
     {
-        // Arrange
         _loggedInUserMock.IsLoggedIn.Returns(false);
 
-        // Act
         Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
-        // Assert
         result.Error.Should().Be(AuthenticationErrors.InvalidPermissions);
     }
 
     [Fact]
     public async Task Handle_Should_ReturnError_WhenDriveBelongsToAnotherUser()
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(Guid.NewGuid());
 
-        // Act
         Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
-        // Assert
         result.Error.Should().Be(AuthenticationErrors.InvalidPermissions);
         await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
     }
@@ -109,28 +95,22 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_ReturnError_WhenDriveIsNotFound()
     {
-        // Arrange
         var missing = Guid.NewGuid();
         _driveRepositoryMock.GetByIdAsync(missing).Returns((Drive?)null);
 
-        // Act
         Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(missing, true));
 
-        // Assert
         result.Error.Should().Be(DriveErrors.NotFound(missing));
     }
 
     [Fact]
     public async Task Handle_Should_RecordTheDrop_WithoutReconnecting_WhenAutoConnectIsOff()
     {
-        // Arrange
         List<Auditlog> entries = CapturedEntries();
 
-        // Act
         Result result = await _reconnectDrive.Handle(
             new ReconnectDrive.Request(_drive.Id, AttemptReconnect: false));
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
         entries.Should().ContainSingle().Which.Action.Should().Be(AuditAction.DriveDisconnected);
 
@@ -141,15 +121,12 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_RecordTheDropAndTheRecovery_WhenReconnectSucceeds()
     {
-        // Arrange
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
 
         List<Auditlog> entries = CapturedEntries();
 
-        // Act
         Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
         entries.Should().HaveCount(2);
         entries[0].Action.Should().Be(AuditAction.DriveDisconnected);
@@ -159,67 +136,52 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_StampTheDrive_WhenReconnectSucceeds()
     {
-        // Arrange
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
 
-        // Act
         await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
-        // Assert — this is what lets the dashboard say when a drive was last reachable.
         _drive.LastConnectedOnUtc.Should().Be(Now);
     }
 
     [Fact]
     public async Task Handle_Should_NotStampTheDrive_WhenReconnectFails()
     {
-        // Arrange
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>())
             .Returns(Result.Failure(DriveErrors.FailedToConnect("Still down.")));
 
-        // Act
         await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
-        // Assert
         _drive.LastConnectedOnUtc.Should().BeNull();
     }
 
     [Fact]
     public async Task Handle_Should_RecordTheFailure_OnTheFirstFailedAttempt()
     {
-        // Arrange
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>())
             .Returns(Result.Failure(DriveErrors.FailedToConnect("The network path was not found.")));
 
         List<Auditlog> entries = CapturedEntries();
 
-        // Act
         Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
-        // Assert
         result.IsFailure.Should().BeTrue();
         entries.Should().HaveCount(2);
         entries[1].Action.Should().Be(AuditAction.DriveReconnectFailed);
 
-        // The reason is carried as detail, so the rendered sentence can name it in any
-        // language without the reason itself having to be translated.
         entries[1].Detail.Should().Be("The network path was not found.");
     }
 
     [Fact]
     public async Task Handle_Should_StaySilent_WhenARetryFails()
     {
-        // Arrange — retries carry RecordDrop: false. Without this the audit log fills
-        // with an entry every few seconds for as long as the NAS stays down.
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>())
             .Returns(Result.Failure(DriveErrors.FailedToConnect("Still down.")));
 
         List<Auditlog> entries = CapturedEntries();
 
-        // Act
         Result result = await _reconnectDrive.Handle(
             new ReconnectDrive.Request(_drive.Id, AttemptReconnect: true, RecordDrop: false));
 
-        // Assert
         result.IsFailure.Should().BeTrue();
         entries.Should().BeEmpty();
     }
@@ -227,16 +189,13 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_RecordTheRecovery_WhenARetrySucceeds()
     {
-        // Arrange
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
 
         List<Auditlog> entries = CapturedEntries();
 
-        // Act
         Result result = await _reconnectDrive.Handle(
             new ReconnectDrive.Request(_drive.Id, AttemptReconnect: true, RecordDrop: false));
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
         entries.Should().ContainSingle().Which.Action.Should().Be(AuditAction.DriveReconnected);
     }
@@ -244,16 +203,12 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_NotTouchTheShare_WhenTheHostIsUnreachable()
     {
-        // Arrange — the laptop is somewhere the NAS is not. Mounting from here would do
-        // nothing but wait out the platform's SMB timeout.
         _hostReachabilityMock
             .IsReachableAsync(_drive.Host, Arg.Any<CancellationToken>())
             .Returns(false);
 
-        // Act
         Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
-        // Assert
         result.Error.Should().Be(DriveErrors.HostUnreachable(_drive.Host));
 
         await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
@@ -263,19 +218,14 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_SayTheHostWasUnreachable_RatherThanThatTheShareRefused()
     {
-        // Arrange
         _hostReachabilityMock
             .IsReachableAsync(_drive.Host, Arg.Any<CancellationToken>())
             .Returns(false);
 
         List<Auditlog> entries = CapturedEntries();
 
-        // Act
         await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
-        // Assert — the drop and the reason are still recorded once, because this is the
-        // only trace the user gets of a drive that went away while nobody was looking.
-        // What changed is that the reason names the network rather than the share.
         entries.Should().HaveCount(2);
         entries[1].Action.Should().Be(AuditAction.DriveReconnectFailed);
         entries[1].Detail.Should().Contain(_drive.Host);
@@ -284,19 +234,15 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_StaySilent_WhenARetryFindsTheHostStillUnreachable()
     {
-        // Arrange — a NAS left behind for the working day is the ordinary case, and it
-        // must not write an audit entry every thirty seconds for eight hours.
         _hostReachabilityMock
             .IsReachableAsync(_drive.Host, Arg.Any<CancellationToken>())
             .Returns(false);
 
         List<Auditlog> entries = CapturedEntries();
 
-        // Act
         Result result = await _reconnectDrive.Handle(
             new ReconnectDrive.Request(_drive.Id, AttemptReconnect: true, RecordDrop: false));
 
-        // Assert
         result.Error.Code.Should().Be(DriveErrors.HostUnreachableCode);
         entries.Should().BeEmpty();
     }
@@ -304,14 +250,10 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_NotProbeTheHost_WhenOnlyRecordingTheDrop()
     {
-        // Arrange — auto-connect off means nothing is going to be mounted, so there is
-        // nothing to find out about the network.
         List<Auditlog> entries = CapturedEntries();
 
-        // Act
         await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, AttemptReconnect: false));
 
-        // Assert
         await _hostReachabilityMock.DidNotReceive()
             .IsReachableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
 
@@ -321,17 +263,12 @@ public class ReconnectDriveTests
     [Fact]
     public async Task Handle_Should_NameTheDriveInTheLog()
     {
-        // Arrange
         _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
 
         List<Auditlog> entries = CapturedEntries();
 
-        // Act
         await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
 
-        // Assert — the log is the only trace of what happened while the app was hidden,
-        // so every entry has to identify which drive it is talking about. The name and
-        // letter are copied, not looked up, so a later rename cannot rewrite history.
         entries.Should().AllSatisfy(entry =>
         {
             entry.EntityId.Should().Be(_drive.Id);

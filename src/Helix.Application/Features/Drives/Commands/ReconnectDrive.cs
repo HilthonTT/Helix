@@ -8,20 +8,6 @@ using Helix.Domain.Users;
 
 namespace Helix.Application.Features.Drives.Commands;
 
-/// <summary>
-/// Handles a drive that the monitor observed dropping: records the loss and, when
-/// asked, tries to bring it back.
-/// </summary>
-/// <remarks>
-/// This is separate from <see cref="ConnectDrive"/> because the two are different
-/// events. A user pressing connect needs no audit entry — they know what they did.
-/// An unattended drop and recovery is the only trace of what happened while the app
-/// sat minimised, so it is written to the log.
-///
-/// <see cref="Request.RecordDrop"/> keeps the log readable while a NAS is down: the
-/// loss and the first failed attempt are recorded once, and the silent retries that
-/// follow only write again if one of them succeeds.
-/// </remarks>
 public sealed class ReconnectDrive(
     IDriveRepository driveRepository,
     IAuditlogRepository auditlogRepository,
@@ -31,11 +17,6 @@ public sealed class ReconnectDrive(
     IHostReachability hostReachability,
     IDateTimeProvider dateTimeProvider) : IHandler
 {
-    /// <param name="DriveId">The drive observed dropping.</param>
-    /// <param name="AttemptReconnect">False when auto-connect is off — record only.</param>
-    /// <param name="RecordDrop">
-    /// True on the first handling of a drop, false for the retries that follow.
-    /// </param>
     public sealed record Request(Guid DriveId, bool AttemptReconnect, bool RecordDrop = true);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
@@ -45,7 +26,6 @@ public sealed class ReconnectDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        // Tracked: a successful reconnect stamps the drive alongside its audit entry.
         Drive? drive = await driveRepository.GetByIdAsync(request.DriveId, cancellationToken);
         if (drive is null)
         {
@@ -69,10 +49,6 @@ public sealed class ReconnectDrive(
             return Result.Success();
         }
 
-        // Asked before the mount is attempted, not instead of it: away from the NAS's
-        // own network every attempt otherwise waits out the platform's SMB timeout and
-        // files a failure that only ever meant "not on that network". A drive whose host
-        // is absent is left exactly as it was, to be picked up again when it answers.
         if (!await hostReachability.IsReachableAsync(drive.Host, cancellationToken))
         {
             Error unreachable = DriveErrors.HostUnreachable(drive.Host);
@@ -100,8 +76,6 @@ public sealed class ReconnectDrive(
             Log(AuditAction.DriveReconnectFailed, result.Error.Description);
         }
 
-        // Saved whichever way it went: the audit entry is the point of this handler.
-        // A retry that failed silently writes nothing, so this is a no-op there.
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return result;

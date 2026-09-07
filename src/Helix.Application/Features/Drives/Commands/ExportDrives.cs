@@ -24,8 +24,6 @@ public sealed class ExportDrives(
         WriteIndented = false,
     };
 
-    // FolderPicker is not available on every platform this assembly's neutral TFM allows,
-    // so the call site is narrowed to the desktop heads Helix actually ships.
     [SupportedOSPlatform("windows")]
     [SupportedOSPlatform("maccatalyst14.0")]
     public async Task<Result> Handle(CancellationToken cancellationToken = default)
@@ -91,9 +89,6 @@ public sealed class ExportDrives(
         }
         catch (IOException ex)
         {
-            // The folder picked is as likely as not a NAS share - the app's own subject -
-            // and one that dropped between the picker closing and the write is an
-            // outcome, not a crash.
             return Result.Failure(FolderPickerErrors.WriteFailed(ex.Message));
         }
 

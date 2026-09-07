@@ -32,9 +32,6 @@ public sealed class DisconnectDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        // Without this the drop reads as a failure to the watchdog, which — with
-        // auto-connect on — puts the drive straight back and tells the user it
-        // reconnected, seconds after they asked for the opposite.
         using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
 
         Result result = await nasConnector.DisconnectAsync(drive, cancellationToken);

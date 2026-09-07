@@ -9,10 +9,6 @@ using NSubstitute;
 
 namespace Application.UnitTests.Features.Drives.Commands;
 
-/// <summary>
-/// Covers acting on an ad-hoc selection of rows: which of the named drives are actually
-/// touched, and what happens to an id that names nothing.
-/// </summary>
 public class ConnectDrivesTests
 {
     private static readonly Guid UserId = Guid.NewGuid();
@@ -38,7 +34,6 @@ public class ConnectDrivesTests
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
-        // Nothing mounted, so every named drive is a candidate to be connected.
         _nasConnectorMock.GetConnectedLetters().Returns([]);
         _nasConnectorMock.ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>())
             .Returns(Result.Success());
@@ -73,13 +68,10 @@ public class ConnectDrivesTests
     [Fact]
     public async Task Handle_Should_ConnectOnlyTheDrivesNamed()
     {
-        // Arrange
         HaveDrives(Media, Backup, Archive);
 
-        // Act
         Result result = await _connectDrives.Handle(new ConnectDrives.Request([Media.Id, Archive.Id]));
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
 
         await _nasConnectorMock.Received(1).ConnectAsync(Media, Arg.Any<CancellationToken>());
@@ -90,17 +82,13 @@ public class ConnectDrivesTests
     [Fact]
     public async Task Handle_Should_DisconnectOnlyTheDrivesNamed_WhenAskedTo()
     {
-        // Arrange
         HaveDrives(Media, Backup);
 
-        // Only the two of them that are up can be taken down.
         _nasConnectorMock.GetConnectedLetters().Returns(["Z", "Y"]);
 
-        // Act
         Result result = await _connectDrives.Handle(
             new ConnectDrives.Request([Media.Id], Disconnect: true));
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
 
         await _nasConnectorMock.Received(1).DisconnectAsync(Media, Arg.Any<CancellationToken>());
@@ -110,14 +98,11 @@ public class ConnectDrivesTests
     [Fact]
     public async Task Handle_Should_IgnoreIdsThatNameNothing()
     {
-        // A row deleted from another window while the selection was held.
         HaveDrives(Media);
 
-        // Act
         Result result = await _connectDrives.Handle(
             new ConnectDrives.Request([Media.Id, Guid.NewGuid()]));
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
 
         await _nasConnectorMock.Received(1).ConnectAsync(Media, Arg.Any<CancellationToken>());
@@ -126,14 +111,11 @@ public class ConnectDrivesTests
     [Fact]
     public async Task Handle_Should_ConnectADriveOnce_WhenItsIdIsRepeated()
     {
-        // Arrange
         HaveDrives(Media);
 
-        // Act
         Result result = await _connectDrives.Handle(
             new ConnectDrives.Request([Media.Id, Media.Id]));
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
 
         await _nasConnectorMock.Received(1).ConnectAsync(Media, Arg.Any<CancellationToken>());
@@ -142,16 +124,12 @@ public class ConnectDrivesTests
     [Fact]
     public async Task Handle_Should_SuppressTheLettersItTouches()
     {
-        // Without this the monitor reads a deliberate unmount as the NAS dropping, and the
-        // watchdog puts every drive straight back.
         HaveDrives(Media, Backup);
 
         _nasConnectorMock.GetConnectedLetters().Returns(["Z", "Y"]);
 
-        // Act
         await _connectDrives.Handle(new ConnectDrives.Request([Media.Id], Disconnect: true));
 
-        // Assert
         _driveMonitorMock.Received(1).Suppress(Arg.Is<IEnumerable<string>>(letters =>
             letters.SequenceEqual(new[] { "Z" })));
     }
@@ -159,10 +137,8 @@ public class ConnectDrivesTests
     [Fact]
     public async Task Handle_Should_DoNothing_WhenNothingWasSelected()
     {
-        // Act
         Result result = await _connectDrives.Handle(new ConnectDrives.Request([]));
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
 
         await _driveRepositoryMock.DidNotReceive().GetAsync(UserId, Arg.Any<CancellationToken>());
@@ -171,17 +147,14 @@ public class ConnectDrivesTests
     [Fact]
     public async Task Handle_Should_ReportEveryFailure()
     {
-        // Arrange
         HaveDrives(Media, Backup);
 
         _nasConnectorMock.ConnectAsync(Backup, Arg.Any<CancellationToken>())
             .Returns(Result.Failure(DriveErrors.FailedToConnect("The share refused it.")));
 
-        // Act
         Result result = await _connectDrives.Handle(
             new ConnectDrives.Request([Media.Id, Backup.Id]));
 
-        // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Description.Should().Contain("Y").And.Contain("The share refused it.");
     }
@@ -189,13 +162,10 @@ public class ConnectDrivesTests
     [Fact]
     public async Task Handle_Should_Fail_WhenNobodyIsSignedIn()
     {
-        // Arrange
         _loggedInUserMock.IsLoggedIn.Returns(false);
 
-        // Act
         Result result = await _connectDrives.Handle(new ConnectDrives.Request([Media.Id]));
 
-        // Assert
         result.Error.Should().Be(AuthenticationErrors.InvalidPermissions);
     }
 }

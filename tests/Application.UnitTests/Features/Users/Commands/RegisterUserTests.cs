@@ -35,65 +35,53 @@ public sealed class RegisterUserTests
     [Fact]
     public async Task Handle_Should_ReturnError_WhenUsernameIsNotUnique()
     {
-        // Arrange
         _userRepositoryMock.IsUsernameUniqueAsync(Arg.Is<string>(e => e == Request.Username))
             .Returns(false);
 
-        // Act
         Result<User> result = await _registerUser.Handle(Request);
 
-        // Assert
         result.Error.Should().Be(AuthenticationErrors.UsernameNotUnique);
     }
 
     [Fact]
     public async Task Handle_Should_ReturnSuccess_WhenCreateSucceeds()
     {
-        // Arrange
         _passwordHasherMock.Hash(Arg.Is<string>(p => p == Request.Password))
             .Returns("SomeHashAbc123");
 
         _userRepositoryMock.IsUsernameUniqueAsync(Arg.Is<string>(e => e == Request.Username))
             .Returns(true);
 
-        // Act
         Result<User> result = await _registerUser.Handle(Request);
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
     public async Task Handle_Should_CallUserRepository_WhenCreateSucceeds()
     {
-        // Arrange
         _passwordHasherMock.Hash(Arg.Is<string>(p => p == Request.Password))
             .Returns("SomeHashAbc123");
 
         _userRepositoryMock.IsUsernameUniqueAsync(Arg.Is<string>(e => e == Request.Username))
             .Returns(true);
 
-        // Act
          await _registerUser.Handle(Request);
 
-        // Assert
         _userRepositoryMock.Received(1).Insert(Arg.Is<User>(u => u.Username == Request.Username));
     }
 
     [Fact]
     public async Task Handle_Should_CallUnitOfWork_WhenCreateSucceeds()
     {
-        // Arrange
         _passwordHasherMock.Hash(Arg.Is<string>(p => p == Request.Password))
             .Returns("SomeHashAbc123");
 
         _userRepositoryMock.IsUsernameUniqueAsync(Arg.Is<string>(e => e == Request.Username))
             .Returns(true);
 
-        // Act
         await _registerUser.Handle(Request);
 
-        // Assert
         await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

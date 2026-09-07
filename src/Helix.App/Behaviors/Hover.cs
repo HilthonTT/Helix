@@ -3,26 +3,12 @@ using System.Reflection;
 
 namespace Helix.App.Behaviors;
 
-/// <summary>
-/// Attached pointer-hover feedback.
-/// </summary>
-/// <remarks>
-/// These are attached properties rather than a <see cref="Behavior"/> so they can be
-/// applied from a <see cref="Style"/> — a view's <c>Behaviors</c> collection is
-/// read-only and cannot be set by a style setter. That lets every card, list row and
-/// icon button in the app share one hover treatment instead of hand-wiring each one.
-///
-/// The resting background is captured on the first pointer entry rather than at
-/// attach time, because styles and control templates finish assigning backgrounds
-/// after the attached property has already been set.
-/// </remarks>
 public static class Hover
 {
     private const string RecognizerId = "Helix.Hover";
     private const string BackgroundAnimation = "Helix.Hover.Background";
     private const uint DurationMs = 140;
 
-    /// <summary>Background colour to fade to while the pointer is over the view.</summary>
     public static readonly BindableProperty BackgroundProperty =
         BindableProperty.CreateAttached(
             "Background",
@@ -31,7 +17,6 @@ public static class Hover
             null,
             propertyChanged: OnFeedbackChanged);
 
-    /// <summary>Scale to grow (or shrink) to while the pointer is over the view.</summary>
     public static readonly BindableProperty ScaleProperty =
         BindableProperty.CreateAttached(
             "Scale",
@@ -40,7 +25,6 @@ public static class Hover
             1d,
             propertyChanged: OnFeedbackChanged);
 
-    /// <summary>Opacity to fade to while the pointer is over the view.</summary>
     public static readonly BindableProperty OpacityProperty =
         BindableProperty.CreateAttached(
             "Opacity",
@@ -49,7 +33,6 @@ public static class Hover
             1d,
             propertyChanged: OnFeedbackChanged);
 
-    /// <summary>Shows the hand cursor over the view, marking it as clickable.</summary>
     public static readonly BindableProperty CursorProperty =
         BindableProperty.CreateAttached(
             "Cursor",
@@ -187,8 +170,6 @@ public static class Hover
     {
         view.AbortAnimation(BackgroundAnimation);
 
-        // Lerping through premultiplied-ish RGBA keeps fades from washing out when
-        // either end is a translucent wash colour (the selected-row tints).
         new Animation(
                 progress => view.Background = new SolidColorBrush(Lerp(from, to, progress)),
                 0d,
@@ -216,8 +197,6 @@ public static class Hover
 
         ApplyHandCursor(view);
 
-        // The handler is usually not built yet when the style is applied, and it is
-        // rebuilt whenever the view is recycled into a new template instance.
         view.HandlerChanged -= OnHandlerChanged;
         view.HandlerChanged += OnHandlerChanged;
     }
@@ -243,8 +222,6 @@ public static class Hover
 
         try
         {
-            // WinUI only exposes ProtectedCursor to derived types, and MAUI never
-            // surfaces it — reflection is the supported-in-practice workaround.
             ProtectedCursor?.SetValue(
                 element,
                 Microsoft.UI.Input.InputSystemCursor.Create(Microsoft.UI.Input.InputSystemCursorShape.Hand));

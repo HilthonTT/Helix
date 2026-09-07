@@ -34,7 +34,6 @@
                        Style="{StaticResource Title1}"
                        Margin="0,16,0,4"/>
 
-                <!-- Names the account, so a shared machine says whose session this is -->
                 <Label Text="{Binding Username}" Style="{StaticResource Muted}"/>
 
                 <Label Text="{l10n:Translate LockMessage}"

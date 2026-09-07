@@ -7,10 +7,6 @@ using Helix.Domain.Users;
 
 namespace Helix.Application.Features.DriveGroups.Commands;
 
-/// <summary>
-/// Deletes a group. The drives in it are left alone — a group is an arrangement of
-/// drives, not a container for them.
-/// </summary>
 public sealed class DeleteDriveGroup(
     IDriveGroupRepository driveGroupRepository,
     IUnitOfWork unitOfWork,

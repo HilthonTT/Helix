@@ -5,34 +5,19 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:behaviors="clr-namespace:Helix.App.Behaviors">
 
-    <!--
-    The Helix design system.
-
-    Pages apply styles from here instead of naming colours, sizes or fonts inline.
-    Every theme-aware value resolves through {AppThemeBinding} against the token pairs
-    in Colors.xaml, which is what makes light mode work without per-page changes.
-    -->
-
-    <!-- ===== Fonts ===== -->
     <x:String x:Key="FontRegular">OpenSansRegular</x:String>
     <x:String x:Key="FontSemibold">OpenSansSemibold</x:String>
     <x:String x:Key="FontMono">SpaceMonoRegular</x:String>
     <x:String x:Key="FontMonoBold">SpaceMonoBold</x:String>
     <x:String x:Key="FontIcon">FontAwesome</x:String>
 
-    <!-- Legacy font keys -->
     <x:String x:Key="SpaceMonoRegular">SpaceMonoRegular</x:String>
     <x:String x:Key="SpaceMonoBold">SpaceMonoBold</x:String>
 
-    <!-- ===== Radii ===== -->
     <x:Double x:Key="RadiusSm">8</x:Double>
     <x:Double x:Key="RadiusMd">12</x:Double>
     <x:Double x:Key="RadiusLg">16</x:Double>
     <x:Double x:Key="RadiusPill">999</x:Double>
-
-    <!-- ==================================================================== -->
-    <!-- Shell                                                                -->
-    <!-- ==================================================================== -->
 
     <Style x:Key="BaseStyle" TargetType="Element">
         <Setter Property="Shell.BackgroundColor"
@@ -53,10 +38,6 @@
         <Setter Property="Shell.NavBarIsVisible" Value="False"/>
     </Style>
 
-    <!-- ==================================================================== -->
-    <!-- Typography                                                           -->
-    <!-- ==================================================================== -->
-
     <Style x:Key="LabelBase" TargetType="Label">
         <Setter Property="FontFamily" Value="{StaticResource FontRegular}"/>
         <Setter Property="FontSize" Value="14"/>
@@ -67,14 +48,12 @@
 
     <Style TargetType="Label" BasedOn="{StaticResource LabelBase}"/>
 
-    <!-- Page heading -->
     <Style x:Key="Display" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
         <Setter Property="FontSize" Value="30"/>
         <Setter Property="LineHeight" Value="1.2"/>
     </Style>
 
-    <!-- Card heading -->
     <Style x:Key="Title1" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
         <Setter Property="FontSize" Value="19"/>
@@ -112,7 +91,6 @@
                 Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
     </Style>
 
-    <!-- Column headers and small section labels -->
     <Style x:Key="Overline" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
         <Setter Property="FontSize" Value="11"/>
@@ -121,7 +99,6 @@
                 Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
     </Style>
 
-    <!-- Form field label -->
     <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
         <Setter Property="FontSize" Value="13"/>
@@ -129,7 +106,6 @@
                 Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
     </Style>
 
-    <!-- Monospace is reserved for data: drive letters, counters, timings -->
     <Style x:Key="Mono" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="FontFamily" Value="{StaticResource FontMono}"/>
     </Style>
@@ -159,7 +135,6 @@
         <Setter Property="TextColor" Value="{StaticResource Brand}"/>
     </Style>
 
-    <!-- FontAwesome glyph -->
     <Style x:Key="Icon" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="FontFamily" Value="{StaticResource FontIcon}"/>
         <Setter Property="FontSize" Value="15"/>
@@ -176,11 +151,6 @@
         <Setter Property="FontSize" Value="20"/>
     </Style>
 
-    <!-- ==================================================================== -->
-    <!-- Surfaces                                                             -->
-    <!-- ==================================================================== -->
-
-    <!-- The standard content card -->
     <Style x:Key="Card" TargetType="Border">
         <Setter Property="Background"
                 Value="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceDarkBrush}}"/>
@@ -191,14 +161,12 @@
         <Setter Property="Padding" Value="0"/>
     </Style>
 
-    <!-- A card that lifts slightly under the pointer — used for clickable tiles -->
     <Style x:Key="CardInteractive" TargetType="Border" BasedOn="{StaticResource Card}">
         <Setter Property="behaviors:Hover.Background"
                 Value="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"/>
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
-    <!-- A recessed panel inside a card -->
     <Style x:Key="CardInset" TargetType="Border">
         <Setter Property="Background"
                 Value="{AppThemeBinding Light={StaticResource SurfaceAltLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"/>
@@ -207,7 +175,6 @@
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=12}"/>
     </Style>
 
-    <!-- Square glyph container that fronts each stat card -->
     <Style x:Key="IconTile" TargetType="Border" BasedOn="{StaticResource CardInset}">
         <Setter Property="WidthRequest" Value="40"/>
         <Setter Property="HeightRequest" Value="40"/>
@@ -215,7 +182,6 @@
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=11}"/>
     </Style>
 
-    <!-- List row: invisible at rest, tints on hover -->
     <Style x:Key="Row" TargetType="Border">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Stroke" Value="Transparent"/>
@@ -226,7 +192,6 @@
                 Value="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"/>
     </Style>
 
-    <!-- Status / metadata pill -->
     <Style x:Key="Pill" TargetType="Border">
         <Setter Property="Stroke" Value="Transparent"/>
         <Setter Property="StrokeThickness" Value="0"/>
@@ -246,7 +211,6 @@
                 Value="{AppThemeBinding Light={StaticResource DangerWashLightBrush}, Dark={StaticResource DangerWashDarkBrush}}"/>
     </Style>
 
-    <!-- The NAS is not on this network: a wait, not a failure, so it is not the red one. -->
     <Style x:Key="PillWarning" TargetType="Border" BasedOn="{StaticResource Pill}">
         <Setter Property="Background"
                 Value="{AppThemeBinding Light={StaticResource WarningWashLightBrush}, Dark={StaticResource WarningWashDarkBrush}}"/>
@@ -257,8 +221,6 @@
                 Value="{AppThemeBinding Light={StaticResource SurfaceAltLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"/>
     </Style>
 
-    <!-- Selection tick. Two styles that swap rather than one retinted by a trigger,
-         the same way the row's status pills do. -->
     <Style x:Key="Tick" TargetType="Border">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Stroke"
@@ -275,7 +237,6 @@
         <Setter Property="Stroke" Value="{StaticResource BrandBrush}"/>
     </Style>
 
-    <!-- Toolbar chip: bordered, tappable, hover-tinted -->
     <Style x:Key="Chip" TargetType="Border">
         <Setter Property="Background"
                 Value="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"/>
@@ -289,7 +250,6 @@
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
-    <!-- Small square icon-only affordance (edit, delete, close) -->
     <Style x:Key="IconChip" TargetType="Border">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Stroke"
@@ -304,7 +264,6 @@
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
-    <!-- Floating surface: modals and the sign-in panel -->
     <Style x:Key="Sheet" TargetType="Border">
         <Setter Property="Background"
                 Value="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceDarkBrush}}"/>
@@ -322,10 +281,6 @@
                 Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"/>
         <Setter Property="HeightRequest" Value="1"/>
     </Style>
-
-    <!-- ==================================================================== -->
-    <!-- Buttons                                                              -->
-    <!-- ==================================================================== -->
 
     <Style TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
@@ -371,7 +326,6 @@
         </Setter>
     </Style>
 
-    <!-- Neutral filled button — the counterweight to a brand primary -->
     <Style x:Key="ButtonSecondary" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
         <Setter Property="FontSize" Value="14"/>
@@ -417,7 +371,6 @@
         </Setter>
     </Style>
 
-    <!-- Destructive primary -->
     <Style x:Key="ButtonDanger" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
         <Setter Property="FontSize" Value="14"/>
@@ -461,7 +414,6 @@
         </Setter>
     </Style>
 
-    <!-- Text-only button -->
     <Style x:Key="ButtonGhost" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
         <Setter Property="FontSize" Value="14"/>
@@ -492,7 +444,6 @@
         </Setter>
     </Style>
 
-    <!-- Legacy button aliases -->
     <Style x:Key="PrimaryButtonOutline" TargetType="Button" BasedOn="{StaticResource ButtonSecondary}"/>
     <Style x:Key="SecondaryButtonOutline" TargetType="Button" BasedOn="{StaticResource ButtonSecondary}"/>
     <Style x:Key="TertiaryButtonOutline" TargetType="Button" BasedOn="{StaticResource ButtonSecondary}"/>
@@ -507,10 +458,6 @@
         <Setter Property="behaviors:Hover.Opacity" Value="0.65"/>
     </Style>
 
-    <!-- ==================================================================== -->
-    <!-- Inputs                                                               -->
-    <!-- ==================================================================== -->
-
     <Style TargetType="Entry">
         <Setter Property="FontFamily" Value="{StaticResource FontRegular}"/>
         <Setter Property="FontSize" Value="14"/>
@@ -524,7 +471,6 @@
         <Setter Property="VerticalOptions" Value="Center"/>
     </Style>
 
-    <!-- The bordered shell an Entry sits inside -->
     <Style x:Key="Field" TargetType="Border">
         <Setter Property="Background"
                 Value="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"/>
@@ -579,10 +525,6 @@
     <Style TargetType="StackLayout">
         <Setter Property="Spacing" Value="10"/>
     </Style>
-
-    <!-- ==================================================================== -->
-    <!-- Legacy aliases — superseded, kept so older markup still resolves      -->
-    <!-- ==================================================================== -->
 
     <Style x:Key="LargeTitle" TargetType="Label" BasedOn="{StaticResource Display}"/>
     <Style x:Key="Headline" TargetType="Label" BasedOn="{StaticResource Overline}"/>

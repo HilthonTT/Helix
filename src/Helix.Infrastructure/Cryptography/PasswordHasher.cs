@@ -7,7 +7,7 @@ internal sealed class PasswordHasher : IPasswordHasher
 {
     private const int SaltSize = 16;
     private const int HashSize = 32;
-    private const int CurrentIterations = 600_000; // OWASP 2023 recommendation for PBKDF2-SHA512
+    private const int CurrentIterations = 600_000;
     private const int LegacyIterations = 100_000;
     private const string V2Prefix = "v2$";
     private const char V2Separator = '$';
@@ -44,13 +44,11 @@ internal sealed class PasswordHasher : IPasswordHasher
     {
         if (string.IsNullOrWhiteSpace(passwordHash))
         {
-            // Caller will fail verification anyway; nothing to migrate.
             return false;
         }
 
         if (!passwordHash.StartsWith(V2Prefix, StringComparison.Ordinal))
         {
-            // Legacy format — always rehash.
             return true;
         }
 
@@ -67,7 +65,6 @@ internal sealed class PasswordHasher : IPasswordHasher
         {
             if (passwordHash.StartsWith(V2Prefix, StringComparison.Ordinal))
             {
-                // v2$<iters>$<hexhash>$<hexsalt>
                 string[] parts = passwordHash[V2Prefix.Length..].Split(V2Separator);
                 if (parts.Length != 3)
                 {
@@ -84,7 +81,6 @@ internal sealed class PasswordHasher : IPasswordHasher
             }
             else
             {
-                // Legacy format: <hexhash>-<hexsalt>
                 string[] parts = passwordHash.Split(LegacySeparator);
                 if (parts.Length != 2)
                 {

@@ -10,19 +10,6 @@ using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.Application.Features.Storage.Queries;
 
-/// <summary>
-/// Reports the volumes that are running out of room, against the threshold the user set.
-/// </summary>
-/// <remarks>
-/// The dashboard has always been able to show how full a NAS is, but only while someone
-/// was looking at it — which is exactly what nobody is doing in the weeks a pool fills up.
-/// This is the same measurement asked as a question that can be answered while the app is
-/// in the tray.
-///
-/// It answers in volumes rather than drives for the reason <see cref="IStorageProbe"/>
-/// exists: thirteen shares of one pool are one thing running out of space, and warning
-/// about it thirteen times would train the user to dismiss the warning.
-/// </remarks>
 public sealed class GetStorageAlerts(
     IDriveRepository driveRepository,
     ISettingsRepository settingsRepository,
@@ -41,9 +28,6 @@ public sealed class GetStorageAlerts(
             loggedInUser.UserId,
             cancellationToken);
 
-        // No settings row yet means the user has not reached the settings page since
-        // registering. Nothing to report rather than something to fail over: this runs
-        // unattended, and a background check is no place to be creating rows.
         if (settings is null)
         {
             return Result.Success(StorageAlertReport.Empty);
@@ -63,8 +47,6 @@ public sealed class GetStorageAlerts(
 
         HashSet<string> connected = nasConnector.GetConnectedLetters();
 
-        // Only what is mounted. A drive that is not connected has not run out of space —
-        // it has not been asked, and guessing at it would warn about a NAS that is fine.
         List<string> letters = [.. drives.Select(d => d.Letter).Where(connected.Contains)];
         if (letters.Count == 0)
         {

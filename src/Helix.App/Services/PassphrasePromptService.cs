@@ -3,11 +3,6 @@ using Helix.Application.Abstractions.Security;
 
 namespace Helix.App.Services;
 
-/// <summary>
-/// Default implementation of <see cref="IPassphrasePrompt"/> using
-/// <see cref="Shell.Current"/> alert dialogs. Lives in the presentation layer
-/// because it touches MAUI UI.
-/// </summary>
 internal sealed class PassphrasePromptService : IPassphrasePrompt
 {
     private const int MaxLength = 256;

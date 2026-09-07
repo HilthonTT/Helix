@@ -6,16 +6,6 @@ using System.Xml.Linq;
 
 namespace Helix.Infrastructure.Startup;
 
-/// <summary>
-/// Registers Helix to launch at login by writing a LaunchAgent property list into
-/// <c>~/Library/LaunchAgents</c> — the macOS counterpart of the Windows Startup folder
-/// shortcut. Removing the file unregisters it.
-/// </summary>
-/// <remarks>
-/// The plist is written rather than <c>launchctl load</c>-ed: <c>RunAtLoad</c> takes
-/// effect from the next login either way, and shelling out to launchctl would need the
-/// user's GUI session bootstrap, which a freshly launched app cannot assume it has.
-/// </remarks>
 [SupportedOSPlatform("maccatalyst")]
 internal sealed class MacStartupService : IStartupService
 {
@@ -53,9 +43,6 @@ internal sealed class MacStartupService : IStartupService
         {
             Directory.CreateDirectory(LaunchAgentsFolder);
 
-            // `open -a <bundle>` rather than the inner executable: launching the binary
-            // directly bypasses LaunchServices, and the app comes up without its icon
-            // in the Dock or a usable activation state.
             var plist = new XDocument(
                 new XDocumentType("plist", "-//Apple//DTD PLIST 1.0//EN",
                     "http://www.apple.com/DTDs/PropertyList-1.0.dtd", null),

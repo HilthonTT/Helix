@@ -8,7 +8,6 @@ public sealed class PasswordGeneratorTests
     [Fact]
     public void Generated_Password_Should_Be_Random_Enough()
     {
-        // Arrange
         int passwordLength = PasswordGenerator.ConfiguredPasswordLength;
         const int sampleSize = 100;
         var generatedPasswords = new HashSet<string>();
@@ -18,8 +17,6 @@ public sealed class PasswordGeneratorTests
         bool hasDigit = false;
         bool hasSpecialChar = false;
 
-        // Act — exercise the random generator directly (the public API caches a
-        // single key in SecureStorage and would return the same value every call).
         for (int i = 0; i < sampleSize; i++)
         {
             string password = PasswordGenerator.GenerateRandomPassword(passwordLength);

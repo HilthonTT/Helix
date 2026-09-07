@@ -60,9 +60,6 @@ public class UnlockSessionTests
     [Fact]
     public async Task Handle_Should_LeaveTheSessionAlone_WhateverTheAnswer()
     {
-        // The whole difference between locking and signing out: nothing here establishes
-        // or ends a session, so the drives stay mounted and the watchdog keeps running
-        // behind the lock screen.
         _passwordHasherMock.Verify(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
 
         await _unlockSession.Handle(new UnlockSession.Request("guess"));
@@ -98,7 +95,6 @@ public class UnlockSessionTests
 
         result.Error.Should().Be(ValidationErrors.MissingFields);
 
-        // Not even asked: an empty box is not a password to check.
         _passwordHasherMock.DidNotReceive().Verify(Arg.Any<string>(), Arg.Any<string>());
     }
 }

@@ -15,7 +15,6 @@
         <Grid ColumnDefinitions="*,*"
               IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
 
-            <!-- ===== Form ===== -->
             <Grid Padding="48,32">
 
                 <Picker VerticalOptions="Start"
@@ -39,7 +38,6 @@
                            Style="{StaticResource Display}"
                            Margin="0,20,0,28"/>
 
-                    <!-- Username -->
                     <Label Text="{l10n:Translate Username}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/>
                     <Border Style="{StaticResource Field}">
                         <Entry Placeholder="{l10n:Translate Username}"
@@ -47,7 +45,6 @@
                                IsEnabled="{Binding IsNotBusy}"/>
                     </Border>
 
-                    <!-- Password -->
                     <Label Text="{l10n:Translate Password}" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
                     <Border Style="{StaticResource Field}">
                         <Grid ColumnDefinitions="*,Auto">
@@ -98,9 +95,6 @@
                 </VerticalStackLayout>
             </Grid>
 
-            <!-- ===== Brand panel ===== -->
-            <!-- The gradient is the floor: if the artwork is ever missing the panel
-                 still renders in brand colours rather than as a blank column. -->
             <Grid Grid.Column="1" Background="{StaticResource BrandGradientBrush}">
                 <Image Source="orange_background.png"
                        Aspect="AspectFill"
@@ -126,7 +120,6 @@
             </Grid>
         </Grid>
 
-        <!-- ===== Busy overlay ===== -->
         <Grid IsVisible="{Binding IsLoading}"
               Background="{AppThemeBinding Light={StaticResource CanvasLightBrush}, Dark={StaticResource CanvasDarkBrush}}">
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="16">
@@ -134,8 +127,6 @@
                 <ActivityIndicator IsRunning="{Binding IsLoading}" WidthRequest="28" HeightRequest="28"/>
             </VerticalStackLayout>
         </Grid>
-        <!-- Last child of the root grid, so a banner sits above the modal layer too:
-             a failure raised from inside a sheet has to be readable without closing it. -->
         <controls:NotificationHost/>
 
     </Grid>

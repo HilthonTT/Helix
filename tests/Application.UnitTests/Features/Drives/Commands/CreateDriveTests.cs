@@ -42,7 +42,6 @@ public class CreateDriveTests
     [Fact]
     public async Task Handle_Should_ReturnError_WhenLetterIsNotASingleCharacter()
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
@@ -51,17 +50,14 @@ public class CreateDriveTests
 
         CreateDrive.Request invalidRequest = Request with { Letter = "LE" };
 
-        // Act
         Result<Drive> result = await _createDrive.Handle(invalidRequest);
 
-        // Assert
         result.Error.Should().Be(DriveErrors.NotALetter);
     }
 
     [Fact]
     public async Task Handle_Should_ReturnError_WhenLetterIsNotUnique()
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
@@ -70,61 +66,52 @@ public class CreateDriveTests
 
         CreateDrive.Request invalidRequest = Request with { Letter = "A" };
 
-        // Act
         Result<Drive> result = await _createDrive.Handle(invalidRequest);
 
-        // Assert
         result.Error.Should().Be(DriveErrors.LetterNotUnique(invalidRequest.Letter));
     }
 
     [Fact]
     public async Task Handle_Should_CallRepository_WhenCreateSucceeds()
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
         _driveRepositoryMock.IsLetterUniqueAsync(Arg.Is<string>(e => e == Request.Letter), _loggedInUserMock.UserId)
             .Returns(true);
 
-        // Act
         await _createDrive.Handle(Request);
 
-        // Assert
         _driveRepositoryMock.Received(1).Insert(Arg.Is<Drive>(d => d.Letter == Request.Letter));
     }
 
     [Fact]
     public async Task Handle_Should_CallUnitOfWork_WhenCreateSucceeds()
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
         _driveRepositoryMock.IsLetterUniqueAsync(Arg.Is<string>(e => e == Request.Letter), _loggedInUserMock.UserId)
             .Returns(true);
 
-        // Act
         await _createDrive.Handle(Request);
 
-        // Assert
         await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Theory]
     [InlineData("")]
-    [InlineData("999.999.999.999")]  // Dotted-numeric, but out of range
-    [InlineData("256.256.256.256")]  // Dotted-numeric, but out of range
-    [InlineData("192.168.1.1.1")]    // Dotted-numeric with too many segments
-    [InlineData("192.168.1")]        // Dotted-numeric with too few segments
-    [InlineData("nas local")]        // A space is not legal in a hostname
-    [InlineData("-nas")]             // A label may not start with a hyphen
-    [InlineData("nas-")]             // ...nor end with one
-    [InlineData("nas..local")]       // Empty label
-    [InlineData("fd00:::5")]         // Not a parseable IPv6 address
+    [InlineData("999.999.999.999")]
+    [InlineData("256.256.256.256")]
+    [InlineData("192.168.1.1.1")]
+    [InlineData("192.168.1")]
+    [InlineData("nas local")]
+    [InlineData("-nas")]
+    [InlineData("nas-")]
+    [InlineData("nas..local")]
+    [InlineData("fd00:::5")]
     public async Task Handle_Should_ReturnError_WhenHostFormatIsInvalid(string invalidHost)
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
@@ -133,10 +120,8 @@ public class CreateDriveTests
 
         CreateDrive.Request invalidRequest = Request with { Host = invalidHost };
 
-        // Act
         Result<Drive> result = await _createDrive.Handle(invalidRequest);
 
-        // Assert
         result.Error.Should().Be(ValidationErrors.InvalidHost);
     }
 
@@ -147,15 +132,14 @@ public class CreateDriveTests
     [InlineData("8.8.8.8")]
     [InlineData("255.255.255.255")]
     [InlineData("0.0.0.0")]
-    [InlineData("nas.local")]        // The usual way a NAS is reached on a home network
-    [InlineData("MYNAS")]            // Single-label NetBIOS name
-    [InlineData("nas_01.example.com")] // Underscores are legal in a Windows computer name
-    [InlineData("abc.def.ghi.jkl")]  // Not an IP address, but a perfectly good hostname
-    [InlineData("fd00::5")]          // IPv6
-    [InlineData("[fd00::5]")]        // IPv6 in the bracketed form other tools print
+    [InlineData("nas.local")]
+    [InlineData("MYNAS")]
+    [InlineData("nas_01.example.com")]
+    [InlineData("abc.def.ghi.jkl")]
+    [InlineData("fd00::5")]
+    [InlineData("[fd00::5]")]
     public async Task Handle_Should_ReturnSuccess_WhenHostFormatIsValid(string validHost)
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
@@ -164,10 +148,8 @@ public class CreateDriveTests
 
         CreateDrive.Request validRequest = Request with { Host = validHost };
 
-        // Act
         Result<Drive> result = await _createDrive.Handle(validRequest);
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
     }
 
@@ -177,8 +159,6 @@ public class CreateDriveTests
     [InlineData("ß")]
     public async Task Handle_Should_ReturnNotALetter_WhenLetterIsNotAToZ(string letter)
     {
-        // char.IsLetter accepts every letter in Unicode; the picker offers A to Z, and a
-        // drive saved under anything else fails at every connect with an error naming no field.
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
@@ -190,21 +170,17 @@ public class CreateDriveTests
     [Fact]
     public async Task Handle_Should_ReturnLetterInUse_WhenLetterIsMountedFromSomethingElse()
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
         _driveRepositoryMock.IsLetterUniqueAsync(Arg.Is<string>(e => e == Request.Letter), _loggedInUserMock.UserId)
             .Returns(true);
 
-        // A USB stick, an optical drive, another account's mapping: mounted, but not this share.
         _nasConnectorMock.GetConnectedLetters().Returns([Request.Letter]);
         _nasConnectorMock.IsMountedFrom(Arg.Any<Drive>()).Returns(false);
 
-        // Act
         Result<Drive> result = await _createDrive.Handle(Request);
 
-        // Assert
         result.Error.Should().Be(DriveErrors.LetterInUse(Request.Letter));
         _driveRepositoryMock.DidNotReceive().Insert(Arg.Any<Drive>());
     }
@@ -212,23 +188,18 @@ public class CreateDriveTests
     [Fact]
     public async Task Handle_Should_ReturnSuccess_WhenLetterIsAlreadyMountedFromThisShare()
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
         _driveRepositoryMock.IsLetterUniqueAsync(Arg.Is<string>(e => e == Request.Letter), _loggedInUserMock.UserId)
             .Returns(true);
 
-        // The mapping outlived the record describing it, as after a reinstall: the drive
-        // being created is the one already on the letter, not a collision with it.
         _nasConnectorMock.GetConnectedLetters().Returns([Request.Letter]);
         _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == Request.Letter && d.Name == Request.Name))
             .Returns(true);
 
-        // Act
         Result<Drive> result = await _createDrive.Handle(Request);
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
         _driveRepositoryMock.Received(1).Insert(Arg.Any<Drive>());
     }

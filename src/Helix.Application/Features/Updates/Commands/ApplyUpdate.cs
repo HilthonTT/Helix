@@ -5,14 +5,6 @@ using Helix.Domain.Users;
 
 namespace Helix.Application.Features.Updates.Commands;
 
-/// <summary>
-/// Hands a staged update to the helper that replaces the install.
-/// </summary>
-/// <remarks>
-/// Success here means the helper started, not that the update is installed — the helper
-/// is waiting for this process to exit before it does anything. The caller must quit
-/// immediately, and nothing after this point can be undone from inside Helix.
-/// </remarks>
 public sealed class ApplyUpdate(
     ILoggedInUser loggedInUser,
     IUpdateInstaller updateInstaller) : IHandler

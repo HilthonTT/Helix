@@ -54,19 +54,11 @@ public sealed partial class HomePage : ContentPage
         _modals.Register(DriveGroups, DriveGroupsLayout, DriveGroupsView);
         _modals.AttachEscapeToDismiss(this);
 
-        // The drive card decides its own layout from its own width rather than the
-        // window's: the sidebar and the connectivity column both come out of the window
-        // before the card sees any of it, and it is the card that has to fit.
         DriveCard.SizeChanged += (_, _) => _viewModel.IsCompact = DriveCard.Width < CompactCardWidth;
 
         RegisterMessages();
     }
 
-    /// <summary>
-    /// Below this many DIPs the drive card goes compact. Fullscreen on a laptop gives it
-    /// around 1060; an un-maximized window around 670. The header's full-labelled row
-    /// needs about 810 to sit without squeezing the search box.
-    /// </summary>
     private const double CompactCardWidth = 850;
 
     protected async override void OnAppearing()
@@ -79,31 +71,22 @@ public sealed partial class HomePage : ContentPage
         _isInitializing = true;
         try
         {
-            // Always refetch: Shell caches this page across logouts, so relying on
-            // _isFirstView left the previous user's drives on screen after re-login.
             List<Drive> drives = await _viewModel.FetchDrivesAsync();
 
             await InitializeChartAsync(drives);
 
-            // After the drives, because a group counts what is on screen.
             await _viewModel.FetchDriveGroupsAsync();
 
             await HandleConnectDrivesOnStartupAsync();
 
             await _viewModel.InitializeCountdownAsync();
 
-            // Started here rather than at app start: the watch set comes from GetDrives,
-            // which requires a signed-in user.
             await _watchdog.StartAsync();
 
-            // Same reason — the tray menu lists the signed-in user's drives.
             await _tray.StartAsync();
 
-            // Started after the tray, because the tray is where its warnings come out.
             _storageAlerts.Start();
 
-            // Reads the user's own lock setting on every tick, so it starts here with
-            // the rest of the per-session services and needs nothing from them.
             _idleLock.Start();
 
             await PruneAuditlogsAsync();
@@ -118,25 +101,12 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    /// <summary>
-    /// Clears the once-per-session state so the next sign-in starts clean. Shell caches
-    /// this page across a sign-out, so without this the startup pass — which also applies
-    /// the signed-in user's language — only ever ran for the first user of the process.
-    /// </summary>
     internal static void ResetSessionState()
     {
         _isFirstView = true;
         _prunedAuditlogs = false;
     }
 
-    /// <summary>
-    /// Trims the audit log to the user's retention setting, once per sign-in.
-    /// </summary>
-    /// <remarks>
-    /// Here rather than on a timer because the log is only ever read from the audit page,
-    /// so trimming it more often than a person can look at it buys nothing. Failures are
-    /// logged and swallowed: housekeeping must never keep the dashboard off screen.
-    /// </remarks>
     private static async Task PruneAuditlogsAsync()
     {
         if (_prunedAuditlogs)
@@ -179,7 +149,6 @@ public sealed partial class HomePage : ContentPage
 
     private async Task InitializeChartAsync(List<Drive>? providedDrives = null)
     {
-        // Use the provided drives if they are not null
         List<Drive> drives = providedDrives ?? await FetchDrivesFromDatabaseAsync();
 
         ChartEntry[] entries = GenerateChartEntries(drives);
@@ -204,7 +173,6 @@ public sealed partial class HomePage : ContentPage
             return BuildEntries(0, 1);
         }
 
-        // Batch lookup — DriveInfo.GetDrives() is enumerated once instead of per drive.
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
         int connected = drives.Count(d => connectedLetters.Contains(d.Letter));
 
@@ -213,7 +181,6 @@ public sealed partial class HomePage : ContentPage
 
     private static ChartEntry[] BuildEntries(int connected, int disconnected)
     {
-        // Fully qualified: `Application` alone binds to the Helix.Application namespace here.
         bool isLight = Microsoft.Maui.Controls.Application.Current?.RequestedTheme == AppTheme.Light;
 
         Color connectedColor = Color.FromArgb(isLight ? "#0E9F6E" : "#34D399");
@@ -232,7 +199,6 @@ public sealed partial class HomePage : ContentPage
         {
             Entries = entries,
             IsAnimated = true,
-            // A thin ring reads as a gauge; the thick default reads as a pie.
             HoleRadius = 0.68f,
             LabelTextSize = 24,
             BackgroundColor = Colors.Transparent.ToSKColor(),
@@ -256,9 +222,6 @@ public sealed partial class HomePage : ContentPage
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(
             this, async (r, m) =>
             {
-                // Published on every connectivity edge, including while the window is
-                // hidden in the tray; a transient read failure there must not escape an
-                // async void and surface as an unhandled-exception alert.
                 try
                 {
                     await InitializeChartAsync();
@@ -286,15 +249,6 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    /// <summary>
-    /// Ctrl+F puts the caret in the filter box.
-    /// </summary>
-    /// <remarks>
-    /// The list itself is still mouse-only — its pills and icon chips are styled Borders
-    /// with tap gestures, which take no focus — so this is the one keyboard route into
-    /// narrowing it. See the note in CLAUDE.md about what making the rows themselves
-    /// keyboard-operable would cost.
-    /// </remarks>
     private void Search_Clicked(object sender, EventArgs e) => DriveSearch.Focus();
 
     private void DriveGroups_Clicked(object sender, EventArgs e)

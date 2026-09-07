@@ -84,8 +84,6 @@ public class DriveGroupTests
     [Fact]
     public async Task Create_Should_KeepOnlyTheDrivesTheUserOwns()
     {
-        // The ids come from a list the presentation layer built. A group holding someone
-        // else's drive is a group that silently does nothing when connected.
         Guid someoneElses = Guid.NewGuid();
 
         DriveGroup? inserted = null;
@@ -136,8 +134,6 @@ public class DriveGroupTests
     [Fact]
     public async Task Update_Should_LetAGroupKeepItsOwnName()
     {
-        // Excluded from the uniqueness check, or changing only the membership of a group
-        // would be rejected for colliding with the name it already has.
         DriveGroup group = GivenGroup(_media.Id);
 
         await Update().Handle(new UpdateDriveGroup.Request(group.Id, "Office", [_media.Id, _backups.Id]));
@@ -200,7 +196,6 @@ public class DriveGroupTests
         result.IsFailure.Should().BeTrue();
         result.Error.Description.Should().Contain("Y:").And.Contain("network path");
 
-        // The one that worked still worked, and is stamped as such.
         _media.LastConnectedOnUtc.Should().Be(Now);
     }
 
@@ -218,15 +213,12 @@ public class DriveGroupTests
         await _nasConnectorMock.Received(1).DisconnectAsync(_media, Arg.Any<CancellationToken>());
         await _nasConnectorMock.DidNotReceive().DisconnectAsync(_backups, Arg.Any<CancellationToken>());
 
-        // Nothing came up, so nothing was stamped and there was nothing to save.
         await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task Connect_Should_DoNothing_WhenEveryDriveItNamedHasBeenDeleted()
     {
-        // A group outlives the drives in it by design — it holds ids, not a foreign key —
-        // so this is a real state, and it is not an error.
         DriveGroup group = GivenGroup(Guid.NewGuid());
 
         Result result = await Connect().Handle(new ConnectDriveGroup.Request(group.Id));
@@ -238,8 +230,6 @@ public class DriveGroupTests
     [Fact]
     public async Task Connect_Should_MountInTheOrderTheGroupNames()
     {
-        // Failures are reported to the user in this order, so it is the order they
-        // arranged rather than whatever the database handed back.
         DriveGroup group = GivenGroup(_backups.Id, _media.Id);
 
         _nasConnectorMock.ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>())

@@ -8,11 +8,11 @@ public static class CultureSwitcher
 {
     public static readonly string[] Languages =
     [
-        "English", 
-        "Français", 
-        "Deutsch", 
-        "Bahasa Indonesia", 
-        "日本語", 
+        "English",
+        "Français",
+        "Deutsch",
+        "Bahasa Indonesia",
+        "日本語",
         "Nederlands"
     ];
 
@@ -49,9 +49,6 @@ public static class CultureSwitcher
             .FirstOrDefault(x => currentCulture.StartsWith(x.Value, StringComparison.OrdinalIgnoreCase))
             .Key;
 
-        // Unsupported OS cultures (e.g. es-ES) miss the map and FirstOrDefault yields
-        // default(Language) = 0, which is not a member of the enum and would blow up
-        // LanguageToString/StringToLanguage round-trips. Fall back to English.
         return currentLanguage == default ? Language.English : currentLanguage;
     }
 

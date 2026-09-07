@@ -35,9 +35,6 @@ public sealed class CreateDriveGroup(
             return Result.Failure<DriveGroup>(DriveGroupErrors.NameNotUnique(name));
         }
 
-        // Filtered against the user's own drives rather than trusted: the ids arrive from
-        // a list the presentation layer built, and a group holding another user's drive
-        // would be a group that silently does nothing when connected.
         List<Guid> owned = await OwnedDriveIdsAsync(request.DriveIds, cancellationToken);
         if (owned.Count == 0)
         {

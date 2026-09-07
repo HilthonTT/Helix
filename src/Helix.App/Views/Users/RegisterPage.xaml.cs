@@ -25,11 +25,6 @@ public sealed partial class RegisterPage : ContentPage
         SetLoadingToFalse();
         LoadCurrentLanguage();
 
-        // Reuse the app-wide hook started in MauiProgram: libuiohook allows only one
-        // running global hook per process, so a second hook's RunAsync faults and the
-        // Ctrl+Enter shortcut would never fire. Subscribing costs nothing where the hook
-        // never started - on macOS without Accessibility access, most likely - it simply
-        // never raises.
         _hook = App.ServiceProvider.GetRequiredService<IGlobalHook>();
         _hook.KeyPressed += OnKeyPressed;
     }

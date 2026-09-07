@@ -35,8 +35,6 @@
 
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate Letter}" Style="{StaticResource FieldLabel}"/>
-                        <!-- Free letters plus this drive's own; see the create modal,
-                             including why this carries no Title. -->
                         <Border Style="{StaticResource Field}">
                             <Picker Margin="8,0"
                                     BackgroundColor="Transparent"
@@ -58,9 +56,6 @@
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate NasHost}" Style="{StaticResource FieldLabel}"/>
                         <Border Style="{StaticResource Field}">
-                            <!-- Not masked by HideSecrets, unlike the two fields below it: a host is
-                                 an address, not a secret, and hiding it made the one field the user
-                                 most often has to check against their NAS unreadable. -->
                             <Entry Placeholder="{l10n:Translate AddNasHostPlaceholder}"
                                    Text="{Binding Drive.Host}"
                                    IsEnabled="{Binding IsNotBusy}"/>
@@ -107,7 +102,6 @@
                                 IsToggled="{Binding Drive.AutoConnect, Mode=TwoWay}"/>
                     </Grid>
 
-                    <!-- Hidden on macOS, which has no remembered-mapping equivalent. -->
                     <Grid ColumnDefinitions="*,Auto"
                           Margin="0,2,0,0"
                           IsVisible="{Binding SupportsPersistentMappings}">
@@ -120,10 +114,6 @@
                                 IsToggled="{Binding Drive.Persistent, Mode=TwoWay}"/>
                     </Grid>
 
-                    <!--
-                    Only Windows keeps one credential context per server name, so only
-                    there does a different spelling of the same NAS buy a slot of its own.
-                    -->
                     <Grid ColumnDefinitions="*,Auto"
                           Margin="0,2,0,0"
                           IsVisible="{Binding SupportsHostnameConnect}">
@@ -139,7 +129,6 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <!-- Auto middle column so "Test connection" is not clipped; see the create modal. -->
             <Grid Grid.Row="2" ColumnDefinitions="*,Auto,*" ColumnSpacing="12" Padding="24,16,24,24">
                 <Button Style="{StaticResource ButtonSecondary}"
                         HorizontalOptions="Fill"

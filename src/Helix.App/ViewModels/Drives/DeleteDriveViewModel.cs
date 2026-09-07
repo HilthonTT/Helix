@@ -21,10 +21,6 @@ internal sealed partial class DeleteDriveViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(Description))]
     public partial DriveDisplay? Drive { get; set; }
 
-    /// <summary>
-    /// The question the sheet asks, in the user's language — it was the one string on the
-    /// dashboard still written in English.
-    /// </summary>
     public string Description => Drive is null
         ? AppResources.DeleteDriveConfirmGeneric
         : string.Format(AppResources.DeleteDriveConfirm, Drive.Name);

@@ -98,10 +98,6 @@ public sealed class UpdateSettings(
             return Result.Failure(SettingsErrors.NotFound);
         }
 
-        // Read before the update, so the shortcuts are only touched when their switch
-        // moved. Rewriting both on every save meant a Startup folder that had become
-        // unwritable failed every other setting on the page - the timer, the retention,
-        // the language - with an error about a shortcut nobody had touched.
         bool startupChanged = settings.SetOnStartup != request.SetOnStartup;
         bool desktopChanged = settings.SetDesktopShortcut != request.SetDesktopShortcut;
 
@@ -118,9 +114,6 @@ public sealed class UpdateSettings(
             request.CloseToTray,
             request.NotifyOnMinimizeToTray);
 
-        // The shortcut services throw IOException on failure (e.g. the startup folder
-        // is locked down by policy). Handlers must never throw for expected failures —
-        // convert to a Result so the settings page shows an alert instead of crashing.
         try
         {
             if (startupChanged)
@@ -150,23 +143,17 @@ public sealed class UpdateSettings(
             return Result.Failure(SettingsErrors.TimerCountMustBePositive);
         }
 
-        // Zero is legal and means "keep everything"; negative is not a shorter retention,
-        // it is a typo that would delete entries dated in the future.
         if (request.AuditlogRetentionDays < 0)
         {
             return Result.Failure(SettingsErrors.RetentionMustNotBeNegative);
         }
 
-        // Zero is legal and means "never warn me". The upper bound is what keeps the
-        // warning meaning something: at 100 every volume is always below its threshold,
-        // which is a notification on every check rather than a warning about anything.
         if (request.StorageAlertThresholdPercent < 0 ||
             request.StorageAlertThresholdPercent > SettingsModel.MaximumStorageAlertThresholdPercent)
         {
             return Result.Failure(SettingsErrors.StorageAlertThresholdOutOfRange);
         }
 
-        // Zero is legal and means "never lock".
         if (request.IdleLockMinutes < 0)
         {
             return Result.Failure(SettingsErrors.IdleLockMustNotBeNegative);

@@ -11,7 +11,6 @@ internal sealed partial class LoginViewModel : BaseViewModel
 {
     public LoginViewModel()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Username = string.Empty;
         Password = string.Empty;
         SelectedLanguage = string.Empty;
@@ -36,7 +35,6 @@ internal sealed partial class LoginViewModel : BaseViewModel
     public partial string SelectedLanguage { get; set; }
     partial void OnSelectedLanguageChanged(string value)
     {
-        // "no selection yet" is not a language — StringToLanguage would throw on it.
         if (string.IsNullOrEmpty(value))
         {
             return;

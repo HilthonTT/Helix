@@ -25,8 +25,6 @@ internal sealed class InsertAuditLogsInterceptor : SaveChangesInterceptor
         DbContextEventData eventData,
         InterceptionResult<int> result)
     {
-        // Mirror the async path — a synchronous SaveChanges() call must not
-        // silently skip audit logging.
         if (eventData.Context is not null)
         {
             InsertAuditLogs(eventData.Context);
@@ -42,14 +40,6 @@ internal sealed class InsertAuditLogsInterceptor : SaveChangesInterceptor
         context.Set<Auditlog>().AddRange(auditLogs);
     }
 
-    /// <summary>
-    /// Turns the drive changes in this save into audit entries.
-    /// </summary>
-    /// <remarks>
-    /// The entry records the action and the drive, not a sentence about them. Composing
-    /// English here was what made the audit page untranslatable in an app that ships in
-    /// six languages — see <see cref="AuditAction"/>.
-    /// </remarks>
     private static IEnumerable<Auditlog> GetDrivesAuditLogs(DbContext context)
     {
         return context.ChangeTracker
@@ -74,15 +64,6 @@ internal sealed class InsertAuditLogsInterceptor : SaveChangesInterceptor
             });
     }
 
-    /// <summary>
-    /// Whether a change is one the user would recognise as a change to the drive.
-    /// </summary>
-    /// <remarks>
-    /// Connecting a drive now stamps <c>LastConnectedOnUtc</c>, and the auditable
-    /// interceptor stamps <c>ModifiedOnUtc</c> alongside it. Both are bookkeeping. Left
-    /// unfiltered, every single connect would file a "the drive was changed" entry and
-    /// bury the events that actually matter.
-    /// </remarks>
     private static bool IsWorthRecording(EntityEntry<Entity> entry)
     {
         if (entry.State != EntityState.Modified)

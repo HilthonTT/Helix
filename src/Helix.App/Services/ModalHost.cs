@@ -1,16 +1,5 @@
 namespace Helix.App.Services;
 
-/// <summary>
-/// Presents the in-page modal sheets: scrim, enter/exit animation, "only one open at
-/// a time" arbitration, and dismissal by scrim click or Escape.
-/// </summary>
-/// <remarks>
-/// Every page used to carry its own copy of this, including an O(n²) block of
-/// "close the other three first" calls and an 800 ms cross-fade that made the app
-/// feel sluggish. Registering sheets by key keeps the arbitration in one place and
-/// lets the transition stay short: a fade with a small rise and scale, which reads as
-/// responsive without the motion being fussy.
-/// </remarks>
 internal sealed class ModalHost
 {
     private const double ScrimOpacity = 0.55;
@@ -39,7 +28,6 @@ internal sealed class ModalHost
         }
     }
 
-    /// <summary>The sheet currently on screen, or <c>null</c> when none is.</summary>
     public string? Current => _current;
 
     public bool IsOpen(string key) => _current == key;
@@ -51,7 +39,6 @@ internal sealed class ModalHost
         layout.IsVisible = false;
     }
 
-    /// <summary>Shows <paramref name="key"/>, closing any other open sheet first.</summary>
     public async Task ShowAsync(string key)
     {
         if (!_sheets.TryGetValue(key, out Sheet? target) || _current == key)
@@ -64,7 +51,6 @@ internal sealed class ModalHost
             await HideAsync(open);
         }
 
-        // Bump the token so a close still in flight cannot hide what we just opened.
         _closeTokens[key] = _closeTokens.GetValueOrDefault(key) + 1;
         _current = key;
 
@@ -105,8 +91,6 @@ internal sealed class ModalHost
 
         await target.Content.FadeToAsync(0, CloseMs, Easing.CubicIn);
 
-        // Another Show may have re-opened this sheet while the fade ran; only the
-        // most recent close is allowed to collapse the layout.
         if (_closeTokens.GetValueOrDefault(key) == token)
         {
             target.Layout.IsVisible = false;
@@ -118,7 +102,6 @@ internal sealed class ModalHost
         return _current is string open ? HideAsync(open) : Task.CompletedTask;
     }
 
-    /// <summary>Routes a show/hide message for <paramref name="key"/>.</summary>
     public Task ToggleAsync(string key, bool show)
     {
         if (show)
@@ -132,7 +115,6 @@ internal sealed class ModalHost
     private sealed record Sheet(AbsoluteLayout Layout, VisualElement Content);
 
 #if WINDOWS
-    /// <summary>Closes the open sheet when Escape is pressed anywhere on the page.</summary>
     public void AttachEscapeToDismiss(Page page)
     {
         void Attach()

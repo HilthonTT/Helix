@@ -4,9 +4,6 @@ using System.Text;
 
 namespace Helix.Infrastructure.Diagnostics;
 
-/// <summary>
-/// An <see cref="ILoggerProvider"/> that writes one line per entry to the log directory.
-/// </summary>
 [ProviderAlias("HelixFile")]
 internal sealed class FileLoggerProvider : ILoggerProvider
 {
@@ -27,19 +24,10 @@ internal sealed class FileLoggerProvider : ILoggerProvider
     {
         _loggers.Clear();
 
-        // The writer is owned by the container, not by this provider — other things hold
-        // it too (the diagnostics export). Flush what is pending and leave it open.
         _writer.Flush();
     }
 }
 
-/// <summary>
-/// One category's view of the log file.
-/// </summary>
-/// <remarks>
-/// The line format is deliberately flat and greppable rather than structured: the reader
-/// is a person who has been sent a zip and wants to find the moment a drive dropped.
-/// </remarks>
 internal sealed class FileLogger : ILogger
 {
     private readonly LogFileWriter _writer;
@@ -50,8 +38,6 @@ internal sealed class FileLogger : ILogger
     {
         _writer = writer;
 
-        // "Helix.App.Services.DriveWatchdog" is mostly namespace; the type is the part
-        // that tells the reader where they are.
         int lastDot = category.LastIndexOf('.');
         _category = lastDot >= 0 && lastDot < category.Length - 1 ? category[(lastDot + 1)..] : category;
 

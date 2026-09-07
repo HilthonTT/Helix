@@ -13,15 +13,8 @@ public sealed class User : Entity, IAuditable
         PasswordHash = passwordHash;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="User"/> class.
-    /// </summary>
-    /// <remarks>
-    /// Required by EF Core.
-    /// </remarks>
     private User()
     {
-        // EF Core materializes these from the database right after this constructor runs.
         Username = null!;
         PasswordHash = null!;
     }

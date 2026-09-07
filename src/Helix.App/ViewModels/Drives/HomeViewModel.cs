@@ -33,7 +33,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
         _storageProbe = App.ServiceProvider.GetRequiredService<IStorageProbe>();
 
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Drives = [];
         DriveGroups = [];
         SearchTerm = string.Empty;
@@ -45,19 +44,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
         RegisterMessages();
         InitializeCountdownEvents();
 
-        // No WatchSelection call here: seeding Drives above already ran OnDrivesChanged,
-        // and subscribing a second time would double every notification.
     }
 
-    /// <summary>
-    /// Keeps the selection-derived properties in step with the rows.
-    /// </summary>
-    /// <remarks>
-    /// Two things can move underneath them: the collection itself is replaced wholesale by
-    /// a reload or a search, and rows are added and removed one at a time by the create
-    /// and delete messages. Subscribing here rather than at each of those sites is what
-    /// stops the next one that is added from forgetting to.
-    /// </remarks>
     private void WatchSelection(ObservableCollection<DriveDisplay> drives)
     {
         drives.CollectionChanged += (_, e) =>
@@ -83,20 +71,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
         RefreshSelection();
     }
 
-    /// <summary>
-    /// Re-subscribes when the whole collection is swapped out — a search, or a reload.
-    /// </summary>
-    /// <remarks>
-    /// The rows are <b>reused</b> across the swap — the same objects go into the new
-    /// collection so a tick and a mount in flight survive typing — so their subscriptions
-    /// do not go with the old collection. They have to be removed here, or every keystroke
-    /// in the search box adds another handler to every visible row, and one tick then
-    /// recomputes the selection once per keystroke ever typed.
-    /// </remarks>
     partial void OnDrivesChanged(ObservableCollection<DriveDisplay> oldValue, ObservableCollection<DriveDisplay> newValue)
     {
-        // Null on the constructor's seeding assignment, whatever the generated signature
-        // says: nothing has been assigned before it.
         foreach (DriveDisplay drive in oldValue ?? [])
         {
             drive.PropertyChanged -= OnDrivePropertyChanged;
@@ -121,67 +97,27 @@ internal sealed partial class HomeViewModel : BaseViewModel
         OnPropertyChanged(nameof(SelectionSummary));
     }
 
-    /// <summary>
-    /// Every drive the user has, whatever the filter is showing.
-    /// </summary>
-    /// <remarks>
-    /// <see cref="Drives"/> is the view onto this: filtered, sorted, and rebuilt from
-    /// these same row objects rather than from fresh ones, so what a row is holding — its
-    /// tick, a mount in flight, why it is offline — survives typing in the search box.
-    /// </remarks>
     private readonly List<DriveDisplay> _allDrives = [];
 
-    /// <summary>What the list is showing: <see cref="_allDrives"/> filtered and sorted.</summary>
     [ObservableProperty]
     public partial ObservableCollection<DriveDisplay> Drives { get; set; }
 
-    /// <summary>The rows currently ticked.</summary>
-    /// <remarks>
-    /// Read off the rows rather than kept as a second list beside them. A drive deleted
-    /// from under a selection then simply is not in it, with nothing to keep in step.
-    /// </remarks>
     public IReadOnlyList<DriveDisplay> SelectedDrives => [.. Drives.Where(drive => drive.IsSelected)];
 
     public bool HasSelection => Drives.Any(drive => drive.IsSelected);
 
-    /// <summary>
-    /// Whether the header tick is filled: every row, and at least one row.
-    /// </summary>
     public bool AllSelected => Drives.Count > 0 && Drives.All(drive => drive.IsSelected);
 
     public string SelectionSummary => string.Format(AppResources.DrivesSelected, SelectedDrives.Count);
 
-    /// <summary>
-    /// Whether the drive card is too narrow to show everything with its label on.
-    /// </summary>
-    /// <remarks>
-    /// Set by the page from the card's measured width, because MAUI has no media queries
-    /// and the card can be 670 DIPs wide in an ordinary un-maximized window — the right
-    /// column takes 320 for the connectivity chart before the list sees any. At that
-    /// width the header's title, search box and three labelled chips wanted ~810, and
-    /// the row's fixed columns wanted more than the row had, so the one flexible column
-    /// — the drive's name — was the one that got nothing.
-    ///
-    /// Compact drops the chip labels for their icons and tooltips, and collapses the
-    /// storage-usage column, which reads "Drive not ready" for every drive that is down
-    /// and is the least useful thing on the row when space is short.
-    /// </remarks>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowChipLabels))]
     public partial bool IsCompact { get; set; }
 
-    /// <summary>
-    /// The column grids do not bind through this viewmodel — a row's ColumnDefinition
-    /// cannot reach it — so the flag is mirrored into <see cref="DriveListLayout"/>,
-    /// which both grids bind to directly.
-    /// </summary>
     partial void OnIsCompactChanged(bool value) => DriveListLayout.Instance.IsCompact = value;
 
     public bool ShowChipLabels => !IsCompact;
 
-    /// <summary>
-    /// The saved sets of drives, as the strip above the drive list shows them.
-    /// </summary>
     [ObservableProperty]
     public partial ObservableCollection<DriveGroupDisplay> DriveGroups { get; set; }
 
@@ -191,7 +127,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [ObservableProperty]
     public partial string TotalConnected { get; set; }
 
-    /// <summary>Backs the connectivity legend beside the donut chart.</summary>
     [ObservableProperty]
     public partial int ConnectedCount { get; set; }
 
@@ -210,22 +145,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Send(new DriveGroupsMessage(true));
     }
 
-    /// <summary>
-    /// The live filter, applied as the user types.
-    /// </summary>
-    /// <remarks>
-    /// It used to be a modal: open a sheet, type, press Search, wait for a database round
-    /// trip, and have the results replace the list. Four interactions and a query to
-    /// narrow a list of thirteen rows that is already in memory. Matching here instead is
-    /// instant, shows the list narrowing as you type, and — the part the query could not
-    /// do at all — matches the drive's host as well as its name and letter.
-    /// </remarks>
     [ObservableProperty]
     public partial string SearchTerm { get; set; }
 
     partial void OnSearchTermChanged(string value) => ApplyFilterAndSort();
 
-    /// <summary>The column the list is ordered by, and which way.</summary>
     [ObservableProperty]
     public partial DriveSortField SortField { get; set; }
 
@@ -234,30 +158,10 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     public bool HasSearchTerm => !string.IsNullOrEmpty(SearchTerm);
 
-    /// <summary>
-    /// The user has no drives at all — the first-run state, which offers to add one.
-    /// </summary>
     public bool ShowNoDrives => Drives.Count == 0 && !HasSearchTerm;
 
-    /// <summary>
-    /// They have drives; none of them match what is in the search box.
-    /// </summary>
-    /// <remarks>
-    /// Its own state rather than sharing the empty one. Filtering thirteen drives down to
-    /// none and being told "you have no drives yet — add one" is the app forgetting what
-    /// the user just typed.
-    /// </remarks>
     public bool ShowNoMatches => Drives.Count == 0 && HasSearchTerm;
 
-    /// <summary>
-    /// Sorts by <paramref name="field"/>, or reverses it if the list is on that column
-    /// already.
-    /// </summary>
-    /// <remarks>
-    /// A fresh column starts ascending rather than keeping the previous direction: it is
-    /// the answer people expect from a header click, and it makes the caret the only thing
-    /// they have to read to know where they are.
-    /// </remarks>
     [RelayCommand]
     private void SortBy(DriveSortField field)
     {
@@ -278,17 +182,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private void ClearSearch() => SearchTerm = string.Empty;
 
-    /// <summary>
-    /// Rebuilds the visible list from <see cref="_allDrives"/>.
-    /// </summary>
-    /// <remarks>
-    /// The rows themselves are reused rather than rebuilt, which is what lets a selection,
-    /// a busy spinner and a drive's offline reason survive typing in the search box.
-    ///
-    /// Anything filtered out is deselected on the way. Acting on a ticked row that is not
-    /// on screen is the one outcome worth ruling out here — "disconnect" has to mean the
-    /// rows the user can see.
-    /// </remarks>
     private void ApplyFilterAndSort()
     {
         string term = SearchTerm.Trim();
@@ -322,8 +215,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         return SortField switch
         {
-            // Letter second in both of the others, so drives that tie on the first key
-            // keep a stable order instead of shuffling on every keystroke.
             DriveSortField.Name => descending
                 ? drives.OrderByDescending(d => d.Name, StringComparer.CurrentCultureIgnoreCase)
                     .ThenBy(d => d.Letter, StringComparer.OrdinalIgnoreCase)
@@ -342,7 +233,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
         };
     }
 
-    /// <summary>Nudges the header carets, which are computed from the two sort properties.</summary>
     private void RefreshSortIndicators()
     {
         OnPropertyChanged(nameof(SortedByLetter));
@@ -357,7 +247,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     public bool SortedByStatus => SortField == DriveSortField.Status;
 
-    /// <summary>The caret drawn against whichever column is currently sorted.</summary>
     public string SortGlyph => SortOrder == SortOrder.Ascending ? IconFont.CaretUp : IconFont.CaretDown;
 
     [RelayCommand]
@@ -389,11 +278,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         if (drives.Count != 0)
         {
-            // Announce each one rather than adding it to Drives directly: DriveWatchdog
-            // rebuilds its watch set from this message, and adding the rows by hand left
-            // freshly imported drives unmonitored — no connectivity refresh and no
-            // auto-reconnect — until the next sign-in. The registration below is what
-            // puts them on screen.
             foreach (Drive drive in drives)
             {
                 WeakReferenceMessenger.Default.Send(new DriveCreatedMessage(drive));
@@ -414,7 +298,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private void ToggleSelectAll()
     {
-        // Anything short of everything means "select the rest"; only a full list clears.
         bool select = !AllSelected;
 
         foreach (DriveDisplay drive in Drives)
@@ -438,14 +321,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private Task DisconnectSelectedAsync() => RunOnSelectionAsync(disconnect: true);
 
-    /// <summary>
-    /// Mounts or unmounts the ticked rows, then leaves the selection alone.
-    /// </summary>
-    /// <remarks>
-    /// Deliberately not cleared afterwards: connecting three drives and then wanting to
-    /// disconnect the same three is the common second act, and re-ticking them by hand
-    /// would be the app forgetting what the user just told it.
-    /// </remarks>
     private async Task RunOnSelectionAsync(bool disconnect)
     {
         if (IsBusy)
@@ -491,19 +366,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
     }
 
-    /// <summary>
-    /// Asks before unmounting more than one drive at once.
-    /// </summary>
-    /// <remarks>
-    /// A dialog rather than a banner, because this is the one case on the page that is a
-    /// question rather than a result. Deleting a single drive was confirmed and unmounting
-    /// thirteen at a stroke was not, which had the risk backwards: an unmount pulls the
-    /// filesystem out from under whatever has a file open on it.
-    ///
-    /// Skipped when nothing would actually come down — a selection of already-disconnected
-    /// drives is a no-op, and a confirmation for a no-op teaches the user to dismiss them
-    /// unread.
-    /// </remarks>
     private static async Task<bool> ConfirmDisconnectAsync(int connectedCount)
     {
         if (connectedCount == 0)
@@ -511,8 +373,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return true;
         }
 
-        // Two forms rather than one with a number in it: "1 drives will be disconnected"
-        // is the sort of thing a translated string should not be made to say.
         string message = connectedCount == 1
             ? AppResources.DisconnectConfirmOne
             : string.Format(AppResources.DisconnectConfirmMany, connectedCount);
@@ -536,9 +396,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            // ConnectAllDrives.Handle is already fully async — no need to offload via Task.Run.
-            // No OnlyAutoConnect here: the user pressed the button, so drives held back
-            // from the automatic passes are still meant to come up.
             Result result = await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle());
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
@@ -567,11 +424,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        // Counted over every drive, because DisconnectAllDrives is going to take down
-        // every drive — including any the filter is hiding. Asked of the connector rather
-        // than read off the rows: a row the list has not realized yet has never been told
-        // whether its drive is up, and a confirmation skipped on that basis would unmount
-        // thirteen shares without the question this dialog exists to ask.
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
 
         if (!await ConfirmDisconnectAsync(_allDrives.Count(drive => connectedLetters.Contains(drive.Letter))))
@@ -592,8 +444,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
                 WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
             }
 
-            // A share with a file open on it refuses to unmount, and the row staying
-            // green was the only sign of it. Connect-all has always reported its result.
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
@@ -623,17 +473,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        // Batch lookup — single DriveInfo.GetDrives() scan rather than per-drive.
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
         if (_allDrives.All(d => connectedLetters.Contains(d.Letter)))
         {
             return;
         }
 
-        // ConnectAllDrives.Handle internally runs Task.WhenAll across all disconnected
-        // drives — much faster than the previous serial per-drive message dispatch.
-        // OnlyAutoConnect: this pass is unattended, so each drive's own flag decides
-        // whether it takes part.
         Result connectResult = await ScopedHandler.HandleAsync(
             (ConnectAllDrives h) => h.Handle(new ConnectAllDrives.Request(OnlyAutoConnect: true)));
 
@@ -663,8 +508,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
         _allDrives.Clear();
         _allDrives.AddRange(drives.Select(d => new DriveDisplay(d)));
 
-        // Before the sort, so a list ordered by status is right on the first draw rather
-        // than after each row has been realized and asked the connector for itself.
         SyncConnectivity(_nasConnector.GetConnectedLetters());
 
         ApplyFilterAndSort();
@@ -674,18 +517,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
         return drives;
     }
 
-    /// <summary>
-    /// Pushes what is actually mounted onto every row, realized or not.
-    /// </summary>
-    /// <remarks>
-    /// The row template refreshes its own drive when it is bound and when a connectivity
-    /// message names it, and that is the only place <see cref="DriveDisplay.Connected"/>
-    /// used to be written. A row the list has not realized — scrolled out of view, or
-    /// filtered out — was therefore never told, and read as disconnected to everything
-    /// that consults the master list: the status sort, and the count the disconnect-all
-    /// confirmation is skipped on. The template still owns the capacity line, which is
-    /// I/O against the share and not worth doing for rows nobody can see.
-    /// </remarks>
     private void SyncConnectivity(HashSet<string> connectedLetters)
     {
         foreach (DriveDisplay drive in _allDrives)
@@ -694,15 +525,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
     }
 
-    /// <summary>
-    /// Re-reads the groups behind the strip.
-    /// </summary>
-    /// <remarks>
-    /// Counted against the drives on screen so a group that names a deleted drive shows
-    /// what it can still connect rather than what it once held. Failures are swallowed on
-    /// purpose: a strip that cannot be read is a strip that is not shown, and it must not
-    /// stand between the user and the drive list underneath it.
-    /// </remarks>
     public async Task FetchDriveGroupsAsync()
     {
         Result<List<DriveGroup>> result = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
@@ -713,19 +535,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        // Resolved against every drive, not the visible ones: a filter must not make a
-        // group look like it has lost members.
         HashSet<Guid> existing = [.. _allDrives.Select(drive => drive.Id)];
 
         DriveGroups = [.. result.Value.Select(group => new DriveGroupDisplay(group, existing))];
     }
 
-    /// <summary>
-    /// Recomputes the dashboard tiles. The connection count is a cheap logical-drive
-    /// lookup, but the capacity figure does I/O against the share, so it is probed off
-    /// the UI thread — the monitor drives this on a timer now, and an unreachable NAS
-    /// would otherwise stall the app on every poll.
-    /// </summary>
     private async Task RefreshTotalsAsync()
     {
         try
@@ -739,23 +553,10 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
     }
 
-    /// <summary>
-    /// Capacity across every connected drive, counting each underlying volume once.
-    /// </summary>
-    /// <remarks>
-    /// The tile has always been labelled total storage but used to read a single drive,
-    /// so a second NAS simply did not appear in the figure. Summing the letters instead
-    /// is just as wrong the other way: mapped drives are usually several shares of one
-    /// NAS, each reporting that one pool's full size, so a 43 TB server mapped three
-    /// times read as 129 TB. <see cref="IStorageProbe"/> resolves what each mount is
-    /// actually on and returns one reading per volume; this only has to add them up.
-    /// </remarks>
     private async Task<string> ValidateTotalStorageAsync()
     {
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
 
-        // Every drive, not the filtered view. The dashboard tiles report what the user
-        // has; a search box narrowing the list below them is not the NAS getting smaller.
         string[] connected = [.. _allDrives
             .Where(d => connectedLetters.Contains(d.Letter))
             .Select(d => d.Letter)];
@@ -771,8 +572,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
     {
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
 
-        // The same reading the tiles are built from, so the rows can never disagree
-        // with the number above them.
         SyncConnectivity(connectedLetters);
 
         int count = _allDrives.Count(d => connectedLetters.Contains(d.Letter));
@@ -792,8 +591,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, (r, m) =>
         {
-            // Looked up in the master list, not the visible one: a drive can be deleted
-            // while a filter is hiding it.
             DriveDisplay? existingDrive = _allDrives.FirstOrDefault(d => d.Id == m.DriveId);
             if (existingDrive is not null)
             {
@@ -803,9 +600,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
                 _ = RefreshTotalsAsync();
 
-                // A group that named it is now one drive smaller. Without this the chip
-                // goes on claiming a drive that no longer exists until the page is
-                // reloaded, and connecting the group quietly does less than it says.
                 _ = FetchDriveGroupsAsync();
             }
         });
@@ -814,24 +608,15 @@ internal sealed partial class HomeViewModel : BaseViewModel
         {
             _allDrives.Add(new DriveDisplay(m.Drive));
 
-            // Re-projected rather than appended, so an arriving drive lands in sort order
-            // and is hidden if it does not match the filter that is up.
             ApplyFilterAndSort();
 
             _ = RefreshTotalsAsync();
 
-            // Counted against the drives on screen, so a drive arriving changes what an
-            // existing group can resolve — an import is the case that matters.
             _ = FetchDriveGroupsAsync();
         });
 
         WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) =>
         {
-            // Applied to the master row, not left to the row template. The template only
-            // hears about a drive it is currently bound to, and a row that is filtered
-            // out or scrolled out of a recycling list has no template — so a rename made
-            // while the search box was narrowing the list past it came back with the old
-            // name, and the filter went on matching against it.
             DriveDisplay? existingDrive = _allDrives.FirstOrDefault(d => d.Id == m.UpdatedDrive.Id);
             if (existingDrive is null)
             {
@@ -842,11 +627,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
             existingDrive.Name = m.UpdatedDrive.Name;
             existingDrive.Host = m.UpdatedDrive.Host;
 
-            // A changed letter is a changed mount: the handler unmounted the old one.
             SyncConnectivity(_nasConnector.GetConnectedLetters());
 
-            // Re-projected, because the name or the letter is what the list is sorted
-            // and filtered by, and both may just have changed.
             ApplyFilterAndSort();
 
             _ = RefreshTotalsAsync();
@@ -857,11 +639,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
             _ = FetchDriveGroupsAsync();
         });
 
-        // Applied to the master row for the same reason DriveUpdatedMessage is: the row
-        // template only hears about a drive it is bound to at that moment, and a row
-        // scrolled out of the recycling list or hidden by the filter has no template. The
-        // watchdog's verdict for those rows was dropped, so scrolling down showed plain
-        // "Disconnected" pills under a run of amber "Unreachable" ones.
         WeakReferenceMessenger.Default.Register<DriveAttemptFailedMessage>(this, (r, m) =>
         {
             _allDrives.FirstOrDefault(d => d.Id == m.DriveId)

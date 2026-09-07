@@ -4,10 +4,8 @@
 
 namespace Helix.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class Added_Host_AutoConnect_And_Persistent_To_Drive : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
@@ -15,10 +13,6 @@ namespace Helix.Infrastructure.Migrations
                 table: "Drives",
                 newName: "Host");
 
-            // True, not the scaffolded false: every drive that already exists was created
-            // when auto-connect was a single user-level setting and applied to all of
-            // them. Backfilling false would quietly opt every one of them out of the
-            // startup pass and the watchdog on the first run after the upgrade.
             migrationBuilder.AddColumn<bool>(
                 name: "AutoConnect",
                 table: "Drives",
@@ -34,7 +28,6 @@ namespace Helix.Infrastructure.Migrations
                 defaultValue: false);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

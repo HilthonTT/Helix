@@ -12,7 +12,6 @@
              Title="">
 
     <ContentPage.Resources>
-        <!-- One preference row: title, supporting line, and its control on the right -->
         <Style x:Key="PreferenceRow" TargetType="Grid">
             <Setter Property="ColumnDefinitions" Value="*,Auto"/>
             <Setter Property="ColumnSpacing" Value="24"/>
@@ -27,14 +26,12 @@
               RowSpacing="20"
               Padding="28,24">
 
-            <!-- ===== Page header ===== -->
             <VerticalStackLayout Grid.ColumnSpan="2" Spacing="2">
                 <Label Text="{l10n:Translate Settings}" Style="{StaticResource Display}"/>
                 <Label Style="{StaticResource Muted}"
                        Text="{Binding Source={x:Static l10n:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=l10n:LocalizationResourceManager}"/>
             </VerticalStackLayout>
 
-            <!-- ===== Section list ===== -->
             <Border Grid.Row="1" Style="{StaticResource Card}" VerticalOptions="Start">
                 <VerticalStackLayout Padding="8,10"
                                      Spacing="2"
@@ -59,15 +56,8 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!--
-            The two panels share one cell, as they always have — only one is visible at a
-            time. What is new is the ScrollView around them: the preferences card sizes to
-            its content and simply overflowed the window once it grew past six rows, which
-            clipped the last one with no way to reach it.
-            -->
             <ScrollView Grid.Row="1" Grid.Column="1">
                 <Grid>
-                    <!-- ===== Account panel ===== -->
                     <Border Style="{StaticResource Card}" VerticalOptions="Start" IsVisible="False">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="account">
@@ -77,21 +67,21 @@
                                 <Setter Property="IsVisible" Value="False"/>
                             </DataTrigger>
                         </Border.Triggers>
-        
+
                         <VerticalStackLayout Padding="24" Spacing="18">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="{l10n:Translate AccountInformation}" Style="{StaticResource Title1}"/>
                                 <Label Text="{l10n:Translate ChangeYourAccountInfo}" Style="{StaticResource Caption}"/>
                             </VerticalStackLayout>
-        
+
                             <BoxView Style="{StaticResource Divider}"/>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate UsernameField}" Style="{StaticResource Caption}"/>
                                     <Label Text="{Binding Username}" Style="{StaticResource Title2}"/>
                                 </VerticalStackLayout>
-        
+
                                 <Border Grid.Column="1"
                                         Style="{StaticResource IconChip}"
                                         IsEnabled="{Binding IsNotBusy}"
@@ -105,15 +95,15 @@
                                            TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
                                 </Border>
                             </Grid>
-        
+
                             <BoxView Style="{StaticResource Divider}"/>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate PasswordField}" Style="{StaticResource Caption}"/>
                                     <Label Text="••••••••" Style="{StaticResource Title2}"/>
                                 </VerticalStackLayout>
-        
+
                                 <Border Grid.Column="1"
                                         Style="{StaticResource IconChip}"
                                         IsEnabled="{Binding IsNotBusy}"
@@ -129,8 +119,7 @@
                             </Grid>
                         </VerticalStackLayout>
                     </Border>
-        
-                    <!-- ===== Preferences panel ===== -->
+
                     <Border Style="{StaticResource Card}" VerticalOptions="Start" IsVisible="False">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="settings">
@@ -140,15 +129,15 @@
                                 <Setter Property="IsVisible" Value="False"/>
                             </DataTrigger>
                         </Border.Triggers>
-        
+
                         <VerticalStackLayout Padding="24" Spacing="18">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="{l10n:Translate Preferences}" Style="{StaticResource Title1}"/>
                                 <Label Text="{l10n:Translate ManageYourPreferences}" Style="{StaticResource Caption}"/>
                             </VerticalStackLayout>
-        
+
                             <BoxView Style="{StaticResource Divider}"/>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate AutoConnectDrivesOnLaunch}" Style="{StaticResource Title3}"/>
@@ -159,7 +148,7 @@
                                         IsToggled="{Binding Settings.AutoConnect}"
                                         IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate AutoMinimizeApp}" Style="{StaticResource Title3}"/>
@@ -171,8 +160,6 @@
                                         IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
 
-                            <!-- Both hidden rather than disabled where the head has no
-                                 tray: on macOS neither switch has anything to act on. -->
                             <Grid Style="{StaticResource PreferenceRow}" IsVisible="{Binding SupportsTray}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate CloseToTray}" Style="{StaticResource Title3}"/>
@@ -194,7 +181,7 @@
                                         IsToggled="{Binding Settings.NotifyOnMinimizeToTray}"
                                         IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate SetOnStartup}" Style="{StaticResource Title3}"/>
@@ -205,7 +192,7 @@
                                         IsToggled="{Binding Settings.SetOnStartup}"
                                         IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate SetDesktopShortcut}" Style="{StaticResource Title3}"/>
@@ -216,9 +203,9 @@
                                         IsToggled="{Binding Settings.SetDesktopShortcut}"
                                         IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
-        
+
                             <BoxView Style="{StaticResource Divider}"/>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate Languages}" Style="{StaticResource Title3}"/>
@@ -232,15 +219,12 @@
                                             SelectedItem="{Binding SelectedLanguage}"/>
                                 </Border>
                             </Grid>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate TimerCountInSeconds}" Style="{StaticResource Title3}"/>
                                     <Label Text="{l10n:Translate TimerCountDescription}" Style="{StaticResource Caption}"/>
                                 </VerticalStackLayout>
-                                <!-- No OffText: zero is not a setting here, it is a
-                                     rejected value. Switching the countdown off is what
-                                     the Auto-minimize toggle above is for. -->
                                 <controls:NumberField Grid.Column="1"
                                                       WidthRequest="200"
                                                       VerticalOptions="Center"
@@ -251,7 +235,7 @@
                                                       Unit="{l10n:Translate UnitSeconds}"
                                                       IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate AuditlogRetention}" Style="{StaticResource Title3}"/>
@@ -268,14 +252,12 @@
                                                       OffText="{l10n:Translate RetentionKeepEverything}"
                                                       IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate StorageAlertThreshold}" Style="{StaticResource Title3}"/>
                                     <Label Text="{l10n:Translate StorageAlertThresholdDescription}" Style="{StaticResource Caption}"/>
                                 </VerticalStackLayout>
-                                <!-- Maximum comes from the domain rather than a literal:
-                                     it is the same bound UpdateSettings validates against. -->
                                 <controls:NumberField Grid.Column="1"
                                                       WidthRequest="200"
                                                       VerticalOptions="Center"
@@ -287,7 +269,7 @@
                                                       OffText="{l10n:Translate StorageAlertOff}"
                                                       IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate IdleLock}" Style="{StaticResource Title3}"/>
@@ -304,9 +286,9 @@
                                                       OffText="{l10n:Translate IdleLockNever}"
                                                       IsEnabled="{Binding Settings.IsNotBusy}"/>
                             </Grid>
-        
+
                             <BoxView Style="{StaticResource Divider}"/>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate ExportDiagnostics}" Style="{StaticResource Title3}"/>
@@ -320,15 +302,12 @@
                                         Command="{Binding ExportDiagnosticsCommand}"
                                         IsEnabled="{Binding IsNotBusy}"/>
                             </Grid>
-        
+
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{l10n:Translate Updates}" Style="{StaticResource Title3}"/>
                                     <Label Text="{l10n:Translate UpdatesDescription}" Style="{StaticResource Caption}"/>
 
-                                    <!-- A release is a couple of hundred megabytes; a
-                                         button that only goes disabled reads as one that
-                                         did nothing. -->
                                     <Label Text="{Binding UpdateStatus}"
                                            Style="{StaticResource Caption}"
                                            FontFamily="{StaticResource FontMono}"
@@ -349,7 +328,6 @@
 
         </Grid>
 
-        <!-- ===== Modal layer ===== -->
         <BoxView x:Name="BlockScreen"
                  Color="{StaticResource Black}"
                  Opacity="0"
@@ -370,8 +348,6 @@
                                                 AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
-        <!-- Last child of the root grid, so a banner sits above the modal layer too:
-             a failure raised from inside a sheet has to be readable without closing it. -->
         <controls:NotificationHost/>
 
     </Grid>

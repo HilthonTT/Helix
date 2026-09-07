@@ -8,15 +8,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.UnitTests.Database;
 
-/// <summary>
-/// Covers the name check behind "a group called X already exists", and the round trip of
-/// the membership column.
-/// </summary>
-/// <remarks>
-/// Against real SQLite rather than mocks, because both are questions about what the
-/// database does — how it compares text, and how it stores a list of ids in one column —
-/// which is exactly what a substituted repository cannot answer.
-/// </remarks>
 public sealed class DriveGroupRepositoryTests : IDisposable
 {
     private readonly SqliteConnection _connection = new("DataSource=:memory:");
@@ -75,7 +66,6 @@ public sealed class DriveGroupRepositoryTests : IDisposable
     [Fact]
     public async Task IsNameUniqueAsync_Should_RejectANameThatDiffersOnlyInCase()
     {
-        // "Office" and "office" are the same group to anyone reading a row of buttons.
         using AppDbContext context = CreateContext();
         Guid userId = await SeedUserAsync(context);
         await SeedGroupAsync(context, userId, "Office");
@@ -88,9 +78,6 @@ public sealed class DriveGroupRepositoryTests : IDisposable
     [Fact]
     public async Task IsNameUniqueAsync_Should_NotReadTheNameAsAPattern()
     {
-        // The check used LIKE, which reads its right-hand side as a pattern: an
-        // underscore matched any character, so this name was refused as a duplicate of a
-        // group nothing was using it for.
         using AppDbContext context = CreateContext();
         Guid userId = await SeedUserAsync(context);
         await SeedGroupAsync(context, userId, "HomeXNAS");
@@ -139,9 +126,6 @@ public sealed class DriveGroupRepositoryTests : IDisposable
     [Fact]
     public async Task Membership_Should_SurviveARoundTrip()
     {
-        // Stored as a primitive collection in one column rather than a join table; worth
-        // proving it comes back in the order it went in, since that order is what the
-        // group's connect pass follows.
         using AppDbContext context = CreateContext();
         Guid userId = await SeedUserAsync(context);
 

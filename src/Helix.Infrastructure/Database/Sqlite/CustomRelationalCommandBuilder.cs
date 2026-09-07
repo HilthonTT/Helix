@@ -15,9 +15,6 @@ internal sealed class CustomRelationalCommandBuilder : RelationalCommandBuilder
 
     public override IRelationalCommand Build()
     {
-        // EF Core 10 keeps a separate command text for logging, in which fragments appended
-        // as sensitive are redacted. Build through the base so that redaction is preserved,
-        // then apply the WITHOUT ROWID fix-up to both texts.
         IRelationalCommand command = base.Build();
 
         return new RelationalCommand(
@@ -31,8 +28,8 @@ internal sealed class CustomRelationalCommandBuilder : RelationalCommandBuilder
     {
         int startCreateTableIndex = originalCommandText.IndexOf(BeginCreateTable);
 
-        if (startCreateTableIndex < 0 || 
-            originalCommandText.Contains(WithoutRowId) || 
+        if (startCreateTableIndex < 0 ||
+            originalCommandText.Contains(WithoutRowId) ||
             originalCommandText.Contains("AUTOINCREMENT"))
         {
             return originalCommandText;

@@ -13,27 +13,18 @@ internal sealed partial class SettingsDisplay : ObservableObject
 {
     private readonly System.Timers.Timer _debounceTimer;
 
-    // Stays false for the duration of the constructor. The On…Changed hooks issue
-    // UpdateSettings writes, which must not run while the constructor is still seeding
-    // properties and the rest still hold half-initialized values (e.g. TimerCount = 0).
     private readonly bool _initialized;
 
-    // Set while a rejected value is being rolled back, so the write-back hook that the
-    // rollback itself fires does not issue a second UpdateSettings call.
     private bool _rollingBack;
 
-    // Last value the store accepted, so a rejected TimerCount can be put back.
     private int _persistedTimerCount;
 
-    // Same again for the retention box, which is typed into the same way.
     private readonly System.Timers.Timer _retentionDebounceTimer;
     private int _persistedRetentionDays;
 
-    // And for the low-space threshold, likewise typed digit by digit.
     private readonly System.Timers.Timer _storageAlertDebounceTimer;
     private int _persistedStorageAlertThresholdPercent;
 
-    // And the idle lock, where a stray intermediate value would lock the screen.
     private readonly System.Timers.Timer _idleLockDebounceTimer;
     private int _persistedIdleLockMinutes;
     private Language _persistedLanguage;
@@ -123,11 +114,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _debounceTimer.Start();
     }
 
-    /// <summary>
-    /// Days of audit history to keep; 0 keeps everything. Debounced like
-    /// <see cref="TimerCount"/> — it is typed into digit by digit, and "9" on the way to
-    /// "90" must not be saved and acted on.
-    /// </summary>
     [ObservableProperty]
     public partial int AuditlogRetentionDays { get; set; }
     partial void OnAuditlogRetentionDaysChanged(int value)
@@ -141,11 +127,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _retentionDebounceTimer.Start();
     }
 
-    /// <summary>
-    /// Free space below which a volume is reported as low, as a percentage; 0 turns the
-    /// warning off. Debounced for the same reason as the two boxes above — "1" on the way
-    /// to "15" would otherwise be saved, and warn about every healthy volume in between.
-    /// </summary>
     [ObservableProperty]
     public partial int StorageAlertThresholdPercent { get; set; }
     partial void OnStorageAlertThresholdPercentChanged(int value)
@@ -159,11 +140,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _storageAlertDebounceTimer.Start();
     }
 
-    /// <summary>
-    /// Minutes of no input before the app locks; 0 never locks. Debounced hardest of the
-    /// three: "1" on the way to "15" would lock the screen a minute later, over the
-    /// settings page the user is still typing on.
-    /// </summary>
     [ObservableProperty]
     public partial int IdleLockMinutes { get; set; }
     partial void OnIdleLockMinutesChanged(int value)
@@ -177,9 +153,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _idleLockDebounceTimer.Start();
     }
 
-    /// <summary>
-    /// Whether the close button hides Helix to the tray instead of quitting it.
-    /// </summary>
     [ObservableProperty]
     public partial bool CloseToTray { get; set; }
     async partial void OnCloseToTrayChanged(bool value)
@@ -195,9 +168,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
     }
 
-    /// <summary>
-    /// Whether the tray says where the window went when it is put away there.
-    /// </summary>
     [ObservableProperty]
     public partial bool NotifyOnMinimizeToTray { get; set; }
     async partial void OnNotifyOnMinimizeToTrayChanged(bool value)
@@ -228,9 +198,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
             return;
         }
 
-        // The only hook that used to have no rollback: the page had already switched
-        // culture, so a rejected write left the UI in the new language until the next
-        // sign-in put the stored one back.
         RollBack(() => Language = _persistedLanguage);
         CultureSwitcher.SwitchCulture(_persistedLanguage);
     }
@@ -242,8 +209,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
             AutoReset = false
         };
 
-        // Elapsed fires on a thread-pool thread; the update mutates bound properties
-        // (IsBusy/IsNotBusy), so marshal the whole thing onto the UI thread.
         _debounceTimer.Elapsed += (_, _) =>
             MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateTimerCount());
 
@@ -290,15 +255,9 @@ internal sealed partial class SettingsDisplay : ObservableObject
         CloseToTray = settings.CloseToTray;
         NotifyOnMinimizeToTray = settings.NotifyOnMinimizeToTray;
 
-        // Every seed above is done — from here on the hooks may write back.
         _initialized = true;
     }
 
-    /// <summary>
-    /// Pushes the current state through UpdateSettings. Returns false when the store
-    /// rejected it, so the caller can put the control back where it was — the alert
-    /// alone used to leave a switch showing a setting that had never been saved.
-    /// </summary>
     private async Task<bool> UpdatePropertyAsync(Action<UpdateSettings.Request.Builder> updateAction)
     {
         try
@@ -318,7 +277,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 CloseToTray,
                 NotifyOnMinimizeToTray);
 
-            // Apply the specific update.
             updateAction(requestBuilder);
 
             UpdateSettings.Request request = requestBuilder.Build();
@@ -331,9 +289,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 return false;
             }
 
-            // Told rather than polled for: the two settings the tray answers
-            // synchronously are cached there, and a cache nobody refreshes is a switch
-            // that does nothing until the next sign-in.
             WeakReferenceMessenger.Default.Send(new SettingsChangedMessage());
 
             return true;
@@ -350,9 +305,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
     }
 
-    /// <summary>
-    /// Restores a rejected value without the restore itself being written back.
-    /// </summary>
     private void RollBack(Action restore)
     {
         _rollingBack = true;
@@ -367,16 +319,6 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
     }
 
-    /// <summary>
-    /// Says a typed setting was stored.
-    /// </summary>
-    /// <remarks>
-    /// Only the numeric fields get this. A switch is its own confirmation — it is sitting
-    /// there in its new position — but a number typed into a box looks identical whether
-    /// it was accepted or thrown away, and these four are all debounced, so the write
-    /// happens well after the keystroke that caused it. The banner collapses repeats, so
-    /// holding the stepper down says it once.
-    /// </remarks>
     private static void ConfirmSaved() => Notifier.Success(AppResources.SettingsSaved);
 
     private async Task DebouncedUpdateTimerCount()

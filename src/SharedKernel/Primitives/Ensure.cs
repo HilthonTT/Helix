@@ -60,10 +60,6 @@ public static class Ensure
         }
     }
 
-    /// <summary>
-    /// Zero or above. For the settings where zero is a meaningful choice rather than an
-    /// unset value — a retention period of zero means "keep everything".
-    /// </summary>
     public static void MustNotBeNegative(
         int value,
         [CallerArgumentExpression("value")] string? paramName = default)

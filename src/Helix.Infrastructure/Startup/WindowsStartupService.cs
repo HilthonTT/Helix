@@ -4,10 +4,6 @@ using System.Runtime.Versioning;
 
 namespace Helix.Infrastructure.Startup;
 
-/// <summary>
-/// Registers Helix in the per-user Startup folder as a .lnk shortcut, created through
-/// late-bound WScript.Shell so no COM reference is needed at compile time.
-/// </summary>
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsStartupService : IStartupService
 {
@@ -41,7 +37,6 @@ internal sealed class WindowsStartupService : IStartupService
         if (string.IsNullOrEmpty(processPath) || !File.Exists(processPath))
             throw new InvalidOperationException("The process path is null or invalid.");
 
-        // Late binding - no COM reference needed
         Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
         if (shellType == null)
             throw new InvalidOperationException("WScript.Shell is not available on this system.");
@@ -61,9 +56,6 @@ internal sealed class WindowsStartupService : IStartupService
             shortcut.WorkingDirectory = Path.GetDirectoryName(processPath)
                 ?? throw new InvalidOperationException("Unable to determine the working directory.");
             shortcut.Description = "Helix startup shortcut.";
-
-            // Optional: You can add an icon
-            // shortcut.IconLocation = $"{processPath},0";
 
             shortcut.Save();
         }

@@ -13,23 +13,12 @@ using System.Collections.ObjectModel;
 
 namespace Helix.App.ViewModels.Drives;
 
-/// <summary>
-/// The group manager: the list of groups on one side of the sheet, and the group being
-/// edited on the other.
-/// </summary>
-/// <remarks>
-/// One sheet for create, rename, re-member and delete rather than four. A group is a name
-/// and a set of ticks — there is not enough in it to justify its own modal per verb, and
-/// the thing users actually do is open it, adjust two groups and close it again.
-/// </remarks>
 internal sealed partial class DriveGroupsViewModel : BaseViewModel
 {
-    /// <summary>The user's drives, as the last load saw them.</summary>
     private List<Drive> _drives = [];
 
     public DriveGroupsViewModel()
     {
-        // Partial properties cannot carry field initializers, so defaults are seeded here.
         Groups = [];
         Drives = [];
         Name = string.Empty;
@@ -40,16 +29,12 @@ internal sealed partial class DriveGroupsViewModel : BaseViewModel
     [ObservableProperty]
     public partial ObservableCollection<DriveGroupDisplay> Groups { get; set; }
 
-    /// <summary>Every drive the user has, ticked where it is in the group being edited.</summary>
     [ObservableProperty]
     public partial ObservableCollection<DriveSelection> Drives { get; set; }
 
     [ObservableProperty]
     public partial string Name { get; set; }
 
-    /// <summary>
-    /// The group being edited, or null while a new one is being composed.
-    /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditing))]
     [NotifyPropertyChangedFor(nameof(EditorTitle))]
@@ -61,7 +46,6 @@ internal sealed partial class DriveGroupsViewModel : BaseViewModel
         ? AppResources.NewGroup
         : Editing.Name;
 
-    /// <summary>Whether the user has any drives to put in a group at all.</summary>
     public bool HasDrives => Drives.Count > 0;
 
     [RelayCommand]
@@ -87,9 +71,6 @@ internal sealed partial class DriveGroupsViewModel : BaseViewModel
 
             await ReloadGroupsAsync();
 
-            // Opening the sheet always starts on a blank group: the common reason to open
-            // it is to make one, and an editor pre-loaded with an existing group invites
-            // editing the wrong one.
             StartNewGroup();
         }
         finally
@@ -193,7 +174,6 @@ internal sealed partial class DriveGroupsViewModel : BaseViewModel
 
             await ReloadGroupsAsync();
 
-            // The editor may have been showing the group that just went.
             if (Editing?.Id == group.Id)
             {
                 StartNewGroup();

@@ -20,8 +20,6 @@ public sealed class GetDriveGroups(
             loggedInUser.UserId,
             cancellationToken);
 
-        // Named order, because this list is rendered as a row of buttons and a set of
-        // buttons that moves between refreshes is a set of buttons that gets misclicked.
         return groups.OrderBy(group => group.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
     }
 }

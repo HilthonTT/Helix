@@ -8,19 +8,6 @@ using Helix.Domain.Users;
 
 namespace Helix.Application.Features.Drives.Commands;
 
-/// <summary>
-/// Checks a set of connection details against the server without saving them.
-/// </summary>
-/// <remarks>
-/// Takes the form's own fields rather than a drive id, because the whole point is to
-/// answer the question before there is anything to load: a wrong password used to be
-/// discovered at the first connect, long after the modal was closed, and the error came
-/// back with no obvious link to the field that caused it.
-///
-/// The drive built here is never inserted and never reaches the repository — it exists
-/// only to carry the values into <see cref="INasConnector.TestAsync"/>, which is defined
-/// not to mount anything or claim the letter.
-/// </remarks>
 public sealed class TestDriveConnection(
     ILoggedInUser loggedInUser,
     INasConnector nasConnector) : IHandler

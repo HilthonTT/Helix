@@ -72,10 +72,6 @@ public sealed class PruneAuditlogsTests
         result.Error.Should().Be(SettingsErrors.NotFound);
     }
 
-    /// <summary>
-    /// Zero means keep everything. It is the value existing installs are migrated to, so
-    /// getting this wrong would delete history nobody asked to lose.
-    /// </summary>
     [Fact]
     public async Task Handle_Should_DeleteNothing_WhenRetentionIsZero()
     {
@@ -118,7 +114,6 @@ public sealed class PruneAuditlogsTests
 
         await _pruneAuditlogs.Handle();
 
-        // One account trimming its own history must never touch another's.
         await _auditlogRepositoryMock.Received(1).DeleteOlderThanAsync(
             Arg.Is<Guid>(id => id == UserId),
             Arg.Any<DateTime>(),

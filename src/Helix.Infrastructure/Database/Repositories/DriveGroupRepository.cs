@@ -43,13 +43,6 @@ internal sealed class DriveGroupRepository(AppDbContext context) : IDriveGroupRe
         Guid? excludingId = null,
         CancellationToken cancellationToken = default)
     {
-        // Compared case-insensitively: "Office" and "office" are the same group to anyone
-        // reading a row of buttons, whatever the database's collation says.
-        //
-        // NOCASE rather than LIKE, which this used to use. LIKE reads its right-hand side
-        // as a pattern, so a group called "Home_NAS" collided with an existing "HomeXNAS"
-        // — the underscore matching any character — and the user was told a name was
-        // taken that nothing was using.
         return !await context
             .DriveGroups
             .Where(g => g.UserId == userId)

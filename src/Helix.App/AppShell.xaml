@@ -22,7 +22,6 @@
             <Grid ColumnDefinitions="*,1"
                   Background="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceDarkBrush}}">
 
-                <!-- Hairline that separates the rail from the page canvas -->
                 <BoxView Grid.Column="1"
                          Style="{StaticResource Divider}"
                          WidthRequest="1"
@@ -33,7 +32,6 @@
                       RadioButtonGroup.GroupName="Menu"
                       RadioButtonGroup.SelectedValue="{Binding SelectedRoute}">
 
-                    <!-- Brand -->
                     <HorizontalStackLayout Grid.Row="0" Spacing="12" Margin="26,28,20,26">
                         <Image Source="logoipsum.png"
                                Aspect="AspectFit"
@@ -49,7 +47,6 @@
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
 
-                    <!-- Primary navigation -->
                     <VerticalStackLayout Grid.Row="1" Spacing="2">
                         <VerticalStackLayout.Resources>
                             <Style TargetType="controls:NavItem">
@@ -77,7 +74,6 @@
                                           CheckedChanged="OnMenuItemChanged"/>
                     </VerticalStackLayout>
 
-                    <!-- Signed-in user -->
                     <Border Grid.Row="3"
                             Style="{StaticResource CardInset}"
                             Margin="16,0,16,10"
@@ -97,7 +93,6 @@
                         </HorizontalStackLayout>
                     </Border>
 
-                    <!-- Sign out -->
                     <Border Grid.Row="4"
                             Margin="16,0,16,4"
                             Padding="14,11"
@@ -123,7 +118,6 @@
                         </HorizontalStackLayout>
                     </Border>
 
-                    <!-- Footer -->
                     <VerticalStackLayout Grid.Row="5" Spacing="12" Margin="20,8,16,18">
 
                         <BoxView Style="{StaticResource Divider}" HorizontalOptions="Fill"/>

@@ -3,19 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace Helix.App.Common;
 
-/// <summary>
-/// The last word when Helix cannot start: the database key could not be read, or the
-/// database could not be opened or migrated.
-/// </summary>
-/// <remarks>
-/// Both happen before there is a window, so nothing that normally reports a failure —
-/// the banner, the tray — exists yet. Left alone, the exception either killed the
-/// process silently or was swallowed by the WinUI last-resort handler and left a
-/// windowless one behind; either way the user saw an app that did not open and had
-/// nothing to say about it. This puts one native dialog up with the reason and where
-/// the log is, writes the same to the log, and exits. On macOS there is no native
-/// dialog reachable from here, so it logs and exits.
-/// </remarks>
 internal static class StartupFailure
 {
     public static void Exit(ILogger logger, Exception exception)

@@ -4,15 +4,6 @@ using System.Text.Json;
 
 namespace Application.UnitTests.Features.Drives.Contracts;
 
-/// <summary>
-/// Guards the vault format across the <c>IpAddress</c> to <c>Host</c> rename.
-/// </summary>
-/// <remarks>
-/// A <c>.helixvault</c> file sits on the user's disk indefinitely and may be the only
-/// copy of a set of credentials they still have. A rename inside Helix that made one
-/// unreadable would be data loss, and the failure would only show up on the day someone
-/// needed to restore.
-/// </remarks>
 public sealed class DriveImportDtoTests
 {
     private const string LegacyVaultEntry = """
@@ -41,8 +32,6 @@ public sealed class DriveImportDtoTests
     {
         DriveImportDto dto = Deserialize(LegacyVaultEntry);
 
-        // Those drives connected on startup when they were exported; importing them as
-        // opted-out would quietly change what the backup restores to.
         dto.AutoConnect.Should().BeTrue();
         dto.Persistent.Should().BeFalse();
     }

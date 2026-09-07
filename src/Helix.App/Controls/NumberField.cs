@@ -1,38 +1,9 @@
 using Microsoft.Maui.Controls.Shapes;
 
-// Unaliased, `Application` binds to the Helix.Application namespace from here.
 using AppBase = Microsoft.Maui.Controls.Application;
 
 namespace Helix.App.Controls;
 
-/// <summary>
-/// A bounded whole number with its unit beside it and a pair of steppers: what the
-/// settings page asks for instead of a bare text box.
-/// </summary>
-/// <remarks>
-/// Four preferences were plain <c>Entry</c>s with a placeholder. Three problems came with
-/// that, and this control is the answer to all three.
-///
-/// The <b>unit</b> lived in the row's title — "Timer count in seconds" — so the box itself
-/// was a number with no dimension, and the retention and idle-lock rows did not say what
-/// they counted at all. <see cref="Unit"/> puts it next to the figure.
-///
-/// <b>Zero means something</b> in three of the four: keep every audit log, never warn about
-/// space, never lock. Nothing on screen said so. <see cref="OffText"/> replaces the unit
-/// with that meaning the moment the value reaches zero, so the special case announces
-/// itself rather than being documented somewhere the user is not looking.
-///
-/// And the <b>bounds were only enforced after the write</b>: the handler rejected the value
-/// and the row rolled back, which is a failure banner for something the control could
-/// simply not have allowed. <see cref="Minimum"/> and <see cref="Maximum"/> clamp instead.
-/// The handler still validates — this is a keyboard, not a trust boundary.
-///
-/// The typed value is committed on Enter or on leaving the field, never per keystroke.
-/// <c>SettingsDisplay</c> debounces these by 500ms precisely because "9" on the way to "90"
-/// used to be saved and acted on; committing whole values means there is no such
-/// intermediate to debounce, and the timer stays as a backstop rather than as the thing
-/// standing between the user and a wrong setting.
-/// </remarks>
 internal sealed class NumberField : ContentView
 {
     public static readonly BindableProperty ValueProperty = BindableProperty.Create(
@@ -43,9 +14,6 @@ internal sealed class NumberField : ContentView
         BindingMode.TwoWay,
         propertyChanged: (bindable, _, _) => ((NumberField)bindable).Render());
 
-    // Both redraw: the stepper opacity says whether there is anywhere left to go, and a
-    // bound Maximum arrives after the first Render has already decided that with the
-    // default in hand.
     public static readonly BindableProperty MinimumProperty = BindableProperty.Create(
         nameof(Minimum),
         typeof(int),
@@ -63,7 +31,6 @@ internal sealed class NumberField : ContentView
     public static readonly BindableProperty StepProperty = BindableProperty.Create(
         nameof(Step), typeof(int), typeof(NumberField), 1);
 
-    /// <summary>What the number counts — "seconds", "days", "%".</summary>
     public static readonly BindableProperty UnitProperty = BindableProperty.Create(
         nameof(Unit),
         typeof(string),
@@ -71,10 +38,6 @@ internal sealed class NumberField : ContentView
         string.Empty,
         propertyChanged: (bindable, _, _) => ((NumberField)bindable).Render());
 
-    /// <summary>
-    /// What zero means, where it means something — "Never", "Off", "Keep everything".
-    /// Empty when zero is just a number.
-    /// </summary>
     public static readonly BindableProperty OffTextProperty = BindableProperty.Create(
         nameof(OffText),
         typeof(string),
@@ -87,10 +50,6 @@ internal sealed class NumberField : ContentView
     private readonly Label _decrement;
     private readonly Label _increment;
 
-    /// <summary>
-    /// Set while <see cref="Render"/> writes the entry's text, so the write-back handlers
-    /// do not treat the control's own update as something the user typed.
-    /// </summary>
     private bool _rendering;
 
     public NumberField()
@@ -208,8 +167,6 @@ internal sealed class NumberField : ContentView
 
         label.GestureRecognizers.Add(tap);
 
-        // Fully qualified: unqualified, `Behaviors` binds to VisualElement's own
-        // collection rather than to the namespace.
         Helix.App.Behaviors.Hover.SetCursor(label, true);
 
         return label;
@@ -217,12 +174,6 @@ internal sealed class NumberField : ContentView
 
     private void Nudge(int by) => Value = Clamp(Value + by);
 
-    /// <summary>
-    /// Takes what is in the box, if it is a number, and clamps it into range. Anything
-    /// else — an empty box, a pasted word — puts the last good value back rather than
-    /// resolving to zero, which in three of these four fields would silently turn the
-    /// setting off.
-    /// </summary>
     private void Commit()
     {
         if (_rendering)
@@ -235,8 +186,6 @@ internal sealed class NumberField : ContentView
             Value = Clamp(typed);
         }
 
-        // Unconditional: a clamped or rejected entry has to be redrawn even when Value
-        // itself did not change, or the box goes on showing what the user typed.
         Render();
     }
 
@@ -244,8 +193,6 @@ internal sealed class NumberField : ContentView
 
     private void Render()
     {
-        // Called from the constructor by way of the property defaults, before the fields
-        // it touches are all assigned.
         if (_entry is null || _suffix is null)
         {
             return;

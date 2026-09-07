@@ -1,16 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<!--
-		Windows and Mac Catalyst heads. Each is gated on the host that can build it —
-		Catalyst compilation needs Xcode and therefore macOS — so `dotnet build` does the
-		right thing on either machine without a -f switch. Helix.Infrastructure gates its
-		target frameworks identically.
-		-->
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">$(TargetFrameworks);net10.0-maccatalyst</TargetFrameworks>
 
-		<!-- Both architectures: the Mac App Store rejects an arm64-only Catalyst build. -->
 		<RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
 
 		<OutputType>Exe</OutputType>
@@ -20,23 +13,12 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
-		<!--
-		Only the cultures Helix is translated into — the list in Localization/CultureSwitcher.
-		Without this the build copies the satellite resource assemblies that .NET, MAUI and
-		the toolkit packages ship for ~120 cultures into the output as one folder each, none
-		of which Helix ever loads. They doubled the file count of a published install, and
-		file count rather than size is what an antivirus scan, a copy and a backup pay for.
-		Add a culture here when adding an AppResources.<culture>.resx.
-		-->
 		<SatelliteResourceLanguages>en;de;fr;id;ja;nl</SatelliteResourceLanguages>
 
-		<!-- Display name -->
 		<ApplicationTitle>Helix</ApplicationTitle>
 
-		<!-- App Identifier -->
 		<ApplicationId>com.companyname.myappname</ApplicationId>
 
-		<!-- Versions -->
 		<ApplicationDisplayVersion>2.2.3</ApplicationDisplayVersion>
 		<ApplicationVersion>3</ApplicationVersion>
 
@@ -48,7 +30,6 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
-	<!-- MSIX/packaging settings that only mean anything to the Windows head. -->
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
 		<WindowsPackageType>None</WindowsPackageType>
 		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
@@ -61,19 +42,10 @@
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 	</PropertyGroup>
 
-	<!-- Codesigning for the Catalyst head. Left to the developer's own identity: set
-	     CodesignKey/CodesignProvision on the command line or in a Directory.Build.rsp. -->
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
 		<UseHardenedRuntime>true</UseHardenedRuntime>
 	</PropertyGroup>
 
-	<!--
-	Folder (unpackaged) publish support: `dotnet publish -p:RuntimeIdentifierOverride=win-x64`.
-	The RID and self-contained switches are applied HERE (App project only) instead of on the
-	command line, because as global CLI properties they would also flow into the referenced
-	class libraries, where WindowsAppSDKSelfContained fails with
-	"requires a supported Windows architecture".
-	-->
 	<PropertyGroup Condition="'$(RuntimeIdentifierOverride)' != ''">
 		<RuntimeIdentifier>$(RuntimeIdentifierOverride)</RuntimeIdentifier>
 		<SelfContained>true</SelfContained>
@@ -81,22 +53,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- App Icon — the Helix logomark on the app's canvas colour -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#121110" />
 
-		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#121110" BaseSize="128,165" />
 
-		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<!-- The logomark is 31x40 intrinsically but is shown up to ~57px tall on the
-		     sign-in screen; rasterise it larger so it stays crisp. -->
 		<MauiImage Update="Resources\Images\logoipsum.svg" BaseSize="124,160" />
 
-		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 	</ItemGroup>
-
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" />
@@ -109,13 +74,6 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<!-- Referenced on both heads. SharpHook 8 ships a Mac Catalyst assembly and the
-		     libuiohook natives for maccatalyst-x64 and -arm64, so the Ctrl+Enter shortcut
-		     on the sign-in pages no longer has to be Windows-only. macOS gates a global
-		     hook behind Accessibility access, which the user grants or does not: without
-		     it RunAsync faults at startup, that is logged, and nothing else changes.
-		     Nothing here reaches Linux - libuiohook supports it, MAUI has no Linux head
-		     for it to run in. -->
 		<PackageReference Include="SharpHook" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" />
 	</ItemGroup>
@@ -190,19 +148,7 @@
 	    <LastGenOutput>AppResources.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
 	</ItemGroup>
-	<!--
-	  Windows reports the running version from [AssemblyMetadata("...AppInfo.Version")],
-	  which MAUI stamps out of the Package.appxmanifest it generates under obj rather than
-	  out of ApplicationDisplayVersion directly. That generated manifest is incremental on
-	  the manifest in Platforms/Windows, which deliberately never carries a version - so
-	  bumping ApplicationDisplayVersion did not invalidate it, and the app went on reporting
-	  the previous version in the sidebar, on the sign-in pages and to the update check
-	  until somebody deleted obj. Deleting the stale copy here makes the build regenerate it.
 
-	  A mismatch is the only thing that triggers the delete, so an ordinary build does no
-	  extra work; if the composed version below ever stops matching MAUI's format, the cost
-	  is a manifest regenerated on every build rather than a wrong version shipped.
-	-->
 	<Target Name="_HelixRefreshStampedAppxManifest"
 	        BeforeTargets="BeforeBuild;PrepareForBuild"
 	        Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' == 'windows'">
@@ -222,18 +168,6 @@
 		        Condition="Exists('$(_HelixStampedManifest)') AND '$(_HelixStampedVersion)' != '$(_HelixExpectedVersion)'" />
 	</Target>
 
-	<!--
-	  The other half of SatelliteResourceLanguages. That property trims the .NET satellite
-	  assemblies, but a self-contained Windows App SDK also carries WinUI's own native
-	  resources - Microsoft.ui.xaml.dll.mui and its Phone twin - as one folder per culture,
-	  and the SDK's targets add every one of them to the output regardless: 86 folders of
-	  two files each, for the strings in WinUI's built-in dialogs, in languages Helix
-	  cannot be switched to. Those targets add them as None items whose Link is
-	  <culture>\<file>.mui, so this runs straight after them and removes the ones whose
-	  language is not in the list. It matches on the language alone - en-GB and en-us
-	  stay with en - because Windows picks the MUI by the OS display language, region
-	  included, and a user on nl-BE should get the Dutch dialog rather than none.
-	-->
 	<Target Name="_HelixPruneWindowsAppSdkCultures"
 	        AfterTargets="AddMicrosoftWindowsAppSDKPayloadFilesFromMsix;AddMicrosoftWindowsAppSDKPayloadFilesFromComponents"
 	        Condition="'$(SatelliteResourceLanguages)' != ''">

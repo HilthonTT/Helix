@@ -6,12 +6,6 @@ namespace ArchitectureTests.Infrastructure;
 
 public sealed class InfrastructureTests
 {
-    /// <summary>
-    /// Everything Helix declares in this assembly sits under <c>Helix.Infrastructure</c>,
-    /// mirroring its folder. The project once carried leftover <c>Krello.Persistence.*</c>
-    /// and <c>Helix.Persistence.*</c> namespaces that no folder matched; this keeps them
-    /// from creeping back. Compiler- and toolchain-generated types are ignored.
-    /// </summary>
     [Fact]
     public void Types_Should_ResideIn_InfrastructureNamespace()
     {

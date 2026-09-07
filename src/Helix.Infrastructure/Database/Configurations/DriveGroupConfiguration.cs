@@ -20,11 +20,6 @@ internal sealed class DriveGroupConfiguration : IEntityTypeConfiguration<DriveGr
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Membership is a primitive collection, stored as a JSON array in one column,
-        // rather than a join table to Drives. A group does not own its drives — several
-        // may name the same one, and a deleted drive must not take the group with it —
-        // so the referential integrity a join table would enforce is the wrong shape
-        // here. Readers resolve the ids against the drives that exist.
         builder.PrimitiveCollection(g => g.DriveIds)
             .HasField("_driveIds")
             .UsePropertyAccessMode(PropertyAccessMode.Field);

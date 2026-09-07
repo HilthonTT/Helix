@@ -55,8 +55,6 @@ public sealed class UpdateDriveTests
     [Fact]
     public async Task Handle_Should_UnmountTheOldLetter_WhenTheLetterChangesWhileMounted()
     {
-        // Arrange — the drive is mounted at L and is being moved to Z. Its own instance:
-        // Update mutates the drive, and the shared one is passed around by other tests.
         Drive drive = Drive.Create(UserId, "L", "192.168.0.1", "Name", "Username", "Password");
 
         _loggedInUserMock.UserId.Returns(UserId);
@@ -68,10 +66,8 @@ public sealed class UpdateDriveTests
         _nasConnectorMock.GetConnectedLetters().Returns(new HashSet<string>(["L"]));
         _nasConnectorMock.DisconnectAsync(Arg.Any<Drive>()).Returns(Result.Success());
 
-        // Act
         Result result = await _updateDrive.Handle(Request);
 
-        // Assert — the mapping nothing will own any more is cancelled, quietly.
         result.IsSuccess.Should().BeTrue();
         await _nasConnectorMock.Received(1).DisconnectAsync(drive);
         _driveMonitorMock.Received(1).Suppress(Arg.Is<IEnumerable<string>>(letters => letters.Contains("L")));
@@ -80,7 +76,6 @@ public sealed class UpdateDriveTests
     [Fact]
     public async Task Handle_Should_NotUnmount_WhenTheLetterIsUnchanged()
     {
-        // Arrange
         Drive drive = Drive.Create(UserId, "L", "192.168.0.1", "Name", "Username", "Password");
 
         _loggedInUserMock.UserId.Returns(UserId);
@@ -89,10 +84,8 @@ public sealed class UpdateDriveTests
         _driveRepositoryMock.GetByIdAsync(Request.DriveId).Returns(drive);
         _nasConnectorMock.GetConnectedLetters().Returns(new HashSet<string>(["L"]));
 
-        // Act
         Result result = await _updateDrive.Handle(Request with { Letter = "l" });
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
         await _nasConnectorMock.DidNotReceive().DisconnectAsync(Arg.Any<Drive>());
     }
@@ -100,7 +93,6 @@ public sealed class UpdateDriveTests
     [Fact]
     public async Task Handle_Should_ReturnError_WhenLetterIsNotASingleCharacter()
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
@@ -109,17 +101,14 @@ public sealed class UpdateDriveTests
 
         UpdateDrive.Request invalidRequest = Request with { Letter = "LE" };
 
-        // Act
         Result result = await _updateDrive.Handle(invalidRequest);
 
-        // Assert
         result.Error.Should().Be(DriveErrors.NotALetter);
     }
 
     [Fact]
     public async Task Handle_Should_ReturnError_WhenLetterIsNotUnique()
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
@@ -131,27 +120,24 @@ public sealed class UpdateDriveTests
 
         UpdateDrive.Request invalidRequest = Request with { Letter = "A" };
 
-        // Act
         Result result = await _updateDrive.Handle(invalidRequest);
 
-        // Assert
         result.Error.Should().Be(DriveErrors.LetterNotUnique(invalidRequest.Letter));
     }
 
     [Theory]
     [InlineData("")]
-    [InlineData("999.999.999.999")]  // Dotted-numeric, but out of range
-    [InlineData("256.256.256.256")]  // Dotted-numeric, but out of range
-    [InlineData("192.168.1.1.1")]    // Dotted-numeric with too many segments
-    [InlineData("192.168.1")]        // Dotted-numeric with too few segments
-    [InlineData("nas local")]        // A space is not legal in a hostname
-    [InlineData("-nas")]             // A label may not start with a hyphen
-    [InlineData("nas-")]             // ...nor end with one
-    [InlineData("nas..local")]       // Empty label
-    [InlineData("fd00:::5")]         // Not a parseable IPv6 address
+    [InlineData("999.999.999.999")]
+    [InlineData("256.256.256.256")]
+    [InlineData("192.168.1.1.1")]
+    [InlineData("192.168.1")]
+    [InlineData("nas local")]
+    [InlineData("-nas")]
+    [InlineData("nas-")]
+    [InlineData("nas..local")]
+    [InlineData("fd00:::5")]
     public async Task Handle_Should_ReturnError_WhenHostFormatIsInvalid(string invalidHost)
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
@@ -163,10 +149,8 @@ public sealed class UpdateDriveTests
 
         UpdateDrive.Request invalidRequest = Request with { Host = invalidHost };
 
-        // Act
         Result result = await _updateDrive.Handle(invalidRequest);
 
-        // Assert
         result.Error.Should().Be(ValidationErrors.InvalidHost);
     }
 
@@ -177,15 +161,14 @@ public sealed class UpdateDriveTests
     [InlineData("8.8.8.8")]
     [InlineData("255.255.255.255")]
     [InlineData("0.0.0.0")]
-    [InlineData("nas.local")]        // The usual way a NAS is reached on a home network
-    [InlineData("MYNAS")]            // Single-label NetBIOS name
-    [InlineData("nas_01.example.com")] // Underscores are legal in a Windows computer name
-    [InlineData("abc.def.ghi.jkl")]  // Not an IP address, but a perfectly good hostname
-    [InlineData("fd00::5")]          // IPv6
-    [InlineData("[fd00::5]")]        // IPv6 in the bracketed form other tools print
+    [InlineData("nas.local")]
+    [InlineData("MYNAS")]
+    [InlineData("nas_01.example.com")]
+    [InlineData("abc.def.ghi.jkl")]
+    [InlineData("fd00::5")]
+    [InlineData("[fd00::5]")]
     public async Task Handle_Should_ReturnSuccess_WhenHostFormatIsValid(string validHost)
     {
-        // Arrange
         _loggedInUserMock.UserId.Returns(UserId);
         _loggedInUserMock.IsLoggedIn.Returns(true);
 
@@ -197,10 +180,8 @@ public sealed class UpdateDriveTests
 
         UpdateDrive.Request validRequest = Request with { Host = validHost };
 
-        // Act
         Result result = await _updateDrive.Handle(validRequest);
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
     }
 }

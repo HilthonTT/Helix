@@ -41,8 +41,6 @@ public sealed class UpdateDriveGroup(
 
         string name = request.Name.Trim();
 
-        // Excluding itself, so a group whose membership changed but whose name did not
-        // is not rejected for colliding with the name it already has.
         if (!await driveGroupRepository.IsNameUniqueAsync(
             name,
             loggedInUser.UserId,

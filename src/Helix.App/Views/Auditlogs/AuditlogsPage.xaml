@@ -16,14 +16,12 @@
 
         <Grid RowDefinitions="Auto,*" RowSpacing="20" Padding="28,24">
 
-            <!-- ===== Page header ===== -->
             <VerticalStackLayout Spacing="2">
                 <Label Text="{l10n:Translate Auditlogs}" Style="{StaticResource Display}"/>
                 <Label Style="{StaticResource Muted}"
                        Text="{Binding Source={x:Static l10n:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=l10n:LocalizationResourceManager}"/>
             </VerticalStackLayout>
 
-            <!-- ===== Log list ===== -->
             <Border Grid.Row="1" Style="{StaticResource Card}">
                 <Grid RowDefinitions="Auto,Auto,*" Padding="20">
 
@@ -38,10 +36,6 @@
                                    FontFamily="{StaticResource FontMonoBold}"/>
                         </Border>
 
-                        <!-- Live, and matched against the sentence the row shows rather
-                             than against the columns the sentence is composed from. -->
-                        <!-- Fill with a ceiling rather than a fixed width; see the note
-                             on the dashboard's box. -->
                         <Border Grid.Column="2"
                                 Style="{StaticResource Field}"
                                 MaximumWidthRequest="300"
@@ -77,7 +71,6 @@
                         </Border>
                     </Grid>
 
-                    <!-- Column headers, aligned to AuditlogTemplate's grid -->
                     <VerticalStackLayout Grid.Row="1"
                                          Spacing="10"
                                          IsVisible="{Binding Auditlogs.Count, Converter={StaticResource CountToBoolConverter}}">
@@ -101,11 +94,6 @@
                         <BoxView Style="{StaticResource Divider}"/>
                     </VerticalStackLayout>
 
-                    <!--
-                    The list this mattered most for: ninety days of retention is the
-                    default, and every row of it used to be realized before the page could
-                    be drawn.
-                    -->
                     <CollectionView Grid.Row="2"
                                     Margin="0,8,0,0"
                                     ItemsSource="{Binding Auditlogs}"
@@ -121,7 +109,6 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <!-- Nothing matched the filter, which is not the same as an empty log. -->
                     <VerticalStackLayout Grid.Row="1"
                                          Grid.RowSpan="2"
                                          Spacing="10"
@@ -153,7 +140,6 @@
                                 Command="{Binding ClearSearchCommand}"/>
                     </VerticalStackLayout>
 
-                    <!-- Empty state -->
                     <VerticalStackLayout Grid.Row="1"
                                          Grid.RowSpan="2"
                                          Spacing="10"
@@ -183,8 +169,6 @@
             </Border>
         </Grid>
 
-        <!-- Last child of the root grid, so a banner sits above the modal layer too:
-             a failure raised from inside a sheet has to be readable without closing it. -->
         <controls:NotificationHost/>
 
     </Grid>
