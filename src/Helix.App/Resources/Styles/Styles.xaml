@@ -250,6 +250,20 @@
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
+    <Style x:Key="IconHit" TargetType="Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Stroke" Value="Transparent"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=8}"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="WidthRequest" Value="26"/>
+        <Setter Property="HeightRequest" Value="26"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+        <Setter Property="behaviors:Hover.Background"
+                Value="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}"/>
+        <Setter Property="behaviors:Hover.Cursor" Value="True"/>
+    </Style>
+
     <Style x:Key="IconChip" TargetType="Border">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Stroke"
