@@ -1570,6 +1570,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}: connected — the mount finished after the timeout..
+        /// </summary>
+        internal static string DriveConnectedLate {
+            get {
+                return ResourceManager.GetString("DriveConnectedLate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The NAS is not on this network. Helix keeps trying..
         /// </summary>
         internal static string StatusUnreachableHint {

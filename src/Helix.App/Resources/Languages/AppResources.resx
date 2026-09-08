@@ -761,4 +761,7 @@
   <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
     <value>'{0}' is in use by something else on this computer. Choose a free letter.</value>
   </data>
+  <data name="DriveConnectedLate" xml:space="preserve">
+    <value>{0}: connected — the mount finished after the timeout.</value>
+  </data>
 </root>

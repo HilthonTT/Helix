@@ -15,6 +15,8 @@ public static class DependencyInjection
 
         services.AddSingleton<DriveWatchdog>();
 
+        services.AddSingleton<MountReconciler>();
+
         services.AddSingleton<TrayIconService>();
 
         services.AddSingleton<StorageAlertService>();

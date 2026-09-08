@@ -761,4 +761,7 @@
   <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
     <value>« {0} » est utilisé par autre chose sur cet ordinateur. Choisissez une lettre libre.</value>
   </data>
+  <data name="DriveConnectedLate" xml:space="preserve">
+    <value>{0} : connecté — le montage s'est terminé après le délai d'attente.</value>
+  </data>
 </root>

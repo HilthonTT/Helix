@@ -24,6 +24,10 @@ public static class DriveErrors
 
     public static Error FailedToDisconnect(string message) => Error.Problem("Drive.FailedToDisconnect", message);
 
+    public static readonly Error ConnectionTimedOut = FailedToConnect("Connection timed out.");
+
+    public static readonly Error DisconnectionTimedOut = FailedToDisconnect("Disconnection timed out.");
+
     public static readonly Error MountNotAvailable = Error.NotFound(
         "Drive.MountNotAvailable",
         "That drive is not mounted, so there is nothing to open.");

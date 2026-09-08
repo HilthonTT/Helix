@@ -644,5 +644,17 @@ internal sealed partial class HomeViewModel : BaseViewModel
             _allDrives.FirstOrDefault(d => d.Id == m.DriveId)
                 ?.MarkOffline(Error.Problem(m.ErrorCode, m.Description));
         });
+
+        WeakReferenceMessenger.Default.Register<DriveAttemptSucceededMessage>(this, (r, m) =>
+        {
+            DriveDisplay? drive = _allDrives.FirstOrDefault(d => d.Id == m.DriveId);
+            if (drive is null)
+            {
+                return;
+            }
+
+            drive.Connected = true;
+            drive.LastConnectedOnUtc = m.ConnectedOnUtc;
+        });
     }
 }

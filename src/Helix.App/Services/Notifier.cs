@@ -45,6 +45,49 @@ internal static class Notifier
         });
     }
 
+    public static void Retract(string line)
+    {
+        if (string.IsNullOrWhiteSpace(line))
+        {
+            return;
+        }
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            RetractHeld(line);
+
+            WeakReferenceMessenger.Default.Send(new RetractNotificationMessage(line));
+        });
+    }
+
+    private static void RetractHeld(string line)
+    {
+        lock (Gate)
+        {
+            for (int i = Undelivered.Count - 1; i >= 0; i--)
+            {
+                Held held = Undelivered[i];
+
+                if (!NotificationText.TryRemove(held.Message.Text, line, out string? remaining))
+                {
+                    continue;
+                }
+
+                if (remaining is null)
+                {
+                    Undelivered.RemoveAt(i);
+
+                    continue;
+                }
+
+                Undelivered[i] = held with
+                {
+                    Message = new NotificationMessage(held.Message.Kind, remaining)
+                };
+            }
+        }
+    }
+
     public static IReadOnlyList<NotificationMessage> DrainHeld()
     {
         lock (Gate)

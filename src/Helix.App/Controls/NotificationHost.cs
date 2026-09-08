@@ -57,6 +57,8 @@ internal sealed class NotificationHost : ContentView
             Show(message);
         });
 
+        WeakReferenceMessenger.Default.Register<RetractNotificationMessage>(this, (_, message) => Retract(message.Line));
+
         _owner = FindOwningPage();
 
         if (_owner is not null)
@@ -70,6 +72,7 @@ internal sealed class NotificationHost : ContentView
     private void OnUnloaded(object? sender, EventArgs e)
     {
         WeakReferenceMessenger.Default.Unregister<NotificationMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<RetractNotificationMessage>(this);
 
         if (_owner is not null)
         {
@@ -125,6 +128,26 @@ internal sealed class NotificationHost : ContentView
         return null;
     }
 
+    private void Retract(string line)
+    {
+        foreach (Banner banner in _stack.Children.OfType<Banner>().ToList())
+        {
+            if (!NotificationText.TryRemove(banner.Message, line, out string? remaining))
+            {
+                continue;
+            }
+
+            if (remaining is null)
+            {
+                _ = DismissAsync(banner);
+
+                continue;
+            }
+
+            banner.Rewrite(remaining);
+        }
+    }
+
     private void Show(NotificationMessage message)
     {
         foreach (Banner existing in _stack.Children.OfType<Banner>())
@@ -176,6 +199,7 @@ internal sealed class NotificationHost : ContentView
     private sealed class Banner : Border
     {
         private readonly IDispatcherTimer _lifetime;
+        private readonly Label _text;
 
         public Banner(NotificationKind kind, string message, IDispatcher dispatcher)
         {
@@ -205,7 +229,7 @@ internal sealed class NotificationHost : ContentView
 
             icon.SetAppThemeColor(Label.TextColorProperty, Resource(lightKey), Resource(darkKey));
 
-            var text = new Label
+            _text = new Label
             {
                 Text = message,
                 FontSize = 13,
@@ -213,7 +237,7 @@ internal sealed class NotificationHost : ContentView
                 VerticalOptions = LayoutOptions.Center
             };
 
-            text.SetAppThemeColor(Label.TextColorProperty, Resource("TextLight"), Resource("TextDark"));
+            _text.SetAppThemeColor(Label.TextColorProperty, Resource("TextLight"), Resource("TextDark"));
 
             var close = new Label
             {
@@ -245,7 +269,7 @@ internal sealed class NotificationHost : ContentView
             };
 
             layout.Add(icon);
-            layout.Add(text, 1);
+            layout.Add(_text, 1);
             layout.Add(close, 2);
 
             Content = layout;
@@ -263,7 +287,16 @@ internal sealed class NotificationHost : ContentView
 
         public NotificationKind Kind { get; }
 
-        public string Message { get; }
+        public string Message { get; private set; }
+
+        public void Rewrite(string message)
+        {
+            Message = message;
+
+            _text.Text = message;
+
+            SemanticProperties.SetDescription(this, message);
+        }
 
         public void RestartLifetime()
         {

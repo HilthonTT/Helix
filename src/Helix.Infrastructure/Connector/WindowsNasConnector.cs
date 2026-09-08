@@ -20,6 +20,8 @@ internal sealed class WindowsNasConnector(
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _hostGates =
         new(StringComparer.OrdinalIgnoreCase);
 
+    public event EventHandler<LateMountOutcome>? MountSettledLate;
+
     public Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
         WhenReachableAsync(
             drive,
@@ -29,10 +31,11 @@ internal sealed class WindowsNasConnector(
                 started => RunWithTimeoutAsync(
                     drive.Letter,
                     () => Connect(drive),
-                    timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                    timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                     failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                     cancellationToken,
-                    started),
+                    started,
+                    reportsMount: true),
                 failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                 cancellationToken),
             cancellationToken);
@@ -41,7 +44,7 @@ internal sealed class WindowsNasConnector(
         RunWithTimeoutAsync(
             drive.Letter,
             () => Disconnect(drive),
-            timeoutError: () => Result.Failure(DriveErrors.FailedToDisconnect("Disconnection timed out.")),
+            timeoutError: () => Result.Failure(DriveErrors.DisconnectionTimedOut),
             failure: message => Result.Failure(DriveErrors.FailedToDisconnect(message)),
             cancellationToken);
 
@@ -54,7 +57,7 @@ internal sealed class WindowsNasConnector(
                 started => RunWithTimeoutAsync(
                     drive.Letter,
                     () => Test(drive),
-                    timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                    timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                     failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                     cancellationToken,
                     started),
@@ -450,7 +453,8 @@ internal sealed class WindowsNasConnector(
         Func<Result> timeoutError,
         Func<string, Result> failure,
         CancellationToken cancellationToken,
-        Action<Task>? onStarted = null)
+        Action<Task>? onStarted = null,
+        bool reportsMount = false)
     {
         Task<Result> task = Task.Run(work, CancellationToken.None);
         onStarted?.Invoke(task);
@@ -462,12 +466,7 @@ internal sealed class WindowsNasConnector(
         catch (TimeoutException)
         {
             _ = task.ContinueWith(
-                finished => logger.LogInformation(
-                    "Drive {Letter}: the mount that timed out finished afterwards - {Outcome}.",
-                    letter,
-                    finished.IsFaulted
-                        ? finished.Exception?.GetBaseException().Message
-                        : finished.Result.IsSuccess ? "it is now mounted" : finished.Result.Error.Description),
+                finished => ReportSettledLate(letter, finished, reportsMount),
                 CancellationToken.None,
                 TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default);
@@ -483,6 +482,34 @@ internal sealed class WindowsNasConnector(
         catch (Exception ex)
         {
             return failure($"Unexpected error: {ex.Message}");
+        }
+    }
+
+    private void ReportSettledLate(string letter, Task<Result> finished, bool reportsMount)
+    {
+        bool mounted = !finished.IsFaulted && finished.Result.IsSuccess;
+
+        string description = finished.IsFaulted
+            ? finished.Exception?.GetBaseException().Message ?? "Unknown error."
+            : mounted ? "It is now mounted." : finished.Result.Error.Description;
+
+        logger.LogInformation(
+            "Drive {Letter}: the mount that timed out finished afterwards - {Outcome}",
+            letter,
+            description);
+
+        if (!reportsMount)
+        {
+            return;
+        }
+
+        try
+        {
+            MountSettledLate?.Invoke(this, new LateMountOutcome(letter, mounted, description));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Reporting the late mount of drive {Letter}: failed.", letter);
         }
     }
 

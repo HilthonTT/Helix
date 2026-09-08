@@ -22,6 +22,8 @@ internal sealed class MacNasConnector : INasConnector
     private readonly ILogger<MacNasConnector> _logger;
     private readonly IHostReachability _hostReachability;
 
+    public event EventHandler<LateMountOutcome>? MountSettledLate;
+
     public MacNasConnector(ILogger<MacNasConnector> logger, IHostReachability hostReachability)
     {
         _logger = logger;
@@ -33,16 +35,19 @@ internal sealed class MacNasConnector : INasConnector
             drive,
             fresh: false,
             () => RunWithTimeoutAsync(
+                drive.Letter,
                 () => Connect(drive),
-                timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                 failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
-                cancellationToken),
+                cancellationToken,
+                reportsMount: true),
             cancellationToken);
 
     public Task<Result> DisconnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
         RunWithTimeoutAsync(
+            drive.Letter,
             () => Disconnect(drive),
-            timeoutError: () => Result.Failure(DriveErrors.FailedToDisconnect("Disconnection timed out.")),
+            timeoutError: () => Result.Failure(DriveErrors.DisconnectionTimedOut),
             failure: message => Result.Failure(DriveErrors.FailedToDisconnect(message)),
             cancellationToken);
 
@@ -51,8 +56,9 @@ internal sealed class MacNasConnector : INasConnector
             drive,
             fresh: true,
             () => RunWithTimeoutAsync(
+                drive.Letter,
                 () => Test(drive),
-                timeoutError: () => Result.Failure(DriveErrors.FailedToConnect("Connection timed out.")),
+                timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                 failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                 cancellationToken),
             cancellationToken);
@@ -233,29 +239,67 @@ internal sealed class MacNasConnector : INasConnector
         return isIpv6 ? $"[{candidate}]" : candidate;
     }
 
-    private static async Task<Result> RunWithTimeoutAsync(
+    private async Task<Result> RunWithTimeoutAsync(
+        string letter,
         Func<Result> work,
         Func<Result> timeoutError,
         Func<string, Result> failure,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool reportsMount = false)
     {
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(MountTimeoutMilliseconds);
+        Task<Result> task = Task.Run(work, CancellationToken.None);
 
         try
         {
-            Task<Result> task = Task.Run(work, cts.Token);
-            return await task.WaitAsync(cts.Token);
+            return await task.WaitAsync(TimeSpan.FromMilliseconds(MountTimeoutMilliseconds), cancellationToken);
+        }
+        catch (TimeoutException)
+        {
+            _ = task.ContinueWith(
+                finished => ReportSettledLate(letter, finished, reportsMount),
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+
+            return timeoutError();
         }
         catch (OperationCanceledException)
         {
-            return cancellationToken.IsCancellationRequested
-                ? failure("Operation canceled by user.")
-                : timeoutError();
+            _ = task.ContinueWith(_ => { }, TaskContinuationOptions.OnlyOnFaulted);
+
+            return failure("Operation canceled by user.");
         }
         catch (Exception ex)
         {
             return failure($"Unexpected error: {ex.Message}");
+        }
+    }
+
+    private void ReportSettledLate(string letter, Task<Result> finished, bool reportsMount)
+    {
+        bool mounted = !finished.IsFaulted && finished.Result.IsSuccess;
+
+        string description = finished.IsFaulted
+            ? finished.Exception?.GetBaseException().Message ?? "Unknown error."
+            : mounted ? "It is now mounted." : finished.Result.Error.Description;
+
+        _logger.LogInformation(
+            "Drive {Letter}: the mount that timed out finished afterwards - {Outcome}",
+            letter,
+            description);
+
+        if (!reportsMount)
+        {
+            return;
+        }
+
+        try
+        {
+            MountSettledLate?.Invoke(this, new LateMountOutcome(letter, mounted, description));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Reporting the late mount of drive {Letter}: failed.", letter);
         }
     }
 

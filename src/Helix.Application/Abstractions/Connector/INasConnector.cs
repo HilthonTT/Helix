@@ -2,8 +2,12 @@
 
 namespace Helix.Application.Abstractions.Connector;
 
+public sealed record LateMountOutcome(string Letter, bool IsMounted, string Description);
+
 public interface INasConnector
 {
+    event EventHandler<LateMountOutcome>? MountSettledLate;
+
     Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default);
 
     Task<Result> DisconnectAsync(Drive drive, CancellationToken cancellationToken = default);

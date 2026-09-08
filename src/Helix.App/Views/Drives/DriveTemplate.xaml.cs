@@ -92,7 +92,7 @@ public sealed partial class DriveTemplate : ContentView
                     RefreshStatus(drive);
                 }
 
-                Notifier.Error(result.Error);
+                Notifier.Error($"{drive.Letter}: {result.Error.Description}");
                 return;
             }
 

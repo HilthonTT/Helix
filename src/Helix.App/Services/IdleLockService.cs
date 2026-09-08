@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Navigation;
 using Helix.Application.Abstractions.Time;
 using Helix.Application.Features.Settings.Queries;
@@ -84,6 +84,7 @@ internal sealed class IdleLockService
         }
 
         App.ServiceProvider.GetRequiredService<DriveWatchdog>().Stop();
+        App.ServiceProvider.GetRequiredService<MountReconciler>().Stop();
         App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
         App.ServiceProvider.GetRequiredService<StorageAlertService>().Stop();
 

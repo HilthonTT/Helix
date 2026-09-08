@@ -101,6 +101,8 @@ public sealed partial class AppShell : Shell
 
         App.ServiceProvider.GetRequiredService<DriveWatchdog>().Stop();
 
+        App.ServiceProvider.GetRequiredService<MountReconciler>().Stop();
+
         App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
 
         App.ServiceProvider.GetRequiredService<StorageAlertService>().Stop();

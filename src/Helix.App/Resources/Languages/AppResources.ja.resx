@@ -761,4 +761,7 @@
   <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
     <value>「{0}」はこのコンピューター上の別のものが使用しています。空いている文字を選んでください。</value>
   </data>
+  <data name="DriveConnectedLate" xml:space="preserve">
+    <value>{0}: 接続されました - タイムアウト後にマウントが完了しました。</value>
+  </data>
 </root>

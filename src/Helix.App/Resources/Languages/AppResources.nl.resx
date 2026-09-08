@@ -761,4 +761,7 @@
   <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
     <value>'{0}' wordt door iets anders op deze computer gebruikt. Kies een vrije letter.</value>
   </data>
+  <data name="DriveConnectedLate" xml:space="preserve">
+    <value>{0}: verbonden — de koppeling is na de time-out voltooid.</value>
+  </data>
 </root>

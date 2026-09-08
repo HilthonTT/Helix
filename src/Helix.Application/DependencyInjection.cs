@@ -70,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<GetAvailableDriveLetters>();
         services.AddScoped<GetDriveById>();
         services.AddScoped<GetDrives>();
+        services.AddScoped<MarkDriveConnected>();
         services.AddScoped<UpdateDrive>();
 
         services.AddScoped<DisconnectDrive>();

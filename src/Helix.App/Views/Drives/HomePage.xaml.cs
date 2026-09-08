@@ -30,6 +30,7 @@ public sealed partial class HomePage : ContentPage
     private readonly HomeViewModel _viewModel;
     private readonly ModalHost _modals;
     private readonly DriveWatchdog _watchdog;
+    private readonly MountReconciler _mountReconciler;
     private readonly TrayIconService _tray;
     private readonly StorageAlertService _storageAlerts;
     private readonly IdleLockService _idleLock;
@@ -44,6 +45,7 @@ public sealed partial class HomePage : ContentPage
 
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
         _watchdog = App.ServiceProvider.GetRequiredService<DriveWatchdog>();
+        _mountReconciler = App.ServiceProvider.GetRequiredService<MountReconciler>();
         _tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
         _storageAlerts = App.ServiceProvider.GetRequiredService<StorageAlertService>();
         _idleLock = App.ServiceProvider.GetRequiredService<IdleLockService>();
@@ -73,6 +75,8 @@ public sealed partial class HomePage : ContentPage
         _isInitializing = true;
         try
         {
+            _mountReconciler.Start();
+
             List<Drive> drives = await _viewModel.FetchDrivesAsync();
 
             await InitializeChartAsync(drives);

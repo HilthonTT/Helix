@@ -761,4 +761,7 @@
   <data name="DiagnoseLetterHeldByAnother" xml:space="preserve">
     <value>'{0}' wird von etwas anderem auf diesem Computer verwendet. Wählen Sie einen freien Buchstaben.</value>
   </data>
+  <data name="DriveConnectedLate" xml:space="preserve">
+    <value>{0}: verbunden — die Einbindung wurde nach dem Zeitlimit abgeschlossen.</value>
+  </data>
 </root>

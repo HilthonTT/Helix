@@ -180,6 +180,15 @@ what the record is for.
 Every string either side of this is in `AppResources`. The app is translated into five
 languages and was still saying "Something went wrong!" in English at eleven call sites.
 
+A banner can also be **taken back**. `Notifier.Retract` names one line of banner text and
+`NotificationHost` removes it: a banner that was only that line is dismissed, and one
+carrying several — the aggregated failures of a "connect all" — is rewritten without it,
+since the other twelve drives' failures are still true. It works on the held queue as well,
+so a message retracted before any page displayed it is never shown. The line is the unit
+because that is what `DriveMountBatch` composes (`"{Letter}: {description}"`), and
+`DriveTemplate` now prefixes a single row's failure the same way — a bare "Connection timed
+out." named no drive and could not be told apart from another drive's.
+
 ### The update check
 
 `GitHubUpdateChecker` reads `/releases/latest` — unauthenticated, read-only, nothing
@@ -262,6 +271,31 @@ first was creating. `RunWithTimeoutAsync` hands the underlying task back through
 caches answers, including "nothing", for the life of the process, but **not a lookup that
 timed out** — that switched `ConnectByHostname` off for a host until restart because DNS
 was slow at logon.
+
+A **timed-out mount that then succeeds** is reconciled rather than left standing. The
+caller has already been answered `DriveErrors.ConnectionTimedOut` while the mount is still
+running, so what the user was told is wrong the moment it comes up: the tester screenshot
+is thirteen connected drives under a "Connection timed out." banner. The abandoned task
+therefore raises `INasConnector.MountSettledLate` with a `LateMountOutcome`, which
+`MountReconciler` in the presentation layer turns into the three things that were missing —
+the banner line is retracted, the drive is stamped through `MarkDriveConnected`, and the
+row is told it is up. Only a *connect* reports itself this way (`reportsMount`); a late
+disconnect or a late `Test` is logged and nothing more, because nothing was claimed about a
+drive that a later success would contradict. A late mount that fails is not reported
+either: the failure banner already says so.
+
+`MarkDriveConnected` is addressed by **letter**, because a letter is all the connector
+knows, and it refuses unless `IsMountedFrom` still says that letter points at that drive's
+share — the mount may have been taken down again in the thirty seconds it took to arrive,
+and a stamp is a claim about now. It writes no audit entry, for the same reason
+`ConnectDrive` does not: the interceptor skips a save whose only change is
+`LastConnectedOnUtc`.
+
+The reconciler is subscribed for the length of a **session**, not a page: it starts at the
+top of `HomePage.OnAppearing`, before the startup connect, since that batch is exactly what
+produced the screenshot and its timeouts land while the page is still assembling. It stops
+where `DriveWatchdog` stops — sign-out, in `AppShell` and `IdleLockService` — and not on an
+idle lock, where the drives and the watchdog carry on.
 
 The row says which of the two it is. `DriveDisplay.OfflineReason` carries
 `HostUnreachable` or `Refused`, and the status pill has one for each — amber "Unreachable"
