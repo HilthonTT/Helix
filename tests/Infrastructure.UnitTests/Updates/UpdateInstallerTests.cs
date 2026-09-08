@@ -452,4 +452,17 @@ public sealed class UpdateInstallerTests : IDisposable
 
         script.Should().Contain("$release = ''");
     }
+
+    [Fact]
+    public void SwapScript_Should_CarryAByteOrderMark_SoPowerShellReadsItAsUtf8()
+    {
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        string staged = Path.Combine(StagingRoot, "v9.9.9", "unpacked");
+        Directory.CreateDirectory(staged);
+
+        byte[] bytes = File.ReadAllBytes(installer.WriteSwapScript(staged, InstallDirectory));
+
+        bytes.Take(3).Should().Equal(Encoding.UTF8.GetPreamble());
+    }
 }

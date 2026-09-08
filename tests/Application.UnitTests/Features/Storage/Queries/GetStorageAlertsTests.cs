@@ -50,6 +50,7 @@ public class GetStorageAlertsTests
 
         _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>()).Returns([_drive]);
         _nasConnectorMock.GetConnectedLetters().Returns(["Z"]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z")).Returns(true);
 
         WithThreshold(10);
     }
@@ -109,6 +110,7 @@ public class GetStorageAlertsTests
 
         _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>()).Returns([_drive, second]);
         _nasConnectorMock.GetConnectedLetters().Returns(["Z", "Y"]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z" || d.Letter == "Y")).Returns(true);
 
         WithVolumes(
             Volume(4 * Terabyte, freePercent: 2, "Z"),
@@ -151,6 +153,7 @@ public class GetStorageAlertsTests
 
         _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>()).Returns([_drive, offline]);
         _nasConnectorMock.GetConnectedLetters().Returns(["Z"]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z")).Returns(true);
 
         WithVolumes(Volume(4 * Terabyte, freePercent: 4, "Z"));
 
@@ -168,6 +171,7 @@ public class GetStorageAlertsTests
 
         _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>()).Returns([_drive, second]);
         _nasConnectorMock.GetConnectedLetters().Returns(["Z", "Y"]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z" || d.Letter == "Y")).Returns(true);
 
         WithVolumes(Volume(4 * Terabyte, freePercent: 2, "Z", "Y"));
 
@@ -184,6 +188,7 @@ public class GetStorageAlertsTests
 
         _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>()).Returns([_drive, second]);
         _nasConnectorMock.GetConnectedLetters().Returns(["Z", "Y"]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z" || d.Letter == "Y")).Returns(true);
 
         WithVolumes(
             Volume(4 * Terabyte, freePercent: 2, "Z"),

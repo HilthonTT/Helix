@@ -163,6 +163,7 @@ public class DriveGroupTests
         DriveGroup group = GivenGroup(_media.Id, _backups.Id);
 
         _nasConnectorMock.GetConnectedLetters().Returns(["Z"]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z")).Returns(true);
 
         Result result = await Connect().Handle(new ConnectDriveGroup.Request(group.Id));
 
@@ -205,6 +206,7 @@ public class DriveGroupTests
         DriveGroup group = GivenGroup(_media.Id, _backups.Id);
 
         _nasConnectorMock.GetConnectedLetters().Returns(["Z"]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z")).Returns(true);
 
         Result result = await Connect().Handle(new ConnectDriveGroup.Request(group.Id, Disconnect: true));
 

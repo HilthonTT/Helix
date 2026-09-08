@@ -764,4 +764,7 @@
   <data name="DriveConnectedLate" xml:space="preserve">
     <value>{0} : connecté — le montage s'est terminé après le délai d'attente.</value>
   </data>
+  <data name="GroupMemberCount" xml:space="preserve">
+    <value>{0} lecteurs</value>
+  </data>
 </root>

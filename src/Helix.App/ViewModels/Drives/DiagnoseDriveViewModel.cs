@@ -7,6 +7,7 @@ using Helix.App.Resources.Languages;
 using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Contracts;
+using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 
 namespace Helix.App.ViewModels.Drives;
@@ -101,7 +102,16 @@ internal sealed partial class DiagnoseDriveViewModel : BaseViewModel
 
             Drive = m.Drive;
 
-            await RunAsync();
+            try
+            {
+                await RunAsync();
+            }
+            catch (Exception ex)
+            {
+                AppLog.For<DiagnoseDriveViewModel>().LogError(ex, "Diagnosing the drive failed.");
+
+                Close();
+            }
         });
     }
 }

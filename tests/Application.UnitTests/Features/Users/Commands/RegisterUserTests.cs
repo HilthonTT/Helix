@@ -84,4 +84,17 @@ public sealed class RegisterUserTests
 
         await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Handle_Should_TrimTheUsername()
+    {
+        _userRepositoryMock.IsUsernameUniqueAsync("bob").Returns(true);
+        _passwordHasherMock.Hash(Request.Password).Returns("SomeHashAbc123");
+
+        Result<User> result = await _registerUser.Handle(Request with { Username = " bob " });
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Username.Should().Be("bob");
+        await _userRepositoryMock.Received(1).IsUsernameUniqueAsync("bob");
+    }
 }

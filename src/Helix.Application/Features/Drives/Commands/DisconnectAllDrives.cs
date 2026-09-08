@@ -1,6 +1,7 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Handlers;
+using Helix.Application.Core.Drives;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
 
@@ -28,7 +29,7 @@ public sealed class DisconnectAllDrives(
         HashSet<string> connectedLetters = nasConnector.GetConnectedLetters();
 
         Drive[] connectedDrives = drives
-            .Where(d => connectedLetters.Contains(d.Letter))
+            .Where(d => DriveMountBatch.IsUp(d, connectedLetters, nasConnector))
             .ToArray();
 
         if (connectedDrives.Length == 0)

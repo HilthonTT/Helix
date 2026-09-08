@@ -281,7 +281,7 @@
                                         IsEnabled="{Binding IsNotBusy}"
                                         Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}"
                                         ToolTipProperties.Text="{l10n:Translate ConnectAll}"
-                                        SemanticProperties.Description="Connects every disconnected drive">
+                                        SemanticProperties.Description="{l10n:Translate ConnectAll}">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding ConnectDrivesCommand}"/>
                                     </Border.GestureRecognizers>
@@ -300,7 +300,7 @@
                                         IsEnabled="{Binding IsNotBusy}"
                                         Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}"
                                         ToolTipProperties.Text="{l10n:Translate DisconnectAll}"
-                                        SemanticProperties.Description="Disconnects every connected drive">
+                                        SemanticProperties.Description="{l10n:Translate DisconnectAll}">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding DisconnectDrivesCommand}"/>
                                     </Border.GestureRecognizers>
@@ -317,7 +317,7 @@
 
                                 <Border Style="{StaticResource Chip}"
                                         ToolTipProperties.Text="{l10n:Translate DriveGroups}"
-                                        SemanticProperties.Description="Opens the drive group manager">
+                                        SemanticProperties.Description="{l10n:Translate DriveGroups}">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding OpenDriveGroupsModalCommand}"/>
                                     </Border.GestureRecognizers>

@@ -388,7 +388,7 @@ document the user opened, reads, and closes — and it is too long to be a banne
 neither reported as changed nor used to move the baseline, and disposing it re-seeds them
 from what is actually mounted. Every handler that mounts or unmounts on purpose —
 `ConnectDrive`, `DisconnectDrive`, `ConnectAllDrives`, `DisconnectAllDrives`,
-`ConnectDriveGroup`, and `DeleteDrive` for the persistent mapping it cancels — holds one
+`ConnectDriveGroup`, and `DeleteDrive` for the mount it takes down — holds one
 across the operation. **Add one to any new handler that mounts or unmounts.**
 
 Without it the monitor cannot tell "the user pressed disconnect" from "the NAS fell over",
@@ -529,6 +529,14 @@ survive an update, so the drives are up before the records that describe them ar
 and treating them as taken meant a vault of thirteen drives imported nothing until every
 share had been disconnected by hand. A vault that ends up importing nothing is reported as
 `JsonErrors.NothingToImport` rather than announced as a success.
+
+`IsMountedFrom` is also what "this drive is up" means to everything that acts on a set of
+drives — `DriveMountBatch.IsUp`, the two all-drives handlers and `GetStorageAlerts`. A
+letter merely present on the machine is not: a USB stick that landed on `E:` used to make
+"connect all" skip the NAS drive defined there, "disconnect all" try to unmount the stick,
+and the low-space check measure it under the drive's name. `DeleteDrive` unmounts whatever
+is mounted from the share, persistent or not, and refuses the delete if that fails, since a
+record deleted out from under a live mapping leaves a letter nothing in Helix can take down.
 
 
 ### Finding a drive, and a row in the log

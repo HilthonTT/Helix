@@ -764,4 +764,7 @@
   <data name="DriveConnectedLate" xml:space="preserve">
     <value>{0}: terhubung — pemasangan selesai setelah waktu tunggu habis.</value>
   </data>
+  <data name="GroupMemberCount" xml:space="preserve">
+    <value>{0} drive</value>
+  </data>
 </root>

@@ -113,7 +113,7 @@ public static class Hover
                 view.SetValue(RestingBackgroundProperty, resting);
             }
 
-            AnimateBackground(view, resting, hovered);
+            AnimateBackground(view, resting, hovered, restore: false);
         }
 
         double scale = GetScale(view);
@@ -139,7 +139,9 @@ public static class Hover
 
         if (view.GetValue(RestingBackgroundProperty) is Color resting)
         {
-            AnimateBackground(view, CurrentBackground(view), resting);
+            view.ClearValue(RestingBackgroundProperty);
+
+            AnimateBackground(view, CurrentBackground(view), resting, restore: true);
         }
 
         if (!IsOne(GetScale(view)))
@@ -166,7 +168,7 @@ public static class Hover
             : view.BackgroundColor ?? Colors.Transparent;
     }
 
-    private static void AnimateBackground(View view, Color from, Color to)
+    private static void AnimateBackground(View view, Color from, Color to, bool restore)
     {
         view.AbortAnimation(BackgroundAnimation);
 
@@ -174,7 +176,26 @@ public static class Hover
                 progress => view.Background = new SolidColorBrush(Lerp(from, to, progress)),
                 0d,
                 1d)
-            .Commit(view, BackgroundAnimation, 16, DurationMs, Easing.CubicOut);
+            .Commit(
+                view,
+                BackgroundAnimation,
+                16,
+                DurationMs,
+                Easing.CubicOut,
+                finished: (_, cancelled) =>
+                {
+                    if (!restore || cancelled)
+                    {
+                        return;
+                    }
+
+                    view.ClearValue(VisualElement.BackgroundProperty);
+
+                    if (view.Background is null && view.BackgroundColor is null && to.Alpha > 0)
+                    {
+                        view.Background = new SolidColorBrush(to);
+                    }
+                });
     }
 
     private static Color Lerp(Color from, Color to, double t)

@@ -85,6 +85,7 @@ public class ConnectDrivesTests
         HaveDrives(Media, Backup);
 
         _nasConnectorMock.GetConnectedLetters().Returns(["Z", "Y"]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z" || d.Letter == "Y")).Returns(true);
 
         Result result = await _connectDrives.Handle(
             new ConnectDrives.Request([Media.Id], Disconnect: true));
@@ -127,6 +128,7 @@ public class ConnectDrivesTests
         HaveDrives(Media, Backup);
 
         _nasConnectorMock.GetConnectedLetters().Returns(["Z", "Y"]);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z" || d.Letter == "Y")).Returns(true);
 
         await _connectDrives.Handle(new ConnectDrives.Request([Media.Id], Disconnect: true));
 

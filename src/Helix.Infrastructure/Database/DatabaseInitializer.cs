@@ -37,6 +37,8 @@ public static class DatabaseInitializer
 
             string backupPath = path + BackupSuffix;
 
+            context.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint(TRUNCATE);");
+
             File.Copy(path, backupPath, overwrite: true);
 
             logger.LogInformation(

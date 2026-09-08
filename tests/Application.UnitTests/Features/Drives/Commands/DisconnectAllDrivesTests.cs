@@ -48,9 +48,13 @@ public class DisconnectAllDrivesTests
         _driveRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>())
             .Returns([.. drives]);
 
-    private void Mounted(params string[] letters) =>
-        _nasConnectorMock.GetConnectedLetters()
-            .Returns(new HashSet<string>(letters, StringComparer.OrdinalIgnoreCase));
+    private void Mounted(params string[] letters)
+    {
+        var mounted = new HashSet<string>(letters, StringComparer.OrdinalIgnoreCase);
+
+        _nasConnectorMock.GetConnectedLetters().Returns(mounted);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => mounted.Contains(d.Letter))).Returns(true);
+    }
 
     [Fact]
     public async Task Handle_Should_DisconnectEveryMountedDrive()
@@ -148,6 +152,20 @@ public class DisconnectAllDrivesTests
 
         result.IsFailure.Should().BeTrue();
 
+        await _nasConnectorMock.DidNotReceive().DisconnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_LeaveALetterHeldBySomethingElseAlone()
+    {
+        HaveDrives(Media);
+
+        _nasConnectorMock.GetConnectedLetters().Returns(new HashSet<string>(["Z"]));
+        _nasConnectorMock.IsMountedFrom(Media).Returns(false);
+
+        Result result = await _disconnectAllDrives.Handle();
+
+        result.IsSuccess.Should().BeTrue();
         await _nasConnectorMock.DidNotReceive().DisconnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
     }
 }

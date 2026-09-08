@@ -175,7 +175,14 @@ public static class MauiProgram
                     return;
                 }
 
-                MainWindow.Restore();
+                try
+                {
+                    MainWindow.Restore();
+                }
+                catch (Exception ex)
+                {
+                    AppLog.For<App>().LogWarning(ex, "A second instance asked for the window before it existed.");
+                }
             }
         })
         {

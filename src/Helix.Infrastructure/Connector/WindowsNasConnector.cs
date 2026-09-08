@@ -241,6 +241,16 @@ internal sealed class WindowsNasConnector(
             return Result.Success();
         }
 
+        if (reuse != ERROR_SESSION_CREDENTIAL_CONFLICT)
+        {
+            logger.LogWarning(
+                "Drive {Letter}: mounting on the existing session failed — {Reason}",
+                drive.Letter,
+                DescribeWNetError(reuse));
+
+            return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(reuse)));
+        }
+
         logger.LogWarning(
             "Drive {Letter}: the session its server is using would not take the mount — {Reason}",
             drive.Letter,
@@ -475,7 +485,11 @@ internal sealed class WindowsNasConnector(
         }
         catch (OperationCanceledException)
         {
-            _ = task.ContinueWith(_ => { }, TaskContinuationOptions.OnlyOnFaulted);
+            _ = task.ContinueWith(
+                static finished => _ = finished.Exception,
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
 
             return failure("Operation canceled by user.");
         }

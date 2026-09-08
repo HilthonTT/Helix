@@ -142,6 +142,9 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 return;
             }
 
+            IsBusy = true;
+            Drive = new UpdateDriveModel();
+
             try
             {
                 var request = new GetDriveById.Request(m.DriveId);
@@ -153,15 +156,19 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                     return;
                 }
 
-                await LoadAvailableLettersAsync(m.DriveId);
-
                 Drive = new UpdateDriveModel(result.Value);
+
+                await LoadAvailableLettersAsync(m.DriveId);
             }
             catch (Exception ex)
             {
                 AppLog.For<UpdateDriveViewModel>().LogError(ex, "Could not open the drive for editing.");
 
                 Close();
+            }
+            finally
+            {
+                IsBusy = false;
             }
         });
     }

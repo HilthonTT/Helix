@@ -9,7 +9,7 @@ public sealed class User : Entity, IAuditable
         Ensure.NotNullOrEmpty(username, nameof(username));
         Ensure.NotNullOrEmpty(passwordHash, nameof(passwordHash));
 
-        Username = username;
+        Username = username.Trim();
         PasswordHash = passwordHash;
     }
 
@@ -41,6 +41,6 @@ public sealed class User : Entity, IAuditable
 
     public void Update(string username)
     {
-        Username = username;
+        Username = username.Trim();
     }
 }

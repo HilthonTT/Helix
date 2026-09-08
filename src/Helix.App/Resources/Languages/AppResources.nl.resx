@@ -764,4 +764,7 @@
   <data name="DriveConnectedLate" xml:space="preserve">
     <value>{0}: verbonden — de koppeling is na de time-out voltooid.</value>
   </data>
+  <data name="GroupMemberCount" xml:space="preserve">
+    <value>{0} stations</value>
+  </data>
 </root>

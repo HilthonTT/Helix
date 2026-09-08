@@ -27,8 +27,8 @@ public sealed class Drive : Entity, IAuditable
         UserId = userId;
         Letter = letter;
         Host = host.Trim();
-        Name = name;
-        Username = username;
+        Name = name.Trim();
+        Username = username.Trim();
         Password = password;
         AutoConnect = autoConnect;
         Persistent = persistent;
@@ -123,8 +123,8 @@ public sealed class Drive : Entity, IAuditable
 
         Letter = letter.ToUpperInvariant();
         Host = host.Trim();
-        Name = name;
-        Username = username;
+        Name = name.Trim();
+        Username = username.Trim();
         Password = password;
         AutoConnect = autoConnect;
         Persistent = persistent;

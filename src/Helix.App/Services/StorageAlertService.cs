@@ -118,9 +118,16 @@ internal sealed class StorageAlertService
                 names,
                 alert.FreePercent);
 
-            _tray.Notify(
-                AppResources.TrayStorageLow,
-                string.Format(AppResources.TrayStorageLowMessage, names, alert.FreePercent));
+            string message = string.Format(AppResources.TrayStorageLowMessage, names, alert.FreePercent);
+
+            if (_tray.IsRunning)
+            {
+                _tray.Notify(AppResources.TrayStorageLow, message);
+            }
+            else
+            {
+                Notifier.Warning(message);
+            }
         }
     }
 
@@ -130,21 +137,33 @@ internal sealed class StorageAlertService
         {
             await Task.Delay(FirstCheckDelay, cancellationToken);
 
-            await CheckAsync();
+            await CheckGuardedAsync(cancellationToken);
 
             using var timer = new PeriodicTimer(CheckInterval);
 
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
-                await CheckAsync();
+                await CheckGuardedAsync(cancellationToken);
             }
         }
         catch (OperationCanceledException)
         {
         }
+    }
+
+    private async Task CheckGuardedAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await CheckAsync();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "The storage check faulted; low-space warnings are off for this session.");
+            _logger.LogError(ex, "A storage check faulted; the next check will run as scheduled.");
         }
     }
 }

@@ -49,7 +49,7 @@
                                                        MaxLines="1"/>
                                                 <Label Style="{StaticResource Caption}"
                                                        FontSize="11"
-                                                       Text="{Binding MemberCount, StringFormat='{0} drives'}"/>
+                                                       Text="{Binding MemberCountText}"/>
                                             </VerticalStackLayout>
 
                                             <Border Grid.Column="1"

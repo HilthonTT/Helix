@@ -64,6 +64,7 @@ public sealed class UpdateDriveTests
         _driveRepositoryMock.IsLetterUniqueAsync(Request.Letter, UserId).Returns(true);
 
         _nasConnectorMock.GetConnectedLetters().Returns(new HashSet<string>(["L"]));
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "L")).Returns(true);
         _nasConnectorMock.DisconnectAsync(Arg.Any<Drive>()).Returns(Result.Success());
 
         Result result = await _updateDrive.Handle(Request);
@@ -83,6 +84,7 @@ public sealed class UpdateDriveTests
 
         _driveRepositoryMock.GetByIdAsync(Request.DriveId).Returns(drive);
         _nasConnectorMock.GetConnectedLetters().Returns(new HashSet<string>(["L"]));
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "L")).Returns(true);
 
         Result result = await _updateDrive.Handle(Request with { Letter = "l" });
 
@@ -199,6 +201,7 @@ public sealed class UpdateDriveTests
         _driveRepositoryMock.IsLetterUniqueAsync(Request.Letter, UserId).Returns(true);
 
         _nasConnectorMock.GetConnectedLetters().Returns(new HashSet<string>(["L"]));
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "L")).Returns(true);
         _nasConnectorMock.DisconnectAsync(Arg.Any<Drive>()).Returns(Result.Failure(unmountError));
 
         Result result = await _updateDrive.Handle(Request);
@@ -245,5 +248,45 @@ public sealed class UpdateDriveTests
 
         result.IsSuccess.Should().BeTrue();
         await _unitOfWorkMock.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_UnmountTheOldShare_WhenTheShareChangesAtTheSameLetter()
+    {
+        Drive drive = Drive.Create(UserId, "Z", "192.168.0.1", "Photos", "Username", "Password");
+
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        _driveRepositoryMock.GetByIdAsync(Request.DriveId).Returns(drive);
+
+        _nasConnectorMock.GetConnectedLetters().Returns(new HashSet<string>(["Z"]));
+        _nasConnectorMock.IsMountedFrom(drive).Returns(true);
+        _nasConnectorMock.DisconnectAsync(Arg.Any<Drive>()).Returns(Result.Success());
+
+        Result result = await _updateDrive.Handle(Request with { Name = "Video" });
+
+        result.IsSuccess.Should().BeTrue();
+        await _nasConnectorMock.Received(1).DisconnectAsync(drive);
+        drive.Name.Should().Be("Video");
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotUnmount_WhenOnlyTheFlagsChangeAtTheSameShare()
+    {
+        Drive drive = Drive.Create(UserId, "Z", "192.168.0.1", "Name", "Username", "Password");
+
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        _driveRepositoryMock.GetByIdAsync(Request.DriveId).Returns(drive);
+
+        _nasConnectorMock.GetConnectedLetters().Returns(new HashSet<string>(["Z"]));
+        _nasConnectorMock.IsMountedFrom(drive).Returns(true);
+
+        Result result = await _updateDrive.Handle(Request with { AutoConnect = false });
+
+        result.IsSuccess.Should().BeTrue();
+        await _nasConnectorMock.DidNotReceive().DisconnectAsync(Arg.Any<Drive>());
     }
 }

@@ -106,15 +106,22 @@ internal sealed class IdleLockService
 
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
-                await CheckAsync();
+                try
+                {
+                    await CheckAsync();
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An idle check faulted; the next check will run as scheduled.");
+                }
             }
         }
         catch (OperationCanceledException)
         {
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "The idle watch faulted; the session will not lock itself this session.");
         }
     }
 

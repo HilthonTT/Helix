@@ -764,4 +764,7 @@
   <data name="DriveConnectedLate" xml:space="preserve">
     <value>{0}: connected — the mount finished after the timeout.</value>
   </data>
+  <data name="GroupMemberCount" xml:space="preserve">
+    <value>{0} drives</value>
+  </data>
 </root>

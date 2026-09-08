@@ -41,7 +41,15 @@ public abstract partial class BaseViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowCountdown))]
     public partial int SecondsRemaining { get; set; }
 
-    public string CountdownDisplay => TimeSpan.FromSeconds(Math.Max(SecondsRemaining, 0)).ToString(@"m\:ss");
+    public string CountdownDisplay
+    {
+        get
+        {
+            TimeSpan remaining = TimeSpan.FromSeconds(Math.Max(SecondsRemaining, 0));
+
+            return $"{(int)remaining.TotalMinutes}:{remaining.Seconds:00}";
+        }
+    }
 
     public bool ShowCountdown => SecondsRemaining > 0 || TimerCancelled;
 

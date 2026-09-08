@@ -764,4 +764,7 @@
   <data name="DriveConnectedLate" xml:space="preserve">
     <value>{0}: verbunden — die Einbindung wurde nach dem Zeitlimit abgeschlossen.</value>
   </data>
+  <data name="GroupMemberCount" xml:space="preserve">
+    <value>{0} Laufwerke</value>
+  </data>
 </root>

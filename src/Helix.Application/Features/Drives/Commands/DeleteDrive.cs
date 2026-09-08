@@ -43,11 +43,17 @@ public sealed class DeleteDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
-        if (drive.Persistent)
+        bool mounted = nasConnector.IsMountedFrom(drive);
+
+        if (mounted || drive.Persistent)
         {
             using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
 
-            await nasConnector.DisconnectAsync(drive, cancellationToken);
+            Result unmount = await nasConnector.DisconnectAsync(drive, cancellationToken);
+            if (unmount.IsFailure && mounted)
+            {
+                return unmount;
+            }
         }
 
         driveRepository.Remove(drive);

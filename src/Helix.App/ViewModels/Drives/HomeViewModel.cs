@@ -197,11 +197,42 @@ internal sealed partial class HomeViewModel : BaseViewModel
             drive.IsSelected = false;
         }
 
-        Drives = new(visible);
+        Reconcile(Drives, visible);
 
         OnPropertyChanged(nameof(HasSearchTerm));
         OnPropertyChanged(nameof(ShowNoDrives));
         OnPropertyChanged(nameof(ShowNoMatches));
+    }
+
+    private static void Reconcile(ObservableCollection<DriveDisplay> shown, DriveDisplay[] wanted)
+    {
+        var keep = new HashSet<DriveDisplay>(wanted);
+
+        for (int i = shown.Count - 1; i >= 0; i--)
+        {
+            if (!keep.Contains(shown[i]))
+            {
+                shown.RemoveAt(i);
+            }
+        }
+
+        for (int i = 0; i < wanted.Length; i++)
+        {
+            DriveDisplay drive = wanted[i];
+
+            int at = shown.IndexOf(drive);
+            if (at == i)
+            {
+                continue;
+            }
+
+            if (at >= 0)
+            {
+                shown.RemoveAt(at);
+            }
+
+            shown.Insert(i, drive);
+        }
     }
 
     private static bool Matches(DriveDisplay drive, string term) =>
@@ -505,8 +536,26 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         List<Drive> drives = result.Value;
 
+        Dictionary<Guid, DriveDisplay> existing = _allDrives.ToDictionary(d => d.Id);
+
         _allDrives.Clear();
-        _allDrives.AddRange(drives.Select(d => new DriveDisplay(d)));
+
+        foreach (Drive drive in drives)
+        {
+            if (existing.TryGetValue(drive.Id, out DriveDisplay? row))
+            {
+                row.Letter = drive.Letter;
+                row.Name = drive.Name;
+                row.Host = drive.Host;
+                row.LastConnectedOnUtc = drive.LastConnectedOnUtc;
+
+                _allDrives.Add(row);
+            }
+            else
+            {
+                _allDrives.Add(new DriveDisplay(drive));
+            }
+        }
 
         SyncConnectivity(_nasConnector.GetConnectedLetters());
 

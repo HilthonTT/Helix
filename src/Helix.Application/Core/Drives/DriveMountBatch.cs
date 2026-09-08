@@ -7,6 +7,9 @@ namespace Helix.Application.Core.Drives;
 
 internal static class DriveMountBatch
 {
+    public static bool IsUp(Drive drive, HashSet<string> connectedLetters, INasConnector nasConnector) =>
+        connectedLetters.Contains(drive.Letter) && nasConnector.IsMountedFrom(drive);
+
     public static async Task<Result> RunAsync(
         IReadOnlyList<Drive> drives,
         bool disconnect,
@@ -23,7 +26,7 @@ internal static class DriveMountBatch
 
         HashSet<string> connected = nasConnector.GetConnectedLetters();
 
-        Drive[] targets = [.. drives.Where(drive => connected.Contains(drive.Letter) == disconnect)];
+        Drive[] targets = [.. drives.Where(drive => IsUp(drive, connected, nasConnector) == disconnect)];
         if (targets.Length == 0)
         {
             return Result.Success();

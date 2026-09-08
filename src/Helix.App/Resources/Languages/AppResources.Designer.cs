@@ -2046,5 +2046,140 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("DiagnoseLetterHeldByAnother", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Groups.
+        /// </summary>
+        internal static string DriveGroups {
+            get {
+                return ResourceManager.GetString("DriveGroups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your groups.
+        /// </summary>
+        internal static string YourGroups {
+            get {
+                return ResourceManager.GetString("YourGroups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit group.
+        /// </summary>
+        internal static string EditGroup {
+            get {
+                return ResourceManager.GetString("EditGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Group name.
+        /// </summary>
+        internal static string GroupName {
+            get {
+                return ResourceManager.GetString("GroupName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Home, Office, Backup run….
+        /// </summary>
+        internal static string GroupNamePlaceholder {
+            get {
+                return ResourceManager.GetString("GroupNamePlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drives in this group.
+        /// </summary>
+        internal static string GroupDrives {
+            get {
+                return ResourceManager.GetString("GroupDrives", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add a drive first — a group is a set of drives you already have..
+        /// </summary>
+        internal static string NoDrivesForGroup {
+            get {
+                return ResourceManager.GetString("NoDrivesForGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect group.
+        /// </summary>
+        internal static string ConnectGroup {
+            get {
+                return ResourceManager.GetString("ConnectGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect group.
+        /// </summary>
+        internal static string DisconnectGroup {
+            get {
+                return ResourceManager.GetString("DisconnectGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lock when idle.
+        /// </summary>
+        internal static string IdleLock {
+            get {
+                return ResourceManager.GetString("IdleLock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ask for the password again after this many minutes without input. 0 never locks. Drives stay connected while locked..
+        /// </summary>
+        internal static string IdleLockDescription {
+            get {
+                return ResourceManager.GetString("IdleLockDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Locked.
+        /// </summary>
+        internal static string LockTitle {
+            get {
+                return ResourceManager.GetString("LockTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Helix locked itself after a while without input. Your drives stayed connected..
+        /// </summary>
+        internal static string LockMessage {
+            get {
+                return ResourceManager.GetString("LockMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unlock.
+        /// </summary>
+        internal static string LockUnlock {
+            get {
+                return ResourceManager.GetString("LockUnlock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} drives.
+        /// </summary>
+        internal static string GroupMemberCount {
+            get {
+                return ResourceManager.GetString("GroupMemberCount", resourceCulture);
+            }
+        }
     }
 }

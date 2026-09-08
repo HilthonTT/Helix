@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Helix.App.Resources.Languages;
 using Helix.Domain.DriveGroups;
 
 namespace Helix.App.Models;
@@ -14,7 +15,10 @@ internal sealed partial class DriveGroupDisplay : ObservableObject
     public IReadOnlyList<Guid> DriveIds { get; set; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MemberCountText))]
     public partial int MemberCount { get; set; }
+
+    public string MemberCountText => string.Format(AppResources.GroupMemberCount, MemberCount);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]

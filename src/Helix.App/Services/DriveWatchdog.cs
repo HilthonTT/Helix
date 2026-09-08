@@ -168,15 +168,22 @@ internal sealed class DriveWatchdog
         {
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
-                await RetryDueAsync();
+                try
+                {
+                    await RetryDueAsync();
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "A drive watchdog retry sweep faulted; the next sweep will run as scheduled.");
+                }
             }
         }
         catch (OperationCanceledException)
         {
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "The drive watchdog retry loop faulted; drives will no longer be retried this session.");
         }
     }
 

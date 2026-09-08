@@ -110,6 +110,7 @@ public class CreateDriveTests
     [InlineData("nas-")]
     [InlineData("nas..local")]
     [InlineData("fd00:::5")]
+    [InlineData("192168110")]
     public async Task Handle_Should_ReturnError_WhenHostFormatIsInvalid(string invalidHost)
     {
         _loggedInUserMock.UserId.Returns(UserId);
@@ -202,5 +203,20 @@ public class CreateDriveTests
 
         result.IsSuccess.Should().BeTrue();
         _driveRepositoryMock.Received(1).Insert(Arg.Any<Drive>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_TrimTheShareAndUsername()
+    {
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        _driveRepositoryMock.IsLetterUniqueAsync(Request.Letter, UserId).Returns(true);
+
+        Result<Drive> result = await _createDrive.Handle(Request with { Name = " photos ", Username = "bob " });
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Name.Should().Be("photos");
+        result.Value.Username.Should().Be("bob");
     }
 }

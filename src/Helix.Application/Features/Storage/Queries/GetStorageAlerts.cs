@@ -2,6 +2,7 @@ using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Storage;
+using Helix.Application.Core.Drives;
 using Helix.Application.Features.Storage.Contracts;
 using Helix.Domain.Drives;
 using Helix.Domain.Settings;
@@ -47,7 +48,9 @@ public sealed class GetStorageAlerts(
 
         HashSet<string> connected = nasConnector.GetConnectedLetters();
 
-        List<string> letters = [.. drives.Select(d => d.Letter).Where(connected.Contains)];
+        List<string> letters = [.. drives
+            .Where(d => DriveMountBatch.IsUp(d, connected, nasConnector))
+            .Select(d => d.Letter)];
         if (letters.Count == 0)
         {
             return Result.Success(StorageAlertReport.Empty);

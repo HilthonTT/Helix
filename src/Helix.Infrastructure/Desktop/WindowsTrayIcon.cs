@@ -35,13 +35,14 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
     private bool _iconAdded;
     private bool _disposed;
 
-    private WndProcDelegate? _wndProc;
+    private readonly WndProcDelegate _wndProc;
 
     private uint _taskbarCreatedMessage;
 
     public WindowsTrayIcon(ILogger<WindowsTrayIcon> logger)
     {
         _logger = logger;
+        _wndProc = WindowProcedure;
     }
 
     public bool IsSupported => true;
@@ -208,23 +209,34 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         }
         finally
         {
-            ReleaseIcon();
-            UnregisterWindowClass();
+            bool owner;
 
             lock (_gate)
             {
-                if (ReferenceEquals(_thread, Thread.CurrentThread))
+                owner = _thread is null || ReferenceEquals(_thread, Thread.CurrentThread);
+
+                if (owner)
                 {
+                    ReleaseIcon();
+                    UnregisterWindowClass();
+
                     _thread = null;
                 }
             }
 
-            try
+            if (!owner)
             {
-                _ready.Set();
+                _logger.LogDebug("A newer tray icon loop has taken over; this one leaves its resources to it.");
             }
-            catch (ObjectDisposedException)
+            else
             {
+                try
+                {
+                    _ready.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                }
             }
         }
     }
@@ -253,7 +265,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         string? className = _className;
 
         _className = null;
-        _wndProc = null;
 
         if (className is null)
         {
@@ -270,8 +281,6 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
     private bool CreateHiddenWindow()
     {
-        _wndProc = WindowProcedure;
-
         string className = $"HelixTrayIcon_{Guid.NewGuid():N}";
 
         var windowClass = new WNDCLASSEXW

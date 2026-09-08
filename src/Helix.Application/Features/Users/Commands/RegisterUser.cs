@@ -29,14 +29,16 @@ public sealed class RegisterUser(
             return Result.Failure<User>(AuthenticationErrors.PasswordsDoNotMatch);
         }
 
-        if (!await userRepository.IsUsernameUniqueAsync(request.Username, cancellationToken))
+        string username = request.Username.Trim();
+
+        if (!await userRepository.IsUsernameUniqueAsync(username, cancellationToken))
         {
             return Result.Failure<User>(AuthenticationErrors.UsernameNotUnique);
         }
 
         string passwordHash = passwordHasher.Hash(request.Password);
 
-        var user = User.Create(request.Username, passwordHash);
+        var user = User.Create(username, passwordHash);
 
         userRepository.Insert(user);
 

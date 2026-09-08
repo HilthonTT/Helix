@@ -75,15 +75,19 @@ public sealed class UpdateDrive(
                 }
             }
 
-            if (nasConnector.GetConnectedLetters().Contains(drive.Letter))
-            {
-                using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
+        }
 
-                Result unmount = await nasConnector.DisconnectAsync(drive, cancellationToken);
-                if (unmount.IsFailure)
-                {
-                    return unmount;
-                }
+        bool isSameShare = string.Equals(drive.Host, request.Host.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                           string.Equals(drive.Name, request.Name.Trim(), StringComparison.OrdinalIgnoreCase);
+
+        if ((!isSameLetter || !isSameShare) && nasConnector.IsMountedFrom(drive))
+        {
+            using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
+
+            Result unmount = await nasConnector.DisconnectAsync(drive, cancellationToken);
+            if (unmount.IsFailure)
+            {
+                return unmount;
             }
         }
 

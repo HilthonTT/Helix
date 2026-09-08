@@ -108,7 +108,7 @@
     <value>フィルター</value>
   </data>
   <data name="Letter" xml:space="preserve">
-    <value>文字 </value>
+    <value>文字</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>名前</value>
@@ -763,5 +763,8 @@
   </data>
   <data name="DriveConnectedLate" xml:space="preserve">
     <value>{0}: 接続されました - タイムアウト後にマウントが完了しました。</value>
+  </data>
+  <data name="GroupMemberCount" xml:space="preserve">
+    <value>{0} 台のドライブ</value>
   </data>
 </root>

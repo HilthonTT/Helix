@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Helix.Infrastructure.Updates;
 
@@ -626,10 +627,10 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
         string[] lines =
         [
-            $"staged=\"{Escape(stagedDirectory)}\"",
-            $"install=\"{Escape(installDirectory)}\"",
-            $"log=\"{Escape(logPath)}\"",
-            $"release=\"{Escape(releaseDirectory)}\"",
+            $"staged='{Escape(stagedDirectory)}'",
+            $"install='{Escape(installDirectory)}'",
+            $"log='{Escape(logPath)}'",
+            $"release='{Escape(releaseDirectory)}'",
             "backup=\"$install.old\"",
             "write_log() { printf '%s [inf] UpdateHelper: %s\\n' \"$(date -u '+%Y-%m-%d %H:%M:%S.000')\" \"$1\" >> \"$log\" 2>/dev/null || true; }",
             $"for _ in $(seq 1 {ExitWaitSeconds}); do",
@@ -668,7 +669,14 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         ];
 #endif
 
-        File.WriteAllText(scriptPath, string.Join(Environment.NewLine, lines));
+#if WINDOWS
+        File.WriteAllText(
+            scriptPath,
+            string.Join(Environment.NewLine, lines),
+            new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+#else
+        File.WriteAllText(scriptPath, string.Join("\n", lines));
+#endif
 
         return scriptPath;
     }
@@ -677,7 +685,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 #if WINDOWS
         path.Replace("'", "''");
 #else
-        path.Replace("\"", "\\\"");
+        path.Replace("'", "'\\''");
 #endif
 
     private static string ArchiveFileName(string? assetName)

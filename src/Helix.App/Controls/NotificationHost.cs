@@ -161,14 +161,11 @@ internal sealed class NotificationHost : ContentView
             }
         }
 
-        while (_stack.Children.Count >= MaximumBanners)
-        {
-            if (_stack.Children[0] is Banner oldest)
-            {
-                _ = DismissAsync(oldest);
-            }
+        Banner[] live = [.. _stack.Children.OfType<Banner>().Where(banner => !banner.IsDismissing)];
 
-            _stack.Children.RemoveAt(0);
+        for (int i = 0; i <= live.Length - MaximumBanners; i++)
+        {
+            _ = DismissAsync(live[i]);
         }
 
         var banner = new Banner(message.Kind, message.Text, Dispatcher);
@@ -187,6 +184,12 @@ internal sealed class NotificationHost : ContentView
 
     private async Task DismissAsync(Banner banner)
     {
+        if (banner.IsDismissing)
+        {
+            return;
+        }
+
+        banner.IsDismissing = true;
         banner.StopLifetime();
 
         await Task.WhenAll(
@@ -288,6 +291,8 @@ internal sealed class NotificationHost : ContentView
         public NotificationKind Kind { get; }
 
         public string Message { get; private set; }
+
+        public bool IsDismissing { get; set; }
 
         public void Rewrite(string message)
         {

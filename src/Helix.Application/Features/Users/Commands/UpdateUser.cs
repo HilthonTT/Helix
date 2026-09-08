@@ -33,13 +33,15 @@ public sealed class UpdateUser(
             return Result.Failure(UserErrors.NotFound);
         }
 
-        if (!string.Equals(user.Username, request.Username, StringComparison.Ordinal) &&
-            !await userRepository.IsUsernameUniqueAsync(request.Username, cancellationToken))
+        string username = request.Username.Trim();
+
+        if (!string.Equals(user.Username, username, StringComparison.Ordinal) &&
+            !await userRepository.IsUsernameUniqueAsync(username, cancellationToken))
         {
             return Result.Failure(AuthenticationErrors.UsernameNotUnique);
         }
 
-        user.Update(request.Username);
+        user.Update(username);
 
         try
         {
@@ -50,7 +52,7 @@ public sealed class UpdateUser(
             return Result.Failure(AuthenticationErrors.UsernameNotUnique);
         }
 
-        loggedInUser.Update(request.Username);
+        loggedInUser.Update(username);
 
         return Result.Success();
     }

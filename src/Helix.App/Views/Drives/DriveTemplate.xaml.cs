@@ -43,10 +43,10 @@ public sealed partial class DriveTemplate : ContentView
         _ = RefreshStorageUsageAsync(drive);
     }
 
-    private static async Task RefreshStorageUsageAsync(DriveDisplay drive)
+    private async Task RefreshStorageUsageAsync(DriveDisplay drive)
     {
         string usage = await StorageUsageHelper.GetStorageUsageAsync(
-            drive.Letter,
+            _nasConnector.GetMountPath(drive.Letter),
             AppResources.DriveNotReady,
             AppResources.InvalidDriveLetter,
             AppResources.StorageUsedOf);

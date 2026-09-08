@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
@@ -26,7 +26,7 @@ public sealed class LoginUser(
             return Result.Failure<User>(validationResult.Error);
         }
 
-        User? user = await userRepository.GetByUsernameAsync(request.Username, cancellationToken);
+        User? user = await userRepository.GetByUsernameAsync(request.Username.Trim(), cancellationToken);
         if (user is null)
         {
             return Result.Failure<User>(AuthenticationErrors.InvalidUsernameOrPassword);

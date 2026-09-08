@@ -15,6 +15,8 @@ internal sealed class MacNasConnector : INasConnector
 {
     private const int MountTimeoutMilliseconds = 30_000;
 
+    private const string MountAtMountDirKey = "MountAtMountDir";
+
     private static readonly string MountRoot = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
         "Helix Drives");
@@ -172,6 +174,9 @@ internal sealed class MacNasConnector : INasConnector
         var user = new NSString(drive.Username);
         var password = new NSString(drive.Password);
 
+        var mountOptions = new NSMutableDictionary();
+        mountOptions[MountAtMountDirKey] = NSNumber.FromBoolean(true);
+
         IntPtr mountedPaths = IntPtr.Zero;
 
         try
@@ -181,7 +186,7 @@ internal sealed class MacNasConnector : INasConnector
                 mountPath.Handle,
                 user.Handle,
                 password.Handle,
-                IntPtr.Zero,
+                mountOptions.Handle,
                 IntPtr.Zero,
                 out mountedPaths);
 
@@ -200,6 +205,7 @@ internal sealed class MacNasConnector : INasConnector
             mountPath.Dispose();
             user.Dispose();
             password.Dispose();
+            mountOptions.Dispose();
         }
     }
 
@@ -265,7 +271,11 @@ internal sealed class MacNasConnector : INasConnector
         }
         catch (OperationCanceledException)
         {
-            _ = task.ContinueWith(_ => { }, TaskContinuationOptions.OnlyOnFaulted);
+            _ = task.ContinueWith(
+                static finished => _ = finished.Exception,
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
 
             return failure("Operation canceled by user.");
         }
