@@ -29,7 +29,7 @@ and keep your credentials encrypted at rest.
 <br />
 
 <div align="center">
-  <img src="docs/screenshots/dashboard.png" alt="The Helix dashboard, showing storage usage, connection counts and the drive list" width="900" />
+  <img src="docs/screenshots/dashboard.png" alt="The Helix dashboard: storage and connection tiles, the drive list with one drive marked unreachable, and the connectivity donut" width="900" />
 </div>
 
 <br />
@@ -62,13 +62,27 @@ that have to talk to the operating system differ.
 
 ## Screenshots
 
-| Sign in | Audit log |
-| --- | --- |
-| <img src="docs/screenshots/sign-in.png" alt="Helix sign-in screen" /> | <img src="docs/screenshots/audit-logs.png" alt="Audit log page listing recorded actions" /> |
+Every screenshot below is a throwaway demo account with invented drives. The addresses are
+private-range or [RFC 5737](https://www.rfc-editor.org/rfc/rfc5737) documentation addresses
+that reach nothing, which is why the drives read as disconnected and the storage figures
+are zero.
 
-| Settings | Add a drive |
+**Why a drive will not connect.** The stethoscope on a drive row walks the chain a mount
+actually takes — the server's name, reaching it, the share and credentials, then the drive
+letter — and reports each step. A step that could not run is reported as skipped rather
+than guessed at.
+
+<div align="center">
+  <img src="docs/screenshots/diagnose.png" alt="The connection check sheet: server name warning, the server not answering on port 445 or 139, the share step skipped because the server did not answer, and the drive letter free" width="900" />
+</div>
+
+| Sign in | Add a drive |
 | --- | --- |
-| <img src="docs/screenshots/settings.png" alt="Settings page with account and preference sections" /> | <img src="docs/screenshots/add-drive.png" alt="Add drive dialog" /> |
+| <img src="docs/screenshots/sign-in.png" alt="Helix sign-in screen" /> | <img src="docs/screenshots/add-drive.png" alt="The add drive dialog, with drive letter, name, NAS address, username and password" /> |
+
+| Audit log | Settings |
+| --- | --- |
+| <img src="docs/screenshots/audit-logs.png" alt="Audit log page listing recorded actions, newest first, with a search box" /> | <img src="docs/screenshots/settings.png" alt="The preferences page: switches for auto-connect, tray behaviour and startup, and numeric fields for the timer, retention, low-space warning and idle lock" /> |
 
 ## Features
 
