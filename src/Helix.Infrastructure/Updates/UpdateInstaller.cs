@@ -117,18 +117,26 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
         string archivePath = Path.Combine(releaseDirectory, ArchiveFileName(update.AssetName));
 
-        Result<string> download = await DownloadAsync(update.DownloadUrl, archivePath, progress, cancellationToken);
+        Result<byte[]> download = await DownloadAsync(update.DownloadUrl, archivePath, progress, cancellationToken);
         if (download.IsFailure)
         {
             return Result.Failure<string>(download.Error);
         }
 
-        Result verified = VerifyDigest(update, download.Value);
+        Result verified = VerifyDigest(update, Convert.ToHexString(download.Value));
         if (verified.IsFailure)
         {
             TryDeleteDirectory(releaseDirectory);
 
             return Result.Failure<string>(verified.Error);
+        }
+
+        Result signed = await VerifySignatureAsync(update, download.Value, cancellationToken);
+        if (signed.IsFailure)
+        {
+            TryDeleteDirectory(releaseDirectory);
+
+            return Result.Failure<string>(signed.Error);
         }
 
         string unpacked = Path.Combine(releaseDirectory, "unpacked");
@@ -204,7 +212,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         }
     }
 
-    private async Task<Result<string>> DownloadAsync(
+    private async Task<Result<byte[]>> DownloadAsync(
         string url,
         string destination,
         IProgress<double>? progress,
@@ -223,7 +231,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
                     "The update download answered with status {Status}.",
                     (int)response.StatusCode);
 
-                return Result.Failure<string>(UpdateErrors.DownloadFailed);
+                return Result.Failure<byte[]>(UpdateErrors.DownloadFailed);
             }
 
             long? total = response.Content.Headers.ContentLength;
@@ -251,7 +259,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
                 }
             }
 
-            return Convert.ToHexString(digest.GetHashAndReset());
+            return digest.GetHashAndReset();
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -265,7 +273,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
             TryDelete(destination);
 
-            return Result.Failure<string>(UpdateErrors.DownloadFailed);
+            return Result.Failure<byte[]>(UpdateErrors.DownloadFailed);
         }
     }
 
@@ -306,6 +314,70 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         }
 
         _logger.LogInformation("The download for {Version} matches the digest GitHub published.", update.LatestVersion);
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Checked against the hash the download already produced rather than by reading the
+    /// archive back, and before it is opened: an archive that is not the one the signer
+    /// signed should never be unpacked, whatever it claims to hold.
+    /// </summary>
+    private async Task<Result> VerifySignatureAsync(
+        UpdateCheck update,
+        byte[] archiveHash,
+        CancellationToken cancellationToken)
+    {
+        if (!ReleaseSignature.IsRequired)
+        {
+            return Result.Success();
+        }
+
+        if (string.IsNullOrWhiteSpace(update.SignatureUrl))
+        {
+            _logger.LogError(
+                "Release {Version} publishes no signature for {Asset}, so it was not installed.",
+                update.LatestVersion,
+                update.AssetName);
+
+            return Result.Failure(UpdateErrors.SignatureMissing);
+        }
+
+        string manifest;
+
+        try
+        {
+            manifest = await _httpClient.GetStringAsync(update.SignatureUrl, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            _logger.LogWarning(ex, "The signatures published for the update could not be fetched.");
+
+            return Result.Failure(UpdateErrors.SignatureMissing);
+        }
+
+        string? signature = ReleaseSignature.FindSignature(manifest, update.AssetName ?? string.Empty);
+
+        if (signature is null)
+        {
+            _logger.LogError(
+                "Release {Version} signs some of its assets but not {Asset}, so it was not installed.",
+                update.LatestVersion,
+                update.AssetName);
+
+            return Result.Failure(UpdateErrors.SignatureMissing);
+        }
+
+        if (!ReleaseSignature.Verify(archiveHash, signature, _logger))
+        {
+            _logger.LogError(
+                "The update downloaded for {Version} is not signed by the key this build trusts. It was discarded.",
+                update.LatestVersion);
+
+            return Result.Failure(UpdateErrors.SignatureInvalid);
+        }
+
+        _logger.LogInformation("The download for {Version} carries a valid signature.", update.LatestVersion);
 
         return Result.Success();
     }

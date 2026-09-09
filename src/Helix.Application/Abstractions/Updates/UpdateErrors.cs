@@ -38,6 +38,14 @@ public static class UpdateErrors
         "Update.DownloadCorrupt",
         "The downloaded update does not match the checksum GitHub published for it, so it was not installed.");
 
+    public static readonly Error SignatureMissing = Error.Problem(
+        "Update.SignatureMissing",
+        "This release is not signed, and this build of Helix only installs signed updates. Open the release page to fetch it by hand.");
+
+    public static readonly Error SignatureInvalid = Error.Problem(
+        "Update.SignatureInvalid",
+        "The signature on the downloaded update does not match, so it was not installed. It was not built by whoever publishes Helix.");
+
     public static readonly Error NotWritable = Error.Problem(
         "Update.NotWritable",
         "Helix cannot replace its own files where it is installed. Update it by hand, or move it somewhere you own.");

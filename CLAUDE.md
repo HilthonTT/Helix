@@ -736,18 +736,46 @@ raw string literals. Each lives in a branch excluded on the other platform, and 
 preprocessor still scans excluded regions for directives: any line starting with `#` — a
 shell comment, a shebang — reads as one and fails the other head's build.
 
-Nothing verifies a signature, because the release archives are unsigned and there is
-nothing to verify against. What there is: TLS to github.com, the SHA-256 the release API
-publishes for each asset, and the check that the archive holds the executable it claims to.
-The digest is compared before the archive is opened, hashed as the download is written
-rather than by reading the file back, and a mismatch is `UpdateErrors.DownloadCorrupt` —
-distinct from an unreadable archive, because a truncated or substituted file may well open
-perfectly well. It proves the bytes are the ones the API described, not who built them; the
-signature is still the missing half. A release that publishes **no** digest, or one in an
-algorithm this build does not know, is staged anyway: GitHub only began returning the field
-recently, so refusing those would break updating for exactly the installs furthest behind,
-and a hard failure on an unknown algorithm would let one change at GitHub's end stop every
-install at once.
+Two things are checked before the archive is opened, and they answer different questions.
+
+The **digest** is the SHA-256 the release API publishes for each asset, compared against
+the hash taken as the download is written rather than by reading the file back; a mismatch
+is `UpdateErrors.DownloadCorrupt`, distinct from an unreadable archive because a truncated
+or substituted file may well open perfectly well. A release that publishes **no** digest, or
+one in an algorithm this build does not know, is staged anyway: GitHub only began returning
+the field recently, so refusing those would break updating for exactly the installs furthest
+behind, and a hard failure on an unknown algorithm would let one change at GitHub's end stop
+every install at once.
+
+The **signature** is the half the digest cannot prove. GitHub publishes the asset as well as
+its hash, so the digest only says the bytes arrived intact — `ReleaseSignature` checks a
+detached ECDSA P-256 signature over that same hash against a public key compiled into the
+build, whose private half lives only in the release workflow's `RELEASE_SIGNING_KEY` secret.
+ECDSA rather than Ed25519 because the BCL has it, and an update path is the last place to
+take a dependency on a third-party crypto library.
+
+The release publishes **one** manifest, `Helix-<tag>-signatures.txt`, whose lines are
+`<asset name> <base64 signature>`, rather than a `.sig` beside each archive — and that name
+is load-bearing. Every build published up to v2.2.3 picks its download with
+`Name.Contains($"-{moniker}.")` and **no extension filter**; the `.zip` filter is newer than
+every release. `Helix-<tag>-win-x64.zip.sig` satisfies that predicate, so a sidecar would
+have let an existing install download the signature as its update and fail with "does not
+look like Helix", with the order GitHub returned the assets in deciding which it got.
+`Helix-<tag>-signatures.txt` carries no moniker and none of them can select it —
+`TheSignatureManifestName_Should_NotMatchWhatOlderBuildsSelectOn` guards exactly that.
+**Do not rename it to anything carrying a moniker.** Which line is read is decided by asset
+name in `ReleaseSignature.FindSignature`, so an x64 machine is never checked against the
+arm64 build's signature.
+
+`UpdateConfiguration.SigningPublicKey` is empty, and while it is empty nothing is checked
+and updates go on being verified by digest alone — a build that demanded a signature no
+published release carries could not update itself at all. Once a key is set, a missing or
+wrong signature is fatal (`UpdateErrors.SignatureMissing`, `UpdateErrors.SignatureInvalid`);
+leniency there would make the check decorative. Which is why the order matters: **publish a
+signed release before shipping the build that pins the key**. `docs/release-signing.md` has
+the key generation, the rotation story and what this still does not prove — the archives are
+not code-signed, so SmartScreen and Gatekeeper know nothing about them, and a first download
+from the releases page trusts GitHub and the account exactly as before.
 
 Staged downloads do not accumulate. `StageAsync` prunes every other release folder under
 the staging root before it starts — they are installed or abandoned, and each is an

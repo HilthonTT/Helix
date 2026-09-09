@@ -103,6 +103,15 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
                 : release.HtmlUrl;
 
             GitHubAsset? asset = SelectAsset(release);
+            GitHubAsset? signature = SelectSignature(release, asset);
+
+            if (isNewer && asset is not null && signature is null && ReleaseSignature.IsRequired)
+            {
+                _logger.LogWarning(
+                    "Release {Tag} publishes no signature for {Asset}; this build will not install it.",
+                    release.TagName,
+                    asset.Name);
+            }
 
             if (isNewer && asset is null)
             {
@@ -119,7 +128,8 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
                 url,
                 asset?.BrowserDownloadUrl,
                 asset?.Name,
-                asset?.Digest);
+                asset?.Digest,
+                signature?.BrowserDownloadUrl);
         }
     }
 
@@ -165,6 +175,24 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// One manifest for the whole release, found by its suffix. Which archive's signature
+    /// to read out of it is decided later, by asset name, so an x64 machine can never
+    /// check itself against the arm64 build's signature.
+    /// </summary>
+    private static GitHubAsset? SelectSignature(GitHubRelease release, GitHubAsset? asset)
+    {
+        if (asset is null || release.Assets is null)
+        {
+            return null;
+        }
+
+        return release.Assets.FirstOrDefault(candidate =>
+            !string.IsNullOrWhiteSpace(candidate.BrowserDownloadUrl) &&
+            candidate.Name is not null &&
+            candidate.Name.EndsWith(UpdateConfiguration.SignatureManifestSuffix, StringComparison.OrdinalIgnoreCase));
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()

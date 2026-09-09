@@ -7,7 +7,8 @@ public sealed record UpdateCheck(
     string ReleaseUrl,
     string? DownloadUrl = null,
     string? AssetName = null,
-    string? AssetDigest = null)
+    string? AssetDigest = null,
+    string? SignatureUrl = null)
 {
     public bool CanInstall => IsUpdateAvailable && !string.IsNullOrWhiteSpace(DownloadUrl);
 }

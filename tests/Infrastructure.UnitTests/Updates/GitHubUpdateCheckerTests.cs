@@ -60,6 +60,19 @@ public sealed class GitHubUpdateCheckerTests
         }
         """;
 
+    private static string ReleaseWithSignedAssetsJson(string tag) =>
+        $$"""
+        {
+          "tag_name": "{{tag}}",
+          "html_url": "https://github.com/HilthonTT/Helix/releases/tag/{{tag}}",
+          "assets": [
+            { "name": "Helix-{{tag}}-signatures.txt", "browser_download_url": "https://example.invalid/signatures" },
+            { "name": "Helix-{{tag}}-win-arm64.zip", "browser_download_url": "https://example.invalid/arm64" },
+            { "name": "Helix-{{tag}}-win-x64.zip", "browser_download_url": "https://example.invalid/x64" }
+          ]
+        }
+        """;
+
     private static string ReleaseWithX64AssetJson(string tag, string? digest = null) =>
         $$"""
         {
@@ -306,5 +319,60 @@ public sealed class GitHubUpdateCheckerTests
 
         result.Value.IsUpdateAvailable.Should().BeTrue();
         result.Value.CanInstall.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task CheckAsync_Should_CarryTheReleasesSignatureManifest()
+    {
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithSignedAssetsJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler).CheckAsync();
+
+        result.Value.DownloadUrl.Should().Be("https://example.invalid/x64");
+        result.Value.SignatureUrl.Should().Be("https://example.invalid/signatures");
+    }
+
+    [Fact]
+    public async Task CheckAsync_Should_ReportNoSignature_WhenTheReleaseCarriesNoManifest()
+    {
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithAssetsJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler).CheckAsync();
+
+        result.Value.SignatureUrl.Should().BeNull();
+    }
+
+    /// <summary>
+    /// The manifest carries no moniker precisely so that the released builds — which match
+    /// on `-{moniker}.` with no extension filter — cannot select it as their download.
+    /// </summary>
+    [Theory]
+    [InlineData("win-x64")]
+    [InlineData("win-arm64")]
+    [InlineData("macos")]
+    public async Task CheckAsync_Should_NeverOfferTheManifestAsTheDownload(string moniker)
+    {
+        var handler = new StubHandler(() => Json(HttpStatusCode.OK, ReleaseWithSignedAssetsJson("v2.1.0")));
+
+        Result<UpdateCheck> result = await Checker(handler, moniker: moniker).CheckAsync();
+
+        result.Value.AssetName.Should().NotContain("signatures");
+    }
+
+    /// <summary>
+    /// The invariant that actually protects existing installs. Every build published up to
+    /// v2.2.3 selects its download with `Name.Contains($"-{moniker}.")` and no extension
+    /// filter, so a per-archive `.sig` sidecar would have matched it. Nothing in this
+    /// repository can make those builds smarter — only the name can keep them safe.
+    /// </summary>
+    [Theory]
+    [InlineData("win-x64")]
+    [InlineData("win-arm64")]
+    [InlineData("macos")]
+    public void TheSignatureManifestName_Should_NotMatchWhatOlderBuildsSelectOn(string moniker)
+    {
+        string manifest = $"Helix-v9.9.9{UpdateConfiguration.SignatureManifestSuffix}";
+
+        manifest.Should().NotContain($"-{moniker}.");
     }
 }

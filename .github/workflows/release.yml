@@ -141,18 +141,61 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      # GitHub publishes a SHA-256 for every asset, but it publishes the asset too, so the
+      # digest only proves the bytes arrived intact. The signature is the half that says
+      # who built them: Helix checks it against a public key compiled into the app, and the
+      # private half never leaves this secret. A release built without the secret is
+      # published unsigned, which every build shipped before the key existed still accepts.
+      #
+      # One manifest for the whole release rather than a .sig beside each archive. Every
+      # build published so far picks its download with Name.Contains("-win-x64.") and no
+      # extension filter, so a file called Helix-<tag>-win-x64.zip.sig matches that
+      # predicate and an existing install could be handed the signature as its update.
+      # This name carries no moniker, so no released build can select it.
+      - name: Sign the archives
+        env:
+          SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SIGNING_KEY:-}" ]; then
+            echo "::warning::No RELEASE_SIGNING_KEY secret is set; this release will be published unsigned."
+            exit 0
+          fi
+
+          printf '%s' "$SIGNING_KEY" > signing-key.pem
+          trap 'rm -f signing-key.pem' EXIT
+
+          manifest="artifacts/Helix-$TAG-signatures.txt"
+          : > "$manifest"
+
+          for archive in artifacts/*.zip; do
+            openssl dgst -sha256 -sign signing-key.pem -out "$archive.der" "$archive"
+            printf '%s %s\n' "$(basename "$archive")" "$(base64 -w0 "$archive.der")" >> "$manifest"
+            rm -f "$archive.der"
+            echo "Signed $(basename "$archive")"
+          done
+
       - name: Create or update release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag || github.ref_name }}
         run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          # The manifest is only there when the secret was, so the list is built from what
+          # exists rather than from a glob the shell would hand over unexpanded.
+          assets=(artifacts/*.zip artifacts/*-signatures.txt)
+
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Release $TAG already exists, uploading assets."
-            gh release upload "$TAG" artifacts/*.zip \
+            gh release upload "$TAG" "${assets[@]}" \
               --repo "$GITHUB_REPOSITORY" \
               --clobber
           else
-            gh release create "$TAG" artifacts/*.zip \
+            gh release create "$TAG" "${assets[@]}" \
               --repo "$GITHUB_REPOSITORY" \
               --title "$TAG" \
               --generate-notes \
