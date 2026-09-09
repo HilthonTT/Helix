@@ -28,19 +28,28 @@ internal sealed class UpdateInstaller : IUpdateInstaller
     private readonly Func<string> _installDirectory;
     private readonly Func<string> _stagingRoot;
     private readonly Func<string> _logDirectory;
+    private readonly string _signingPublicKey;
 
+    /// <param name="signingPublicKey">
+    /// The key updates must be signed with, or null for the one compiled into this build.
+    /// Taken here so the signature path can be exercised at all: the compiled key is a
+    /// constant, and a constant that is empty until a key is minted would otherwise leave
+    /// the whole check untested until the day it starts refusing releases.
+    /// </param>
     public UpdateInstaller(
         HttpClient httpClient,
         ILogger<UpdateInstaller> logger,
         Func<string> installDirectory,
         Func<string> stagingRoot,
-        Func<string> logDirectory)
+        Func<string> logDirectory,
+        string? signingPublicKey = null)
     {
         _httpClient = httpClient;
         _logger = logger;
         _installDirectory = installDirectory;
         _stagingRoot = stagingRoot;
         _logDirectory = logDirectory;
+        _signingPublicKey = signingPublicKey ?? UpdateConfiguration.SigningPublicKey;
     }
 
     public static string DefaultStagingRoot =>
@@ -117,9 +126,23 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
         string archivePath = Path.Combine(releaseDirectory, ArchiveFileName(update.AssetName));
 
-        Result<byte[]> download = await DownloadAsync(update.DownloadUrl, archivePath, progress, cancellationToken);
+        Result<byte[]> download;
+
+        try
+        {
+            download = await DownloadAsync(update.DownloadUrl, archivePath, progress, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            TryDeleteDirectory(releaseDirectory);
+
+            throw;
+        }
+
         if (download.IsFailure)
         {
+            TryDeleteDirectory(releaseDirectory);
+
             return Result.Failure<string>(download.Error);
         }
 
@@ -328,7 +351,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         byte[] archiveHash,
         CancellationToken cancellationToken)
     {
-        if (!ReleaseSignature.IsRequired)
+        if (string.IsNullOrWhiteSpace(_signingPublicKey))
         {
             return Result.Success();
         }
@@ -349,11 +372,18 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         {
             manifest = await _httpClient.GetStringAsync(update.SignatureUrl, cancellationToken);
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // A manifest that could not be fetched is a network failure, not an unsigned
+            // release, and it is reported as one: told "this release is not signed", a user
+            // would go and look for a signed one rather than try again.
             _logger.LogWarning(ex, "The signatures published for the update could not be fetched.");
 
-            return Result.Failure(UpdateErrors.SignatureMissing);
+            return Result.Failure(UpdateErrors.DownloadFailed);
         }
 
         string? signature = ReleaseSignature.FindSignature(manifest, update.AssetName ?? string.Empty);
@@ -368,7 +398,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             return Result.Failure(UpdateErrors.SignatureMissing);
         }
 
-        if (!ReleaseSignature.Verify(archiveHash, signature, _logger))
+        if (!ReleaseSignature.Verify(archiveHash, signature, _signingPublicKey, _logger))
         {
             _logger.LogError(
                 "The update downloaded for {Version} is not signed by the key this build trusts. It was discarded.",

@@ -111,6 +111,13 @@ public sealed class UpdateInstallerTests : IDisposable
             CancellationToken cancellationToken) => Task.FromResult(respond());
     }
 
+    private sealed class RoutedHandler(Func<HttpRequestMessage, HttpResponseMessage> respond) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken) => Task.FromResult(respond(request));
+    }
+
     private UpdateInstaller Installer(Func<HttpResponseMessage> respond) =>
         new(new HttpClient(new StubHandler(respond)),
             NullLogger<UpdateInstaller>.Instance,
@@ -118,10 +125,46 @@ public sealed class UpdateInstallerTests : IDisposable
             () => StagingRoot,
             () => LogDirectory);
 
+    /// <summary>
+    /// An installer that pins a key, answering the archive and the manifest by URL.
+    /// </summary>
+    private UpdateInstaller SigningInstaller(
+        string publicKey,
+        byte[] archive,
+        Func<HttpResponseMessage>? manifest) =>
+        new(new HttpClient(new RoutedHandler(request =>
+                request.RequestUri!.AbsoluteUri == ManifestUrl
+                    ? manifest?.Invoke() ?? new HttpResponseMessage(HttpStatusCode.NotFound)
+                    : Respond(archive))),
+            NullLogger<UpdateInstaller>.Instance,
+            () => InstallDirectory,
+            () => StagingRoot,
+            () => LogDirectory,
+            publicKey);
+
+    private const string AssetName = "Helix-v2.1.0-win-x64.zip";
+
+    private const string ManifestUrl = "https://example.invalid/signatures";
+
     private static UpdateCheck Update(
         string? url = "https://example.invalid/helix.zip",
-        string? digest = null) =>
-        new(true, "2.0.0", "v2.1.0", "https://example.invalid/release", url, "Helix-v2.1.0-win-x64.zip", digest);
+        string? digest = null,
+        string? signatureUrl = null) =>
+        new(true, "2.0.0", "v2.1.0", "https://example.invalid/release", url, AssetName, digest, signatureUrl);
+
+    private static (string PublicKey, string Signature) Sign(byte[] archive)
+    {
+        using ECDsa signer = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        return (
+            Convert.ToBase64String(signer.ExportSubjectPublicKeyInfo()),
+            Convert.ToBase64String(signer.SignHash(SHA256.HashData(archive), DSASignatureFormat.Rfc3279DerSequence)));
+    }
+
+    private static HttpResponseMessage Manifest(string text) => new(HttpStatusCode.OK)
+    {
+        Content = new StringContent(text, Encoding.UTF8),
+    };
 
     private static string DigestOf(byte[] archive) => $"sha256:{Convert.ToHexString(SHA256.HashData(archive))}";
 
@@ -464,5 +507,127 @@ public sealed class UpdateInstallerTests : IDisposable
         byte[] bytes = File.ReadAllBytes(installer.WriteSwapScript(staged, InstallDirectory));
 
         bytes.Take(3).Should().Equal(Encoding.UTF8.GetPreamble());
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_Stage_WhenThisBuildPinsNoKey_AndTheReleaseIsUnsigned()
+    {
+        // Every build before a key exists, and the one that carries the key's release.
+        UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));
+
+        Result<string> result = await installer.StageAsync(Update(signatureUrl: null));
+
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_Refuse_AnUnsignedRelease_OnceAKeyIsPinned()
+    {
+        byte[] archive = ZipBytes(("Helix.App.exe", "binary"));
+        (string publicKey, _) = Sign(archive);
+
+        UpdateInstaller installer = SigningInstaller(publicKey, archive, manifest: null);
+
+        Result<string> result = await installer.StageAsync(Update(signatureUrl: null));
+
+        result.Error.Should().Be(UpdateErrors.SignatureMissing);
+        Directory.Exists(Path.Combine(StagingRoot, "v2.1.0")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_Stage_WhenTheManifestSignsThisArchive()
+    {
+        byte[] archive = ZipBytes(("Helix.App.exe", "binary"));
+        (string publicKey, string signature) = Sign(archive);
+
+        // Windows line endings and another architecture's line, as a real manifest may carry.
+        string manifest = $"Helix-v2.1.0-win-arm64.zip AAAA\r\n{AssetName} {signature}\r\n";
+
+        UpdateInstaller installer = SigningInstaller(publicKey, archive, () => Manifest(manifest));
+
+        Result<string> result = await installer.StageAsync(Update(signatureUrl: ManifestUrl));
+
+        result.IsSuccess.Should().BeTrue();
+        File.Exists(Path.Combine(result.Value, "Helix.App.exe")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_Refuse_WhenTheSignatureIsForOtherBytes()
+    {
+        byte[] archive = ZipBytes(("Helix.App.exe", "binary"));
+        (string publicKey, string signatureOfSomethingElse) = Sign(ZipBytes(("Helix.App.exe", "tampered")));
+
+        UpdateInstaller installer = SigningInstaller(
+            publicKey,
+            archive,
+            () => Manifest($"{AssetName} {signatureOfSomethingElse}"));
+
+        Result<string> result = await installer.StageAsync(Update(signatureUrl: ManifestUrl));
+
+        result.Error.Should().Be(UpdateErrors.SignatureInvalid);
+        Directory.Exists(Path.Combine(StagingRoot, "v2.1.0")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_Refuse_WhenTheManifestSignsOnlyOtherArchitectures()
+    {
+        byte[] archive = ZipBytes(("Helix.App.exe", "binary"));
+        (string publicKey, string signature) = Sign(archive);
+
+        UpdateInstaller installer = SigningInstaller(
+            publicKey,
+            archive,
+            () => Manifest($"Helix-v2.1.0-win-arm64.zip {signature}"));
+
+        Result<string> result = await installer.StageAsync(Update(signatureUrl: ManifestUrl));
+
+        result.Error.Should().Be(UpdateErrors.SignatureMissing);
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_ReportANetworkFailure_WhenTheManifestCannotBeFetched()
+    {
+        byte[] archive = ZipBytes(("Helix.App.exe", "binary"));
+        (string publicKey, _) = Sign(archive);
+
+        UpdateInstaller installer = SigningInstaller(
+            publicKey,
+            archive,
+            () => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
+
+        Result<string> result = await installer.StageAsync(Update(signatureUrl: ManifestUrl));
+
+        // Not "this release is not signed": it may well be, and the user should try again.
+        result.Error.Should().Be(UpdateErrors.DownloadFailed);
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_PropagateCancellation_RatherThanReportItAsAnUnsignedRelease()
+    {
+        byte[] archive = ZipBytes(("Helix.App.exe", "binary"));
+        (string publicKey, _) = Sign(archive);
+
+        using var cancellation = new CancellationTokenSource();
+
+        UpdateInstaller installer = SigningInstaller(publicKey, archive, () =>
+        {
+            cancellation.Cancel();
+
+            throw new TaskCanceledException();
+        });
+
+        Func<Task> act = () => installer.StageAsync(Update(signatureUrl: ManifestUrl), null, cancellation.Token);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    [Fact]
+    public async Task StageAsync_Should_KeepNothing_WhenTheDownloadFails()
+    {
+        UpdateInstaller installer = Installer(() => new HttpResponseMessage(HttpStatusCode.NotFound));
+
+        await installer.StageAsync(Update());
+
+        Directory.Exists(Path.Combine(StagingRoot, "v2.1.0")).Should().BeFalse();
     }
 }
