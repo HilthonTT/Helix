@@ -628,12 +628,25 @@ Rows are recycled, which `DriveTemplate` already handles — `OnBindingContextCh
 unregisters before it re-registers, so a view handed a different drive does not keep the
 old one's subscriptions.
 
-**The rows are still mouse-only.** Ctrl+F focuses the drive filter and that is the extent of
-the keyboard story. Making a row itself keyboard-operable is not a small change: its status
-pills and icon chips are styled `Border`s with tap gestures, which take no focus, and MAUI's
-`Button` takes text rather than arbitrary content — so every interactive part of the row
-would have to be rebuilt against a focusable control with a custom template before arrow
-keys and Enter could reach it. Worth doing; not a detail.
+**The drive rows are reachable from the keyboard**, through `Behaviors/RowFocus` — one tab
+stop per row, not one per control. The row's status pills and icon chips are styled
+`Border`s with tap gestures, which take no focus, and MAUI's `Button` takes text rather than
+arbitrary content, so making each of them focusable would have meant rebuilding every
+interactive part of the row *and* putting a hundred tab stops in front of a user with
+thirteen drives. Focus lands on the row and the keys act on it, the way a file manager's
+list does: **Enter** connects or disconnects, **Space** ticks, **Delete** deletes, **F2**
+edits, **Ctrl+D** diagnoses, **Ctrl+O** opens the folder. Every one of them is the same work
+the mouse reaches through a pill or a chip, routed through `IRowKeys` on `DriveTemplate`, so
+a row does the same thing either way. Ctrl+O is refused rather than swallowed when the drive
+is down, because the chip is not there either.
+
+Up and Down are answered by the behavior itself, with WinUI's `FocusManager.TryMoveFocus` —
+moving between rows is the list's business, not the drive's, and this way nothing has to
+find the `CollectionView`. The behavior is Windows-only like `Hover`; Mac Catalyst has no
+equivalent seam in MAUI and the rows stay mouse-only there. The focus ring is a `Focused`
+visual state on the `Row` style, and the style carries a **two-wide transparent stroke with
+two less padding at rest** so the ring appearing cannot shift the row's columns off the
+header grid they have to line up with.
 
 `GetAuditlogs` is **paged** — `Skip`, `Take` and the sort order go to the database, and
 `AuditlogPage` carries the total so the page can tell there is more behind it without asking

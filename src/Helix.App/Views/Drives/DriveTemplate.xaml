@@ -7,9 +7,14 @@
              xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
              xmlns:l10n="clr-namespace:Helix.App.Localization"
              x:Class="Helix.App.Views.Drives.DriveTemplate"
+             x:Name="RowRoot"
              x:DataType="models:DriveDisplay">
 
-    <Border Style="{StaticResource Row}" IsEnabled="{Binding IsNotBusy}">
+    <Border Style="{StaticResource Row}"
+            IsEnabled="{Binding IsNotBusy}"
+            behaviors:RowFocus.Owner="{x:Reference RowRoot}"
+            SemanticProperties.Description="{Binding Name}"
+            SemanticProperties.Hint="{Binding Subtitle}">
         <Grid ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="28"/>

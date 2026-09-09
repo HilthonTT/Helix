@@ -9,10 +9,11 @@ using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 using Helix.App.Services;
+using Helix.App.Behaviors;
 
 namespace Helix.App.Views.Drives;
 
-public sealed partial class DriveTemplate : ContentView
+public sealed partial class DriveTemplate : ContentView, IRowKeys
 {
     private readonly INasConnector _nasConnector;
     private readonly IFileBrowser _fileBrowser;
@@ -54,7 +55,53 @@ public sealed partial class DriveTemplate : ContentView
         MainThread.BeginInvokeOnMainThread(() => drive.StorageUsage = usage);
     }
 
-    private async void ToggleConnect(object? sender, TappedEventArgs e)
+    /// <summary>
+    /// The keys the row answers to. Every one of them is the same work the mouse reaches
+    /// through a pill or a chip, so a row does the same thing either way.
+    /// </summary>
+    bool IRowKeys.OnRowKey(RowKey key)
+    {
+        if (BindingContext is not DriveDisplay drive)
+        {
+            return false;
+        }
+
+        switch (key)
+        {
+            case RowKey.Activate:
+                ToggleConnect();
+                return true;
+
+            case RowKey.Select:
+                ToggleSelected();
+                return true;
+
+            case RowKey.Delete:
+                Delete();
+                return true;
+
+            case RowKey.Edit:
+                Edit();
+                return true;
+
+            case RowKey.Diagnose:
+                Diagnose();
+                return true;
+
+            // The chip is not there when the drive is down, so neither is the shortcut:
+            // swallowing the key would make Ctrl+O look broken rather than inapplicable.
+            case RowKey.Open when drive.Connected:
+                OpenFolder();
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    private void ToggleConnect(object? sender, TappedEventArgs e) => ToggleConnect();
+
+    private async void ToggleConnect()
     {
         try
         {
@@ -125,7 +172,9 @@ public sealed partial class DriveTemplate : ContentView
 
     private static void MarkOffline(DriveDisplay drive, Error error) => drive.MarkOffline(error);
 
-    private void ToggleSelected(object? sender, TappedEventArgs e)
+    private void ToggleSelected(object? sender, TappedEventArgs e) => ToggleSelected();
+
+    private void ToggleSelected()
     {
         if (BindingContext is DriveDisplay drive)
         {
@@ -133,7 +182,9 @@ public sealed partial class DriveTemplate : ContentView
         }
     }
 
-    private void HandleOpen(object? sender, TappedEventArgs e)
+    private void HandleOpen(object? sender, TappedEventArgs e) => OpenFolder();
+
+    private void OpenFolder()
     {
         if (BindingContext is not DriveDisplay drive)
         {
@@ -147,7 +198,9 @@ public sealed partial class DriveTemplate : ContentView
         }
     }
 
-    private void HandleDiagnose(object? sender, TappedEventArgs e)
+    private void HandleDiagnose(object? sender, TappedEventArgs e) => Diagnose();
+
+    private void Diagnose()
     {
         if (BindingContext is not DriveDisplay drive)
         {
@@ -157,7 +210,9 @@ public sealed partial class DriveTemplate : ContentView
         WeakReferenceMessenger.Default.Send(new DiagnoseDriveMessage(true, drive));
     }
 
-    private void HandleUpdate(object? sender, TappedEventArgs e)
+    private void HandleUpdate(object? sender, TappedEventArgs e) => Edit();
+
+    private void Edit()
     {
         if (BindingContext is not DriveDisplay drive)
         {
@@ -167,7 +222,9 @@ public sealed partial class DriveTemplate : ContentView
         WeakReferenceMessenger.Default.Send(new UpdateDriveMessage(true, drive.Id));
     }
 
-    private void HandleDelete(object? sender, TappedEventArgs e)
+    private void HandleDelete(object? sender, TappedEventArgs e) => Delete();
+
+    private void Delete()
     {
         if (BindingContext is not DriveDisplay drive)
         {
