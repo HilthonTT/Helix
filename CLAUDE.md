@@ -545,8 +545,9 @@ Both lists filter live, from a box that is always on screen, over what is alread
 memory. Both used to be a modal: open a sheet, type, press Search, wait for a database
 round trip, and have the results replace the list — four interactions and a query to narrow
 thirteen rows. `SearchDrives` and `SearchAuditlogs` were deleted along with the sheets;
-`GetDrives` and `GetAuditlogs` already load everything, so the queries were narrowing a set
-the app was holding anyway.
+`GetDrives` already loads everything, so the drive query was narrowing a set the app was
+holding anyway, and the history is loaded a page at a time with a search widening it (see
+**Long lists**) rather than being asked a question the database cannot answer.
 
 A drive letter is `GeneralValidation.IsDriveLetter`: one character, A to Z. `char.IsLetter`
 let a hand-edited vault save `É` as a letter the edit modal could not even offer. Export and
@@ -634,10 +635,23 @@ pills and icon chips are styled `Border`s with tap gestures, which take no focus
 would have to be rebuilt against a focusable control with a custom template before arrow
 keys and Enter could reach it. Worth doing; not a detail.
 
-The other thing left undone: `GetAuditlogs` still loads the whole history in one go.
-Virtualizing the rows means the page no longer *draws* thousands of them, but it still reads
-them all out of SQLite and holds them. Paging that query is the real fix, and it is
-untouched.
+`GetAuditlogs` is **paged** — `Skip`, `Take` and the sort order go to the database, and
+`AuditlogPage` carries the total so the page can tell there is more behind it without asking
+for it. Virtualizing the rows stopped the page *drawing* ninety days of history; it was still
+reading all of it out of SQLite and holding it. The `CollectionView`'s
+`RemainingItemsThresholdReached` pulls the next hundred as the user scrolls, and the composite
+`(UserId, CreatedOnUtc)` index is what keeps a page from being a scan and a sort. The page
+boundary breaks ties on the id, so rows written in the same tick cannot straddle it and be
+handed over twice.
+
+Searching is the one thing that cannot be paged, and it pulls the rest of the history in
+instead. The sentence a row shows is composed at display time in the user's language and is
+not in the database, so a search can only be answered over rows that are loaded — typing
+therefore filters what is loaded immediately and widens behind that, once. The count beside
+the title reads the **estate**: the whole history while the list is merely scrolled part of
+the way through it, the matches once a search narrows it. Changing the sort order re-asks
+from the top rather than re-sorting what is loaded, since sorting a hundred of the newest
+rows ascending would present them as the oldest history.
 
 ### Installing an update
 

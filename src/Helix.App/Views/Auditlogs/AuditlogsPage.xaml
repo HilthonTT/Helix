@@ -31,7 +31,7 @@
                                VerticalOptions="Center"/>
 
                         <Border Grid.Column="1" Style="{StaticResource PillNeutral}" Padding="9,3">
-                            <Label Text="{Binding Auditlogs.Count}"
+                            <Label Text="{Binding CountDisplay}"
                                    Style="{StaticResource Caption}"
                                    FontFamily="{StaticResource FontMonoBold}"/>
                         </Border>
@@ -101,6 +101,8 @@
                                     Margin="0,8,0,0"
                                     ItemsSource="{Binding Auditlogs}"
                                     SelectionMode="None"
+                                    RemainingItemsThreshold="20"
+                                    RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
                                     IsVisible="{Binding Auditlogs.Count, Converter={StaticResource CountToBoolConverter}}">
                         <CollectionView.ItemsLayout>
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="2"/>

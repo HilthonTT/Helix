@@ -20,6 +20,8 @@ internal sealed class AuditLogConfiguration : IEntityTypeConfiguration<Auditlog>
            .IsRequired()
            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(a => a.CreatedOnUtc);
+        // The history is only ever read one user's newest-first page at a time, so the
+        // index carries the user as well: without it every page is a scan and a sort.
+        builder.HasIndex(a => new { a.UserId, a.CreatedOnUtc });
     }
 }
