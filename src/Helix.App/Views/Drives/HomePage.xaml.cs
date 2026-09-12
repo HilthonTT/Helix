@@ -111,9 +111,6 @@ public sealed partial class HomePage : ContentPage
     {
         base.OnDisappearing();
 
-        // The dashboard is the only page that shows the auto-minimize countdown and the only one
-        // that can call it off, so it must not go on running - and minimizing the window - while
-        // the user is reading the settings or the audit log.
         _viewModel.PauseCountdown();
     }
 

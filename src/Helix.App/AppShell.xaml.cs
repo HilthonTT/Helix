@@ -1,6 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messaging.DriveGroups;
+using Helix.App.Messaging.Drives;
 using Helix.App.Messaging.Navigation;
+using Helix.App.Messaging.Updates;
 using Helix.App.Messaging.Users;
+using Helix.App.Models;
 using Helix.App.Services;
 using Helix.App.ViewModels;
 using Helix.App.Views.Auditlogs;
@@ -8,14 +12,24 @@ using Helix.App.Views.Drives;
 using Helix.App.Views.Settings;
 using Helix.App.Views.Users;
 using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Updates;
+using Helix.Application.Features.DriveGroups.Queries;
+using Helix.Application.Features.Drives.Queries;
+using Helix.Application.Features.Updates.Queries;
 using Helix.Application.Features.Users.Commands;
+using Helix.Domain.DriveGroups;
+using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 
 namespace Helix.App;
 
 public sealed partial class AppShell : Shell
 {
     private readonly ILoggedInUser _loggedInUser;
+    private readonly EstateStatus _estate;
+
+    private bool _sessionStarted;
 
     public string RepositoryUrl => "https://github.com/HilthonTT/Helix";
 
@@ -28,6 +42,9 @@ public sealed partial class AppShell : Shell
         InitializeComponent();
 
         _loggedInUser = App.ServiceProvider.GetRequiredService<ILoggedInUser>();
+        _estate = App.ServiceProvider.GetRequiredService<EstateStatus>();
+
+        Groups = [];
 
         BindingContext = this;
         Navigated += OnNavigated;
@@ -65,6 +82,175 @@ public sealed partial class AppShell : Shell
         {
             _username = value;
             OnPropertyChanged();
+        }
+    }
+
+    public EstateStatus Estate => _estate;
+
+    public ObservableCollection<DriveGroupDisplay> Groups { get; }
+
+    public bool HasGroups => Groups.Count > 0;
+
+    private bool _updateAvailable;
+
+    public bool UpdateAvailable
+    {
+        get { return _updateAvailable; }
+        private set
+        {
+            if (_updateAvailable == value)
+            {
+                return;
+            }
+
+            _updateAvailable = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _updateVersion = string.Empty;
+
+    public string UpdateVersion
+    {
+        get { return _updateVersion; }
+        private set
+        {
+            if (_updateVersion == value)
+            {
+                return;
+            }
+
+            _updateVersion = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private void BeginSession()
+    {
+        if (_sessionStarted)
+        {
+            return;
+        }
+
+        _sessionStarted = true;
+
+        _estate.Start();
+
+        _ = RefreshGroupsAsync();
+        _ = CheckForUpdatesAsync();
+    }
+
+    private void EndSession()
+    {
+        if (!_sessionStarted)
+        {
+            return;
+        }
+
+        _sessionStarted = false;
+
+        _estate.Stop();
+
+        Groups.Clear();
+        OnPropertyChanged(nameof(HasGroups));
+
+        UpdateAvailable = false;
+        UpdateVersion = string.Empty;
+    }
+
+    private async Task RefreshGroupsAsync()
+    {
+        if (!_sessionStarted)
+        {
+            return;
+        }
+
+        try
+        {
+            Result<List<DriveGroup>> groups = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
+            if (groups.IsFailure)
+            {
+                return;
+            }
+
+            Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+
+            HashSet<Guid> existing = drives.IsSuccess
+                ? [.. drives.Value.Select(drive => drive.Id)]
+                : [];
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                Groups.Clear();
+
+                foreach (DriveGroup group in groups.Value)
+                {
+                    Groups.Add(new DriveGroupDisplay(group, existing));
+                }
+
+                OnPropertyChanged(nameof(HasGroups));
+            });
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<AppShell>().LogWarning(ex, "The sidebar groups could not be refreshed.");
+        }
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            Result<UpdateCheck> result = await ScopedHandler.HandleAsync((CheckForUpdates h) => h.Handle());
+            if (result.IsFailure)
+            {
+                AppLog.For<AppShell>().LogDebug(
+                    "The update check at sign-in did not answer: {Reason}",
+                    result.Error.Description);
+
+                return;
+            }
+
+            ApplyUpdateCheck(result.Value.IsUpdateAvailable, result.Value.LatestVersion);
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<AppShell>().LogDebug(ex, "The update check at sign-in faulted.");
+        }
+    }
+
+    private void ApplyUpdateCheck(bool isAvailable, string latestVersion)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            UpdateVersion = isAvailable ? $"v{latestVersion}" : string.Empty;
+            UpdateAvailable = isAvailable;
+        });
+    }
+
+    private async void OnLockNow(object? sender, TappedEventArgs e)
+    {
+        try
+        {
+            await App.ServiceProvider.GetRequiredService<IdleLockService>().LockNowAsync();
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<AppShell>().LogError(ex, "The session could not be locked.");
+        }
+    }
+
+    private async void OnShowUpdates(object? sender, TappedEventArgs e)
+    {
+        try
+        {
+            await Current.GoToAsync($"//{PageNames.SettingsPage}");
+
+            WeakReferenceMessenger.Default.Send(new ShowUpdatesMessage());
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<AppShell>().LogError(ex, "The update could not be opened from the sidebar.");
         }
     }
 
@@ -139,6 +325,11 @@ public sealed partial class AppShell : Shell
         if (currentItem.Route is PageNames.LoginPage or PageNames.RegisterPage or PageNames.LockPage)
         {
             FlyoutBehavior = FlyoutBehavior.Disabled;
+
+            if (currentItem.Route is not PageNames.LockPage)
+            {
+                EndSession();
+            }
         }
         else
         {
@@ -147,6 +338,8 @@ public sealed partial class AppShell : Shell
             SyncSelection(currentItem.Route);
 
             Username = _loggedInUser.Username;
+
+            BeginSession();
         }
 
         OnPropertyChanged();
@@ -192,5 +385,17 @@ public sealed partial class AppShell : Shell
         {
             Username = m.NewUsername;
         });
+
+        WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(
+            this, (r, m) => _ = RefreshGroupsAsync());
+
+        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(
+            this, (r, m) => _ = RefreshGroupsAsync());
+
+        WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(
+            this, (r, m) => _ = RefreshGroupsAsync());
+
+        WeakReferenceMessenger.Default.Register<UpdateCheckedMessage>(
+            this, (r, m) => ApplyUpdateCheck(m.IsUpdateAvailable, m.LatestVersion));
     }
 }

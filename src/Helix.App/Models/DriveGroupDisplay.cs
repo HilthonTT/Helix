@@ -4,7 +4,7 @@ using Helix.Domain.DriveGroups;
 
 namespace Helix.App.Models;
 
-internal sealed partial class DriveGroupDisplay : ObservableObject
+public sealed partial class DriveGroupDisplay : ObservableObject
 {
     [ObservableProperty]
     public partial Guid Id { get; set; }

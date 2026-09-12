@@ -1023,12 +1023,12 @@ Icons/         IconFont glyph constants
 Localization/  LocalizationResourceManager, TranslateExtension, CultureSwitcher
 Messaging/     CommunityToolkit.Mvvm messages, by feature
                Auditlogs/, DriveGroups/, Drives/, Navigation/, Notifications/,
-               Settings/, Users/
+               Settings/, Storage/, Updates/, Users/
 Models/        observable display models bound by the views
 Platforms/     MAUI platform heads
 Resources/     AppIcon, Fonts, Images, Languages, Splash, Styles
 Services/      DriveWatchdog, TrayIconService, StorageAlertService, IdleLockService,
-               ModalHost, PassphrasePromptService, Notifier
+               EstateStatus, ModalHost, PassphrasePromptService, Notifier
 ViewModels/    BaseViewModel + Auditlogs/, Drives/, Settings/, Users/
 Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/, Users/
 ```
@@ -1036,6 +1036,68 @@ Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/,
 A view and its viewmodel sit in the same feature folder under their respective roots — `Views/Drives/HomePage.xaml` pairs with `ViewModels/Drives/HomeViewModel.cs`.
 
 `GlobalUsings.cs` imports `Helix.App.Common` and `Helix.App.Localization` alongside the SharedKernel namespaces, so `ScopedHandler`, `PageNames` and `LocalizationResourceManager` need no per-file using.
+
+#### What the sidebar carries
+
+The flyout's flexible row was empty, and four things live in it now, each because the app
+already knew something it had no way to say from anywhere but the dashboard.
+
+**The groups** are listed and connectable from the sidebar. `TrayIconService` already
+renders the same set as a menu, so this is that list with the window up — the dashboard
+strip is where a group is *managed*, the sidebar is where one is *used* from whatever page
+the user happens to be on. Both rows go through `Common/DriveGroupActions`, which is the
+whole of what surrounds `ConnectDriveGroup` — the busy flag, the connectivity refresh, the
+per-drive notification, the failure banner — so the strip and the sidebar cannot drift.
+
+**The overview** — connected count, storage total, a low-space warning — is held by
+`Services/EstateStatus`, a singleton, for the length of the session. The dashboard's own
+tiles compute the same numbers off `HomeViewModel`'s master list, and those die with the
+page: navigating to the settings or the audit log left the user with no sight of the NAS at
+all. Refreshes are driven by the messages that mean the estate changed
+(`CheckDrivesStatusMessage`, `DriveCreatedMessage`, `DriveDeletedMessage`) rather than by a
+timer, they are serialized, and one arriving mid-probe is *remembered rather than dropped* —
+a "connect all" raises one per drive and the reading taken before the last of them mounted
+would otherwise be what stayed on screen. The low-space light is not a probe of its own: it
+is `StorageAlertService`'s own 15-minute check, published as `StorageAlertsChangedMessage`,
+because a second sweep of the shares for the same answer is exactly what `GetStorageAlerts`
+exists to avoid.
+
+**The update badge** is the result of one check per signed-in session, run from
+`AppShell.BeginSession`. It is only ever a badge: tapping it navigates to the settings page
+and sends `ShowUpdatesMessage`, which runs the check-download-install flow that page already
+owns, rather than carrying a second copy of it. `SettingsViewModel` sends
+`UpdateCheckedMessage` back after any check it runs, so a badge cannot outlive a check the
+user ran themselves. A check that cannot reach GitHub is logged and nothing is shown — the
+user did not ask for it.
+
+**Lock** sits beside Logout. `IdleLockService.LockNowAsync` is deliberately independent of
+the idle poller: the lock is offered whether or not the platform can report idle time, and
+whether or not `IdleLockMinutes` is set to never lock on its own. Before it, the only way to
+lock was to wait out the timer, and the alternative — signing out — stops the watchdog, the
+tray and the storage alerts, which is precisely what locking does not.
+
+`AppShell.BeginSession` and `EndSession` bracket all four, driven from `OnNavigated`. The
+sign-in pages end the session; **`LockPage` does not**, for the same reason the watchdog
+keeps running behind it — the session is live, the drives are mounted, and only the screen
+is covered.
+
+Everything the flyout binds must be **public**, including `EstateStatus` and
+`DriveGroupDisplay`. XamlC will not resolve an internal member for a compiled binding on a
+public host type; it degrades to `XC0045` and a binding that silently does nothing.
+
+#### The auto-minimize countdown
+
+`ICountdownService` is paused by `HomePage.OnDisappearing` and picked back up by
+`InitializeCountdownAsync` in `OnAppearing`. The dashboard is the only page that shows the
+countdown and the only one that can call it off, so a countdown left running while the user
+reads the settings page minimizes the window out from under them.
+
+Settings are re-read on every resume rather than on first start, so auto-minimize switched
+off — or its timer changed — while the user was away is honoured the moment they come back:
+off clears the countdown outright, a changed `TimerCount` restarts rather than resuming a
+stale count. A countdown the user **cancelled**, or one that already fired and minimized,
+is not auto-resumed; it comes back showing its "Continue" affordance, which is what
+cancelling meant.
 
 #### What the dashboard gives room to
 

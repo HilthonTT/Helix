@@ -86,11 +86,6 @@ public abstract partial class BaseViewModel : ObservableObject
         TimerCancelled = true;
     }
 
-    /// <summary>
-    /// Holds the countdown where it is while the dashboard is not the page in front of the user.
-    /// The seconds are kept, so returning to the dashboard picks up where it left off rather than
-    /// minimizing the app out from under whatever page they walked away to.
-    /// </summary>
     public void PauseCountdown()
     {
         if (!_countdownStarted)
@@ -177,11 +172,6 @@ public abstract partial class BaseViewModel : ObservableObject
             });
     }
 
-    /// <summary>
-    /// Starts the countdown, or picks it back up where <see cref="PauseCountdown"/> left it.
-    /// Settings are re-read every time, so auto-minimize switched off - or its timer changed -
-    /// while the user was on another page is honoured the moment they come back.
-    /// </summary>
     public async Task InitializeCountdownAsync(CancellationToken cancellationToken = default)
     {
         Result<SettingsModel> result = await ScopedHandler.HandleAsync(

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messaging.Updates;
 using Helix.App.Messaging.Users;
 using Helix.App.Models;
 using Helix.App.Services;
@@ -168,6 +169,9 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
             UpdateCheck check = result.Value;
 
+            WeakReferenceMessenger.Default.Send(
+                new UpdateCheckedMessage(check.IsUpdateAvailable, check.LatestVersion));
+
             if (!check.IsUpdateAvailable)
             {
                 await DisplaySuccessAsync(string.Format(AppResources.UpToDate, check.CurrentVersion));
@@ -319,6 +323,14 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Register<UsernameUpdatedMessage>(this, (r, m) =>
         {
             Username = m.NewUsername;
+        });
+
+        WeakReferenceMessenger.Default.Register<ShowUpdatesMessage>(this, (r, m) =>
+        {
+            if (CheckForUpdatesCommand.CanExecute(null))
+            {
+                CheckForUpdatesCommand.Execute(null);
+            }
         });
     }
 }

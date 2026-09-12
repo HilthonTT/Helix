@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messaging.Storage;
 using Helix.App.Resources.Languages;
 using Helix.Application.Features.Storage.Contracts;
 using Helix.Application.Features.Storage.Queries;
@@ -108,6 +110,8 @@ internal sealed class StorageAlertService
                 }
             }
         }
+
+        WeakReferenceMessenger.Default.Send(new StorageAlertsChangedMessage(alerts.Count));
 
         foreach (StorageAlert alert in fresh)
         {

@@ -767,4 +767,16 @@
   <data name="GroupMemberCount" xml:space="preserve">
     <value>{0} drive</value>
   </data>
+  <data name="LockNow" xml:space="preserve">
+    <value>Kunci</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>Ikhtisar</value>
+  </data>
+  <data name="Storage" xml:space="preserve">
+    <value>Penyimpanan</value>
+  </data>
+  <data name="UpdateAvailableShort" xml:space="preserve">
+    <value>Pembaruan tersedia</value>
+  </data>
 </root>

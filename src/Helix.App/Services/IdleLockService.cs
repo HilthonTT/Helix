@@ -62,6 +62,11 @@ internal sealed class IdleLockService
         IsLocked = false;
     }
 
+    public Task LockNowAsync()
+    {
+        return IsLocked ? Task.CompletedTask : LockAsync(null);
+    }
+
     public async Task UnlockAsync()
     {
         IsLocked = false;
@@ -152,11 +157,18 @@ internal sealed class IdleLockService
         await LockAsync(minutes);
     }
 
-    private async Task LockAsync(int minutes)
+    private async Task LockAsync(int? minutes)
     {
         IsLocked = true;
 
-        _logger.LogInformation("Locking the session after {Minutes} minutes without input.", minutes);
+        if (minutes is int idleMinutes)
+        {
+            _logger.LogInformation("Locking the session after {Minutes} minutes without input.", idleMinutes);
+        }
+        else
+        {
+            _logger.LogInformation("Locking the session at the user's request.");
+        }
 
         await MainThread.InvokeOnMainThreadAsync(async () =>
         {

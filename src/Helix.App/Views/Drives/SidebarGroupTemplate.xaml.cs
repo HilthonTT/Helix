@@ -2,9 +2,9 @@ using Helix.App.Models;
 
 namespace Helix.App.Views.Drives;
 
-public sealed partial class DriveGroupTemplate : ContentView
+public sealed partial class SidebarGroupTemplate : ContentView
 {
-    public DriveGroupTemplate()
+    public SidebarGroupTemplate()
     {
         InitializeComponent();
     }

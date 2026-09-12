@@ -11,6 +11,7 @@
     xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
     xmlns:controls="clr-namespace:Helix.App.Controls"
     xmlns:icons="clr-namespace:Helix.App.Icons"
+    xmlns:models="clr-namespace:Helix.App.Models"
     xmlns:local="clr-namespace:Helix.App"
     xmlns:l10n="clr-namespace:Helix.App.Localization"
     Shell.FlyoutBehavior="Disabled"
@@ -74,6 +75,130 @@
                                           CheckedChanged="OnMenuItemChanged"/>
                     </VerticalStackLayout>
 
+                    <Grid Grid.Row="2" RowDefinitions="Auto,*,Auto" Margin="0,18,0,0">
+
+                        <Label Grid.Row="0"
+                               Text="{l10n:Translate DriveGroups}"
+                               Style="{StaticResource Overline}"
+                               Margin="26,0,0,6"
+                               IsVisible="{Binding HasGroups}"/>
+
+                        <ScrollView Grid.Row="1"
+                                    VerticalScrollBarVisibility="Never"
+                                    IsVisible="{Binding HasGroups}">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Groups}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:DriveGroupDisplay">
+                                        <home:SidebarGroupTemplate BindingContext="{Binding .}"/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </ScrollView>
+
+                        <VerticalStackLayout Grid.Row="2" Spacing="7" Margin="0,16,0,12">
+
+                            <Label Text="{l10n:Translate Overview}"
+                                   Style="{StaticResource Overline}"
+                                   Margin="26,0,0,2"
+                                   IsVisible="{Binding Estate.HasDrives}"/>
+
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  ColumnSpacing="10"
+                                  Margin="26,0,20,0"
+                                  IsVisible="{Binding Estate.HasDrives}">
+                                <Label Text="{x:Static icons:IconFont.Plug}"
+                                       Style="{StaticResource IconSm}"
+                                       FontSize="12"
+                                       VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                <Label Grid.Column="1"
+                                       Text="{l10n:Translate Connected}"
+                                       Style="{StaticResource Faint}"
+                                       VerticalOptions="Center"/>
+                                <Label Grid.Column="2"
+                                       Text="{Binding Estate.ConnectedSummary}"
+                                       Style="{StaticResource Mono}"
+                                       FontSize="12"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  ColumnSpacing="10"
+                                  Margin="26,0,20,0"
+                                  IsVisible="{Binding Estate.HasDrives}">
+                                <Label Text="{x:Static icons:IconFont.Hdd}"
+                                       Style="{StaticResource IconSm}"
+                                       FontSize="12"
+                                       VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                <Label Grid.Column="1"
+                                       Text="{l10n:Translate Storage}"
+                                       Style="{StaticResource Faint}"
+                                       VerticalOptions="Center"/>
+                                <Label Grid.Column="2"
+                                       Text="{Binding Estate.StorageSummary}"
+                                       Style="{StaticResource Mono}"
+                                       FontSize="12"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+
+                            <Border Margin="16,4,16,0"
+                                    Padding="12,9"
+                                    Style="{StaticResource Pill}"
+                                    StrokeShape="{RoundRectangle CornerRadius=11}"
+                                    Background="{AppThemeBinding Light={StaticResource WarningWashLightBrush}, Dark={StaticResource WarningWashDarkBrush}}"
+                                    IsVisible="{Binding Estate.HasLowSpace}">
+                                <HorizontalStackLayout Spacing="10">
+                                    <Label Text="{x:Static icons:IconFont.ExclamationTriangle}"
+                                           Style="{StaticResource IconSm}"
+                                           FontSize="12"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"/>
+                                    <Label Text="{l10n:Translate TrayStorageLow}"
+                                           Style="{StaticResource Caption}"
+                                           VerticalOptions="Center"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="1"/>
+                                </HorizontalStackLayout>
+                            </Border>
+
+                            <Border Margin="16,4,16,0"
+                                    Padding="12,9"
+                                    Style="{StaticResource Pill}"
+                                    StrokeShape="{RoundRectangle CornerRadius=11}"
+                                    Background="{AppThemeBinding Light={StaticResource BrandWashLightBrush}, Dark={StaticResource BrandWashDarkBrush}}"
+                                    behaviors:Hover.Cursor="True"
+                                    ToolTipProperties.Text="{l10n:Translate CheckForUpdates}"
+                                    IsVisible="{Binding UpdateAvailable}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnShowUpdates"/>
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" InputTransparent="True">
+                                    <Label Text="{x:Static icons:IconFont.CloudDownloadAlt}"
+                                           Style="{StaticResource IconSm}"
+                                           FontSize="12"
+                                           VerticalOptions="Center"
+                                           TextColor="{StaticResource Brand}"/>
+                                    <Label Grid.Column="1"
+                                           Text="{l10n:Translate UpdateAvailableShort}"
+                                           Style="{StaticResource BrandText}"
+                                           FontSize="12"
+                                           VerticalOptions="Center"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="1"/>
+                                    <Label Grid.Column="2"
+                                           Text="{Binding UpdateVersion}"
+                                           Style="{StaticResource Mono}"
+                                           FontSize="11"
+                                           VerticalOptions="Center"
+                                           TextColor="{StaticResource Brand}"/>
+                                </Grid>
+                            </Border>
+
+                        </VerticalStackLayout>
+
+                    </Grid>
+
                     <Border Grid.Row="3"
                             Style="{StaticResource CardInset}"
                             Margin="16,0,16,10"
@@ -93,30 +218,55 @@
                         </HorizontalStackLayout>
                     </Border>
 
-                    <Border Grid.Row="4"
-                            Margin="16,0,16,4"
-                            Padding="14,11"
-                            Background="Transparent"
-                            Stroke="Transparent"
-                            StrokeThickness="0"
-                            StrokeShape="{RoundRectangle CornerRadius=11}"
-                            ToolTipProperties.Text="{l10n:Translate Logout}"
-                            behaviors:Hover.Cursor="True"
-                            behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnLogout"/>
-                        </Border.GestureRecognizers>
-                        <HorizontalStackLayout Spacing="12" InputTransparent="True">
-                            <Label Text="{x:Static icons:IconFont.SignOutAlt}"
-                                   Style="{StaticResource Icon}"
-                                   FontSize="15"
-                                   WidthRequest="20"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
-                            <Label Text="{l10n:Translate Logout}"
-                                   Style="{StaticResource Muted}"
-                                   VerticalOptions="Center"/>
-                        </HorizontalStackLayout>
-                    </Border>
+                    <VerticalStackLayout Grid.Row="4" Spacing="2">
+                        <Border Margin="16,0,16,0"
+                                Padding="14,11"
+                                Background="Transparent"
+                                Stroke="Transparent"
+                                StrokeThickness="0"
+                                StrokeShape="{RoundRectangle CornerRadius=11}"
+                                ToolTipProperties.Text="{l10n:Translate LockNow}"
+                                behaviors:Hover.Cursor="True"
+                                behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnLockNow"/>
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="12" InputTransparent="True">
+                                <Label Text="{x:Static icons:IconFont.Lock}"
+                                       Style="{StaticResource Icon}"
+                                       FontSize="15"
+                                       WidthRequest="20"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                <Label Text="{l10n:Translate LockNow}"
+                                       Style="{StaticResource Muted}"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </Border>
+
+                        <Border Margin="16,0,16,4"
+                                Padding="14,11"
+                                Background="Transparent"
+                                Stroke="Transparent"
+                                StrokeThickness="0"
+                                StrokeShape="{RoundRectangle CornerRadius=11}"
+                                ToolTipProperties.Text="{l10n:Translate Logout}"
+                                behaviors:Hover.Cursor="True"
+                                behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnLogout"/>
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="12" InputTransparent="True">
+                                <Label Text="{x:Static icons:IconFont.SignOutAlt}"
+                                       Style="{StaticResource Icon}"
+                                       FontSize="15"
+                                       WidthRequest="20"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                <Label Text="{l10n:Translate Logout}"
+                                       Style="{StaticResource Muted}"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
 
                     <VerticalStackLayout Grid.Row="5" Spacing="12" Margin="20,8,16,18">
 

@@ -767,4 +767,16 @@
   <data name="GroupMemberCount" xml:space="preserve">
     <value>{0} lecteurs</value>
   </data>
+  <data name="LockNow" xml:space="preserve">
+    <value>Verrouiller</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>Aperçu</value>
+  </data>
+  <data name="Storage" xml:space="preserve">
+    <value>Stockage</value>
+  </data>
+  <data name="UpdateAvailableShort" xml:space="preserve">
+    <value>Mise à jour disponible</value>
+  </data>
 </root>

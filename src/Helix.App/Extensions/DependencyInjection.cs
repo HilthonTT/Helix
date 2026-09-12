@@ -23,6 +23,8 @@ public static class DependencyInjection
 
         services.AddSingleton<IdleLockService>();
 
+        services.AddSingleton<EstateStatus>();
+
         services.AddScoped<HomePage>();
 
         return services;

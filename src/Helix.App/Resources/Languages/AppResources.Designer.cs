@@ -466,6 +466,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Lock.
+        /// </summary>
+        internal static string LockNow {
+            get {
+                return ResourceManager.GetString("LockNow", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Login.
         /// </summary>
         internal static string Login {
@@ -591,6 +600,15 @@ namespace Helix.App.Resources.Languages {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Overview.
+        /// </summary>
+        internal static string Overview {
+            get {
+                return ResourceManager.GetString("Overview", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Password.
         /// </summary>
@@ -754,6 +772,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Storage.
+        /// </summary>
+        internal static string Storage {
+            get {
+                return ResourceManager.GetString("Storage", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Storage Usage.
         /// </summary>
         internal static string StorageUsage {
@@ -816,6 +843,15 @@ namespace Helix.App.Resources.Languages {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Update available.
+        /// </summary>
+        internal static string UpdateAvailableShort {
+            get {
+                return ResourceManager.GetString("UpdateAvailableShort", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Update Drive.
         /// </summary>
