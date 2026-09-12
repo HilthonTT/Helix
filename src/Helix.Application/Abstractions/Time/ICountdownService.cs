@@ -2,6 +2,10 @@
 
 public interface ICountdownService
 {
+    int SecondsRemaining { get; }
+
+    bool IsRunning { get; }
+
     void Start(int initialSeconds);
 
     void Stop();

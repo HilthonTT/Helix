@@ -25,6 +25,8 @@ internal sealed partial class CountdownService : ObservableObject, ICountdownSer
     [ObservableProperty]
     public partial int SecondsRemaining { get; set; }
 
+    public bool IsRunning => _countdownTimer.Enabled;
+
     public void Start(int initialSeconds)
     {
         if (initialSeconds <= 0)

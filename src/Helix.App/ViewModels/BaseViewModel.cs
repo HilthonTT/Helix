@@ -11,6 +11,8 @@ namespace Helix.App.ViewModels;
 public abstract partial class BaseViewModel : ObservableObject
 {
     private static bool _countdownStarted;
+    private static int _countdownSeconds;
+    private static bool _countdownDismissed;
 
     private readonly ICountdownService _countdownService;
 
@@ -64,6 +66,8 @@ public abstract partial class BaseViewModel : ObservableObject
     {
         if (SecondsRemaining > 0)
         {
+            _countdownDismissed = false;
+
             _countdownService.Resume();
             TimerCancelled = false;
 
@@ -78,11 +82,35 @@ public abstract partial class BaseViewModel : ObservableObject
     {
         _countdownService.Stop();
 
+        _countdownDismissed = true;
         TimerCancelled = true;
+    }
+
+    /// <summary>
+    /// Holds the countdown where it is while the dashboard is not the page in front of the user.
+    /// The seconds are kept, so returning to the dashboard picks up where it left off rather than
+    /// minimizing the app out from under whatever page they walked away to.
+    /// </summary>
+    public void PauseCountdown()
+    {
+        if (!_countdownStarted)
+        {
+            return;
+        }
+
+        _countdownService.Stop();
+
+        SecondsRemaining = _countdownService.SecondsRemaining;
     }
 
     private void ClearCountdown()
     {
+        _countdownService.Reset();
+
+        _countdownStarted = false;
+        _countdownSeconds = 0;
+        _countdownDismissed = false;
+
         SecondsRemaining = 0;
         ShowRedoButton = false;
         TimerCancelled = false;
@@ -93,6 +121,8 @@ public abstract partial class BaseViewModel : ObservableObject
         App.ServiceProvider.GetRequiredService<ICountdownService>().Reset();
 
         _countdownStarted = false;
+        _countdownSeconds = 0;
+        _countdownDismissed = false;
     }
 
     public static Task DisplayErrorAsync(Error error)
@@ -139,20 +169,51 @@ public abstract partial class BaseViewModel : ObservableObject
         _countdownService.CountdownFinished += (sender, args) =>
             MainThread.BeginInvokeOnMainThread(() =>
             {
+                _countdownDismissed = true;
+
                 ShowRedoButton = true;
                 TimerCancelled = true;
                 MinimizeApp();
             });
     }
 
-    public Task InitializeCountdownAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Starts the countdown, or picks it back up where <see cref="PauseCountdown"/> left it.
+    /// Settings are re-read every time, so auto-minimize switched off - or its timer changed -
+    /// while the user was on another page is honoured the moment they come back.
+    /// </summary>
+    public async Task InitializeCountdownAsync(CancellationToken cancellationToken = default)
     {
-        if (_countdownStarted)
+        Result<SettingsModel> result = await ScopedHandler.HandleAsync(
+            (GetSettings h) => h.Handle(cancellationToken));
+        if (result.IsFailure)
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        return StartCountdownAsync(cancellationToken);
+        SettingsModel settings = result.Value;
+
+        if (!settings.AutoMinimize || settings.TimerCount <= 0)
+        {
+            ClearCountdown();
+            return;
+        }
+
+        if (!_countdownStarted || _countdownSeconds != settings.TimerCount)
+        {
+            StartCountdown(settings.TimerCount);
+            return;
+        }
+
+        SecondsRemaining = _countdownService.SecondsRemaining;
+        TimerCancelled = _countdownDismissed;
+
+        if (_countdownDismissed || SecondsRemaining <= 0)
+        {
+            return;
+        }
+
+        _countdownService.Resume();
     }
 
     private async Task StartCountdownAsync(CancellationToken cancellationToken = default)
@@ -172,11 +233,24 @@ public abstract partial class BaseViewModel : ObservableObject
             return;
         }
 
+        StartCountdown(settings.TimerCount);
+    }
+
+    private void StartCountdown(int seconds)
+    {
+        if (seconds <= 0)
+        {
+            ClearCountdown();
+            return;
+        }
+
         _countdownStarted = true;
+        _countdownSeconds = seconds;
+        _countdownDismissed = false;
 
-        _countdownService.Start(settings.TimerCount);
+        _countdownService.Start(seconds);
 
-        SecondsRemaining = settings.TimerCount;
+        SecondsRemaining = seconds;
         ShowRedoButton = false;
         TimerCancelled = false;
     }
