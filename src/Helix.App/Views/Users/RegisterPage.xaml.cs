@@ -42,7 +42,7 @@ public sealed partial class RegisterPage : ContentPage
 
     private void OnKeyPressed(object? sender, KeyboardHookEventArgs e)
     {
-        if (e.Data.KeyCode != KeyCode.VcEnter || (e.RawEvent.Mask & EventMask.Ctrl) == 0)
+        if (!MainWindow.IsActive || e.Data.KeyCode != KeyCode.VcEnter || (e.RawEvent.Mask & EventMask.Ctrl) == 0)
         {
             return;
         }

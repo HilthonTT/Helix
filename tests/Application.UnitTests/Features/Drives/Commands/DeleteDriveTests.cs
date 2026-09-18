@@ -114,6 +114,21 @@ public sealed class DeleteDriveTests
     }
 
     [Fact]
+    public async Task Handle_Should_LeaveTheLetterAlone_WhenAPersistentDrivesLetterIsHeldBySomethingElse()
+    {
+        Drive drive = Have(persistent: true);
+
+        _nasConnectorMock.IsMountedFrom(drive).Returns(false);
+        _nasConnectorMock.IsConnected(drive.Letter).Returns(true);
+
+        Result result = await _deleteDrive.Handle(new DeleteDrive.Request(drive.Id));
+
+        result.IsSuccess.Should().BeTrue();
+        await _nasConnectorMock.DidNotReceive().DisconnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
+        _driveRepositoryMock.Received(1).Remove(drive);
+    }
+
+    [Fact]
     public async Task Handle_Should_PruneTheDriveFromEveryGroup()
     {
         Drive drive = Have();

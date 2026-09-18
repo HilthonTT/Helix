@@ -55,6 +55,8 @@ internal static class MainWindow
 
     public static bool IsExiting { get; private set; }
 
+    public static volatile bool IsActive = true;
+
     public static void Exit()
     {
         IsExiting = true;

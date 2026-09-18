@@ -12,6 +12,8 @@ public interface IDriveMonitor
 {
     event EventHandler<IReadOnlyList<DriveConnectivityChange>>? ConnectivityChanged;
 
+    event EventHandler<IReadOnlyList<string>>? TakenDown;
+
     bool IsRunning { get; }
 
     void Watch(IReadOnlyCollection<WatchedDrive> drives);

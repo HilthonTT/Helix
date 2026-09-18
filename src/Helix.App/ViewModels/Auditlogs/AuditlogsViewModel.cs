@@ -92,10 +92,31 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
 
         OnPropertyChanged(nameof(SortGlyph));
 
+        if (_loading)
+        {
+            _reloadRequested = true;
+
+            return;
+        }
+
         // The order is the database's, not the loaded page's, so it has to be asked again
         // from the top: sorting thirteen loaded rows of ninety days ascending would put the
         // newest rows in the oldest order and call it the oldest history.
         await GetAuditlogsAsync();
+    }
+
+    private bool _reloadRequested;
+
+    private Task ReloadIfRequestedAsync()
+    {
+        if (!_reloadRequested || _loading)
+        {
+            return Task.CompletedTask;
+        }
+
+        _reloadRequested = false;
+
+        return GetAuditlogsAsync();
     }
 
     [RelayCommand]
@@ -140,6 +161,8 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
             _loading = false;
             IsBusy = false;
         }
+
+        await ReloadIfRequestedAsync();
     }
 
     [RelayCommand]
@@ -163,6 +186,8 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
         {
             _loading = false;
         }
+
+        await ReloadIfRequestedAsync();
     }
 
     private async Task LoadRestAsync()
@@ -190,14 +215,18 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
             _loading = false;
             IsBusy = false;
         }
+
+        await ReloadIfRequestedAsync();
     }
 
     private async Task<int?> LoadPageAsync(int skip, int take = GetAuditlogs.DefaultPageSize)
     {
-        Result<AuditlogPage> result = await ScopedHandler.HandleAsync((GetAuditlogs h) =>
-            h.Handle(new GetAuditlogs.Request(skip, take, SortOrder)));
+        SortOrder order = SortOrder;
 
-        if (result.IsFailure)
+        Result<AuditlogPage> result = await ScopedHandler.HandleAsync((GetAuditlogs h) =>
+            h.Handle(new GetAuditlogs.Request(skip, take, order)));
+
+        if (result.IsFailure || order != SortOrder)
         {
             return null;
         }

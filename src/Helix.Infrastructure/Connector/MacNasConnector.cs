@@ -195,8 +195,8 @@ internal sealed class MacNasConnector : INasConnector
                 mountPath.Handle,
                 user.Handle,
                 password.Handle,
-                mountOptions.Handle,
                 IntPtr.Zero,
+                mountOptions.Handle,
                 out mountedPaths);
 
             return code == 0

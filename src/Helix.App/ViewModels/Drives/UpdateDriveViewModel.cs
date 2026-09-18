@@ -101,16 +101,18 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
         {
             IsBusy = true;
 
+            UpdateDriveModel edited = Drive;
+
             var request = new UpdateDrive.Request(
-                Drive.Id,
-                Drive.Letter,
-                Drive.Host,
-                Drive.Name,
-                Drive.Username,
-                Drive.Password,
-                Drive.AutoConnect,
-                Drive.Persistent,
-                Drive.ConnectByHostname,
+                edited.Id,
+                edited.Letter,
+                edited.Host,
+                edited.Name,
+                edited.Username,
+                edited.Password,
+                edited.AutoConnect,
+                edited.Persistent,
+                edited.ConnectByHostname,
                 NetworkPin.NetworkId,
                 NetworkPin.NetworkName,
                 ApplyCredentialsToServer && ShowApplyCredentials);
@@ -127,7 +129,7 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 Notifier.Success(AppResources.CredentialsAppliedToServer);
             }
 
-            var driveDisplay = new DriveDisplay(Drive);
+            var driveDisplay = new DriveDisplay(edited);
             WeakReferenceMessenger.Default.Send(new DriveUpdatedMessage(driveDisplay));
 
             Close();

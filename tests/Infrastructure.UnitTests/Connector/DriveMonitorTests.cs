@@ -211,6 +211,39 @@ public sealed class DriveMonitorTests
     }
 
     [Fact]
+    public void Suppress_Should_Say_Which_Letters_The_App_Took_Down()
+    {
+        DriveMonitor monitor = CreateMonitor("M");
+        monitor.Watch([new WatchedDrive(MediaId, "M")]);
+
+        List<string> takenDown = [];
+        monitor.TakenDown += (_, letters) => takenDown.AddRange(letters);
+
+        using (monitor.Suppress(["M"]))
+        {
+            Connected();
+        }
+
+        takenDown.Should().Equal("M");
+    }
+
+    [Fact]
+    public void Suppress_Should_Not_Call_A_Failed_Connect_A_Disconnect()
+    {
+        DriveMonitor monitor = CreateMonitor();
+        monitor.Watch([new WatchedDrive(MediaId, "M")]);
+
+        List<string> takenDown = [];
+        monitor.TakenDown += (_, letters) => takenDown.AddRange(letters);
+
+        using (monitor.Suppress(["M"]))
+        {
+        }
+
+        takenDown.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task Suppress_Should_Leave_The_New_State_As_The_Baseline()
     {
         DriveMonitor monitor = CreateMonitor("M");

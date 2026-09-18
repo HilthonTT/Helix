@@ -49,13 +49,17 @@ internal sealed partial class DiagnoseDriveViewModel : BaseViewModel
 
     public bool ShowProblem => HasFailure;
 
+    private int _run;
+
     [RelayCommand]
     private async Task RunAsync()
     {
-        if (Drive is null || IsBusy)
+        if (Drive is null)
         {
             return;
         }
+
+        int run = ++_run;
 
         try
         {
@@ -69,6 +73,11 @@ internal sealed partial class DiagnoseDriveViewModel : BaseViewModel
             Result<DriveDiagnosis> result =
                 await ScopedHandler.HandleAsync((DiagnoseDrive h) => h.Handle(request));
 
+            if (run != _run)
+            {
+                return;
+            }
+
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
@@ -81,7 +90,10 @@ internal sealed partial class DiagnoseDriveViewModel : BaseViewModel
         }
         finally
         {
-            IsBusy = false;
+            if (run == _run)
+            {
+                IsBusy = false;
+            }
         }
     }
 

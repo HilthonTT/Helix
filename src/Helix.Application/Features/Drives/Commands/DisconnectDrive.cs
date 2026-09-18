@@ -32,6 +32,13 @@ public sealed class DisconnectDrive(
             return Result.Failure(AuthenticationErrors.InvalidPermissions);
         }
 
+        if (!nasConnector.IsMountedFrom(drive))
+        {
+            return nasConnector.IsConnected(drive.Letter)
+                ? Result.Failure(DriveErrors.LetterInUse(drive.Letter))
+                : Result.Success();
+        }
+
         using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
 
         Result result = await nasConnector.DisconnectAsync(drive, cancellationToken);

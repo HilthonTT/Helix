@@ -57,6 +57,7 @@ internal sealed class DriveWatchdog
         if (!_subscribed)
         {
             _monitor.ConnectivityChanged += OnConnectivityChanged;
+            _monitor.TakenDown += OnTakenDown;
             RegisterMessages();
 
             _subscribed = true;
@@ -120,6 +121,19 @@ internal sealed class DriveWatchdog
             foreach (Guid driveId in _pending.Keys.Where(id => !stillWanted.Contains(id)).ToList())
             {
                 _pending.Remove(driveId);
+            }
+        }
+    }
+
+    private void OnTakenDown(object? sender, IReadOnlyList<string> letters)
+    {
+        lock (_gate)
+        {
+            foreach (PendingReconnect pending in _pending.Values
+                .Where(p => letters.Contains(p.Letter, StringComparer.OrdinalIgnoreCase))
+                .ToList())
+            {
+                _pending.Remove(pending.DriveId);
             }
         }
     }

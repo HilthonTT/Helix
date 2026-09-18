@@ -30,6 +30,8 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 
     public event EventHandler<IReadOnlyList<DriveConnectivityChange>>? ConnectivityChanged;
 
+    public event EventHandler<IReadOnlyList<string>>? TakenDown;
+
     public bool IsRunning => _loop is { IsCompleted: false };
 
     public void Watch(IReadOnlyCollection<WatchedDrive> drives)
@@ -78,6 +80,8 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
     {
         HashSet<string> connected = _nasConnector.GetConnectedLetters();
 
+        List<string> takenDown = [];
+
         lock (_gate)
         {
             foreach (string letter in letters)
@@ -96,11 +100,32 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
                 _suppressed.Remove(letter);
                 _releasedAt[letter] = ++_clock;
 
-                if (_baseline.ContainsKey(letter))
+                if (_baseline.TryGetValue(letter, out bool wasUp))
                 {
-                    _baseline[letter] = connected.Contains(letter);
+                    bool isUp = connected.Contains(letter);
+
+                    if (wasUp && !isUp)
+                    {
+                        takenDown.Add(letter);
+                    }
+
+                    _baseline[letter] = isUp;
                 }
             }
+        }
+
+        if (takenDown.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            TakenDown?.Invoke(this, takenDown);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Reporting a deliberate disconnect failed.");
         }
     }
 

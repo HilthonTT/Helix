@@ -49,11 +49,11 @@ internal sealed class MacDesktopService : IDesktopService
     {
         try
         {
-            var link = new DirectoryInfo(ShortcutPath);
+            var link = new FileInfo(ShortcutPath);
 
-            if (link.Exists && link.LinkTarget is not null)
+            if (link.LinkTarget is not null)
             {
-                link.Delete();
+                File.Delete(ShortcutPath);
             }
         }
         catch (Exception ex)

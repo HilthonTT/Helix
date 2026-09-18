@@ -45,7 +45,7 @@ public sealed class DeleteDrive(
 
         bool mounted = nasConnector.IsMountedFrom(drive);
 
-        if (mounted || drive.Persistent)
+        if (mounted || (drive.Persistent && !nasConnector.IsConnected(drive.Letter)))
         {
             using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
 

@@ -59,6 +59,9 @@ public sealed partial class App : AppBase
     {
         var window = new Window(new AppShell());
 
+        window.Activated += (_, _) => MainWindow.IsActive = true;
+        window.Deactivated += (_, _) => MainWindow.IsActive = false;
+
 #if MACCATALYST
         DisplayInfo display = DeviceDisplay.Current.MainDisplayInfo;
         double density = display.Density > 0 ? display.Density : 1;

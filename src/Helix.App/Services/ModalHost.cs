@@ -13,6 +13,10 @@ internal sealed class ModalHost
 
     private string? _current;
 
+    private static int _openCount;
+
+    public static bool IsAnyOpen => Volatile.Read(ref _openCount) > 0;
+
     public ModalHost(VisualElement scrim)
     {
         _scrim = scrim;
@@ -54,6 +58,8 @@ internal sealed class ModalHost
         _closeTokens[key] = _closeTokens.GetValueOrDefault(key) + 1;
         _current = key;
 
+        Interlocked.Increment(ref _openCount);
+
         target.Layout.IsVisible = true;
         target.Content.Opacity = 0;
         target.Content.Scale = 0.96;
@@ -81,6 +87,8 @@ internal sealed class ModalHost
         if (_current == key)
         {
             _current = null;
+
+            Interlocked.Decrement(ref _openCount);
         }
 
         _scrim.InputTransparent = true;

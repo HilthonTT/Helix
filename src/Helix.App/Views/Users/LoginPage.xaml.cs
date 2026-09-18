@@ -46,7 +46,7 @@ public sealed partial class LoginPage : ContentPage
             return;
         }
 
-        if (e.Data.KeyCode != KeyCode.VcEnter || (e.RawEvent.Mask & EventMask.Ctrl) == 0)
+        if (!MainWindow.IsActive || e.Data.KeyCode != KeyCode.VcEnter || (e.RawEvent.Mask & EventMask.Ctrl) == 0)
         {
             return;
         }

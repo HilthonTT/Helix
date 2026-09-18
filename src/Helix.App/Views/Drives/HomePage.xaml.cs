@@ -3,6 +3,7 @@ using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
 using Helix.App.Services;
 using Helix.App.ViewModels.Drives;
+using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Features.Auditlogs.Commands;
 using Helix.Application.Features.Drives.Commands;
@@ -26,6 +27,7 @@ public sealed partial class HomePage : ContentPage
     private static bool _isFirstView = true;
     private static bool _prunedAuditlogs;
     private bool _isInitializing;
+    private bool _isVisible;
 
     private readonly INasConnector _nasConnector;
     private readonly HomeViewModel _viewModel;
@@ -76,6 +78,8 @@ public sealed partial class HomePage : ContentPage
 
     protected async override void OnAppearing()
     {
+        _isVisible = true;
+
         if (_isInitializing)
         {
             return;
@@ -94,7 +98,17 @@ public sealed partial class HomePage : ContentPage
 
             await HandleConnectDrivesOnStartupAsync();
 
+            if (!App.ServiceProvider.GetRequiredService<ILoggedInUser>().IsLoggedIn)
+            {
+                return;
+            }
+
             await _viewModel.InitializeCountdownAsync();
+
+            if (!_isVisible)
+            {
+                _viewModel.PauseCountdown();
+            }
 
             await _watchdog.StartAsync();
 
@@ -122,7 +136,11 @@ public sealed partial class HomePage : ContentPage
     {
         base.OnDisappearing();
 
+        _isVisible = false;
+
         _viewModel.PauseCountdown();
+
+        _ = _modals.HideCurrentAsync();
     }
 
     internal static void ResetSessionState()
@@ -165,9 +183,9 @@ public sealed partial class HomePage : ContentPage
 
         if (_viewModel.ConnectDrivesOnStartupCommand.CanExecute(null))
         {
-            await _viewModel.ConnectDrivesOnStartupCommand.ExecuteAsync(null);
-
             _isFirstView = false;
+
+            await _viewModel.ConnectDrivesOnStartupCommand.ExecuteAsync(null);
         }
     }
 

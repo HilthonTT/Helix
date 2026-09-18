@@ -61,7 +61,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
     /// </summary>
     bool IRowKeys.OnRowKey(RowKey key)
     {
-        if (BindingContext is not DriveDisplay drive)
+        if (BindingContext is not DriveDisplay drive || ModalHost.IsAnyOpen)
         {
             return false;
         }

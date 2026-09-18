@@ -437,6 +437,19 @@ landing between the unmount and the note is the case that produces the spurious 
 so there must be no window at all. Suppressions are counted, so a group going down while a
 row's own disconnect is in flight cannot uncover the other's letters.
 
+Releasing a suppression also raises `IDriveMonitor.TakenDown` for every letter that was up
+before the operation and is down after it, and `DriveWatchdog` drops its pending retry for
+those letters. A drive that had dropped and was still in the backoff queue when the user
+connected and then disconnected it by hand used to be remounted at its next retry, with a
+"reconnected" toast. A connect that merely failed is down before and after, so it is not
+reported and the retries carry on.
+
+`DisconnectDrive` refuses, with `DriveErrors.LetterInUse`, a letter that is not mounted from
+the drive's own share, and `DeleteDrive` only cancels a persistent mapping that is down when
+nothing else holds the letter: the connector's unmount is a forced cancel of whatever is on
+that letter, and a row whose letter had been taken by another mapping offered to pull it out
+from under whoever made it.
+
 `ReconnectDrive` deliberately does **not** suppress. A drive coming back unattended is
 exactly what the tray notification and the audit entry exist to report.
 
