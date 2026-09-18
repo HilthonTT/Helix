@@ -779,4 +779,79 @@
   <data name="UpdateAvailableShort" xml:space="preserve">
     <value>アップデートがあります</value>
   </data>
+  <data name="BrowseShares" xml:space="preserve">
+    <value>共有を参照</value>
+  </data>
+  <data name="ShareAlreadyAdded" xml:space="preserve">
+    <value>{0}: として追加済み</value>
+  </data>
+  <data name="NoSharesFound" xml:space="preserve">
+    <value>この認証情報では、サーバーに共有が見つかりませんでした。</value>
+  </data>
+  <data name="SharesSelected" xml:space="preserve">
+    <value>{0} 個の共有を選択しました。上の文字から順に、それぞれに文字が割り当てられます。</value>
+  </data>
+  <data name="NotEnoughLetters" xml:space="preserve">
+    <value>選択したすべての共有に割り当てる空きドライブ文字が足りません。</value>
+  </data>
+  <data name="DrivesAdded" xml:space="preserve">
+    <value>{0} 個のドライブを追加しました。</value>
+  </data>
+  <data name="DriveAddedOne" xml:space="preserve">
+    <value>ドライブを追加しました。</value>
+  </data>
+  <data name="OnlyOnNetwork" xml:space="preserve">
+    <value>{0} でのみ自動的に再接続</value>
+  </data>
+  <data name="OnlyOnNetworkUnknown" xml:space="preserve">
+    <value>このネットワークでのみ自動的に再接続</value>
+  </data>
+  <data name="StatusAway" xml:space="preserve">
+    <value>ネットワーク外</value>
+  </data>
+  <data name="StatusAwayHint" xml:space="preserve">
+    <value>このコンピューターはドライブのホームネットワークに接続されていないため、自動的には再接続されません。クリックすると接続します。</value>
+  </data>
+  <data name="ApplyCredentialsToServerOne" xml:space="preserve">
+    <value>このサーバー上のもう 1 つのドライブにもこの認証情報を使用</value>
+  </data>
+  <data name="ApplyCredentialsToServerMany" xml:space="preserve">
+    <value>このサーバー上のほかの {0} 個のドライブにもこの認証情報を使用</value>
+  </data>
+  <data name="CredentialsAppliedToServer" xml:space="preserve">
+    <value>このサーバー上のほかのドライブにも新しい認証情報を設定しました。</value>
+  </data>
+  <data name="DuplicateDrive" xml:space="preserve">
+    <value>複製</value>
+  </data>
+  <data name="TrayOpenFolder" xml:space="preserve">
+    <value>フォルダーを開く</value>
+  </data>
+  <data name="GlobalHotkeys" xml:space="preserve">
+    <value>グローバル ショートカット</value>
+  </data>
+  <data name="GlobalHotkeysDescription" xml:space="preserve">
+    <value>どのアプリからでも、Ctrl+Alt+Shift+C ですべてのドライブを接続し、Ctrl+Alt+Shift+D で切断します。</value>
+  </data>
+  <data name="HotkeyConnectedAll" xml:space="preserve">
+    <value>すべてのドライブを接続しました。</value>
+  </data>
+  <data name="HotkeyDisconnectedAll" xml:space="preserve">
+    <value>すべてのドライブを切断しました。</value>
+  </data>
+  <data name="AdoptMappings" xml:space="preserve">
+    <value>既存の割り当てを追加</value>
+  </data>
+  <data name="AdoptMappingsTitle" xml:space="preserve">
+    <value>既存のネットワーク ドライブ</value>
+  </data>
+  <data name="AdoptMappingsMessage" xml:space="preserve">
+    <value>これらの文字はこのコンピューターで割り当てられていますが、まだ Helix で管理されていません。追加するものにチェックを付け、使用している認証情報を入力してください。</value>
+  </data>
+  <data name="NoMappingsFound" xml:space="preserve">
+    <value>このコンピューターの割り当て済みネットワーク ドライブは、すべて Helix に登録済みです。</value>
+  </data>
+  <data name="AddSelected" xml:space="preserve">
+    <value>選択項目を追加</value>
+  </data>
 </root>

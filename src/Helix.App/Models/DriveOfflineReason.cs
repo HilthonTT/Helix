@@ -6,5 +6,7 @@ internal enum DriveOfflineReason
 
     HostUnreachable,
 
+    AwayFromHome,
+
     Refused
 }

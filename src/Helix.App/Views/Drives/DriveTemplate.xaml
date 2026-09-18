@@ -15,6 +15,20 @@
             behaviors:RowFocus.Owner="{x:Reference RowRoot}"
             SemanticProperties.Description="{Binding Name}"
             SemanticProperties.Hint="{Binding Subtitle}">
+        <FlyoutBase.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Text="{Binding ToggleConnectText}" Clicked="ToggleConnect"/>
+                <MenuFlyoutItem Text="{l10n:Translate OpenInFileManager}"
+                                IsEnabled="{Binding Connected}"
+                                Clicked="HandleOpen"/>
+                <MenuFlyoutItem Text="{l10n:Translate DiagnoseDrive}" Clicked="HandleDiagnose"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="{l10n:Translate UpdateDrive}" Clicked="HandleUpdate"/>
+                <MenuFlyoutItem Text="{l10n:Translate DuplicateDrive}" Clicked="HandleDuplicate"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="{l10n:Translate DeleteDrive}" Clicked="HandleDelete"/>
+            </MenuFlyout>
+        </FlyoutBase.ContextFlyout>
         <Grid ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="28"/>
@@ -159,6 +173,27 @@
                                TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
                         <Label Text="{l10n:Translate StatusFailed}"
                                Style="{StaticResource DangerText}"
+                               FontSize="12"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource PillNeutral}"
+                        IsVisible="{Binding ShowAway}"
+                        ToolTipProperties.Text="{Binding OfflineDetail}"
+                        behaviors:Hover.Cursor="True"
+                        behaviors:Hover.Scale="1.04">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="ToggleConnect"/>
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="8" InputTransparent="True">
+                        <Label Text="{x:Static icons:IconFont.MapMarkerAlt}"
+                               Style="{StaticResource IconSm}"
+                               FontSize="9"
+                               VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                        <Label Text="{l10n:Translate StatusAway}"
+                               Style="{StaticResource Caption}"
                                FontSize="12"
                                VerticalOptions="Center"/>
                     </HorizontalStackLayout>

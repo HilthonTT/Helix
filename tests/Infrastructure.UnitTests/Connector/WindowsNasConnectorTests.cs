@@ -39,4 +39,14 @@ public sealed class WindowsNasConnectorTests
 
         expanded.Should().Be(compressed);
     }
+
+    [Theory]
+    [InlineData("192.168.0.10")]
+    [InlineData("nas.local")]
+    [InlineData("fd00::5")]
+    [InlineData("2001:db8::1")]
+    public void FromUncHost_Should_ReverseToUncHost(string host)
+    {
+        WindowsNasConnector.FromUncHost(WindowsNasConnector.ToUncHost(host)).Should().Be(host);
+    }
 }

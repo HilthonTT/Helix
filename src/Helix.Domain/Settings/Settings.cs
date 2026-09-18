@@ -18,6 +18,8 @@ public sealed class Settings : Entity
 
     public const bool DefaultNotifyOnMinimizeToTray = true;
 
+    public const bool DefaultGlobalHotkeys = false;
+
     [JsonConstructor]
     private Settings(
         Guid id,
@@ -32,7 +34,8 @@ public sealed class Settings : Entity
         int storageAlertThresholdPercent,
         int idleLockMinutes,
         bool closeToTray,
-        bool notifyOnMinimizeToTray)
+        bool notifyOnMinimizeToTray,
+        bool globalHotkeys)
         : base(id)
     {
         Ensure.NotNullOrEmpty(id, nameof(id));
@@ -48,6 +51,7 @@ public sealed class Settings : Entity
         Ensure.MustNotBeNegative(idleLockMinutes, nameof(idleLockMinutes));
         Ensure.NotNull(closeToTray, nameof(closeToTray));
         Ensure.NotNull(notifyOnMinimizeToTray, nameof(notifyOnMinimizeToTray));
+        Ensure.NotNull(globalHotkeys, nameof(globalHotkeys));
 
         UserId = userId;
         AutoConnect = autoConnect;
@@ -61,6 +65,7 @@ public sealed class Settings : Entity
         IdleLockMinutes = idleLockMinutes;
         CloseToTray = closeToTray;
         NotifyOnMinimizeToTray = notifyOnMinimizeToTray;
+        GlobalHotkeys = globalHotkeys;
     }
 
     private Settings()
@@ -91,6 +96,8 @@ public sealed class Settings : Entity
 
     public bool NotifyOnMinimizeToTray { get; private set; }
 
+    public bool GlobalHotkeys { get; private set; }
+
     public static Settings Create(
         Guid userId,
         bool autoConnect,
@@ -103,7 +110,8 @@ public sealed class Settings : Entity
         int storageAlertThresholdPercent = DefaultStorageAlertThresholdPercent,
         int idleLockMinutes = DefaultIdleLockMinutes,
         bool closeToTray = DefaultCloseToTray,
-        bool notifyOnMinimizeToTray = DefaultNotifyOnMinimizeToTray)
+        bool notifyOnMinimizeToTray = DefaultNotifyOnMinimizeToTray,
+        bool globalHotkeys = DefaultGlobalHotkeys)
     {
         var settings = new Settings(
             Guid.CreateVersion7(),
@@ -118,7 +126,8 @@ public sealed class Settings : Entity
             storageAlertThresholdPercent,
             idleLockMinutes,
             closeToTray,
-            notifyOnMinimizeToTray);
+            notifyOnMinimizeToTray,
+            globalHotkeys);
 
         return settings;
     }
@@ -134,7 +143,8 @@ public sealed class Settings : Entity
         int storageAlertThresholdPercent,
         int idleLockMinutes,
         bool closeToTray,
-        bool notifyOnMinimizeToTray)
+        bool notifyOnMinimizeToTray,
+        bool globalHotkeys)
     {
         AutoConnect = autoConnect;
         AutoMinimize = autoMinimize;
@@ -147,5 +157,6 @@ public sealed class Settings : Entity
         IdleLockMinutes = idleLockMinutes;
         CloseToTray = closeToTray;
         NotifyOnMinimizeToTray = notifyOnMinimizeToTray;
+        GlobalHotkeys = globalHotkeys;
     }
 }

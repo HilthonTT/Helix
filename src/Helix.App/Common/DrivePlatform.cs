@@ -15,4 +15,18 @@ internal static class DrivePlatform
 #else
         false;
 #endif
+
+    public static bool SupportsShareBrowsing =>
+#if WINDOWS
+        true;
+#else
+        false;
+#endif
+
+    public static bool SupportsAdoptingMappings =>
+#if WINDOWS
+        true;
+#else
+        false;
+#endif
 }

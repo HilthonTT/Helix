@@ -82,6 +82,18 @@
                         </Border>
                     </VerticalStackLayout>
 
+                    <Grid ColumnDefinitions="*,Auto"
+                          Margin="0,2,0,0"
+                          IsVisible="{Binding ShowApplyCredentials}">
+                        <Label Text="{Binding ApplyCredentialsLabel}"
+                               Style="{StaticResource Caption}"
+                               VerticalOptions="Center"/>
+                        <Switch Grid.Column="1"
+                                Scale="0.85"
+                                HorizontalOptions="End"
+                                IsToggled="{Binding ApplyCredentialsToServer, Mode=TwoWay}"/>
+                    </Grid>
+
                     <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
                         <Label Text="{l10n:Translate ShowCredentials}"
                                Style="{StaticResource Caption}"
@@ -112,6 +124,19 @@
                                 Scale="0.85"
                                 HorizontalOptions="End"
                                 IsToggled="{Binding Drive.Persistent, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto"
+                          Margin="0,2,0,0"
+                          IsVisible="{Binding NetworkPin.IsSupported}">
+                        <Label Text="{Binding NetworkPin.Label}"
+                               Style="{StaticResource Caption}"
+                               VerticalOptions="Center"/>
+                        <Switch Grid.Column="1"
+                                Scale="0.85"
+                                HorizontalOptions="End"
+                                IsEnabled="{Binding NetworkPin.CanChange}"
+                                IsToggled="{Binding NetworkPin.IsPinned, Mode=TwoWay}"/>
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto"

@@ -779,4 +779,79 @@
   <data name="UpdateAvailableShort" xml:space="preserve">
     <value>Update available</value>
   </data>
+  <data name="BrowseShares" xml:space="preserve">
+    <value>Browse shares</value>
+  </data>
+  <data name="ShareAlreadyAdded" xml:space="preserve">
+    <value>already added as {0}:</value>
+  </data>
+  <data name="NoSharesFound" xml:space="preserve">
+    <value>The server did not list any shares for these credentials.</value>
+  </data>
+  <data name="SharesSelected" xml:space="preserve">
+    <value>{0} shares selected — each gets its own letter, starting with the one above.</value>
+  </data>
+  <data name="NotEnoughLetters" xml:space="preserve">
+    <value>There are not enough free drive letters for every selected share.</value>
+  </data>
+  <data name="DrivesAdded" xml:space="preserve">
+    <value>{0} drives added.</value>
+  </data>
+  <data name="DriveAddedOne" xml:space="preserve">
+    <value>Drive added.</value>
+  </data>
+  <data name="OnlyOnNetwork" xml:space="preserve">
+    <value>Reconnect automatically only on {0}</value>
+  </data>
+  <data name="OnlyOnNetworkUnknown" xml:space="preserve">
+    <value>Reconnect automatically only on this network</value>
+  </data>
+  <data name="StatusAway" xml:space="preserve">
+    <value>Away</value>
+  </data>
+  <data name="StatusAwayHint" xml:space="preserve">
+    <value>This computer is not on the drive's home network, so it is not reconnected automatically. Click to connect it anyway.</value>
+  </data>
+  <data name="ApplyCredentialsToServerOne" xml:space="preserve">
+    <value>Use these credentials for the other drive on this server</value>
+  </data>
+  <data name="ApplyCredentialsToServerMany" xml:space="preserve">
+    <value>Use these credentials for the other {0} drives on this server</value>
+  </data>
+  <data name="CredentialsAppliedToServer" xml:space="preserve">
+    <value>The other drives on this server use the new credentials too.</value>
+  </data>
+  <data name="DuplicateDrive" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="TrayOpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="GlobalHotkeys" xml:space="preserve">
+    <value>Global shortcuts</value>
+  </data>
+  <data name="GlobalHotkeysDescription" xml:space="preserve">
+    <value>Ctrl+Alt+Shift+C connects every drive and Ctrl+Alt+Shift+D disconnects them, from any application.</value>
+  </data>
+  <data name="HotkeyConnectedAll" xml:space="preserve">
+    <value>Every drive is connected.</value>
+  </data>
+  <data name="HotkeyDisconnectedAll" xml:space="preserve">
+    <value>Every drive is disconnected.</value>
+  </data>
+  <data name="AdoptMappings" xml:space="preserve">
+    <value>Add existing mappings</value>
+  </data>
+  <data name="AdoptMappingsTitle" xml:space="preserve">
+    <value>Existing network drives</value>
+  </data>
+  <data name="AdoptMappingsMessage" xml:space="preserve">
+    <value>These letters are mapped on this computer, but Helix does not manage them yet. Tick the ones to add and enter the credentials they use.</value>
+  </data>
+  <data name="NoMappingsFound" xml:space="preserve">
+    <value>Every mapped network drive on this computer is already in Helix.</value>
+  </data>
+  <data name="AddSelected" xml:space="preserve">
+    <value>Add selected</value>
+  </data>
 </root>

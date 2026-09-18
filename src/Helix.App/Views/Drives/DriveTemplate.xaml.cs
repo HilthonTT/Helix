@@ -88,6 +88,10 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
                 Diagnose();
                 return true;
 
+            case RowKey.Duplicate:
+                Duplicate();
+                return true;
+
             // The chip is not there when the drive is down, so neither is the shortcut:
             // swallowing the key would make Ctrl+O look broken rather than inapplicable.
             case RowKey.Open when drive.Connected:
@@ -99,7 +103,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         }
     }
 
-    private void ToggleConnect(object? sender, TappedEventArgs e) => ToggleConnect();
+    private void ToggleConnect(object? sender, EventArgs e) => ToggleConnect();
 
     private async void ToggleConnect()
     {
@@ -182,7 +186,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         }
     }
 
-    private void HandleOpen(object? sender, TappedEventArgs e) => OpenFolder();
+    private void HandleOpen(object? sender, EventArgs e) => OpenFolder();
 
     private void OpenFolder()
     {
@@ -198,7 +202,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         }
     }
 
-    private void HandleDiagnose(object? sender, TappedEventArgs e) => Diagnose();
+    private void HandleDiagnose(object? sender, EventArgs e) => Diagnose();
 
     private void Diagnose()
     {
@@ -210,7 +214,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         WeakReferenceMessenger.Default.Send(new DiagnoseDriveMessage(true, drive));
     }
 
-    private void HandleUpdate(object? sender, TappedEventArgs e) => Edit();
+    private void HandleUpdate(object? sender, EventArgs e) => Edit();
 
     private void Edit()
     {
@@ -222,7 +226,19 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         WeakReferenceMessenger.Default.Send(new UpdateDriveMessage(true, drive.Id));
     }
 
-    private void HandleDelete(object? sender, TappedEventArgs e) => Delete();
+    private void HandleDuplicate(object? sender, EventArgs e) => Duplicate();
+
+    private void Duplicate()
+    {
+        if (BindingContext is not DriveDisplay drive)
+        {
+            return;
+        }
+
+        WeakReferenceMessenger.Default.Send(new CreateDriveMessage(true, drive.Id));
+    }
+
+    private void HandleDelete(object? sender, EventArgs e) => Delete();
 
     private void Delete()
     {

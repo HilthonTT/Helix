@@ -21,6 +21,7 @@ public sealed partial class HomePage : ContentPage
     private const string DeleteDrive = "delete-drive";
     private const string DiagnoseDrive = "diagnose-drive";
     private const string DriveGroups = "drive-groups";
+    private const string AdoptMappings = "adopt-mappings";
 
     private static bool _isFirstView = true;
     private static bool _prunedAuditlogs;
@@ -32,6 +33,7 @@ public sealed partial class HomePage : ContentPage
     private readonly DriveWatchdog _watchdog;
     private readonly MountReconciler _mountReconciler;
     private readonly TrayIconService _tray;
+    private readonly HotkeyService _hotkeys;
     private readonly StorageAlertService _storageAlerts;
     private readonly IdleLockService _idleLock;
 
@@ -47,6 +49,7 @@ public sealed partial class HomePage : ContentPage
         _watchdog = App.ServiceProvider.GetRequiredService<DriveWatchdog>();
         _mountReconciler = App.ServiceProvider.GetRequiredService<MountReconciler>();
         _tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
+        _hotkeys = App.ServiceProvider.GetRequiredService<HotkeyService>();
         _storageAlerts = App.ServiceProvider.GetRequiredService<StorageAlertService>();
         _idleLock = App.ServiceProvider.GetRequiredService<IdleLockService>();
 
@@ -56,7 +59,13 @@ public sealed partial class HomePage : ContentPage
         _modals.Register(DeleteDrive, DeleteDriveLayout, DeleteDriveView);
         _modals.Register(DiagnoseDrive, DiagnoseDriveLayout, DiagnoseDriveView);
         _modals.Register(DriveGroups, DriveGroupsLayout, DriveGroupsView);
+        _modals.Register(AdoptMappings, AdoptMappingsLayout, AdoptMappingsView);
         _modals.AttachEscapeToDismiss(this);
+
+        if (!DrivePlatform.SupportsAdoptingMappings)
+        {
+            DrivesMenu.Remove(AdoptMappingsMenuItem);
+        }
 
         DriveCard.SizeChanged += (_, _) => _viewModel.IsCompact = DriveCard.Width < CompactCardWidth;
 
@@ -90,6 +99,8 @@ public sealed partial class HomePage : ContentPage
             await _watchdog.StartAsync();
 
             await _tray.StartAsync();
+
+            await _hotkeys.StartAsync();
 
             _storageAlerts.Start();
 
@@ -235,6 +246,9 @@ public sealed partial class HomePage : ContentPage
         WeakReferenceMessenger.Default.Register<DriveGroupsMessage>(
             this, async (r, m) => await _modals.ToggleAsync(DriveGroups, m.Show));
 
+        WeakReferenceMessenger.Default.Register<AdoptMappingsMessage>(
+            this, async (r, m) => await _modals.ToggleAsync(AdoptMappings, m.Value));
+
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(
             this, async (r, m) =>
             {
@@ -280,6 +294,14 @@ public sealed partial class HomePage : ContentPage
         if (_viewModel.ExportDrivesCommand.CanExecute(null))
         {
             _viewModel.ExportDrivesCommand.Execute(null);
+        }
+    }
+
+    private void AdoptMappings_Clicked(object sender, EventArgs e)
+    {
+        if (_viewModel.OpenAdoptMappingsModalCommand.CanExecute(null))
+        {
+            _viewModel.OpenAdoptMappingsModalCommand.Execute(null);
         }
     }
 

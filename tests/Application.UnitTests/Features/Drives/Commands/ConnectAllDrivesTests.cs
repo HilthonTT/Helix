@@ -19,6 +19,7 @@ public class ConnectAllDrivesTests
     private readonly INasConnector _nasConnectorMock;
     private readonly IDriveMonitor _driveMonitorMock;
     private readonly IUnitOfWork _unitOfWorkMock;
+    private readonly INetworkLocation _networkLocationMock;
     private readonly IDateTimeProvider _dateTimeProviderMock;
 
     public ConnectAllDrivesTests()
@@ -28,6 +29,7 @@ public class ConnectAllDrivesTests
         _nasConnectorMock = Substitute.For<INasConnector>();
         _driveMonitorMock = Substitute.For<IDriveMonitor>();
         _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+        _networkLocationMock = Substitute.For<INetworkLocation>();
         _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
         _loggedInUserMock.UserId.Returns(UserId);
@@ -43,6 +45,7 @@ public class ConnectAllDrivesTests
             _loggedInUserMock,
             _nasConnectorMock,
             _driveMonitorMock,
+            _networkLocationMock,
             _dateTimeProviderMock);
     }
 
@@ -55,6 +58,57 @@ public class ConnectAllDrivesTests
     private void HaveDrives(params Drive[] drives) =>
         _driveRepositoryMock.GetAsync(UserId, Arg.Any<CancellationToken>())
             .Returns([.. drives]);
+
+    private static Drive PinnedTo(string networkId, string letter)
+    {
+        var drive = Drive.Create(UserId, letter, "nas.local", "Office", "user", "password", autoConnect: true);
+        drive.PinToNetwork(networkId, "Office");
+
+        return drive;
+    }
+
+    private void BeOn(string networkId) =>
+        _networkLocationMock.GetCurrentAsync(Arg.Any<CancellationToken>())
+            .Returns(new NetworkLocation(networkId, "Network"));
+
+    [Fact]
+    public async Task Handle_Should_SkipDrivesPinnedToAnotherNetwork_WhenThePassIsUnattended()
+    {
+        Drive office = PinnedTo("gateway:office", "O");
+        HaveDrives(Automatic, office);
+        BeOn("gateway:home");
+
+        Result result = await _connectAllDrives.Handle(new ConnectAllDrives.Request(OnlyAutoConnect: true));
+
+        result.IsSuccess.Should().BeTrue();
+        await _nasConnectorMock.Received(1).ConnectAsync(Automatic, Arg.Any<CancellationToken>());
+        await _nasConnectorMock.DidNotReceive().ConnectAsync(office, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ConnectDrivesPinnedToThisNetwork_WhenThePassIsUnattended()
+    {
+        Drive office = PinnedTo("gateway:office", "O");
+        HaveDrives(office);
+        BeOn("gateway:office");
+
+        await _connectAllDrives.Handle(new ConnectAllDrives.Request(OnlyAutoConnect: true));
+
+        await _nasConnectorMock.Received(1).ConnectAsync(office, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ConnectDrivesPinnedElsewhere_WhenTheUserAskedForIt()
+    {
+        Drive office = PinnedTo("gateway:office", "O");
+        HaveDrives(office);
+        BeOn("gateway:home");
+
+        await _connectAllDrives.Handle();
+
+        await _nasConnectorMock.Received(1).ConnectAsync(office, Arg.Any<CancellationToken>());
+        await _networkLocationMock.DidNotReceive().GetCurrentAsync(Arg.Any<CancellationToken>());
+    }
 
     [Fact]
     public async Task Handle_Should_ConnectEveryDrive_WhenTheUserAskedForIt()

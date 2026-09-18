@@ -779,4 +779,79 @@
   <data name="UpdateAvailableShort" xml:space="preserve">
     <value>Pembaruan tersedia</value>
   </data>
+  <data name="BrowseShares" xml:space="preserve">
+    <value>Telusuri berbagi</value>
+  </data>
+  <data name="ShareAlreadyAdded" xml:space="preserve">
+    <value>sudah ditambahkan sebagai {0}:</value>
+  </data>
+  <data name="NoSharesFound" xml:space="preserve">
+    <value>Server tidak menampilkan berbagi apa pun untuk kredensial ini.</value>
+  </data>
+  <data name="SharesSelected" xml:space="preserve">
+    <value>{0} berbagi dipilih — masing-masing mendapat hurufnya sendiri, dimulai dari huruf di atas.</value>
+  </data>
+  <data name="NotEnoughLetters" xml:space="preserve">
+    <value>Huruf drive yang tersedia tidak cukup untuk semua berbagi yang dipilih.</value>
+  </data>
+  <data name="DrivesAdded" xml:space="preserve">
+    <value>{0} drive ditambahkan.</value>
+  </data>
+  <data name="DriveAddedOne" xml:space="preserve">
+    <value>Drive ditambahkan.</value>
+  </data>
+  <data name="OnlyOnNetwork" xml:space="preserve">
+    <value>Sambungkan ulang otomatis hanya di {0}</value>
+  </data>
+  <data name="OnlyOnNetworkUnknown" xml:space="preserve">
+    <value>Sambungkan ulang otomatis hanya di jaringan ini</value>
+  </data>
+  <data name="StatusAway" xml:space="preserve">
+    <value>Di luar jaringan</value>
+  </data>
+  <data name="StatusAwayHint" xml:space="preserve">
+    <value>Komputer ini tidak berada di jaringan asal drive, jadi drive tidak disambungkan ulang otomatis. Klik untuk tetap menyambungkannya.</value>
+  </data>
+  <data name="ApplyCredentialsToServerOne" xml:space="preserve">
+    <value>Gunakan kredensial ini untuk drive lain di server ini</value>
+  </data>
+  <data name="ApplyCredentialsToServerMany" xml:space="preserve">
+    <value>Gunakan kredensial ini untuk {0} drive lain di server ini</value>
+  </data>
+  <data name="CredentialsAppliedToServer" xml:space="preserve">
+    <value>Drive lain di server ini juga menggunakan kredensial baru.</value>
+  </data>
+  <data name="DuplicateDrive" xml:space="preserve">
+    <value>Duplikat</value>
+  </data>
+  <data name="TrayOpenFolder" xml:space="preserve">
+    <value>Buka folder</value>
+  </data>
+  <data name="GlobalHotkeys" xml:space="preserve">
+    <value>Pintasan global</value>
+  </data>
+  <data name="GlobalHotkeysDescription" xml:space="preserve">
+    <value>Ctrl+Alt+Shift+C menyambungkan semua drive dan Ctrl+Alt+Shift+D memutuskannya, dari aplikasi mana pun.</value>
+  </data>
+  <data name="HotkeyConnectedAll" xml:space="preserve">
+    <value>Semua drive tersambung.</value>
+  </data>
+  <data name="HotkeyDisconnectedAll" xml:space="preserve">
+    <value>Semua drive terputus.</value>
+  </data>
+  <data name="AdoptMappings" xml:space="preserve">
+    <value>Tambahkan pemetaan yang ada</value>
+  </data>
+  <data name="AdoptMappingsTitle" xml:space="preserve">
+    <value>Drive jaringan yang ada</value>
+  </data>
+  <data name="AdoptMappingsMessage" xml:space="preserve">
+    <value>Huruf-huruf ini dipetakan di komputer ini, tetapi belum dikelola Helix. Centang yang ingin ditambahkan dan masukkan kredensial yang digunakan.</value>
+  </data>
+  <data name="NoMappingsFound" xml:space="preserve">
+    <value>Semua drive jaringan yang dipetakan di komputer ini sudah ada di Helix.</value>
+  </data>
+  <data name="AddSelected" xml:space="preserve">
+    <value>Tambahkan yang dipilih</value>
+  </data>
 </root>

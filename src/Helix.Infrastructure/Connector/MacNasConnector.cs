@@ -71,6 +71,15 @@ internal sealed class MacNasConnector : INasConnector
 
     public bool HasOtherMountsOn(Drive drive) => false;
 
+    public Task<Result<IReadOnlyList<string>>> ListSharesAsync(
+        string host,
+        string username,
+        string password,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(Result.Failure<IReadOnlyList<string>>(DriveErrors.ShareListingUnsupported));
+
+    public IReadOnlyList<MappedShare> GetMappedShares() => [];
+
     private async Task<Result> WhenReachableAsync(
         Drive drive,
         bool fresh,

@@ -571,6 +571,91 @@ and the low-space check measure it under the drive's name. `DeleteDrive` unmount
 is mounted from the share, persistent or not, and refuses the delete if that fails, since a
 record deleted out from under a live mapping leaves a letter nothing in Helix can take down.
 
+### A drive's home network
+
+A drive can be pinned to the network it lives on — `Drive.HomeNetworkId`, with the name it
+had when it was pinned in `HomeNetworkName` for the switch and the pill to show. The
+unattended passes then leave it alone anywhere else: `ReconnectDrive` answers
+`DriveErrors.AwayFromHomeNetwork` **before** it probes the host, and the startup
+`ConnectAllDrives(OnlyAutoConnect)` drops it from the batch. Before this a laptop off its
+NAS's network probed every share every thirty seconds all day and showed a row of amber
+pills for a state that is not a fault; now the row says "Away", in neutral grey, and nothing
+is attempted. Anything the user presses — the row, a group, a selection, "connect all" —
+ignores the pin, for the same reason those ignore `AutoConnect`.
+
+`INetworkLocation` is the seventh platform seam. On Windows a network is identified by the
+**hardware address of the default gateway**: the adapter `GetBestInterface` would route the
+internet through, its IPv4 gateway, and `SendARP` for that gateway's MAC. Not the SSID —
+reading it needs location permission on current Windows, it misses a wired dock entirely,
+and two cafés called "Guest" are not the same place. Not the gateway's IP either, since half
+the routers in the world are `192.168.1.1`; that is only the fallback when ARP will not
+answer. The connection profile's name is read for display and nothing else. Readings are
+cached for ten seconds with the in-flight task shared, like `HostReachability`, because
+every reconnect of a pinned drive asks.
+
+A network that **cannot be identified reads as home**, never as away. A false "away" would
+stop a drive reconnecting that would have come back — the same asymmetry
+`HostReachability` is built on. macOS has no implementation (`UnsupportedNetworkLocation`)
+and the switch is hidden rather than shown and ignored.
+
+`DriveWatchdog` reads the network on every retry sweep, and when it **changes** to a known
+one it connects the auto-connect drives pinned there that are down, through `ConnectDrives`.
+That is what makes "Office" come up on arriving at the office: the monitor only reports
+letters that went away, so a drive that was never mounted this session would otherwise wait
+for somebody to press something. The first reading of a session is only a baseline — the
+startup connect has just handled that network. An `AwayFromHomeNetwork` reconnect is
+treated like `HostUnreachable`: a flat thirty-second retry, logged at Debug, not counted as
+a failure.
+
+### Adding drives from what is already there
+
+**Browsing a server's shares.** The add-drive sheet lists what the server shares, given its
+host and credentials, and a share ticked there fills the name; ticking several creates one
+drive per share through `CreateDrives`, the first on the chosen letter and the rest on the
+next free ones counting down, as the letter picker itself defaults to the last. Shares the
+user already has as drives are shown with their letter and cannot be ticked. `ListShares`
+goes through `INasConnector.ListSharesAsync`, which on Windows is `NetShareEnum` at level 1,
+keeping disk shares that are neither special nor `$`-suffixed.
+
+How it authenticates is the part to leave alone. With a drive letter already mounted from the
+server it enumerates on that session. Otherwise it connects `\\host\IPC$` with the typed
+credentials first — **never** enumerates anonymously first, because an unauthenticated
+`NetShareEnum` signs in as the Windows account and leaves exactly the session that turns the
+next mount into `ERROR_SESSION_CREDENTIAL_CONFLICT`. A 1219 on that `IPC$` connection takes
+the same leftover-session branch as a mount (drop it unforced, try again), and a conflict
+that survives the drop lists the shares on the session that holds the server, because a list
+of names is not a claim about the credentials. It holds the per-host gate like a mount does.
+macOS has no equivalent and the button is hidden (`DrivePlatform.SupportsShareBrowsing`).
+
+**Duplicate** — the row's right-click menu or Ctrl+Shift+D — opens the add sheet with the
+drive's server, credentials, switches and home network filled in and the share left blank:
+the second drive on a NAS is the common case and it is everything but the share. It is the
+natural partner of the browser.
+
+**Adopting existing mappings** lists the letters mapped on this machine that no Helix drive
+claims (`GetUnmanagedMappings` over `INasConnector.GetMappedShares`, which on Windows asks
+`WNetGetConnection` for every letter, remembered-but-unavailable ones included) and turns
+the ticked ones into drives with one set of credentials. They are created persistent,
+because a mapping someone made in Explorer almost always was. `CreateDrives` accepts a letter
+that is mounted from the share it describes, the same exception `CreateDrive` makes, so
+adopting does not require unmapping first. WebDAV mappings (`\\server@SSL\...`) are left
+out; `Drive.Host` cannot hold them.
+
+`CreateDrives` is all-or-nothing: every letter is checked — unique within the batch, not
+already a drive, not held by something else — before anything is inserted, so a batch that
+fails leaves no half of itself behind.
+
+### One server, one set of credentials
+
+Each drive still stores its own username and password, but editing them on a drive whose
+server has other drives offers to apply them to those too (`UpdateDrive.Request
+.ApplyCredentialsToServer`). The switch appears only once the credentials have actually
+changed and only when there is a sibling; it is **off by default**, because a NAS commonly
+carries an admin share and a guest share under different accounts, and changing the other
+drives silently is worse than one more click. "Same server" is `Drive.IsOnSameServerAs`:
+the host string, case-insensitive — two spellings of one NAS are two servers here, which
+errs towards changing too little.
+
 
 ### Finding a drive, and a row in the log
 
@@ -675,10 +760,12 @@ arbitrary content, so making each of them focusable would have meant rebuilding 
 interactive part of the row *and* putting a hundred tab stops in front of a user with
 thirteen drives. Focus lands on the row and the keys act on it, the way a file manager's
 list does: **Enter** connects or disconnects, **Space** ticks, **Delete** deletes, **F2**
-edits, **Ctrl+D** diagnoses, **Ctrl+O** opens the folder. Every one of them is the same work
+edits, **Ctrl+D** diagnoses, **Ctrl+Shift+D** duplicates, **Ctrl+O** opens the folder. Every one of them is the same work
 the mouse reaches through a pill or a chip, routed through `IRowKeys` on `DriveTemplate`, so
 a row does the same thing either way. Ctrl+O is refused rather than swallowed when the drive
-is down, because the chip is not there either.
+is down, because the chip is not there either. The same actions are on the row's right-click
+menu (`FlyoutBase.ContextFlyout`), which is also where Duplicate lives: a fifth chip would
+have widened the actions column and taken the room from the drive's name.
 
 Up and Down are answered by the behavior itself, with WinUI's `FocusManager.TryMoveFocus` —
 moving between rows is the list's business, not the drive's, and this way nothing has to
@@ -891,7 +978,7 @@ DependencyInjection.cs
 
 #### Platform seams
 
-Exactly six abstractions have a genuinely per-OS implementation, and they are bound in
+Exactly seven abstractions have a genuinely per-OS implementation, and they are bound in
 `AddPlatformServices()` behind `#if WINDOWS` / `#elif MACCATALYST` (with an `#else` that
 throws, so a new head fails at composition rather than at first use):
 
@@ -903,6 +990,7 @@ throws, so a new head fails at composition rather than at first use):
 | `ITrayIcon` | `WindowsTrayIcon` — `Shell_NotifyIcon`, hidden window on its own message loop | `UnsupportedTrayIcon` — no-op, `IsSupported` is false |
 | `IStorageProbe` | `WindowsStorageProbe` — mounts are `Z:\` | `MacStorageProbe` — mounts are `~/Helix Drives/Z` |
 | `IIdleTimeProvider` | `WindowsIdleTimeProvider` — `GetLastInputInfo` | `MacIdleTimeProvider` — `CGEventSourceSecondsSinceLastEventType` |
+| `INetworkLocation` | `WindowsNetworkLocation` — default gateway's MAC via `SendARP` | `UnsupportedNetworkLocation` — no-op, `IsSupported` is false |
 
 `INasConnector.GetMountPath` is the seventh thing that needs to know where a letter
 lives, after the two connectors and the two probes. It is asked of the connector because
@@ -1079,7 +1167,7 @@ Models/        observable display models bound by the views
 Platforms/     MAUI platform heads
 Resources/     AppIcon, Fonts, Images, Languages, Splash, Styles
 Services/      DriveWatchdog, TrayIconService, StorageAlertService, IdleLockService,
-               EstateStatus, ModalHost, PassphrasePromptService, Notifier
+               HotkeyService, EstateStatus, ModalHost, PassphrasePromptService, Notifier
 ViewModels/    BaseViewModel + Auditlogs/, Drives/, Settings/, Users/
 Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/, Users/
 ```
@@ -1213,6 +1301,29 @@ it is sitting there in its new position — but a number typed into a box looks 
 whether it was stored or thrown away, and the write lands well after the keystroke that
 caused it.
 
+#### Global shortcuts
+
+`Settings.GlobalHotkeys` turns on **Ctrl+Alt+Shift+C** (connect every drive) and
+**Ctrl+Alt+Shift+D** (disconnect every drive) from any application, through the SharpHook
+hook `MauiProgram` already runs. Off by default: a system-wide chord is something a user
+should ask for, not discover. Three modifiers because Ctrl+Alt is AltGr on the European
+layouts Helix is translated for, and AltGr+C and AltGr+D type characters there. The hook
+does not swallow keys, so another application bound to the same chord still gets it.
+
+`HotkeyService` answers only while a session is live and **not while the idle lock is up** —
+the lock exists to stop someone at an unattended keyboard, and "disconnect every drive" is
+exactly what it should stop. Like the tray's own "disconnect all" it does not confirm: the
+point is that the window is not in front. The outcome goes to the tray balloon when the icon
+is up and to the banner otherwise, and a repeat while one is running is ignored rather than
+queued, since a held key auto-repeats.
+
+#### The tray's folder menu
+
+The tray menu carries **Open folder**, a submenu of the drives that are mounted from their
+share. `TrayMenuItem.Children` is what makes a submenu; `WindowsTrayIcon` numbers every leaf
+of the tree in one sequence as it builds the popup, so a selection still maps back to one
+item id. Only mounted drives are listed — a folder that is not there is not a menu item.
+
 #### Platform-specific presentation code
 
 The XAML, viewmodels, converters and behaviours are shared verbatim; only these carry an
@@ -1276,7 +1387,7 @@ DI is composed via three static extension methods chained in `Helix.App/MauiProg
 - `services.AddInfrastructure()` — `Helix.Infrastructure/DependencyInjection.cs` registers `AppDbContext`, repositories, auth, time, NAS connector, etc.
 - `services.AddPresensation()` — `Helix.App/Extensions/DependencyInjection.cs` (note: the method name is misspelled but kept consistent across the codebase).
 
-Handlers are scoped and must never be cached in viewmodel/page fields. The presentation layer invokes them per operation through `ScopedHandler.HandleAsync((MyHandler h) => h.Handle(request))` (`src/Helix.App/Common/ScopedHandler.cs`), which creates a DI scope per call so each operation gets a fresh `AppDbContext`. Only singletons (`ILoggedInUser`, `INasConnector`, `IDriveMonitor`, `ICountdownService`, `IGlobalHook`, `IVaultCipher`, `IDateTimeProvider`) may be resolved from `App.ServiceProvider` and stored in fields.
+Handlers are scoped and must never be cached in viewmodel/page fields. The presentation layer invokes them per operation through `ScopedHandler.HandleAsync((MyHandler h) => h.Handle(request))` (`src/Helix.App/Common/ScopedHandler.cs`), which creates a DI scope per call so each operation gets a fresh `AppDbContext`. Only singletons (`ILoggedInUser`, `INasConnector`, `IDriveMonitor`, `ICountdownService`, `IGlobalHook`, `IVaultCipher`, `IDateTimeProvider`, `INetworkLocation`) may be resolved from `App.ServiceProvider` and stored in fields.
 
 ### Persistence
 

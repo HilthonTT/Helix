@@ -65,11 +65,14 @@ public static class DependencyInjection
         services.AddScoped<ConnectDrives>();
 
         services.AddScoped<CreateDrive>();
+        services.AddScoped<CreateDrives>();
         services.AddScoped<DeleteDrive>();
         services.AddScoped<DiagnoseDrive>();
         services.AddScoped<GetAvailableDriveLetters>();
         services.AddScoped<GetDriveById>();
         services.AddScoped<GetDrives>();
+        services.AddScoped<GetUnmanagedMappings>();
+        services.AddScoped<ListShares>();
         services.AddScoped<MarkDriveConnected>();
         services.AddScoped<UpdateDrive>();
 

@@ -779,4 +779,79 @@
   <data name="UpdateAvailableShort" xml:space="preserve">
     <value>Mise à jour disponible</value>
   </data>
+  <data name="BrowseShares" xml:space="preserve">
+    <value>Parcourir les partages</value>
+  </data>
+  <data name="ShareAlreadyAdded" xml:space="preserve">
+    <value>déjà ajouté en {0}:</value>
+  </data>
+  <data name="NoSharesFound" xml:space="preserve">
+    <value>Le serveur n'a listé aucun partage pour ces identifiants.</value>
+  </data>
+  <data name="SharesSelected" xml:space="preserve">
+    <value>{0} partages sélectionnés — chacun reçoit sa propre lettre, en commençant par celle ci-dessus.</value>
+  </data>
+  <data name="NotEnoughLetters" xml:space="preserve">
+    <value>Il n'y a pas assez de lettres de lecteur libres pour tous les partages sélectionnés.</value>
+  </data>
+  <data name="DrivesAdded" xml:space="preserve">
+    <value>{0} lecteurs ajoutés.</value>
+  </data>
+  <data name="DriveAddedOne" xml:space="preserve">
+    <value>Lecteur ajouté.</value>
+  </data>
+  <data name="OnlyOnNetwork" xml:space="preserve">
+    <value>Reconnecter automatiquement uniquement sur {0}</value>
+  </data>
+  <data name="OnlyOnNetworkUnknown" xml:space="preserve">
+    <value>Reconnecter automatiquement uniquement sur ce réseau</value>
+  </data>
+  <data name="StatusAway" xml:space="preserve">
+    <value>Hors réseau</value>
+  </data>
+  <data name="StatusAwayHint" xml:space="preserve">
+    <value>Cet ordinateur n'est pas sur le réseau d'origine du lecteur ; il n'est donc pas reconnecté automatiquement. Cliquez pour le connecter quand même.</value>
+  </data>
+  <data name="ApplyCredentialsToServerOne" xml:space="preserve">
+    <value>Utiliser ces identifiants pour l'autre lecteur de ce serveur</value>
+  </data>
+  <data name="ApplyCredentialsToServerMany" xml:space="preserve">
+    <value>Utiliser ces identifiants pour les {0} autres lecteurs de ce serveur</value>
+  </data>
+  <data name="CredentialsAppliedToServer" xml:space="preserve">
+    <value>Les autres lecteurs de ce serveur utilisent aussi les nouveaux identifiants.</value>
+  </data>
+  <data name="DuplicateDrive" xml:space="preserve">
+    <value>Dupliquer</value>
+  </data>
+  <data name="TrayOpenFolder" xml:space="preserve">
+    <value>Ouvrir le dossier</value>
+  </data>
+  <data name="GlobalHotkeys" xml:space="preserve">
+    <value>Raccourcis globaux</value>
+  </data>
+  <data name="GlobalHotkeysDescription" xml:space="preserve">
+    <value>Ctrl+Alt+Maj+C connecte tous les lecteurs et Ctrl+Alt+Maj+D les déconnecte, depuis n'importe quelle application.</value>
+  </data>
+  <data name="HotkeyConnectedAll" xml:space="preserve">
+    <value>Tous les lecteurs sont connectés.</value>
+  </data>
+  <data name="HotkeyDisconnectedAll" xml:space="preserve">
+    <value>Tous les lecteurs sont déconnectés.</value>
+  </data>
+  <data name="AdoptMappings" xml:space="preserve">
+    <value>Ajouter les lecteurs existants</value>
+  </data>
+  <data name="AdoptMappingsTitle" xml:space="preserve">
+    <value>Lecteurs réseau existants</value>
+  </data>
+  <data name="AdoptMappingsMessage" xml:space="preserve">
+    <value>Ces lettres sont attribuées sur cet ordinateur, mais Helix ne les gère pas encore. Cochez celles à ajouter et saisissez les identifiants qu'elles utilisent.</value>
+  </data>
+  <data name="NoMappingsFound" xml:space="preserve">
+    <value>Tous les lecteurs réseau de cet ordinateur sont déjà dans Helix.</value>
+  </data>
+  <data name="AddSelected" xml:space="preserve">
+    <value>Ajouter la sélection</value>
+  </data>
 </root>

@@ -25,10 +25,13 @@ internal sealed class TrayIconService
     private const string ExitId = "exit";
     private const string DriveIdPrefix = "drive:";
     private const string GroupIdPrefix = "group:";
+    private const string OpenFolderId = "open-folder";
+    private const string OpenDriveIdPrefix = "open-drive:";
 
     private readonly ITrayIcon _trayIcon;
     private readonly INasConnector _nasConnector;
     private readonly IDriveMonitor _monitor;
+    private readonly IFileBrowser _fileBrowser;
     private readonly ILogger<TrayIconService> _logger;
     private readonly Lock _gate = new();
 
@@ -52,11 +55,13 @@ internal sealed class TrayIconService
         ITrayIcon trayIcon,
         INasConnector nasConnector,
         IDriveMonitor monitor,
+        IFileBrowser fileBrowser,
         ILogger<TrayIconService> logger)
     {
         _trayIcon = trayIcon;
         _nasConnector = nasConnector;
         _monitor = monitor;
+        _fileBrowser = fileBrowser;
         _logger = logger;
     }
 
@@ -217,7 +222,7 @@ internal sealed class TrayIconService
             _drives = drives;
             _groups = groups;
 
-            _trayIcon.SetMenu(BuildMenu(drives, groups, connected));
+            _trayIcon.SetMenu(BuildMenu(drives, groups, connected, _nasConnector));
 
             _running = _trayIcon.Show($"{AppInfo.Current.Name} — {CountConnected(drives, connected)}/{drives.Count}");
         }
@@ -229,12 +234,23 @@ internal sealed class TrayIconService
     private static List<TrayMenuItem> BuildMenu(
         List<Drive> drives,
         List<DriveGroup> groups,
-        HashSet<string> connected)
+        HashSet<string> connected,
+        INasConnector nasConnector)
     {
         List<TrayMenuItem> items =
         [
             new(OpenId, AppResources.TrayOpen),
         ];
+
+        TrayMenuItem[] folders = [.. drives
+            .Where(drive => connected.Contains(drive.Letter) && nasConnector.IsMountedFrom(drive))
+            .OrderBy(drive => drive.Letter, StringComparer.OrdinalIgnoreCase)
+            .Select(drive => new TrayMenuItem($"{OpenDriveIdPrefix}{drive.Id}", $"{drive.Letter}: — {drive.Name}"))];
+
+        if (folders.Length > 0)
+        {
+            items.Add(new TrayMenuItem(OpenFolderId, AppResources.TrayOpenFolder) { Children = folders });
+        }
 
         if (drives.Count > 0)
         {
@@ -300,6 +316,12 @@ internal sealed class TrayIconService
                     break;
 
                 default:
+                    if (id.StartsWith(OpenDriveIdPrefix, StringComparison.Ordinal))
+                    {
+                        OpenFolder(id[OpenDriveIdPrefix.Length..]);
+                        return;
+                    }
+
                     if (id.StartsWith(GroupIdPrefix, StringComparison.Ordinal))
                     {
                         await ConnectGroupAsync(id[GroupIdPrefix.Length..]);
@@ -325,6 +347,27 @@ internal sealed class TrayIconService
         {
             _logger.LogError(ex, "The tray icon failed to handle the menu selection {MenuItemId}.", id);
         }
+    }
+
+    private void OpenFolder(string rawDriveId)
+    {
+        if (!Guid.TryParse(rawDriveId, out Guid driveId))
+        {
+            return;
+        }
+
+        Drive? drive;
+        lock (_gate)
+        {
+            drive = _drives.FirstOrDefault(d => d.Id == driveId);
+        }
+
+        if (drive is null)
+        {
+            return;
+        }
+
+        Report(_fileBrowser.Open(_nasConnector.GetMountPath(drive.Letter)));
     }
 
     private async Task ConnectGroupAsync(string rawGroupId)

@@ -27,7 +27,8 @@ public sealed class UpdateSettings(
         int StorageAlertThresholdPercent,
         int IdleLockMinutes,
         bool CloseToTray,
-        bool NotifyOnMinimizeToTray)
+        bool NotifyOnMinimizeToTray,
+        bool GlobalHotkeys = SettingsModel.DefaultGlobalHotkeys)
     {
         public sealed class Builder(
             bool autoConnect,
@@ -40,7 +41,8 @@ public sealed class UpdateSettings(
             int storageAlertThresholdPercent,
             int idleLockMinutes,
             bool closeToTray,
-            bool notifyOnMinimizeToTray)
+            bool notifyOnMinimizeToTray,
+            bool globalHotkeys)
         {
             public bool AutoConnect { get; set; } = autoConnect;
 
@@ -64,6 +66,8 @@ public sealed class UpdateSettings(
 
             public bool NotifyOnMinimizeToTray { get; set; } = notifyOnMinimizeToTray;
 
+            public bool GlobalHotkeys { get; set; } = globalHotkeys;
+
             public Request Build() => new(
                 AutoConnect,
                 AutoMinimize,
@@ -75,7 +79,8 @@ public sealed class UpdateSettings(
                 StorageAlertThresholdPercent,
                 IdleLockMinutes,
                 CloseToTray,
-                NotifyOnMinimizeToTray);
+                NotifyOnMinimizeToTray,
+                GlobalHotkeys);
         }
     }
 
@@ -112,7 +117,8 @@ public sealed class UpdateSettings(
             request.StorageAlertThresholdPercent,
             request.IdleLockMinutes,
             request.CloseToTray,
-            request.NotifyOnMinimizeToTray);
+            request.NotifyOnMinimizeToTray,
+            request.GlobalHotkeys);
 
         try
         {

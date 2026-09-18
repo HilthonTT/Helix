@@ -184,6 +184,21 @@ internal sealed partial class SettingsDisplay : ObservableObject
     }
 
     [ObservableProperty]
+    public partial bool GlobalHotkeys { get; set; }
+    async partial void OnGlobalHotkeysChanged(bool value)
+    {
+        if (!_initialized || _rollingBack)
+        {
+            return;
+        }
+
+        if (!await UpdatePropertyAsync(builder => builder.GlobalHotkeys = value))
+        {
+            RollBack(() => GlobalHotkeys = !value);
+        }
+    }
+
+    [ObservableProperty]
     public partial Language Language { get; set; }
     async partial void OnLanguageChanged(Language value)
     {
@@ -254,6 +269,7 @@ internal sealed partial class SettingsDisplay : ObservableObject
         _persistedIdleLockMinutes = settings.IdleLockMinutes;
         CloseToTray = settings.CloseToTray;
         NotifyOnMinimizeToTray = settings.NotifyOnMinimizeToTray;
+        GlobalHotkeys = settings.GlobalHotkeys;
 
         _initialized = true;
     }
@@ -275,7 +291,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 _persistedStorageAlertThresholdPercent,
                 _persistedIdleLockMinutes,
                 CloseToTray,
-                NotifyOnMinimizeToTray);
+                NotifyOnMinimizeToTray,
+                GlobalHotkeys);
 
             updateAction(requestBuilder);
 

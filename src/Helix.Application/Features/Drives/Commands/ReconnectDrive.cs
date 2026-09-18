@@ -15,6 +15,7 @@ public sealed class ReconnectDrive(
     ILoggedInUser loggedInUser,
     INasConnector nasConnector,
     IHostReachability hostReachability,
+    INetworkLocation networkLocation,
     IDateTimeProvider dateTimeProvider) : IHandler
 {
     public sealed record Request(Guid DriveId, bool AttemptReconnect, bool RecordDrop = true);
@@ -47,6 +48,18 @@ public sealed class ReconnectDrive(
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
+        }
+
+        if (drive.HomeNetworkId is not null)
+        {
+            NetworkLocation? here = await networkLocation.GetCurrentAsync(cancellationToken);
+
+            if (drive.IsAwayFrom(here?.Id))
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                return Result.Failure(DriveErrors.AwayFromHomeNetwork(drive.HomeNetworkName));
+            }
         }
 
         if (!await hostReachability.IsReachableAsync(drive.Host, cancellationToken))

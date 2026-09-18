@@ -45,7 +45,11 @@ internal sealed partial class DriveDisplay : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowDisconnected))]
     [NotifyPropertyChangedFor(nameof(ShowUnreachable))]
     [NotifyPropertyChangedFor(nameof(ShowFailed))]
+    [NotifyPropertyChangedFor(nameof(ShowAway))]
+    [NotifyPropertyChangedFor(nameof(ToggleConnectText))]
     public partial bool Connected { get; set; }
+
+    public string ToggleConnectText => Connected ? AppResources.Disconnect : AppResources.Connect;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsNotBusy))]
@@ -53,6 +57,7 @@ internal sealed partial class DriveDisplay : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowDisconnected))]
     [NotifyPropertyChangedFor(nameof(ShowUnreachable))]
     [NotifyPropertyChangedFor(nameof(ShowFailed))]
+    [NotifyPropertyChangedFor(nameof(ShowAway))]
     [NotifyPropertyChangedFor(nameof(BusyText))]
     public partial bool IsBusy { get; set; }
 
@@ -60,6 +65,7 @@ internal sealed partial class DriveDisplay : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowDisconnected))]
     [NotifyPropertyChangedFor(nameof(ShowUnreachable))]
     [NotifyPropertyChangedFor(nameof(ShowFailed))]
+    [NotifyPropertyChangedFor(nameof(ShowAway))]
     public partial DriveOfflineReason OfflineReason { get; set; }
 
     [ObservableProperty]
@@ -74,6 +80,8 @@ internal sealed partial class DriveDisplay : ObservableObject
     public bool ShowUnreachable => IsOffline && OfflineReason == DriveOfflineReason.HostUnreachable;
 
     public bool ShowFailed => IsOffline && OfflineReason == DriveOfflineReason.Refused;
+
+    public bool ShowAway => IsOffline && OfflineReason == DriveOfflineReason.AwayFromHome;
 
     private bool IsOffline => !Connected && !IsBusy;
 
@@ -93,6 +101,13 @@ internal sealed partial class DriveDisplay : ObservableObject
         if (error.Code == DriveErrors.HostUnreachableCode)
         {
             MarkOffline(DriveOfflineReason.HostUnreachable, AppResources.StatusUnreachableHint);
+
+            return;
+        }
+
+        if (error.Code == DriveErrors.AwayFromHomeNetworkCode)
+        {
+            MarkOffline(DriveOfflineReason.AwayFromHome, AppResources.StatusAwayHint);
 
             return;
         }

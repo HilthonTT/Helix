@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
+             xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:DataType="vm:AdoptMappingsViewModel"
+             x:Class="Helix.App.Views.Drives.AdoptMappingsModal"
+             BackgroundColor="Transparent">
+
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{l10n:Translate AdoptMappingsTitle}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{l10n:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+            </Grid>
+
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="14" Padding="24,4,24,20">
+
+                    <Label Text="{l10n:Translate AdoptMappingsMessage}"
+                           Style="{StaticResource Caption}"
+                           IsVisible="{Binding HasMappings}"/>
+
+                    <Label Text="{l10n:Translate NoMappingsFound}"
+                           Style="{StaticResource Caption}"
+                           IsVisible="{Binding ShowNoMappings}"/>
+
+                    <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Mappings}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:MappingOption">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
+                                    <CheckBox IsChecked="{Binding IsSelected}" VerticalOptions="Center"/>
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Label}"
+                                           Style="{StaticResource Caption}"
+                                           VerticalOptions="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="14" IsVisible="{Binding HasMappings}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{l10n:Translate NasUsername}" Style="{StaticResource FieldLabel}"/>
+                            <Border Style="{StaticResource Field}">
+                                <Entry Placeholder="{l10n:Translate AddNasUsernamePlaceholder}"
+                                       Text="{Binding Username}"
+                                       IsPassword="{Binding HideSecrets}"
+                                       IsEnabled="{Binding IsNotBusy}"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{l10n:Translate NasPassword}" Style="{StaticResource FieldLabel}"/>
+                            <Border Style="{StaticResource Field}">
+                                <Entry Placeholder="{l10n:Translate AddNasPasswordPlaceholder}"
+                                       Text="{Binding Password}"
+                                       IsPassword="{Binding HideSecrets}"
+                                       IsEnabled="{Binding IsNotBusy}"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
+                            <Label Text="{l10n:Translate ShowCredentials}"
+                                   Style="{StaticResource Caption}"
+                                   VerticalOptions="Center"/>
+                            <Switch Grid.Column="1"
+                                    Scale="0.85"
+                                    HorizontalOptions="End"
+                                    IsToggled="{Binding HideSecrets, Converter={StaticResource InvertedBoolConverter}, Mode=TwoWay}"/>
+                        </Grid>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,16,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Cancel}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Grid.Column="1"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate AddSelected}"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding HasMappings}"/>
+            </Grid>
+        </Grid>
+    </Border>
+
+</ContentView>

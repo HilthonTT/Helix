@@ -124,6 +124,7 @@ internal static class RowFocus
         }
 
         bool control = IsDown(Windows.System.VirtualKey.Control);
+        bool shift = IsDown(Windows.System.VirtualKey.Shift);
 
         RowKey? key = e.Key switch
         {
@@ -131,6 +132,7 @@ internal static class RowFocus
             Windows.System.VirtualKey.Space when !control => RowKey.Select,
             Windows.System.VirtualKey.Delete when !control => RowKey.Delete,
             Windows.System.VirtualKey.F2 when !control => RowKey.Edit,
+            Windows.System.VirtualKey.D when control && shift => RowKey.Duplicate,
             Windows.System.VirtualKey.D when control => RowKey.Diagnose,
             Windows.System.VirtualKey.O when control => RowKey.Open,
             _ => null,

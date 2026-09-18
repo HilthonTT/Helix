@@ -67,6 +67,10 @@ public sealed class Drive : Entity, IAuditable
 
     public bool ConnectByHostname { get; private set; }
 
+    public string? HomeNetworkId { get; private set; }
+
+    public string? HomeNetworkName { get; private set; }
+
     public DateTime? LastConnectedOnUtc { get; private set; }
 
     public DateTime CreatedOnUtc { get; set; }
@@ -77,6 +81,37 @@ public sealed class Drive : Entity, IAuditable
     {
         LastConnectedOnUtc = utcNow;
     }
+
+    public bool IsAwayFrom(string? currentNetworkId) =>
+        HomeNetworkId is not null &&
+        currentNetworkId is not null &&
+        !string.Equals(HomeNetworkId, currentNetworkId, StringComparison.OrdinalIgnoreCase);
+
+    public void PinToNetwork(string? networkId, string? networkName)
+    {
+        if (string.IsNullOrWhiteSpace(networkId))
+        {
+            HomeNetworkId = null;
+            HomeNetworkName = null;
+
+            return;
+        }
+
+        HomeNetworkId = networkId.Trim();
+        HomeNetworkName = string.IsNullOrWhiteSpace(networkName) ? null : networkName.Trim();
+    }
+
+    public void ChangeCredentials(string username, string password)
+    {
+        Ensure.NotNullOrEmpty(username, nameof(username));
+        Ensure.NotNullOrEmpty(password, nameof(password));
+
+        Username = username.Trim();
+        Password = password;
+    }
+
+    public bool IsOnSameServerAs(string host) =>
+        string.Equals(Host, host.Trim(), StringComparison.OrdinalIgnoreCase);
 
     public static Drive Create(
         Guid userId,

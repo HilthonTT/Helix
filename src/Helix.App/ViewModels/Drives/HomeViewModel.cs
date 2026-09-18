@@ -139,6 +139,14 @@ internal sealed partial class HomeViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Send(new CreateDriveMessage(true));
     }
 
+    public bool SupportsAdoptingMappings => DrivePlatform.SupportsAdoptingMappings;
+
+    [RelayCommand]
+    private static void OpenAdoptMappingsModal()
+    {
+        WeakReferenceMessenger.Default.Send(new AdoptMappingsMessage(true));
+    }
+
     [RelayCommand]
     private static void OpenDriveGroupsModal()
     {

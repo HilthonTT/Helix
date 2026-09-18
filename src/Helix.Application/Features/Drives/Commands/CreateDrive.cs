@@ -23,7 +23,9 @@ public sealed class CreateDrive(
         string Password,
         bool AutoConnect = true,
         bool Persistent = false,
-        bool ConnectByHostname = false);
+        bool ConnectByHostname = false,
+        string? HomeNetworkId = null,
+        string? HomeNetworkName = null);
 
     public async Task<Result<Drive>> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -53,6 +55,8 @@ public sealed class CreateDrive(
             request.AutoConnect,
             request.Persistent,
             request.ConnectByHostname);
+
+        drive.PinToNetwork(request.HomeNetworkId, request.HomeNetworkName);
 
         if (nasConnector.GetConnectedLetters().Contains(drive.Letter) && !nasConnector.IsMountedFrom(drive))
         {

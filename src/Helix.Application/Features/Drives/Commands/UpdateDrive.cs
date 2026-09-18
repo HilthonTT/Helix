@@ -25,7 +25,10 @@ public sealed class UpdateDrive(
         string Password,
         bool AutoConnect = true,
         bool Persistent = false,
-        bool ConnectByHostname = false);
+        bool ConnectByHostname = false,
+        string? HomeNetworkId = null,
+        string? HomeNetworkName = null,
+        bool ApplyCredentialsToServer = false);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -100,6 +103,18 @@ public sealed class UpdateDrive(
             request.AutoConnect,
             request.Persistent,
             request.ConnectByHostname);
+
+        drive.PinToNetwork(request.HomeNetworkId, request.HomeNetworkName);
+
+        if (request.ApplyCredentialsToServer)
+        {
+            List<Drive> drives = await driveRepository.GetAsync(loggedInUser.UserId, cancellationToken);
+
+            foreach (Drive sibling in drives.Where(d => d.Id != drive.Id && d.IsOnSameServerAs(drive.Host)))
+            {
+                sibling.ChangeCredentials(drive.Username, drive.Password);
+            }
+        }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

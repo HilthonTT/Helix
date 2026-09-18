@@ -24,6 +24,7 @@ internal sealed class DriveWatchdog
 
     private readonly IDriveMonitor _monitor;
     private readonly INasConnector _nasConnector;
+    private readonly INetworkLocation _networkLocation;
     private readonly ILogger<DriveWatchdog> _logger;
     private readonly Lock _gate = new();
 
@@ -36,10 +37,18 @@ internal sealed class DriveWatchdog
     private int _generation;
     private bool _subscribed;
 
-    public DriveWatchdog(IDriveMonitor monitor, INasConnector nasConnector, ILogger<DriveWatchdog> logger)
+    private bool _networkSeen;
+    private string? _networkId;
+
+    public DriveWatchdog(
+        IDriveMonitor monitor,
+        INasConnector nasConnector,
+        INetworkLocation networkLocation,
+        ILogger<DriveWatchdog> logger)
     {
         _monitor = monitor;
         _nasConnector = nasConnector;
+        _networkLocation = networkLocation;
         _logger = logger;
     }
 
@@ -89,6 +98,9 @@ internal sealed class DriveWatchdog
             _pending.Clear();
             _inFlight.Clear();
         }
+
+        _networkSeen = false;
+        _networkId = null;
     }
 
     public async Task RefreshWatchedDrivesAsync()
@@ -170,6 +182,8 @@ internal sealed class DriveWatchdog
             {
                 try
                 {
+                    await CheckNetworkArrivalAsync();
+
                     await RetryDueAsync();
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -234,6 +248,85 @@ internal sealed class DriveWatchdog
         await Task.WhenAll(attempts);
     }
 
+    private async Task CheckNetworkArrivalAsync()
+    {
+        if (!_networkLocation.IsSupported)
+        {
+            return;
+        }
+
+        NetworkLocation? here = await _networkLocation.GetCurrentAsync();
+
+        bool firstReading = !_networkSeen;
+
+        _networkSeen = true;
+
+        if (here is null)
+        {
+            return;
+        }
+
+        bool moved = !string.Equals(here.Id, _networkId, StringComparison.OrdinalIgnoreCase);
+
+        _networkId = here.Id;
+
+        if (firstReading || !moved)
+        {
+            return;
+        }
+
+        await ConnectDrivesAtHomeAsync(here);
+    }
+
+    private async Task ConnectDrivesAtHomeAsync(NetworkLocation here)
+    {
+        if (!await IsAutoConnectEnabledAsync())
+        {
+            return;
+        }
+
+        Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+        if (drives.IsFailure)
+        {
+            return;
+        }
+
+        Guid[] arriving = [.. drives.Value
+            .Where(drive => drive.AutoConnect &&
+                            drive.HomeNetworkId is not null &&
+                            !drive.IsAwayFrom(here.Id) &&
+                            !_nasConnector.IsMountedFrom(drive))
+            .Select(drive => drive.Id)];
+
+        if (arriving.Length == 0)
+        {
+            return;
+        }
+
+        _logger.LogInformation(
+            "Arrived on a drive's home network; connecting the {Count} drive(s) that belong to it.",
+            arriving.Length);
+
+        Result result = await ScopedHandler.HandleAsync(
+            (ConnectDrives h) => h.Handle(new ConnectDrives.Request(arriving)));
+
+        if (result.IsFailure)
+        {
+            _logger.LogWarning(
+                "Some drives did not connect on arriving at their home network — {Reason}",
+                result.Error.Description);
+        }
+
+        foreach (Guid driveId in arriving)
+        {
+            Forget(driveId);
+        }
+
+        await _monitor.PollAsync();
+
+        PublishToUi(arriving);
+    }
+
     private async Task AttemptAsync(Guid driveId, string letter, bool reconnect, bool recordDrop)
     {
         int generation;
@@ -283,9 +376,16 @@ internal sealed class DriveWatchdog
                 return;
             }
 
-            if (result.Error.Code == DriveErrors.HostUnreachableCode)
+            if (result.Error.Code is DriveErrors.HostUnreachableCode or DriveErrors.AwayFromHomeNetworkCode)
             {
-                _logger.LogDebug("Drive {Letter}: is waiting for its NAS to be reachable again.", letter);
+                if (result.Error.Code == DriveErrors.HostUnreachableCode)
+                {
+                    _logger.LogDebug("Drive {Letter}: is waiting for its NAS to be reachable again.", letter);
+                }
+                else
+                {
+                    _logger.LogDebug("Drive {Letter}: is waiting to be back on its home network.", letter);
+                }
 
                 PublishFailureToUi(driveId, result.Error);
 

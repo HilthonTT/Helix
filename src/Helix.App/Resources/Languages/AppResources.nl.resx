@@ -779,4 +779,79 @@
   <data name="UpdateAvailableShort" xml:space="preserve">
     <value>Update beschikbaar</value>
   </data>
+  <data name="BrowseShares" xml:space="preserve">
+    <value>Shares bekijken</value>
+  </data>
+  <data name="ShareAlreadyAdded" xml:space="preserve">
+    <value>al toegevoegd als {0}:</value>
+  </data>
+  <data name="NoSharesFound" xml:space="preserve">
+    <value>De server gaf geen shares voor deze inloggegevens.</value>
+  </data>
+  <data name="SharesSelected" xml:space="preserve">
+    <value>{0} shares geselecteerd — elk krijgt een eigen letter, te beginnen met die hierboven.</value>
+  </data>
+  <data name="NotEnoughLetters" xml:space="preserve">
+    <value>Er zijn niet genoeg vrije stationsletters voor alle geselecteerde shares.</value>
+  </data>
+  <data name="DrivesAdded" xml:space="preserve">
+    <value>{0} schijven toegevoegd.</value>
+  </data>
+  <data name="DriveAddedOne" xml:space="preserve">
+    <value>Schijf toegevoegd.</value>
+  </data>
+  <data name="OnlyOnNetwork" xml:space="preserve">
+    <value>Alleen op {0} automatisch verbinden</value>
+  </data>
+  <data name="OnlyOnNetworkUnknown" xml:space="preserve">
+    <value>Alleen op dit netwerk automatisch verbinden</value>
+  </data>
+  <data name="StatusAway" xml:space="preserve">
+    <value>Buiten netwerk</value>
+  </data>
+  <data name="StatusAwayHint" xml:space="preserve">
+    <value>Deze computer is niet op het thuisnetwerk van de schijf, dus die wordt niet automatisch verbonden. Klik om toch te verbinden.</value>
+  </data>
+  <data name="ApplyCredentialsToServerOne" xml:space="preserve">
+    <value>Deze inloggegevens ook voor de andere schijf op deze server gebruiken</value>
+  </data>
+  <data name="ApplyCredentialsToServerMany" xml:space="preserve">
+    <value>Deze inloggegevens ook voor de andere {0} schijven op deze server gebruiken</value>
+  </data>
+  <data name="CredentialsAppliedToServer" xml:space="preserve">
+    <value>De andere schijven op deze server gebruiken nu ook de nieuwe inloggegevens.</value>
+  </data>
+  <data name="DuplicateDrive" xml:space="preserve">
+    <value>Dupliceren</value>
+  </data>
+  <data name="TrayOpenFolder" xml:space="preserve">
+    <value>Map openen</value>
+  </data>
+  <data name="GlobalHotkeys" xml:space="preserve">
+    <value>Globale sneltoetsen</value>
+  </data>
+  <data name="GlobalHotkeysDescription" xml:space="preserve">
+    <value>Ctrl+Alt+Shift+C verbindt alle schijven en Ctrl+Alt+Shift+D verbreekt ze, vanuit elke toepassing.</value>
+  </data>
+  <data name="HotkeyConnectedAll" xml:space="preserve">
+    <value>Alle schijven zijn verbonden.</value>
+  </data>
+  <data name="HotkeyDisconnectedAll" xml:space="preserve">
+    <value>Alle schijven zijn verbroken.</value>
+  </data>
+  <data name="AdoptMappings" xml:space="preserve">
+    <value>Bestaande koppelingen toevoegen</value>
+  </data>
+  <data name="AdoptMappingsTitle" xml:space="preserve">
+    <value>Bestaande netwerkschijven</value>
+  </data>
+  <data name="AdoptMappingsMessage" xml:space="preserve">
+    <value>Deze letters zijn op deze computer gekoppeld, maar Helix beheert ze nog niet. Vink aan welke je wilt toevoegen en vul de inloggegevens in die ze gebruiken.</value>
+  </data>
+  <data name="NoMappingsFound" xml:space="preserve">
+    <value>Alle gekoppelde netwerkschijven op deze computer staan al in Helix.</value>
+  </data>
+  <data name="AddSelected" xml:space="preserve">
+    <value>Selectie toevoegen</value>
+  </data>
 </root>

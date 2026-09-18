@@ -2217,5 +2217,230 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("GroupMemberCount", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Browse shares.
+        /// </summary>
+        internal static string BrowseShares {
+            get {
+                return ResourceManager.GetString("BrowseShares", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to already added as {0}:.
+        /// </summary>
+        internal static string ShareAlreadyAdded {
+            get {
+                return ResourceManager.GetString("ShareAlreadyAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The server did not list any shares for these credentials..
+        /// </summary>
+        internal static string NoSharesFound {
+            get {
+                return ResourceManager.GetString("NoSharesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} shares selected — each gets its own letter, starting with the one above..
+        /// </summary>
+        internal static string SharesSelected {
+            get {
+                return ResourceManager.GetString("SharesSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are not enough free drive letters for every selected share..
+        /// </summary>
+        internal static string NotEnoughLetters {
+            get {
+                return ResourceManager.GetString("NotEnoughLetters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} drives added..
+        /// </summary>
+        internal static string DrivesAdded {
+            get {
+                return ResourceManager.GetString("DrivesAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drive added..
+        /// </summary>
+        internal static string DriveAddedOne {
+            get {
+                return ResourceManager.GetString("DriveAddedOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reconnect automatically only on {0}.
+        /// </summary>
+        internal static string OnlyOnNetwork {
+            get {
+                return ResourceManager.GetString("OnlyOnNetwork", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reconnect automatically only on this network.
+        /// </summary>
+        internal static string OnlyOnNetworkUnknown {
+            get {
+                return ResourceManager.GetString("OnlyOnNetworkUnknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Away.
+        /// </summary>
+        internal static string StatusAway {
+            get {
+                return ResourceManager.GetString("StatusAway", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This computer is not on the drive's home network, so it is not reconnected automatically. Click to connect it anyway..
+        /// </summary>
+        internal static string StatusAwayHint {
+            get {
+                return ResourceManager.GetString("StatusAwayHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use these credentials for the other drive on this server.
+        /// </summary>
+        internal static string ApplyCredentialsToServerOne {
+            get {
+                return ResourceManager.GetString("ApplyCredentialsToServerOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use these credentials for the other {0} drives on this server.
+        /// </summary>
+        internal static string ApplyCredentialsToServerMany {
+            get {
+                return ResourceManager.GetString("ApplyCredentialsToServerMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The other drives on this server use the new credentials too..
+        /// </summary>
+        internal static string CredentialsAppliedToServer {
+            get {
+                return ResourceManager.GetString("CredentialsAppliedToServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate.
+        /// </summary>
+        internal static string DuplicateDrive {
+            get {
+                return ResourceManager.GetString("DuplicateDrive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open folder.
+        /// </summary>
+        internal static string TrayOpenFolder {
+            get {
+                return ResourceManager.GetString("TrayOpenFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Global shortcuts.
+        /// </summary>
+        internal static string GlobalHotkeys {
+            get {
+                return ResourceManager.GetString("GlobalHotkeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ctrl+Alt+Shift+C connects every drive and Ctrl+Alt+Shift+D disconnects them, from any application..
+        /// </summary>
+        internal static string GlobalHotkeysDescription {
+            get {
+                return ResourceManager.GetString("GlobalHotkeysDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Every drive is connected..
+        /// </summary>
+        internal static string HotkeyConnectedAll {
+            get {
+                return ResourceManager.GetString("HotkeyConnectedAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Every drive is disconnected..
+        /// </summary>
+        internal static string HotkeyDisconnectedAll {
+            get {
+                return ResourceManager.GetString("HotkeyDisconnectedAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add existing mappings.
+        /// </summary>
+        internal static string AdoptMappings {
+            get {
+                return ResourceManager.GetString("AdoptMappings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Existing network drives.
+        /// </summary>
+        internal static string AdoptMappingsTitle {
+            get {
+                return ResourceManager.GetString("AdoptMappingsTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to These letters are mapped on this computer, but Helix does not manage them yet. Tick the ones to add and enter the credentials they use..
+        /// </summary>
+        internal static string AdoptMappingsMessage {
+            get {
+                return ResourceManager.GetString("AdoptMappingsMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Every mapped network drive on this computer is already in Helix..
+        /// </summary>
+        internal static string NoMappingsFound {
+            get {
+                return ResourceManager.GetString("NoMappingsFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add selected.
+        /// </summary>
+        internal static string AddSelected {
+            get {
+                return ResourceManager.GetString("AddSelected", resourceCulture);
+            }
+        }
     }
 }

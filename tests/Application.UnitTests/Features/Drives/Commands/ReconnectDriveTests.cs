@@ -23,6 +23,7 @@ public class ReconnectDriveTests
     private readonly ILoggedInUser _loggedInUserMock;
     private readonly INasConnector _nasConnectorMock;
     private readonly IHostReachability _hostReachabilityMock;
+    private readonly INetworkLocation _networkLocationMock;
     private readonly IDateTimeProvider _dateTimeProviderMock;
 
     private readonly Drive _drive;
@@ -35,6 +36,7 @@ public class ReconnectDriveTests
         _loggedInUserMock = Substitute.For<ILoggedInUser>();
         _nasConnectorMock = Substitute.For<INasConnector>();
         _hostReachabilityMock = Substitute.For<IHostReachability>();
+        _networkLocationMock = Substitute.For<INetworkLocation>();
         _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
         _hostReachabilityMock
@@ -50,6 +52,7 @@ public class ReconnectDriveTests
             _loggedInUserMock,
             _nasConnectorMock,
             _hostReachabilityMock,
+            _networkLocationMock,
             _dateTimeProviderMock);
 
         _drive = Drive.Create(UserId, "Z", "192.168.0.1", "Media Vault", "Username", "Password");
@@ -69,6 +72,59 @@ public class ReconnectDriveTests
             .Do(call => entries.Add(call.Arg<Auditlog>()));
 
         return entries;
+    }
+
+    private void BeOn(string? networkId) =>
+        _networkLocationMock.GetCurrentAsync(Arg.Any<CancellationToken>())
+            .Returns(networkId is null ? null : new NetworkLocation(networkId, "Network"));
+
+    [Fact]
+    public async Task Handle_Should_NotTryTheShare_WhenAwayFromTheDrivesHomeNetwork()
+    {
+        _drive.PinToNetwork("gateway:aa", "Home");
+        BeOn("gateway:bb");
+
+        Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, AttemptReconnect: true));
+
+        result.Error.Code.Should().Be(DriveErrors.AwayFromHomeNetworkCode);
+        await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
+        await _hostReachabilityMock.DidNotReceive().IsReachableAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_Reconnect_WhenOnTheDrivesHomeNetwork()
+    {
+        _drive.PinToNetwork("gateway:aa", "Home");
+        BeOn("GATEWAY:AA");
+
+        _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
+
+        Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, AttemptReconnect: true));
+
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Handle_Should_Reconnect_WhenTheNetworkCannotBeIdentified()
+    {
+        _drive.PinToNetwork("gateway:aa", "Home");
+        BeOn(null);
+
+        _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
+
+        Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, AttemptReconnect: true));
+
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotAskWhichNetworkThisIs_ForADriveWithNoHome()
+    {
+        _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
+
+        await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, AttemptReconnect: true));
+
+        await _networkLocationMock.DidNotReceive().GetCurrentAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

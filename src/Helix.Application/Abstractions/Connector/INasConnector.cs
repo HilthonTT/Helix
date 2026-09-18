@@ -23,4 +23,12 @@ public interface INasConnector
     bool IsMountedFrom(Drive drive);
 
     bool HasOtherMountsOn(Drive drive);
+
+    Task<Result<IReadOnlyList<string>>> ListSharesAsync(
+        string host,
+        string username,
+        string password,
+        CancellationToken cancellationToken = default);
+
+    IReadOnlyList<MappedShare> GetMappedShares();
 }

@@ -138,6 +138,8 @@ public static class DependencyInjection
         services.AddSingleton<IStorageProbe, WindowsStorageProbe>();
 
         services.AddSingleton<IIdleTimeProvider, WindowsIdleTimeProvider>();
+
+        services.AddSingleton<INetworkLocation, WindowsNetworkLocation>();
 #elif MACCATALYST
         services.AddSingleton<INasConnector, MacNasConnector>();
 
@@ -149,11 +151,14 @@ public static class DependencyInjection
         services.AddSingleton<IStorageProbe, MacStorageProbe>();
 
         services.AddSingleton<IIdleTimeProvider, MacIdleTimeProvider>();
+
+        services.AddSingleton<INetworkLocation, UnsupportedNetworkLocation>();
 #else
         throw new PlatformNotSupportedException(
             "Helix has no platform services for this target framework. Add implementations of " +
             $"{nameof(INasConnector)}, {nameof(IStartupService)}, {nameof(IDesktopService)}, " +
-            $"{nameof(ITrayIcon)}, {nameof(IStorageProbe)} and {nameof(IIdleTimeProvider)} for it.");
+            $"{nameof(ITrayIcon)}, {nameof(IStorageProbe)}, {nameof(IIdleTimeProvider)} and " +
+            $"{nameof(INetworkLocation)} for it.");
 #endif
 
         return services;

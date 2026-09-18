@@ -15,7 +15,7 @@ namespace Helix.Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.11");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
 
             modelBuilder.Entity("Helix.Domain.Auditlogs.Auditlog", b =>
                 {
@@ -105,6 +105,12 @@ namespace Helix.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("HomeNetworkId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HomeNetworkName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Host")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -168,6 +174,9 @@ namespace Helix.Infrastructure.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("CloseToTray")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("GlobalHotkeys")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("IdleLockMinutes")

@@ -121,6 +121,218 @@ internal sealed class WindowsNasConnector(
         return false;
     }
 
+    public async Task<Result<IReadOnlyList<string>>> ListSharesAsync(
+        string host,
+        string username,
+        string password,
+        CancellationToken cancellationToken = default)
+    {
+        if (!await hostReachability.ProbeNowAsync(host, cancellationToken))
+        {
+            return Result.Failure<IReadOnlyList<string>>(DriveErrors.HostUnreachable(host));
+        }
+
+        string uncHost = ToUncHost(host);
+        SemaphoreSlim gate = _hostGates.GetOrAdd(uncHost, _ => new SemaphoreSlim(1, 1));
+
+        bool held;
+
+        try
+        {
+            held = await gate.WaitAsync(MountTimeoutMilliseconds, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed("Operation canceled by user."));
+        }
+
+        Task<Result<IReadOnlyList<string>>> listing = Task.Run(
+            () => ListShares(uncHost, username, password),
+            CancellationToken.None);
+
+        try
+        {
+            return await listing.WaitAsync(TimeSpan.FromMilliseconds(MountTimeoutMilliseconds), cancellationToken);
+        }
+        catch (TimeoutException)
+        {
+            return Result.Failure<IReadOnlyList<string>>(DriveErrors.ConnectionTimedOut);
+        }
+        catch (OperationCanceledException)
+        {
+            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed("Operation canceled by user."));
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed($"Unexpected error: {ex.Message}"));
+        }
+        finally
+        {
+            if (held)
+            {
+                _ = listing.ContinueWith(
+                    _ => gate.Release(),
+                    CancellationToken.None,
+                    TaskContinuationOptions.ExecuteSynchronously,
+                    TaskScheduler.Default);
+            }
+        }
+    }
+
+    public IReadOnlyList<MappedShare> GetMappedShares()
+    {
+        List<MappedShare> mappings = [];
+
+        for (char letter = 'A'; letter <= 'Z'; letter++)
+        {
+            string? remote = RemoteNameOf($"{letter}:");
+            if (remote is null || !remote.StartsWith(@"\\", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            string path = remote[2..].TrimEnd('\\');
+            int separator = path.IndexOf('\\');
+            if (separator <= 0 || separator == path.Length - 1)
+            {
+                continue;
+            }
+
+            string server = path[..separator];
+            if (server.Contains('@', StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            mappings.Add(new MappedShare(letter.ToString(), FromUncHost(server), path[(separator + 1)..]));
+        }
+
+        return mappings;
+    }
+
+    private Result<IReadOnlyList<string>> ListShares(string uncHost, string username, string password)
+    {
+        if (HasLiveConnectionTo(uncHost))
+        {
+            return Enumerated(uncHost);
+        }
+
+        string ipc = ShareOn(uncHost, "IPC$");
+
+        int code = AddConnection(local: null, ipc, username, password, CONNECT_TEMPORARY);
+
+        if (code == ERROR_SESSION_CREDENTIAL_CONFLICT)
+        {
+            DropIdleServerSession(uncHost);
+
+            code = AddConnection(local: null, ipc, username, password, CONNECT_TEMPORARY);
+        }
+
+        if (code == ERROR_SESSION_CREDENTIAL_CONFLICT)
+        {
+            logger.LogInformation("Listing shares: the server is held by another session; listing on that one.");
+
+            Result<IReadOnlyList<string>> joined = Enumerated(uncHost);
+
+            return joined.IsSuccess
+                ? joined
+                : Result.Failure<IReadOnlyList<string>>(DriveErrors.SessionConflict(DescribeWNetError(code)));
+        }
+
+        if (code != NO_ERROR)
+        {
+            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed(DescribeWNetError(code)));
+        }
+
+        try
+        {
+            return Enumerated(uncHost);
+        }
+        finally
+        {
+            WNetCancelConnection2W(ipc, 0, fForce: false);
+        }
+    }
+
+    private static Result<IReadOnlyList<string>> Enumerated(string uncHost)
+    {
+        int status = EnumerateDiskShares(uncHost, out List<string> shares);
+
+        return status == NO_ERROR
+            ? Result.Success<IReadOnlyList<string>>(shares)
+            : Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed(DescribeWNetError(status)));
+    }
+
+    private static int EnumerateDiskShares(string uncHost, out List<string> shares)
+    {
+        shares = [];
+
+        int resume = 0;
+        int status;
+
+        do
+        {
+            status = NetShareEnum(
+                $@"\\{uncHost}",
+                1,
+                out IntPtr buffer,
+                MAX_PREFERRED_LENGTH,
+                out int read,
+                out _,
+                ref resume);
+
+            if (status != NO_ERROR && status != ERROR_MORE_DATA)
+            {
+                return status;
+            }
+
+            try
+            {
+                int size = Marshal.SizeOf<SHARE_INFO_1>();
+
+                for (int i = 0; i < read; i++)
+                {
+                    SHARE_INFO_1 share = Marshal.PtrToStructure<SHARE_INFO_1>(buffer + (i * size));
+
+                    bool isDisk = (share.shi1_type & STYPE_MASK) == STYPE_DISKTREE;
+                    bool isSpecial = (share.shi1_type & STYPE_SPECIAL) != 0;
+
+                    if (isDisk && !isSpecial && !string.IsNullOrEmpty(share.shi1_netname) &&
+                        !share.shi1_netname.EndsWith('$'))
+                    {
+                        shares.Add(share.shi1_netname);
+                    }
+                }
+            }
+            finally
+            {
+                if (buffer != IntPtr.Zero)
+                {
+                    NetApiBufferFree(buffer);
+                }
+            }
+        }
+        while (status == ERROR_MORE_DATA);
+
+        return NO_ERROR;
+    }
+
+    internal static string FromUncHost(string uncHost)
+    {
+        const string Ipv6Suffix = ".ipv6-literal.net";
+
+        if (!uncHost.EndsWith(Ipv6Suffix, StringComparison.OrdinalIgnoreCase))
+        {
+            return uncHost;
+        }
+
+        string literal = uncHost[..^Ipv6Suffix.Length]
+            .Replace('-', ':')
+            .Replace('s', '%');
+
+        return IPAddress.TryParse(literal, out IPAddress? address) ? address.ToString() : uncHost;
+    }
+
     private static bool RemoteHostIs(string remote, string uncHost) =>
         remote.StartsWith($@"\\{uncHost}\", StringComparison.OrdinalIgnoreCase);
 
@@ -563,6 +775,33 @@ internal sealed class WindowsNasConnector(
     private const int ERROR_SESSION_CREDENTIAL_CONFLICT = 1219;
 
     private const int MaxPathLength = 32_767;
+
+    private const int ERROR_MORE_DATA = 234;
+    private const int MAX_PREFERRED_LENGTH = -1;
+    private const uint STYPE_MASK = 0x000000FF;
+    private const uint STYPE_DISKTREE = 0x00000000;
+    private const uint STYPE_SPECIAL = 0x80000000;
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct SHARE_INFO_1
+    {
+        [MarshalAs(UnmanagedType.LPWStr)] public string shi1_netname;
+        public uint shi1_type;
+        [MarshalAs(UnmanagedType.LPWStr)] public string shi1_remark;
+    }
+
+    [DllImport("netapi32.dll", CharSet = CharSet.Unicode)]
+    private static extern int NetShareEnum(
+        string servername,
+        int level,
+        out IntPtr bufptr,
+        int prefmaxlen,
+        out int entriesread,
+        out int totalentries,
+        ref int resume_handle);
+
+    [DllImport("netapi32.dll")]
+    private static extern int NetApiBufferFree(IntPtr buffer);
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct NETRESOURCE

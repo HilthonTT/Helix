@@ -19,4 +19,6 @@ internal enum RowKey
 
     /// <summary>Ctrl+O.</summary>
     Open,
+
+    Duplicate,
 }

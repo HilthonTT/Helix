@@ -24,6 +24,8 @@ public static class DependencyInjection
 
         services.AddSingleton<TrayIconService>();
 
+        services.AddSingleton<HotkeyService>();
+
         services.AddSingleton<StorageAlertService>();
 
         services.AddSingleton<IdleLockService>();

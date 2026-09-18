@@ -18,6 +18,28 @@ public static class DriveErrors
 
     public const string HostUnreachableCode = "Drive.HostUnreachable";
 
+    public static Error AwayFromHomeNetwork(string? networkName) => Error.Problem(
+        AwayFromHomeNetworkCode,
+        networkName is null
+            ? "This drive only reconnects on its home network, and this is not it."
+            : $"This drive only reconnects on '{networkName}', and this is not it.");
+
+    public const string AwayFromHomeNetworkCode = "Drive.AwayFromHomeNetwork";
+
+    public static readonly Error ShareListingUnsupported = Error.Problem(
+        "Drive.ShareListingUnsupported",
+        "Listing a server's shares is not supported on this platform.");
+
+    public static Error SharesNotListed(string message) => Error.Problem("Drive.SharesNotListed", message);
+
+    public static readonly Error NothingToCreate = Error.Problem(
+        "Drive.NothingToCreate",
+        "Choose at least one share to add.");
+
+    public static Error DuplicateLetter(string letter) => Error.Conflict(
+        "Drive.DuplicateLetter",
+        $"The drive letter '{letter}' was given to more than one share.");
+
     public static Error SessionConflict(string message) => Error.Conflict(SessionConflictCode, message);
 
     public const string SessionConflictCode = "Drive.SessionConflict";

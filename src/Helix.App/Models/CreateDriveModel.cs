@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Helix.Domain.Drives;
 
 namespace Helix.App.Models;
 
@@ -16,6 +17,16 @@ internal sealed partial class CreateDriveModel : ObservableObject
         Persistent = false;
         ConnectByHostname = false;
     }
+
+    public static CreateDriveModel CopyOf(Drive drive) => new()
+    {
+        Host = drive.Host,
+        Username = drive.Username,
+        Password = drive.Password,
+        AutoConnect = drive.AutoConnect,
+        Persistent = drive.Persistent,
+        ConnectByHostname = drive.ConnectByHostname,
+    };
 
     [ObservableProperty]
     public partial string Letter { get; set; }

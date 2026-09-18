@@ -18,7 +18,7 @@
             <MenuFlyoutItem Text="{l10n:Translate Preferences}" Clicked="Preferences_Clicked"/>
         </MenuBarItem>
 
-        <MenuBarItem Text="{l10n:Translate Drives}">
+        <MenuBarItem x:Name="DrivesMenu" Text="{l10n:Translate Drives}">
             <MenuFlyoutItem Text="{l10n:Translate AddDrive}" Clicked="AddDrive_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="A" Modifiers="Ctrl"/>
@@ -48,6 +48,10 @@
                     <KeyboardAccelerator Key="I" Modifiers="Ctrl"/>
                 </MenuFlyoutItem.KeyboardAccelerators>
             </MenuFlyoutItem>
+
+            <MenuFlyoutItem x:Name="AdoptMappingsMenuItem"
+                            Text="{l10n:Translate AdoptMappings}"
+                            Clicked="AdoptMappings_Clicked"/>
         </MenuBarItem>
     </ContentPage.MenuBarItems>
 
@@ -542,10 +546,15 @@
                                    HorizontalTextAlignment="Center"
                                    MaximumWidthRequest="360"/>
 
-                            <Button Text="{l10n:Translate AddDrive}"
-                                    Margin="0,6,0,0"
-                                    HorizontalOptions="Center"
-                                    Command="{Binding OpenCreateDriveModalCommand}"/>
+                            <HorizontalStackLayout Spacing="10" Margin="0,6,0,0" HorizontalOptions="Center">
+                                <Button Text="{l10n:Translate AdoptMappings}"
+                                        Style="{StaticResource ButtonSecondary}"
+                                        IsVisible="{Binding SupportsAdoptingMappings}"
+                                        Command="{Binding OpenAdoptMappingsModalCommand}"/>
+
+                                <Button Text="{l10n:Translate AddDrive}"
+                                        Command="{Binding OpenCreateDriveModalCommand}"/>
+                            </HorizontalStackLayout>
                         </VerticalStackLayout>
 
                     </Grid>
@@ -640,6 +649,14 @@
 
         <AbsoluteLayout x:Name="DiagnoseDriveLayout" IsVisible="False">
             <views:DiagnoseDriveModal x:Name="DiagnoseDriveView"
+                                          AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                          AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="AdoptMappingsLayout" IsVisible="False">
+            <views:AdoptMappingsModal x:Name="AdoptMappingsView"
+                                          WidthRequest="480"
+                                          MaximumHeightRequest="600"
                                           AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
                                           AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>

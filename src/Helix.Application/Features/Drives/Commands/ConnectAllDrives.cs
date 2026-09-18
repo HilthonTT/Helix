@@ -14,6 +14,7 @@ public sealed class ConnectAllDrives(
     ILoggedInUser loggedInUser,
     INasConnector nasConnector,
     IDriveMonitor driveMonitor,
+    INetworkLocation networkLocation,
     IDateTimeProvider dateTimeProvider) : IHandler
 {
     public sealed record Request(bool OnlyAutoConnect = false);
@@ -39,6 +40,13 @@ public sealed class ConnectAllDrives(
             .Where(d => !DriveMountBatch.IsUp(d, connectedLetters, nasConnector))
             .Where(d => !onlyAutoConnect || d.AutoConnect)
             .ToArray();
+
+        if (onlyAutoConnect && disconnectedDrives.Any(d => d.HomeNetworkId is not null))
+        {
+            NetworkLocation? here = await networkLocation.GetCurrentAsync(cancellationToken);
+
+            disconnectedDrives = [.. disconnectedDrives.Where(d => !d.IsAwayFrom(here?.Id))];
+        }
 
         if (disconnectedDrives.Length == 0)
         {

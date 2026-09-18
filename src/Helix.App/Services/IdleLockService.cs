@@ -91,6 +91,7 @@ internal sealed class IdleLockService
         App.ServiceProvider.GetRequiredService<DriveWatchdog>().Stop();
         App.ServiceProvider.GetRequiredService<MountReconciler>().Stop();
         App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
+        App.ServiceProvider.GetRequiredService<HotkeyService>().Stop();
         App.ServiceProvider.GetRequiredService<StorageAlertService>().Stop();
 
         Stop();

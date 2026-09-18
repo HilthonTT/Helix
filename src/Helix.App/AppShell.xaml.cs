@@ -291,6 +291,8 @@ public sealed partial class AppShell : Shell
 
         App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
 
+        App.ServiceProvider.GetRequiredService<HotkeyService>().Stop();
+
         App.ServiceProvider.GetRequiredService<StorageAlertService>().Stop();
 
         App.ServiceProvider.GetRequiredService<IdleLockService>().Stop();

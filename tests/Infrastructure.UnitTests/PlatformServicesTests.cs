@@ -69,6 +69,17 @@ public sealed class PlatformServicesTests
     }
 
     [Fact]
+    public void AddInfrastructure_Should_BindTheWindowsNetworkLocation()
+    {
+        using ServiceProvider provider = BuildProvider();
+
+        INetworkLocation location = provider.GetRequiredService<INetworkLocation>();
+
+        location.Should().BeOfType<WindowsNetworkLocation>();
+        location.IsSupported.Should().BeTrue();
+    }
+
+    [Fact]
     public void AddInfrastructure_Should_KeepTheNasConnectorASingleton()
     {
         using ServiceProvider provider = BuildProvider();

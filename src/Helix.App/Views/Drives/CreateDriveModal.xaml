@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
+             xmlns:models="clr-namespace:Helix.App.Models"
              xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:l10n="clr-namespace:Helix.App.Localization"
              x:DataType="vm:CreateDriveViewModel"
@@ -47,11 +48,14 @@
 
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate DriveName}" Style="{StaticResource FieldLabel}"/>
-                        <Border Style="{StaticResource Field}">
+                        <Border Style="{StaticResource Field}" IsVisible="{Binding IsSingleShare}">
                             <Entry Placeholder="{l10n:Translate AddDriveNamePlaceholder}"
                                    Text="{Binding Form.Name}"
                                    IsEnabled="{Binding IsNotBusy}"/>
                         </Border>
+                        <Label Text="{Binding SharesSelectedText}"
+                               Style="{StaticResource Caption}"
+                               IsVisible="{Binding IsMultiShare}"/>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="6">
@@ -81,6 +85,36 @@
                                    IsPassword="{Binding HideSecrets}"
                                    IsEnabled="{Binding IsNotBusy}"/>
                         </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding SupportsShareBrowsing}">
+                        <Button Style="{StaticResource ButtonSecondary}"
+                                HorizontalOptions="Start"
+                                Text="{l10n:Translate BrowseShares}"
+                                Command="{Binding BrowseSharesCommand}"
+                                IsEnabled="{Binding IsNotBusy}"/>
+
+                        <VerticalStackLayout Spacing="2"
+                                             IsVisible="{Binding HasShares}"
+                                             BindableLayout.ItemsSource="{Binding Shares}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:ShareOption">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,2">
+                                        <CheckBox IsChecked="{Binding IsSelected}"
+                                                  IsEnabled="{Binding CanSelect}"
+                                                  VerticalOptions="Center"/>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding Label}"
+                                               Style="{StaticResource Caption}"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <Label Text="{l10n:Translate NoSharesFound}"
+                               Style="{StaticResource Caption}"
+                               IsVisible="{Binding ShowNoShares}"/>
                     </VerticalStackLayout>
 
                     <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
@@ -113,6 +147,19 @@
                                 Scale="0.85"
                                 HorizontalOptions="End"
                                 IsToggled="{Binding Form.Persistent, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto"
+                          Margin="0,2,0,0"
+                          IsVisible="{Binding NetworkPin.IsSupported}">
+                        <Label Text="{Binding NetworkPin.Label}"
+                               Style="{StaticResource Caption}"
+                               VerticalOptions="Center"/>
+                        <Switch Grid.Column="1"
+                                Scale="0.85"
+                                HorizontalOptions="End"
+                                IsEnabled="{Binding NetworkPin.CanChange}"
+                                IsToggled="{Binding NetworkPin.IsPinned, Mode=TwoWay}"/>
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto"

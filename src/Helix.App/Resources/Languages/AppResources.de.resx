@@ -779,4 +779,79 @@
   <data name="UpdateAvailableShort" xml:space="preserve">
     <value>Update verfügbar</value>
   </data>
+  <data name="BrowseShares" xml:space="preserve">
+    <value>Freigaben durchsuchen</value>
+  </data>
+  <data name="ShareAlreadyAdded" xml:space="preserve">
+    <value>bereits als {0}: hinzugefügt</value>
+  </data>
+  <data name="NoSharesFound" xml:space="preserve">
+    <value>Der Server hat für diese Zugangsdaten keine Freigaben aufgeführt.</value>
+  </data>
+  <data name="SharesSelected" xml:space="preserve">
+    <value>{0} Freigaben ausgewählt – jede erhält einen eigenen Buchstaben, beginnend mit dem obigen.</value>
+  </data>
+  <data name="NotEnoughLetters" xml:space="preserve">
+    <value>Es gibt nicht genug freie Laufwerksbuchstaben für alle ausgewählten Freigaben.</value>
+  </data>
+  <data name="DrivesAdded" xml:space="preserve">
+    <value>{0} Laufwerke hinzugefügt.</value>
+  </data>
+  <data name="DriveAddedOne" xml:space="preserve">
+    <value>Laufwerk hinzugefügt.</value>
+  </data>
+  <data name="OnlyOnNetwork" xml:space="preserve">
+    <value>Nur in {0} automatisch verbinden</value>
+  </data>
+  <data name="OnlyOnNetworkUnknown" xml:space="preserve">
+    <value>Nur in diesem Netzwerk automatisch verbinden</value>
+  </data>
+  <data name="StatusAway" xml:space="preserve">
+    <value>Unterwegs</value>
+  </data>
+  <data name="StatusAwayHint" xml:space="preserve">
+    <value>Dieser Computer ist nicht im Heimnetz des Laufwerks, daher wird es nicht automatisch verbunden. Zum Verbinden trotzdem klicken.</value>
+  </data>
+  <data name="ApplyCredentialsToServerOne" xml:space="preserve">
+    <value>Diese Zugangsdaten auch für das andere Laufwerk auf diesem Server verwenden</value>
+  </data>
+  <data name="ApplyCredentialsToServerMany" xml:space="preserve">
+    <value>Diese Zugangsdaten auch für die anderen {0} Laufwerke auf diesem Server verwenden</value>
+  </data>
+  <data name="CredentialsAppliedToServer" xml:space="preserve">
+    <value>Die anderen Laufwerke auf diesem Server verwenden ebenfalls die neuen Zugangsdaten.</value>
+  </data>
+  <data name="DuplicateDrive" xml:space="preserve">
+    <value>Duplizieren</value>
+  </data>
+  <data name="TrayOpenFolder" xml:space="preserve">
+    <value>Ordner öffnen</value>
+  </data>
+  <data name="GlobalHotkeys" xml:space="preserve">
+    <value>Globale Tastenkürzel</value>
+  </data>
+  <data name="GlobalHotkeysDescription" xml:space="preserve">
+    <value>Strg+Alt+Umschalt+C verbindet alle Laufwerke, Strg+Alt+Umschalt+D trennt sie – aus jeder Anwendung.</value>
+  </data>
+  <data name="HotkeyConnectedAll" xml:space="preserve">
+    <value>Alle Laufwerke sind verbunden.</value>
+  </data>
+  <data name="HotkeyDisconnectedAll" xml:space="preserve">
+    <value>Alle Laufwerke sind getrennt.</value>
+  </data>
+  <data name="AdoptMappings" xml:space="preserve">
+    <value>Vorhandene Zuordnungen hinzufügen</value>
+  </data>
+  <data name="AdoptMappingsTitle" xml:space="preserve">
+    <value>Vorhandene Netzlaufwerke</value>
+  </data>
+  <data name="AdoptMappingsMessage" xml:space="preserve">
+    <value>Diese Buchstaben sind auf diesem Computer zugeordnet, werden aber noch nicht von Helix verwaltet. Wählen Sie die hinzuzufügenden aus und geben Sie die verwendeten Zugangsdaten ein.</value>
+  </data>
+  <data name="NoMappingsFound" xml:space="preserve">
+    <value>Alle zugeordneten Netzlaufwerke dieses Computers sind bereits in Helix.</value>
+  </data>
+  <data name="AddSelected" xml:space="preserve">
+    <value>Auswahl hinzufügen</value>
+  </data>
 </root>

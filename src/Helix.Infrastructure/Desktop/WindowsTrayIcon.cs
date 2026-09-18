@@ -384,22 +384,11 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
             return;
         }
 
+        List<TrayMenuItem> commands = [];
+
         try
         {
-            for (int index = 0; index < items.Length; index++)
-            {
-                TrayMenuItem item = items[index];
-
-                if (item.IsSeparator)
-                {
-                    AppendMenuW(menu, MF_SEPARATOR, UIntPtr.Zero, null);
-                    continue;
-                }
-
-                uint flags = item.IsEnabled ? MF_STRING : MF_STRING | MF_GRAYED;
-
-                AppendMenuW(menu, flags, (UIntPtr)(index + 1), item.Text);
-            }
+            AppendItems(menu, items, commands);
 
             GetCursorPos(out POINT cursor);
 
@@ -415,12 +404,12 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
 
             PostMessageW(hWnd, WM_NULL, IntPtr.Zero, IntPtr.Zero);
 
-            if (selected <= 0 || selected > items.Length)
+            if (selected <= 0 || selected > commands.Count)
             {
                 return;
             }
 
-            TrayMenuItem chosen = items[selected - 1];
+            TrayMenuItem chosen = commands[selected - 1];
 
             EventHandler<string>? handler = MenuItemSelected;
             if (handler is not null)
@@ -431,6 +420,40 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         finally
         {
             DestroyMenu(menu);
+        }
+    }
+
+    private static void AppendItems(IntPtr menu, IReadOnlyList<TrayMenuItem> items, List<TrayMenuItem> commands)
+    {
+        foreach (TrayMenuItem item in items)
+        {
+            if (item.IsSeparator)
+            {
+                AppendMenuW(menu, MF_SEPARATOR, UIntPtr.Zero, null);
+                continue;
+            }
+
+            if (item.IsSubmenu)
+            {
+                IntPtr submenu = CreatePopupMenu();
+                if (submenu == IntPtr.Zero)
+                {
+                    continue;
+                }
+
+                AppendItems(submenu, item.Children, commands);
+
+                uint popupFlags = item.IsEnabled ? MF_POPUP : MF_POPUP | MF_GRAYED;
+
+                AppendMenuW(menu, popupFlags, (UIntPtr)(nuint)submenu, item.Text);
+                continue;
+            }
+
+            commands.Add(item);
+
+            uint flags = item.IsEnabled ? MF_STRING : MF_STRING | MF_GRAYED;
+
+            AppendMenuW(menu, flags, (UIntPtr)commands.Count, item.Text);
         }
     }
 
@@ -572,6 +595,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
     private const uint MF_STRING = 0x00000000;
     private const uint MF_GRAYED = 0x00000001;
     private const uint MF_SEPARATOR = 0x00000800;
+    private const uint MF_POPUP = 0x00000010;
 
     private const uint TPM_RIGHTBUTTON = 0x0002;
     private const uint TPM_RETURNCMD = 0x0100;

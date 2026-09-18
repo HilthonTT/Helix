@@ -4,12 +4,14 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
 using Helix.App.Models;
 using Helix.App.Resources.Languages;
+using Helix.App.Services;
 using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Helix.App.ViewModels.Drives;
 
@@ -20,12 +22,62 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
         Drive = new();
         HideSecrets = true;
         AvailableLetters = [];
+        NetworkPin = new();
 
         RegisterMessages();
     }
 
+    private List<Drive> _otherDrives = [];
+    private string _originalUsername = string.Empty;
+    private string _originalPassword = string.Empty;
+
     [ObservableProperty]
     public partial UpdateDriveModel Drive { get; set; }
+
+    partial void OnDriveChanged(UpdateDriveModel oldValue, UpdateDriveModel newValue)
+    {
+        if (oldValue is not null)
+        {
+            oldValue.PropertyChanged -= OnDrivePropertyChanged;
+        }
+
+        newValue.PropertyChanged += OnDrivePropertyChanged;
+
+        RefreshCredentialScope();
+    }
+
+    private void OnDrivePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(UpdateDriveModel.Host) or
+            nameof(UpdateDriveModel.Username) or
+            nameof(UpdateDriveModel.Password))
+        {
+            RefreshCredentialScope();
+        }
+    }
+
+    public NetworkPinModel NetworkPin { get; }
+
+    [ObservableProperty]
+    public partial bool ApplyCredentialsToServer { get; set; }
+
+    public int SameServerCount => _otherDrives.Count(d => d.IsOnSameServerAs(Drive.Host ?? string.Empty));
+
+    public bool ShowApplyCredentials =>
+        SameServerCount > 0 &&
+        (!string.Equals(Drive.Username, _originalUsername, StringComparison.Ordinal) ||
+         !string.Equals(Drive.Password, _originalPassword, StringComparison.Ordinal));
+
+    public string ApplyCredentialsLabel => SameServerCount == 1
+        ? AppResources.ApplyCredentialsToServerOne
+        : string.Format(AppResources.ApplyCredentialsToServerMany, SameServerCount);
+
+    private void RefreshCredentialScope()
+    {
+        OnPropertyChanged(nameof(SameServerCount));
+        OnPropertyChanged(nameof(ShowApplyCredentials));
+        OnPropertyChanged(nameof(ApplyCredentialsLabel));
+    }
 
     [ObservableProperty]
     public partial ObservableCollection<string> AvailableLetters { get; set; }
@@ -58,13 +110,21 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 Drive.Password,
                 Drive.AutoConnect,
                 Drive.Persistent,
-                Drive.ConnectByHostname);
+                Drive.ConnectByHostname,
+                NetworkPin.NetworkId,
+                NetworkPin.NetworkName,
+                ApplyCredentialsToServer && ShowApplyCredentials);
 
             Result result = await ScopedHandler.HandleAsync((UpdateDrive h) => h.Handle(request));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
                 return;
+            }
+
+            if (request.ApplyCredentialsToServer)
+            {
+                Notifier.Success(AppResources.CredentialsAppliedToServer);
             }
 
             var driveDisplay = new DriveDisplay(Drive);
@@ -143,6 +203,10 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
             }
 
             IsBusy = true;
+            ApplyCredentialsToServer = false;
+            _otherDrives = [];
+            _originalUsername = string.Empty;
+            _originalPassword = string.Empty;
             Drive = new UpdateDriveModel();
 
             try
@@ -156,7 +220,15 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                     return;
                 }
 
+                _originalUsername = result.Value.Username;
+                _originalPassword = result.Value.Password;
+
+                Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+                _otherDrives = drives.IsSuccess ? [.. drives.Value.Where(d => d.Id != m.DriveId)] : [];
+
                 Drive = new UpdateDriveModel(result.Value);
+
+                await NetworkPin.LoadAsync(result.Value.HomeNetworkId, result.Value.HomeNetworkName);
 
                 await LoadAvailableLettersAsync(m.DriveId);
             }

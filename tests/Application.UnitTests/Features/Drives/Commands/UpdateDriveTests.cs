@@ -52,6 +52,81 @@ public sealed class UpdateDriveTests
         _updateDrive = new(_driveRepositoryMock, _unitOfWorkMock, _loggedInUserMock, _nasConnectorMock, _driveMonitorMock);
     }
 
+    private Drive Editing(Drive drive, params Drive[] others)
+    {
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        _driveRepositoryMock.GetByIdAsync(drive.Id).Returns(drive);
+        _driveRepositoryMock.GetAsync(UserId, Arg.Any<CancellationToken>()).Returns([drive, .. others]);
+
+        return drive;
+    }
+
+    private static UpdateDrive.Request NewCredentialsFor(Drive drive, bool applyToServer) => new(
+        drive.Id,
+        drive.Letter,
+        drive.Host,
+        drive.Name,
+        "admin",
+        "new-password",
+        ApplyCredentialsToServer: applyToServer);
+
+    [Fact]
+    public async Task Handle_Should_GiveTheOtherDrivesOnTheServerTheNewCredentials_WhenAsked()
+    {
+        Drive sibling = Drive.Create(UserId, "M", "192.168.0.1", "Media", "Username", "Password");
+        Drive elsewhere = Drive.Create(UserId, "N", "192.168.0.2", "Other", "Username", "Password");
+        Drive drive = Editing(Drive.Create(UserId, "L", "192.168.0.1", "Name", "Username", "Password"), sibling, elsewhere);
+
+        Result result = await _updateDrive.Handle(NewCredentialsFor(drive, applyToServer: true));
+
+        result.IsSuccess.Should().BeTrue();
+        sibling.Username.Should().Be("admin");
+        sibling.Password.Should().Be("new-password");
+        elsewhere.Password.Should().Be("Password");
+    }
+
+    [Fact]
+    public async Task Handle_Should_LeaveTheOtherDrivesOnTheServerAlone_WhenNotAsked()
+    {
+        Drive sibling = Drive.Create(UserId, "M", "192.168.0.1", "Media", "Username", "Password");
+        Drive drive = Editing(Drive.Create(UserId, "L", "192.168.0.1", "Name", "Username", "Password"), sibling);
+
+        await _updateDrive.Handle(NewCredentialsFor(drive, applyToServer: false));
+
+        drive.Password.Should().Be("new-password");
+        sibling.Password.Should().Be("Password");
+    }
+
+    [Fact]
+    public async Task Handle_Should_PinTheDriveToItsHomeNetwork()
+    {
+        Drive drive = Editing(Drive.Create(UserId, "L", "192.168.0.1", "Name", "Username", "Password"));
+
+        await _updateDrive.Handle(NewCredentialsFor(drive, applyToServer: false) with
+        {
+            HomeNetworkId = "gateway:aa",
+            HomeNetworkName = "Home",
+        });
+
+        drive.HomeNetworkId.Should().Be("gateway:aa");
+        drive.HomeNetworkName.Should().Be("Home");
+    }
+
+    [Fact]
+    public async Task Handle_Should_UnpinTheDrive_WhenNoNetworkIsGiven()
+    {
+        Drive drive = Drive.Create(UserId, "L", "192.168.0.1", "Name", "Username", "Password");
+        drive.PinToNetwork("gateway:aa", "Home");
+        Editing(drive);
+
+        await _updateDrive.Handle(NewCredentialsFor(drive, applyToServer: false));
+
+        drive.HomeNetworkId.Should().BeNull();
+        drive.HomeNetworkName.Should().BeNull();
+    }
+
     [Fact]
     public async Task Handle_Should_UnmountTheOldLetter_WhenTheLetterChangesWhileMounted()
     {
