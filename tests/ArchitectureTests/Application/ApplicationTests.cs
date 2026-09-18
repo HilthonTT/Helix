@@ -45,4 +45,15 @@ public sealed class ApplicationTests
 
         result.IsSuccessful.Should().BeTrue();
     }
+
+    [Fact]
+    public void ApplicationLayer_Should_NotHaveDependencyOn_Maui()
+    {
+        TestResult result = Types.InAssembly(ApplicationAssembly.Instance)
+            .Should()
+            .NotHaveDependencyOnAny("Microsoft.Maui", "CommunityToolkit.Maui")
+            .GetResult();
+
+        result.IsSuccessful.Should().BeTrue();
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
+using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Security;
 using Helix.Application.Core.Errors;
@@ -18,6 +19,7 @@ public sealed class ImportDrives(
     ILoggedInUser loggedInUser,
     IVaultCipher vaultCipher,
     IPassphrasePrompt passphrasePrompt,
+    IFilePicker filePicker,
     INasConnector nasConnector) : IHandler
 {
     private const string FileExtension = ".helixvault";
@@ -29,13 +31,13 @@ public sealed class ImportDrives(
             return Result.Failure<List<Drive>>(AuthenticationErrors.InvalidPermissions);
         }
 
-        FileResult? file = await FilePicker.Default.PickAsync(CreatePickOptions());
-        if (file is null)
+        string? filePath = await filePicker.PickAsync(FileExtension, cancellationToken);
+        if (string.IsNullOrWhiteSpace(filePath))
         {
             return Result.Failure<List<Drive>>(FolderPickerErrors.Cancelled);
         }
 
-        if (!file.FileName.EndsWith(FileExtension, StringComparison.OrdinalIgnoreCase))
+        if (!filePath.EndsWith(FileExtension, StringComparison.OrdinalIgnoreCase))
         {
             return Result.Failure<List<Drive>>(JsonErrors.Invalid);
         }
@@ -50,7 +52,7 @@ public sealed class ImportDrives(
 
         try
         {
-            vault = await File.ReadAllTextAsync(file.FullPath, cancellationToken);
+            vault = await File.ReadAllTextAsync(filePath, cancellationToken);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -155,23 +157,5 @@ public sealed class ImportDrives(
         }
 
         return true;
-    }
-
-    private static PickOptions CreatePickOptions()
-    {
-        var fileTypes = new FilePickerFileType(
-            new Dictionary<DevicePlatform, IEnumerable<string>>
-            {
-                { DevicePlatform.iOS, new[] { FileExtension } },
-                { DevicePlatform.Android, new[] { FileExtension } },
-                { DevicePlatform.WinUI, new[] { FileExtension } },
-                { DevicePlatform.Tizen, new[] { FileExtension } },
-                { DevicePlatform.macOS, new[] { FileExtension } },
-            });
-
-        return new PickOptions
-        {
-            FileTypes = fileTypes,
-        };
     }
 }

@@ -1,12 +1,11 @@
-﻿using CommunityToolkit.Maui.Storage;
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
+using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Security;
 using Helix.Application.Core.Errors;
 using Helix.Application.Features.Drives.Contracts;
 using Helix.Domain.Drives;
 using Helix.Domain.Users;
-using System.Runtime.Versioning;
 using System.Text.Json;
 
 namespace Helix.Application.Features.Drives.Commands;
@@ -15,7 +14,8 @@ public sealed class ExportDrives(
     IDriveRepository driveRepository,
     ILoggedInUser loggedInUser,
     IVaultCipher vaultCipher,
-    IPassphrasePrompt passphrasePrompt) : IHandler
+    IPassphrasePrompt passphrasePrompt,
+    IFolderPicker folderPicker) : IHandler
 {
     private const string FileExtension = ".helixvault";
 
@@ -24,8 +24,6 @@ public sealed class ExportDrives(
         WriteIndented = false,
     };
 
-    [SupportedOSPlatform("windows")]
-    [SupportedOSPlatform("maccatalyst14.0")]
     public async Task<Result> Handle(CancellationToken cancellationToken = default)
     {
         if (!loggedInUser.IsLoggedIn)
@@ -60,19 +58,19 @@ public sealed class ExportDrives(
         string plaintext = JsonSerializer.Serialize(exportable, JsonSerializerOptions);
         string vault = vaultCipher.Encrypt(plaintext, passphrase);
 
-        FolderPickerResult folderResult = await FolderPicker.Default.PickAsync(cancellationToken);
-        if (!folderResult.IsSuccessful)
+        FolderPick folder = await folderPicker.PickAsync(cancellationToken);
+        if (!folder.IsSuccessful)
         {
             return Result.Failure(FolderPickerErrors.Cancelled);
         }
 
-        if (string.IsNullOrWhiteSpace(folderResult.Folder?.Path))
+        if (string.IsNullOrWhiteSpace(folder.Path))
         {
             return Result.Failure(FolderPickerErrors.InvalidFolderPath);
         }
 
         string fileName = $"helix-drives-{DateTime.UtcNow:yyyyMMdd-HHmmss}{FileExtension}";
-        string filePath = Path.Combine(folderResult.Folder.Path, fileName);
+        string filePath = Path.Combine(folder.Path, fileName);
 
         if (File.Exists(filePath))
         {

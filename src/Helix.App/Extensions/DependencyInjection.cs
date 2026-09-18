@@ -1,5 +1,6 @@
 ﻿using Helix.App.Services;
 using Helix.App.Views.Drives;
+using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Security;
 using SharpHook;
 
@@ -12,6 +13,10 @@ public static class DependencyInjection
         services.AddSingleton<IGlobalHook>(sp => new TaskPoolGlobalHook());
 
         services.AddSingleton<IPassphrasePrompt, PassphrasePromptService>();
+
+        services.AddSingleton<IFolderPicker, FolderPickerService>();
+
+        services.AddSingleton<Helix.Application.Abstractions.Desktop.IFilePicker, FilePickerService>();
 
         services.AddSingleton<DriveWatchdog>();
 

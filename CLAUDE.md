@@ -37,13 +37,18 @@ dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-pro
 
 Running the MAUI app itself is normally done via Visual Studio 2022 (`Helix.App` startup project), not `dotnet run`, because of the MAUI/Windows packaging configuration.
 
-The test projects target `net10.0-windows10.0.19041.0`, so the suite only runs on Windows. On a Mac, build the app project on its own — the solution also contains those Windows-only projects:
+`Application.UnitTests` targets plain `net10.0` and runs anywhere; `Infrastructure.UnitTests`
+and `ArchitectureTests` target `net10.0-windows10.0.19041.0`, because the assemblies they load
+are the Windows head. On a Mac, build the app project on its own and run the Application suite
+— the solution also contains those Windows-only projects:
 
 ```bash
 dotnet build src/Helix.App/Helix.App.csproj
+dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
 ```
 
-CI covers both: a Windows job builds and tests, a macOS job compile-verifies the Catalyst head.
+CI covers both: a Windows job builds and runs all three suites, a macOS job compile-verifies the
+Catalyst head and runs the Application suite.
 
 ## Build configuration
 
@@ -105,6 +110,29 @@ DependencyInjection.cs
 ```
 
 No dependency on Infrastructure — it consumes its own `Abstractions/` interfaces only.
+
+**No MAUI, either**, and `ApplicationLayer_Should_NotHaveDependencyOn_Maui` in the architecture
+tests holds it to that. Three handlers used to raise a file dialog through the static
+`FolderPicker.Default` / `FilePicker.Default`, which cost more than it looked: `ImportDrives`,
+`ExportDrives` and `ExportDiagnostics` were the only handlers that could not be unit-tested —
+and `ImportDrives` is the one that decrypts a vault, validates every DTO and decides which
+letters are free — and the whole reference dragged `Application.UnitTests` onto a Windows target
+framework, so every Application test was Windows-only for the sake of three dialogs.
+`IFolderPicker` and `IFilePicker` sit in `Abstractions/Desktop/` beside `IFileBrowser` and are
+implemented in the **presentation** layer (`Services/FolderPickerService`,
+`Services/FilePickerService`), the same place `IPassphrasePrompt` is: a picker is a modal the
+user answers, not a platform capability, and neither needs an `#if` — the toolkit's
+`FolderPicker` and MAUI's `FilePicker` cover both heads.
+
+`IFilePicker` and `IFolderPicker` collide by name with `Microsoft.Maui.Storage.IFilePicker` and
+`CommunityToolkit.Maui.Storage.IFolderPicker`, both of which the App project has through
+implicit usings — which is why the two implementations qualify one side or the other rather
+than importing both namespaces.
+
+`FolderPick` keeps the two failure cases the toolkit reports separately: a dialog the user
+dismissed and a dialog that answered with no path are different errors
+(`FolderPickerErrors.Cancelled` and `InvalidFolderPath`), and collapsing them into a nullable
+string would have lost one.
 
 #### Handler pattern (use cases)
 
