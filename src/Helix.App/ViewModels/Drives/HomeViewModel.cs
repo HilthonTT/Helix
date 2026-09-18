@@ -536,7 +536,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         List<Drive> drives = result.Value;
 
-        Dictionary<Guid, DriveDisplay> existing = _allDrives.ToDictionary(d => d.Id);
+        Dictionary<Guid, DriveDisplay> existing = [];
+
+        foreach (DriveDisplay shown in _allDrives)
+        {
+            existing.TryAdd(shown.Id, shown);
+        }
 
         _allDrives.Clear();
 
@@ -589,12 +594,22 @@ internal sealed partial class HomeViewModel : BaseViewModel
         DriveGroups = [.. result.Value.Select(group => new DriveGroupDisplay(group, existing))];
     }
 
+    private int _totalsRequest;
+
     private async Task RefreshTotalsAsync()
     {
+        int request = ++_totalsRequest;
+
         try
         {
             TotalConnected = ValidateTotalConnected();
-            TotalStorage = await ValidateTotalStorageAsync();
+
+            string storage = await ValidateTotalStorageAsync();
+
+            if (request == _totalsRequest)
+            {
+                TotalStorage = storage;
+            }
         }
         catch (Exception ex)
         {
@@ -655,6 +670,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(this, (r, m) =>
         {
+            if (_allDrives.Any(d => d.Id == m.Drive.Id))
+            {
+                return;
+            }
+
             _allDrives.Add(new DriveDisplay(m.Drive));
 
             ApplyFilterAndSort();

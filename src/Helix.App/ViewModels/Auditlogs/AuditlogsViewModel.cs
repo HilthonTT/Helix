@@ -5,6 +5,7 @@ using Helix.App.Models;
 using Helix.Application.Core.Sorting;
 using Helix.Application.Features.Auditlogs.Contracts;
 using Helix.Application.Features.Auditlogs.Queries;
+using Helix.Domain.Auditlogs;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 
@@ -14,7 +15,11 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
 {
     private readonly List<AuditlogDisplay> _allAuditlogs = [];
 
+    private readonly HashSet<Guid> _loadedIds = [];
+
     private bool _loading;
+
+    private bool _exhausted;
 
     private bool _hasLoaded;
 
@@ -66,7 +71,7 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
 
     public bool HasSearchTerm => !string.IsNullOrEmpty(SearchTerm);
 
-    public bool HasMore => _allAuditlogs.Count < _totalCount;
+    public bool HasMore => !_exhausted && _allAuditlogs.Count < _totalCount;
 
     public bool ShowNoAuditlogs => _hasLoaded && Auditlogs.Count == 0 && !HasSearchTerm;
 
@@ -110,9 +115,11 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
         try
         {
             _allAuditlogs.Clear();
+            _loadedIds.Clear();
+            _exhausted = false;
             _totalCount = 0;
 
-            bool loaded = await LoadPageAsync(skip: 0);
+            bool loaded = await LoadPageAsync(skip: 0) is not null;
 
             _hasLoaded = _hasLoaded || loaded;
 
@@ -147,7 +154,7 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
 
         try
         {
-            if (await LoadPageAsync(_allAuditlogs.Count))
+            if (await LoadPageAsync(_allAuditlogs.Count) is not null)
             {
                 ApplyFilterAndSort();
             }
@@ -170,11 +177,9 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
 
         try
         {
-            // Bounded by the total the first page reported, so a history that is being
-            // written to while it is read cannot turn this into an endless loop.
             while (HasMore)
             {
-                if (!await LoadPageAsync(_allAuditlogs.Count, GetAuditlogs.MaximumPageSize))
+                if (await LoadPageAsync(_allAuditlogs.Count, GetAuditlogs.MaximumPageSize) is null)
                 {
                     break;
                 }
@@ -187,28 +192,40 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
         }
     }
 
-    private async Task<bool> LoadPageAsync(int skip, int take = GetAuditlogs.DefaultPageSize)
+    private async Task<int?> LoadPageAsync(int skip, int take = GetAuditlogs.DefaultPageSize)
     {
         Result<AuditlogPage> result = await ScopedHandler.HandleAsync((GetAuditlogs h) =>
             h.Handle(new GetAuditlogs.Request(skip, take, SortOrder)));
 
         if (result.IsFailure)
         {
-            return false;
+            return null;
         }
 
         AuditlogPage page = result.Value;
 
         _totalCount = page.TotalCount;
 
-        if (page.Items.Count == 0)
+        int added = 0;
+
+        foreach (Auditlog item in page.Items)
         {
-            return true;
+            if (!_loadedIds.Add(item.Id))
+            {
+                continue;
+            }
+
+            _allAuditlogs.Add(new AuditlogDisplay(item));
+
+            added++;
         }
 
-        _allAuditlogs.AddRange(page.Items.Select(a => new AuditlogDisplay(a)));
+        if (added == 0)
+        {
+            _exhausted = true;
+        }
 
-        return true;
+        return added;
     }
 
     private void ApplyFilterAndSort()
@@ -219,15 +236,43 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
             ? _allAuditlogs
             : _allAuditlogs.Where(log => Matches(log, term));
 
-        Auditlogs = new(SortOrder == SortOrder.Ascending
+        AuditlogDisplay[] wanted = [.. SortOrder == SortOrder.Ascending
             ? matching.OrderBy(log => log.CreatedOnUtc)
-            : matching.OrderByDescending(log => log.CreatedOnUtc));
+            : matching.OrderByDescending(log => log.CreatedOnUtc)];
+
+        if (!TryAppend(Auditlogs, wanted))
+        {
+            Auditlogs = new(wanted);
+        }
 
         OnPropertyChanged(nameof(HasSearchTerm));
         OnPropertyChanged(nameof(HasMore));
         OnPropertyChanged(nameof(CountDisplay));
         OnPropertyChanged(nameof(ShowNoAuditlogs));
         OnPropertyChanged(nameof(ShowNoMatches));
+    }
+
+    private static bool TryAppend(ObservableCollection<AuditlogDisplay> shown, AuditlogDisplay[] wanted)
+    {
+        if (shown.Count == 0 || wanted.Length < shown.Count)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < shown.Count; i++)
+        {
+            if (!ReferenceEquals(shown[i], wanted[i]))
+            {
+                return false;
+            }
+        }
+
+        for (int i = shown.Count; i < wanted.Length; i++)
+        {
+            shown.Add(wanted[i]);
+        }
+
+        return true;
     }
 
     private static bool Matches(AuditlogDisplay log, string term) =>

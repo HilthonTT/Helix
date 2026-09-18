@@ -164,6 +164,11 @@ which left every unattended reconnect failure unreportable. A `FileLoggerProvide
 `Infrastructure/Diagnostics` writes a dated file under `%LOCALAPPDATA%/.../logs`, kept for
 14 days, and the settings page exports them as a zip through `IDiagnosticsLog`.
 
+`LogFileWriter` rolls to `helix-<date>-<n>.log` at 2 MB, and the sequence lives in memory. At
+startup it steps past files that are already full before opening one; it used to reopen
+`helix-<date>.log` regardless and push one line into each full file on its way back to the
+live one.
+
 Anything the container constructs takes `ILogger<T>` as a constructor dependency. Pages,
 viewmodels and static helpers are built by MAUI rather than DI and use `AppLog.For<T>()`
 instead — that is the only reason it exists, so do not reach for it from a type that could
@@ -598,6 +603,13 @@ list reads the master**: the storage and connection tiles, the connectivity donu
 membership, and the count "disconnect all" confirms against. A search box narrowing the
 list below them is not the NAS getting smaller.
 
+`RefreshTotalsAsync` is raised once per drive by a "connect all", each run probes the shares,
+and the probes finish in whatever order they like — so the storage figure is only applied by
+the **latest** request, or a reading taken before the last drive mounted could land last and
+stay. `DriveCreatedMessage` is ignored for a drive the master list already holds: a fetch that
+was in flight when the drive was saved returns it too, and the duplicate row it left made the
+next `FetchDrivesAsync` throw on its id lookup.
+
 Rows filtered out are **deselected** on the way. Acting on a ticked row that is not on
 screen is the one outcome worth ruling out — "disconnect" has to mean the rows the user can
 see.
@@ -684,6 +696,17 @@ reading all of it out of SQLite and holding it. The `CollectionView`'s
 `(UserId, CreatedOnUtc)` index is what keeps a page from being a scan and a sort. The page
 boundary breaks ties on the id, so rows written in the same tick cannot straddle it and be
 handed over twice.
+
+Paging is by `Skip`, and the history is **written to while it is read** — the watchdog files a
+row per drop and per reconnect. Newest-first, a row written after the first page pushes every
+later one down by one, so the next page began with the row the last one ended on and the list
+showed it twice. `AuditlogsViewModel` keeps the ids it has loaded and drops repeats. The same
+rows also mean the loaded count never reaches the total, so `HasMore` stayed true forever and
+the search's load-the-rest loop had nothing bounding it; a page that adds **nothing new** now
+marks the history exhausted. A page that arrives is **appended** to the bound collection when
+what is shown is a prefix of what is wanted, rather than replacing it — a new `ItemsSource`
+per page makes the `CollectionView` rebuild itself, which discards the scroll position the
+user had just reached in order to ask for that page.
 
 Searching is the one thing that cannot be paged, and it pulls the rest of the history in
 instead. The sentence a row shows is composed at display time in the user's language and is
@@ -1127,6 +1150,11 @@ stale count. A countdown the user **cancelled**, or one that already fired and m
 is not auto-resumed; it comes back showing its "Continue" affordance, which is what
 cancelling meant.
 
+`System.Timers.Timer` can raise an `Elapsed` that was already queued when `Stop` was called.
+`CountdownService` ignores a tick that arrives while the timer is off: without that, leaving
+the dashboard on the last second paused the countdown and then let it finish anyway, and the
+window minimized from under the settings page — the thing the pause exists to prevent.
+
 #### What the dashboard gives room to
 
 The stat row is **two cards, not three**. The auto-minimize countdown used to hold the
@@ -1172,6 +1200,13 @@ wants 12 rather than 10 or 15; days, percent and minutes move by a stride.
 be saved and acted on; committing whole values means there is no such intermediate, and the
 timer stays as a backstop rather than as the thing standing between the user and a wrong
 setting.
+
+Every write sends the whole settings row, and `SettingsDisplay` fills the four numbers and the
+language from what was **last persisted**, not from what the fields currently show. A number
+still inside its debounce used to ride along on whichever switch was flipped next: it was saved
+without its own confirmation or its `_persisted` baseline moving, and if it was the one the
+handler refused, the switch rolled back with an error about a field the user had not finished
+typing in.
 
 Only these four confirm themselves, through `Notifier`. A switch is its own confirmation —
 it is sitting there in its new position — but a number typed into a box looks identical

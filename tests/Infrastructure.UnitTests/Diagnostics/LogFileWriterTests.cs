@@ -104,6 +104,24 @@ public sealed class LogFileWriterTests : IDisposable
     }
 
     [Fact]
+    public void Write_Should_StartANewFile_WhenTodaysFileWasAlreadyFullAtStartup()
+    {
+        Directory.CreateDirectory(_directory);
+
+        string full = Path.Combine(_directory, $"helix-{DateTime.UtcNow:yyyyMMdd}.log");
+        File.WriteAllBytes(full, new byte[2 * 1024 * 1024]);
+
+        using LogFileWriter writer = Create();
+
+        writer.Write("after the restart");
+
+        new FileInfo(full).Length.Should().Be(2 * 1024 * 1024);
+
+        string next = Path.Combine(_directory, $"helix-{DateTime.UtcNow:yyyyMMdd}-1.log");
+        File.Exists(next).Should().BeTrue();
+    }
+
+    [Fact]
     public void GetFiles_Should_IgnoreUnrelatedFiles()
     {
         using LogFileWriter writer = Create();

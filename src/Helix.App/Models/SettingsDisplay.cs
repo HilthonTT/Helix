@@ -269,11 +269,11 @@ internal sealed partial class SettingsDisplay : ObservableObject
                 AutoMinimize,
                 SetOnStartup,
                 SetDesktopShortcut,
-                TimerCount,
-                Language,
-                AuditlogRetentionDays,
-                StorageAlertThresholdPercent,
-                IdleLockMinutes,
+                _persistedTimerCount,
+                _persistedLanguage,
+                _persistedRetentionDays,
+                _persistedStorageAlertThresholdPercent,
+                _persistedIdleLockMinutes,
                 CloseToTray,
                 NotifyOnMinimizeToTray);
 

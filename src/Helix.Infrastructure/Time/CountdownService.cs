@@ -60,8 +60,13 @@ internal sealed partial class CountdownService : ObservableObject, ICountdownSer
         }
     }
 
-    private void OnCountdownTick(object? sender, ElapsedEventArgs e)
+    internal void OnCountdownTick(object? sender, ElapsedEventArgs? e)
     {
+        if (!_countdownTimer.Enabled)
+        {
+            return;
+        }
+
         try
         {
             if (SecondsRemaining > 0)

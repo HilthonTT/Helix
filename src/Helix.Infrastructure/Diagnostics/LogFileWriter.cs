@@ -134,8 +134,14 @@ internal sealed class LogFileWriter : IDisposable
 
         _openFor = today;
 
-        string suffix = _sequence == 0 ? string.Empty : $"-{_sequence}";
-        string path = Path.Combine(directory, $"{FilePrefix}{today:yyyyMMdd}{suffix}{FileExtension}");
+        string path = PathFor(directory, today, _sequence);
+
+        while (IsFull(path))
+        {
+            _sequence++;
+
+            path = PathFor(directory, today, _sequence);
+        }
 
         var stream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete);
 
@@ -144,6 +150,20 @@ internal sealed class LogFileWriter : IDisposable
         PruneOldFiles();
 
         return _writer;
+    }
+
+    private static string PathFor(string directory, DateOnly day, int sequence)
+    {
+        string suffix = sequence == 0 ? string.Empty : $"-{sequence}";
+
+        return Path.Combine(directory, $"{FilePrefix}{day:yyyyMMdd}{suffix}{FileExtension}");
+    }
+
+    private static bool IsFull(string path)
+    {
+        var file = new FileInfo(path);
+
+        return file.Exists && file.Length >= MaximumFileBytes;
     }
 
     private long CurrentLength()
