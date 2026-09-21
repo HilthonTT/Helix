@@ -854,4 +854,22 @@
   <data name="AddSelected" xml:space="preserve">
     <value>Auswahl hinzufügen</value>
   </data>
+  <data name="WakeMacAddress" xml:space="preserve">
+    <value>Hardwareadresse für Wake-on-LAN</value>
+  </data>
+  <data name="WakeMacAddressPlaceholder" xml:space="preserve">
+    <value>z. B. 1a-2b-3c-4d-5e-6f</value>
+  </data>
+  <data name="WakeMacAddressDescription" xml:space="preserve">
+    <value>Antwortet das NAS nicht, sendet Helix ein Weckpaket und verbindet, sobald es bereit ist. Leer lassen, um es nie zu wecken.</value>
+  </data>
+  <data name="LookUpMacAddress" xml:space="preserve">
+    <value>Ermitteln</value>
+  </data>
+  <data name="WakeDrive" xml:space="preserve">
+    <value>NAS wecken</value>
+  </data>
+  <data name="WakeSent" xml:space="preserve">
+    <value>Ein Weckpaket wurde für {0} gesendet. Die Verbindung folgt, sobald das NAS antwortet.</value>
+  </data>
 </root>

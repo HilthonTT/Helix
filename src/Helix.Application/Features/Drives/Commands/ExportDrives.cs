@@ -52,7 +52,8 @@ public sealed class ExportDrives(
                 d.Password,
                 d.AutoConnect,
                 d.Persistent,
-                d.ConnectByHostname))
+                d.ConnectByHostname,
+                d.MacAddress))
             .ToList();
 
         string plaintext = JsonSerializer.Serialize(exportable, JsonSerializerOptions);

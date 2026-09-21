@@ -28,6 +28,7 @@ public sealed class UpdateDrive(
         bool ConnectByHostname = false,
         string? HomeNetworkId = null,
         string? HomeNetworkName = null,
+        string? MacAddress = null,
         bool ApplyCredentialsToServer = false);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
@@ -106,6 +107,8 @@ public sealed class UpdateDrive(
 
         drive.PinToNetwork(request.HomeNetworkId, request.HomeNetworkName);
 
+        drive.RememberMacAddress(request.MacAddress);
+
         if (request.ApplyCredentialsToServer)
         {
             List<Drive> drives = await driveRepository.GetAsync(loggedInUser.UserId, cancellationToken);
@@ -131,6 +134,11 @@ public sealed class UpdateDrive(
         if (!GeneralValidation.IsValidHost(request.Host))
         {
             return Result.Failure(ValidationErrors.InvalidHost);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.MacAddress) && !MacAddresses.IsValid(request.MacAddress))
+        {
+            return Result.Failure(DriveErrors.NotAMacAddress);
         }
 
         string[] properties = [request.Letter, request.Host, request.Name, request.Username, request.Password];

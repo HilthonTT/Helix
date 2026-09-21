@@ -561,6 +561,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
                 row.Name = drive.Name;
                 row.Host = drive.Host;
                 row.LastConnectedOnUtc = drive.LastConnectedOnUtc;
+                row.CanWake = drive.MacAddress is not null;
 
                 _allDrives.Add(row);
             }
@@ -703,6 +704,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
             existingDrive.Letter = m.UpdatedDrive.Letter;
             existingDrive.Name = m.UpdatedDrive.Name;
             existingDrive.Host = m.UpdatedDrive.Host;
+            existingDrive.CanWake = m.UpdatedDrive.CanWake;
 
             SyncConnectivity(_nasConnector.GetConnectedLetters());
 

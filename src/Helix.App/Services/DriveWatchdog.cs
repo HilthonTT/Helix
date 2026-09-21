@@ -22,6 +22,8 @@ internal sealed class DriveWatchdog
 
     private static readonly TimeSpan OfflineRetryInterval = TimeSpan.FromSeconds(30);
 
+    private static readonly TimeSpan ResumeGap = TimeSpan.FromSeconds(60);
+
     private readonly IDriveMonitor _monitor;
     private readonly INasConnector _nasConnector;
     private readonly INetworkLocation _networkLocation;
@@ -39,6 +41,10 @@ internal sealed class DriveWatchdog
 
     private bool _networkSeen;
     private string? _networkId;
+
+    private bool _watchingConnectivity;
+    private DateTime _lastTickUtc;
+    private int _nudging;
 
     public DriveWatchdog(
         IDriveMonitor monitor,
@@ -63,6 +69,10 @@ internal sealed class DriveWatchdog
             _subscribed = true;
         }
 
+        WatchConnectivity();
+
+        _lastTickUtc = DateTime.UtcNow;
+
         await RefreshWatchedDrivesAsync();
 
         _monitor.Start(PollInterval);
@@ -72,6 +82,8 @@ internal sealed class DriveWatchdog
 
     public void Stop()
     {
+        UnwatchConnectivity();
+
         _monitor.Stop();
         _monitor.Watch([]);
 
@@ -102,6 +114,106 @@ internal sealed class DriveWatchdog
 
         _networkSeen = false;
         _networkId = null;
+        _lastTickUtc = default;
+    }
+
+    private void WatchConnectivity()
+    {
+        if (_watchingConnectivity)
+        {
+            return;
+        }
+
+        try
+        {
+            Connectivity.Current.ConnectivityChanged += OnNetworkAccessChanged;
+
+            _watchingConnectivity = true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Could not watch for network changes; the retry sweep is the only trigger.");
+        }
+    }
+
+    private void UnwatchConnectivity()
+    {
+        if (!_watchingConnectivity)
+        {
+            return;
+        }
+
+        _watchingConnectivity = false;
+
+        try
+        {
+            Connectivity.Current.ConnectivityChanged -= OnNetworkAccessChanged;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Could not stop watching for network changes.");
+        }
+    }
+
+    private void OnNetworkAccessChanged(object? sender, ConnectivityChangedEventArgs e)
+    {
+        if (e.NetworkAccess == NetworkAccess.None)
+        {
+            return;
+        }
+
+        _ = NudgeAsync("the network came back");
+    }
+
+    private async Task NudgeAsync(string reason)
+    {
+        if (Interlocked.Exchange(ref _nudging, 1) == 1)
+        {
+            return;
+        }
+
+        try
+        {
+            if (_retryCancellation is null)
+            {
+                return;
+            }
+
+            _logger.LogInformation("Rechecking every drive because {Reason}.", reason);
+
+            await _monitor.PollAsync();
+
+            BringRetriesForward();
+
+            NetworkLocation? here = _networkLocation.IsSupported
+                ? await _networkLocation.GetCurrentAsync()
+                : null;
+
+            await ConnectDownDrivesAsync(here, pinnedOnly: false, reason);
+
+            await RetryDueAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "The drive watchdog failed to recheck the drives after {Reason}.", reason);
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _nudging, 0);
+        }
+    }
+
+    private void BringRetriesForward()
+    {
+        lock (_gate)
+        {
+            DateTime now = DateTime.UtcNow;
+
+            foreach (PendingReconnect pending in _pending.Values.ToList())
+            {
+                _pending[pending.DriveId] = pending with { NextAttemptUtc = now };
+            }
+        }
     }
 
     public async Task RefreshWatchedDrivesAsync()
@@ -196,6 +308,13 @@ internal sealed class DriveWatchdog
             {
                 try
                 {
+                    if (SleptThroughATick())
+                    {
+                        await NudgeAsync("the machine came back from sleep");
+
+                        continue;
+                    }
+
                     await CheckNetworkArrivalAsync();
 
                     await RetryDueAsync();
@@ -213,6 +332,16 @@ internal sealed class DriveWatchdog
         catch (OperationCanceledException)
         {
         }
+    }
+
+    private bool SleptThroughATick()
+    {
+        DateTime now = DateTime.UtcNow;
+        DateTime previous = _lastTickUtc;
+
+        _lastTickUtc = now;
+
+        return previous != default && now - previous > ResumeGap;
     }
 
     private async Task RetryDueAsync()
@@ -289,10 +418,10 @@ internal sealed class DriveWatchdog
             return;
         }
 
-        await ConnectDrivesAtHomeAsync(here);
+        await ConnectDownDrivesAsync(here, pinnedOnly: true, "it arrived on a drive's home network");
     }
 
-    private async Task ConnectDrivesAtHomeAsync(NetworkLocation here)
+    private async Task ConnectDownDrivesAsync(NetworkLocation? here, bool pinnedOnly, string reason)
     {
         if (!await IsAutoConnectEnabledAsync())
         {
@@ -307,8 +436,8 @@ internal sealed class DriveWatchdog
 
         Guid[] arriving = [.. drives.Value
             .Where(drive => drive.AutoConnect &&
-                            drive.HomeNetworkId is not null &&
-                            !drive.IsAwayFrom(here.Id) &&
+                            (!pinnedOnly || drive.HomeNetworkId is not null) &&
+                            !drive.IsAwayFrom(here?.Id) &&
                             !_nasConnector.IsMountedFrom(drive))
             .Select(drive => drive.Id)];
 
@@ -318,8 +447,9 @@ internal sealed class DriveWatchdog
         }
 
         _logger.LogInformation(
-            "Arrived on a drive's home network; connecting the {Count} drive(s) that belong to it.",
-            arriving.Length);
+            "Connecting the {Count} drive(s) that are down because {Reason}.",
+            arriving.Length,
+            reason);
 
         Result result = await ScopedHandler.HandleAsync(
             (ConnectDrives h) => h.Handle(new ConnectDrives.Request(arriving)));
@@ -327,7 +457,8 @@ internal sealed class DriveWatchdog
         if (result.IsFailure)
         {
             _logger.LogWarning(
-                "Some drives did not connect on arriving at their home network — {Reason}",
+                "Some drives did not connect after {Reason} — {Error}",
+                reason,
                 result.Error.Description);
         }
 

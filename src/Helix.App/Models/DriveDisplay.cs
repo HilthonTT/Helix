@@ -41,6 +41,9 @@ internal sealed partial class DriveDisplay : ObservableObject
     public partial bool IsSelected { get; set; }
 
     [ObservableProperty]
+    public partial bool CanWake { get; set; }
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowConnected))]
     [NotifyPropertyChangedFor(nameof(ShowDisconnected))]
     [NotifyPropertyChangedFor(nameof(ShowUnreachable))]
@@ -143,6 +146,7 @@ internal sealed partial class DriveDisplay : ObservableObject
         Name = drive.Name;
         Host = drive.Host;
         LastConnectedOnUtc = drive.LastConnectedOnUtc;
+        CanWake = drive.MacAddress is not null;
     }
 
     public DriveDisplay(UpdateDriveModel updateDrive)
@@ -152,6 +156,7 @@ internal sealed partial class DriveDisplay : ObservableObject
         Letter = updateDrive.Letter;
         Name = updateDrive.Name;
         Host = updateDrive.Host;
+        CanWake = MacAddresses.IsValid(updateDrive.MacAddress);
     }
 
     public DriveDisplay()

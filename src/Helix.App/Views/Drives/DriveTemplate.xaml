@@ -22,6 +22,9 @@
                                 IsEnabled="{Binding Connected}"
                                 Clicked="HandleOpen"/>
                 <MenuFlyoutItem Text="{l10n:Translate DiagnoseDrive}" Clicked="HandleDiagnose"/>
+                <MenuFlyoutItem Text="{l10n:Translate WakeDrive}"
+                                IsEnabled="{Binding CanWake}"
+                                Clicked="HandleWake"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="{l10n:Translate UpdateDrive}" Clicked="HandleUpdate"/>
                 <MenuFlyoutItem Text="{l10n:Translate DuplicateDrive}" Clicked="HandleDuplicate"/>

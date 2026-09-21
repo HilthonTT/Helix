@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Helix.App.Behaviors;
 
@@ -135,6 +135,7 @@ internal static class RowFocus
             Windows.System.VirtualKey.D when control && shift => RowKey.Duplicate,
             Windows.System.VirtualKey.D when control => RowKey.Diagnose,
             Windows.System.VirtualKey.O when control => RowKey.Open,
+            Windows.System.VirtualKey.W when control => RowKey.Wake,
             _ => null,
         };
 

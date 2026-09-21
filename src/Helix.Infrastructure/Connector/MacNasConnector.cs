@@ -23,13 +23,18 @@ internal sealed class MacNasConnector : INasConnector
 
     private readonly ILogger<MacNasConnector> _logger;
     private readonly IHostReachability _hostReachability;
+    private readonly IWakeOnLan _wakeOnLan;
 
     public event EventHandler<LateMountOutcome>? MountSettledLate;
 
-    public MacNasConnector(ILogger<MacNasConnector> logger, IHostReachability hostReachability)
+    public MacNasConnector(
+        ILogger<MacNasConnector> logger,
+        IHostReachability hostReachability,
+        IWakeOnLan wakeOnLan)
     {
         _logger = logger;
         _hostReachability = hostReachability;
+        _wakeOnLan = wakeOnLan;
     }
 
     public Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
@@ -92,6 +97,8 @@ internal sealed class MacNasConnector : INasConnector
 
         if (!reachable)
         {
+            await _wakeOnLan.TryWakeAsync(drive.MacAddress, cancellationToken);
+
             return Result.Failure(DriveErrors.HostUnreachable(drive.Host));
         }
 

@@ -15,6 +15,8 @@ using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using System.Diagnostics;
+using System.IO.Pipes;
+using System.Text;
 using Windows.Graphics;
 #endif
 
@@ -24,10 +26,10 @@ public static class MauiProgram
 {
 #if WINDOWS
     private static Mutex? _singleInstance;
-    private static EventWaitHandle? _activationSignal;
 
     private const string SingleInstanceMutexName = @"Local\Helix.App.SingleInstance";
-    private const string ActivationSignalName = @"Local\Helix.App.Activate";
+
+    private const int CommandConnectTimeoutMilliseconds = 3_000;
 #endif
 
     public static MauiApp CreateMauiApp()
@@ -107,6 +109,10 @@ public static class MauiProgram
             StartupFailure.Exit(startupLogger, ex);
         }
 
+#if WINDOWS
+        app.Services.GetRequiredService<CommandListener>().Start();
+#endif
+
         var hook = app.Services.GetRequiredService<IGlobalHook>();
 
         hook.RunAsync(GlobalHookType.Keyboard, useBackgroundThread: true).ContinueWith(
@@ -128,25 +134,61 @@ public static class MauiProgram
 #if WINDOWS
     private static void ExitIfAlreadyRunning()
     {
+        CommandRequest request = CommandRequest.Parse([.. Environment.GetCommandLineArgs().Skip(1)]);
+
+        if (request.Verb == CommandVerb.Help)
+        {
+            ExitWith(CommandListener.Success + CommandRequest.Usage);
+        }
+
+        if (request.Verb == CommandVerb.Unknown)
+        {
+            ExitWith($"{CommandListener.Failure}'{request.Target}' is not something Helix understands.{CommandRequest.LineBreak}{CommandRequest.LineBreak}{CommandRequest.Usage}");
+        }
+
         _singleInstance = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out bool createdNew);
-        _activationSignal = new EventWaitHandle(initialState: false, EventResetMode.AutoReset, ActivationSignalName);
 
         if (createdNew)
         {
-            ListenForActivation(_activationSignal);
+            if (request.Verb != CommandVerb.None)
+            {
+                ExitWith(CommandListener.Failure + "Helix is not running. Start it and sign in, then try again.");
+            }
 
             return;
         }
 
+        if (request.Verb is CommandVerb.None or CommandVerb.Show)
+        {
+            BringOtherInstanceForward();
+        }
+
+        string? reply = Send(request);
+
+        if (request.Verb == CommandVerb.None)
+        {
+            Environment.Exit(0);
+        }
+
+        ExitWith(reply ?? CommandListener.Failure + "Helix is running but did not answer.");
+    }
+
+    private static void BringOtherInstanceForward()
+    {
         try
         {
-            _activationSignal.Set();
-
             Process current = Process.GetCurrentProcess();
 
             foreach (Process other in Process.GetProcessesByName(current.ProcessName))
             {
-                if (other.Id != current.Id && other.MainWindowHandle != IntPtr.Zero)
+                if (other.Id == current.Id)
+                {
+                    continue;
+                }
+
+                AllowSetForegroundWindow(other.Id);
+
+                if (other.MainWindowHandle != IntPtr.Zero)
                 {
                     ShowWindow(other.MainWindowHandle, SW_RESTORE);
                     SetForegroundWindow(other.MainWindowHandle);
@@ -156,42 +198,67 @@ public static class MauiProgram
         catch (Exception)
         {
         }
-
-        Environment.Exit(0);
     }
 
-    private static void ListenForActivation(EventWaitHandle signal)
+    private static string? Send(CommandRequest request)
     {
-        var listener = new Thread(() =>
+        try
         {
-            while (true)
-            {
-                try
-                {
-                    signal.WaitOne();
-                }
-                catch (ObjectDisposedException)
-                {
-                    return;
-                }
+            using var client = new NamedPipeClientStream(
+                ".",
+                CommandListener.PipeName,
+                PipeDirection.InOut,
+                PipeOptions.CurrentUserOnly);
 
-                try
-                {
-                    MainWindow.Restore();
-                }
-                catch (Exception ex)
-                {
-                    AppLog.For<App>().LogWarning(ex, "A second instance asked for the window before it existed.");
-                }
-            }
-        })
+            client.Connect(CommandConnectTimeoutMilliseconds);
+
+            using var writer = new StreamWriter(client, new UTF8Encoding(false), leaveOpen: true) { AutoFlush = true };
+            using var reader = new StreamReader(client, Encoding.UTF8, leaveOpen: true);
+
+            writer.WriteLine(request.Encode());
+
+            return reader.ReadLine();
+        }
+        catch (Exception)
         {
-            IsBackground = true,
-            Name = "Helix.SingleInstance"
-        };
-
-        listener.Start();
+            return null;
+        }
     }
+
+    private static void ExitWith(string reply)
+    {
+        bool ok = reply.StartsWith(CommandListener.Success, StringComparison.Ordinal);
+        string message = reply.Length > 0 ? reply[1..] : string.Empty;
+
+        if (message.Length > 0)
+        {
+            try
+            {
+                AttachConsole(AttachParentProcess);
+
+                using var output = new StreamWriter(ok ? Console.OpenStandardOutput() : Console.OpenStandardError())
+                {
+                    AutoFlush = true,
+                };
+
+                output.WriteLine();
+                output.WriteLine(message.Replace(CommandRequest.LineBreak.ToString(), Environment.NewLine));
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        Environment.Exit(ok ? 0 : 1);
+    }
+
+    private const int AttachParentProcess = -1;
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern bool AttachConsole(int dwProcessId);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool AllowSetForegroundWindow(int dwProcessId);
 
     private const int SW_RESTORE = 9;
 

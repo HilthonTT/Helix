@@ -73,6 +73,7 @@ public static class DependencyInjection
         services.AddScoped<GetDrives>();
         services.AddScoped<GetUnmanagedMappings>();
         services.AddScoped<ListShares>();
+        services.AddScoped<LookUpMacAddress>();
         services.AddScoped<MarkDriveConnected>();
         services.AddScoped<UpdateDrive>();
 
@@ -80,6 +81,7 @@ public static class DependencyInjection
         services.AddScoped<DisconnectAllDrives>();
         services.AddScoped<ReconnectDrive>();
         services.AddScoped<TestDriveConnection>();
+        services.AddScoped<WakeDrive>();
 
         services.AddScoped<ExportDrives>();
         services.AddScoped<ImportDrives>();

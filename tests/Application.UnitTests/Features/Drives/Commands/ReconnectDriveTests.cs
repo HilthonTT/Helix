@@ -23,6 +23,7 @@ public class ReconnectDriveTests
     private readonly ILoggedInUser _loggedInUserMock;
     private readonly INasConnector _nasConnectorMock;
     private readonly IHostReachability _hostReachabilityMock;
+    private readonly IWakeOnLan _wakeOnLanMock;
     private readonly INetworkLocation _networkLocationMock;
     private readonly IDateTimeProvider _dateTimeProviderMock;
 
@@ -36,6 +37,7 @@ public class ReconnectDriveTests
         _loggedInUserMock = Substitute.For<ILoggedInUser>();
         _nasConnectorMock = Substitute.For<INasConnector>();
         _hostReachabilityMock = Substitute.For<IHostReachability>();
+        _wakeOnLanMock = Substitute.For<IWakeOnLan>();
         _networkLocationMock = Substitute.For<INetworkLocation>();
         _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
@@ -52,6 +54,7 @@ public class ReconnectDriveTests
             _loggedInUserMock,
             _nasConnectorMock,
             _hostReachabilityMock,
+            _wakeOnLanMock,
             _networkLocationMock,
             _dateTimeProviderMock);
 
@@ -269,6 +272,49 @@ public class ReconnectDriveTests
 
         await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
         _drive.LastConnectedOnUtc.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Handle_Should_WakeTheNas_WhenTheHostIsUnreachable()
+    {
+        _drive.RememberMacAddress("1A:2B:3C:4D:5E:6F");
+
+        _hostReachabilityMock
+            .IsReachableAsync(_drive.Host, Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
+
+        await _wakeOnLanMock.Received(1).TryWakeAsync("1a-2b-3c-4d-5e-6f", Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotWakeTheNas_WhenTheHostAnswers()
+    {
+        _drive.RememberMacAddress("1a-2b-3c-4d-5e-6f");
+
+        _nasConnectorMock.ConnectAsync(_drive, Arg.Any<CancellationToken>()).Returns(Result.Success());
+
+        await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
+
+        await _wakeOnLanMock.DidNotReceive().TryWakeAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotWakeTheNas_WhenAwayFromItsHomeNetwork()
+    {
+        _drive.RememberMacAddress("1a-2b-3c-4d-5e-6f");
+        _drive.PinToNetwork("gateway:home", "Home");
+        BeOn("gateway:cafe");
+
+        _hostReachabilityMock
+            .IsReachableAsync(_drive.Host, Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        Result result = await _reconnectDrive.Handle(new ReconnectDrive.Request(_drive.Id, true));
+
+        result.Error.Code.Should().Be(DriveErrors.AwayFromHomeNetworkCode);
+        await _wakeOnLanMock.DidNotReceive().TryWakeAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

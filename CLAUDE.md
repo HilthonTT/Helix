@@ -356,6 +356,65 @@ Debug rather than Warning — on a laptop this is the ordinary state of affairs 
 the day, and a warning per drive per sweep buries the real failures in the file the user is
 asked to send on. The sweep is skipped outright when `Connectivity` reports no network.
 
+### Waking a NAS that is asleep
+
+A drive can carry the **hardware address** of its NAS (`Drive.MacAddress`), and when it does,
+a host that does not answer is sent a Wake-on-LAN packet before Helix reports it unreachable.
+The unreachable branch used to be a dead end — the watchdog waited politely at thirty seconds
+a try for somebody to walk over and press the NAS's power button. Now it is the thing that
+fixes it: the packet goes out, the drive stays on that flat thirty-second retry, and the
+first retry after the NAS has booted connects it.
+
+The wake is sent from **both** places that decide a host is unreachable: `ReconnectDrive`'s
+own gate, which answers before the connector is reached, and the connectors'
+`WhenReachableAsync`, which is behind every deliberate connect — a row, a group, a selection,
+"connect all" and the startup batch. Either on its own would leave half the paths unable to
+wake anything. It is sent **after** the home-network check, so a laptop at a café does not
+broadcast for a NAS it is nowhere near.
+
+`IWakeOnLan.TryWakeAsync` holds a **five-minute quiet period per address**, which is what
+makes calling it from two places, and from thirteen shares of one NAS, harmless: a pool of
+thirteen drives sends one packet, not thirteen, and a NAS that is genuinely gone is not
+broadcast at every thirty seconds all day. `WakeNowAsync` skips it, and is only used by the
+explicit **Wake NAS** action (the row's menu, Ctrl+W, `--wake`) — a user pressing a button
+has already decided it is worth sending. Addresses are normalized first
+(`MacAddresses.Normalize`, `1a-2b-3c-4d-5e-6f`), so two spellings of one NAS share a quiet
+period.
+
+The packet is the standard six `FF`s and sixteen copies of the address, to UDP 9 and 7, both
+to the limited broadcast and to **every up adapter's subnet broadcast**. The limited
+broadcast alone only leaves by the default route, which on a laptop with a VPN or a Hyper-V
+switch is often not the adapter the NAS is on.
+
+Nobody knows their NAS's hardware address, so the drive sheets offer **Look up**, which
+resolves the host and asks ARP (`SendARP`, the same call `WindowsNetworkLocation` uses for
+the gateway). That only answers on the NAS's own network while it is awake, which is exactly
+when the user is adding it — and the error says so rather than just failing. macOS has no
+lookup (`IWakeOnLan.CanLookUp` is false and the button is hidden); the address can still be
+typed and waking works on both heads. An address that does not parse is refused by
+`CreateDrive`/`UpdateDrive` (`DriveErrors.NotAMacAddress`) but **dropped** on import: a vault
+is restored whole or not at all, and a bad optional field is not worth losing the drive over.
+The address travels in the export.
+
+### Coming back from sleep
+
+`DriveWatchdog` used to have exactly one trigger, its own five-second sweep, and that is
+exactly wrong after a resume: every SMB session died with the lid closed, and the backoff
+queue was still sitting on whatever delay it had escalated to — five minutes, commonly. Two
+things now **nudge** it: `Connectivity.ConnectivityChanged` reporting access back, and the
+sweep itself noticing that **more than a minute passed between five-second ticks**. The second
+is how resume is detected, deliberately, rather than through `SystemEvents.PowerModeChanged`:
+it needs no package, no eighth platform seam and works on both heads, and the only other thing
+that stalls a timer for a minute is a machine so overloaded that re-checking the drives is the
+right response anyway.
+
+A nudge polls the monitor, brings **every pending retry forward to now**, and connects the
+auto-connect drives that are down and not away from their home network, through the same
+`ConnectDownDrivesAsync` the home-network arrival uses — arrival passes `pinnedOnly: true`,
+a nudge does not. Nudges do not overlap: a resume that also brings the network back is one
+recheck, not two. The ordinary sweep is skipped on the tick that detected the resume, since
+the nudge has just done its work.
+
 ### Diagnosing a drive that will not connect
 
 Everything above is what Helix knows about *why* a mount failed, and until now all of it
@@ -773,7 +832,8 @@ arbitrary content, so making each of them focusable would have meant rebuilding 
 interactive part of the row *and* putting a hundred tab stops in front of a user with
 thirteen drives. Focus lands on the row and the keys act on it, the way a file manager's
 list does: **Enter** connects or disconnects, **Space** ticks, **Delete** deletes, **F2**
-edits, **Ctrl+D** diagnoses, **Ctrl+Shift+D** duplicates, **Ctrl+O** opens the folder. Every one of them is the same work
+edits, **Ctrl+D** diagnoses, **Ctrl+Shift+D** duplicates, **Ctrl+O** opens the folder,
+**Ctrl+W** wakes the NAS. Every one of them is the same work
 the mouse reaches through a pill or a chip, routed through `IRowKeys` on `DriveTemplate`, so
 a row does the same thing either way. Ctrl+O is refused rather than swallowed when the drive
 is down, because the chip is not there either. The same actions are on the row's right-click
@@ -876,7 +936,8 @@ assets ending in `.zip` are considered, so a future `.sha256` sidecar cannot be 
 the build.
 
 `MauiProgram` holds a named mutex per logon session and a second instance brings the
-first's window forward and exits: two Helixes on one database is what the helper
+first's window forward and exits (see **The command line**, which that second instance now
+also carries): two Helixes on one database is what the helper
 produced, and what a shortcut double-clicked while the first is in the tray produces. Whatever happens is appended
 to `helix-updates.log` in the log directory, named so `LogFileWriter` collects it into the
 diagnostics zip: the helper outlives the logger, and its failure path puts the old version
@@ -1008,6 +1069,11 @@ throws, so a new head fails at composition rather than at first use):
 `INasConnector.GetMountPath` is the seventh thing that needs to know where a letter
 lives, after the two connectors and the two probes. It is asked of the connector because
 the connector is what put it there; it answers for any letter, mounted or not.
+
+`IWakeOnLan` is not a seam either. Sending the packet is a UDP broadcast on both heads; only
+the ARP lookup is Windows-only, and it sits behind an `#if WINDOWS` inside the one
+implementation, the same way `WindowsNetworkLocation.ProfileName` does, with `CanLookUp`
+saying which.
 
 Opening that folder goes through `IFileBrowser`, which is deliberately **not** a seventh
 platform seam: `ProcessStartInfo.UseShellExecute` hands a directory to Explorer on Windows
@@ -1180,7 +1246,8 @@ Models/        observable display models bound by the views
 Platforms/     MAUI platform heads
 Resources/     AppIcon, Fonts, Images, Languages, Splash, Styles
 Services/      DriveWatchdog, TrayIconService, StorageAlertService, IdleLockService,
-               HotkeyService, EstateStatus, ModalHost, PassphrasePromptService, Notifier
+               HotkeyService, CommandListener, EstateStatus, ModalHost,
+               PassphrasePromptService, Notifier
 ViewModels/    BaseViewModel + Auditlogs/, Drives/, Settings/, Users/
 Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/, Users/
 ```
@@ -1330,6 +1397,38 @@ point is that the window is not in front. The outcome goes to the tray balloon w
 is up and to the banner otherwise, and a repeat while one is running is ignored rather than
 queued, since a held key auto-repeats.
 
+#### The command line
+
+`Helix.App.exe --connect-all`, `--disconnect-all`, `--connect <drive>`, `--disconnect <drive>`,
+`--connect-group <name>`, `--disconnect-group <name>`, `--wake <drive>`, `--status`, `--show`,
+`--quit`, `--help`. A drive is named by letter (`Z`, `Z:`) or by name; a name two drives share
+is refused with their letters rather than guessed at. Task Scheduler, a backup job's pre-script
+and a Stream Deck button are what this is for.
+
+It drives the **running** instance, and only that. The second process that `MauiProgram`'s
+single-instance mutex already turned away now carries its arguments to the first over a named
+pipe (`CommandListener`, `Helix.App.Command.<session id>`, `PipeOptions.CurrentUserOnly` on
+both ends) and prints the one-line answer. There is no cold path: a command given with no Helix
+running says so and exits 1, because every drive's credentials are behind the account password
+and nothing without a signed-in session can mount anything. For the same reason a command is
+refused while signed out and while the **idle lock** is up — the lock stops an unattended
+keyboard, and a script is one. `--help` and a mistyped flag are answered by the client itself,
+so a typo is not reported as "Helix is not running".
+
+The pipe **replaced** the `EventWaitHandle` a second launch used to set. An event carries no
+payload, and two mechanisms for "a second copy started" is one too many; a bare launch is now
+`--show` over the same pipe, which restores a window hidden to the tray the way the event did.
+The client still calls `ShowWindow`/`SetForegroundWindow` on the other's visible window itself,
+and grants it `AllowSetForegroundWindow` first — the freshly launched process is the one
+Windows lets take the foreground, not the one sitting in the tray.
+
+The answer goes to the parent console through `AttachConsole`, success on stdout and failure
+on stderr, and the exit code is 0 or 1. Helix is a GUI executable, so **PowerShell and cmd do
+not wait for it** unless asked: `Start-Process -Wait -PassThru`, `start /wait`, or piping the
+output. The replies are English, like every other CLI on the machine, while the Wake NAS banner
+and everything else a window shows stay in `AppResources`. Windows only: Mac Catalyst has no
+single-instance mutex, and a second `open` of a running `.app` does not forward its arguments.
+
 #### The tray's folder menu
 
 The tray menu carries **Open folder**, a submenu of the drives that are mounted from their
@@ -1400,7 +1499,7 @@ DI is composed via three static extension methods chained in `Helix.App/MauiProg
 - `services.AddInfrastructure()` — `Helix.Infrastructure/DependencyInjection.cs` registers `AppDbContext`, repositories, auth, time, NAS connector, etc.
 - `services.AddPresensation()` — `Helix.App/Extensions/DependencyInjection.cs` (note: the method name is misspelled but kept consistent across the codebase).
 
-Handlers are scoped and must never be cached in viewmodel/page fields. The presentation layer invokes them per operation through `ScopedHandler.HandleAsync((MyHandler h) => h.Handle(request))` (`src/Helix.App/Common/ScopedHandler.cs`), which creates a DI scope per call so each operation gets a fresh `AppDbContext`. Only singletons (`ILoggedInUser`, `INasConnector`, `IDriveMonitor`, `ICountdownService`, `IGlobalHook`, `IVaultCipher`, `IDateTimeProvider`, `INetworkLocation`) may be resolved from `App.ServiceProvider` and stored in fields.
+Handlers are scoped and must never be cached in viewmodel/page fields. The presentation layer invokes them per operation through `ScopedHandler.HandleAsync((MyHandler h) => h.Handle(request))` (`src/Helix.App/Common/ScopedHandler.cs`), which creates a DI scope per call so each operation gets a fresh `AppDbContext`. Only singletons (`ILoggedInUser`, `INasConnector`, `IDriveMonitor`, `ICountdownService`, `IGlobalHook`, `IVaultCipher`, `IDateTimeProvider`, `INetworkLocation`, `IWakeOnLan`) may be resolved from `App.ServiceProvider` and stored in fields.
 
 ### Persistence
 

@@ -71,6 +71,8 @@ public sealed class Drive : Entity, IAuditable
 
     public string? HomeNetworkName { get; private set; }
 
+    public string? MacAddress { get; private set; }
+
     public DateTime? LastConnectedOnUtc { get; private set; }
 
     public DateTime CreatedOnUtc { get; set; }
@@ -99,6 +101,11 @@ public sealed class Drive : Entity, IAuditable
 
         HomeNetworkId = networkId.Trim();
         HomeNetworkName = string.IsNullOrWhiteSpace(networkName) ? null : networkName.Trim();
+    }
+
+    public void RememberMacAddress(string? macAddress)
+    {
+        MacAddress = MacAddresses.Normalize(macAddress);
     }
 
     public void ChangeCredentials(string username, string password)

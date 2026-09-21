@@ -64,6 +64,22 @@ public static class DriveErrors
         "Drive.LetterInUse",
         $"The drive letter '{letter}' is already in use on this computer. Choose a free one.");
 
+    public static Error MacAddressNotFound(string host) => Error.NotFound(
+        "Drive.MacAddressNotFound",
+        $"The hardware address of '{host}' could not be read. It answers only on this network, while it is awake.");
+
+    public static readonly Error NotAMacAddress = Error.Problem(
+        "Drive.NotAMacAddress",
+        "That is not a hardware address. Six pairs of hex digits are expected, such as 1a-2b-3c-4d-5e-6f.");
+
+    public static readonly Error NoMacAddress = Error.Problem(
+        "Drive.NoMacAddress",
+        "This drive has no hardware address, so there is nothing to wake.");
+
+    public static readonly Error WakeNotSent = Error.Problem(
+        "Drive.WakeNotSent",
+        "The wake-up packet could not be sent from this machine.");
+
     public static readonly Error NotALetter = Error.Problem(
         "Drive.NotALetter",
         "The 'letter' you've provided is not a single character.");

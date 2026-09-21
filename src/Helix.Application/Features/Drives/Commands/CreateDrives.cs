@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
@@ -25,7 +25,8 @@ public sealed class CreateDrives(
         bool Persistent = false,
         bool ConnectByHostname = false,
         string? HomeNetworkId = null,
-        string? HomeNetworkName = null);
+        string? HomeNetworkName = null,
+        string? MacAddress = null);
 
     public async Task<Result<List<Drive>>> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -64,6 +65,8 @@ public sealed class CreateDrives(
 
             drive.PinToNetwork(request.HomeNetworkId, request.HomeNetworkName);
 
+            drive.RememberMacAddress(request.MacAddress);
+
             if (connectedLetters.Contains(drive.Letter) && !nasConnector.IsMountedFrom(drive))
             {
                 return Result.Failure<List<Drive>>(DriveErrors.LetterInUse(entry.Letter));
@@ -92,6 +95,11 @@ public sealed class CreateDrives(
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
         {
             return Result.Failure(ValidationErrors.MissingFields);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.MacAddress) && !MacAddresses.IsValid(request.MacAddress))
+        {
+            return Result.Failure(DriveErrors.NotAMacAddress);
         }
 
         HashSet<string> letters = new(StringComparer.OrdinalIgnoreCase);

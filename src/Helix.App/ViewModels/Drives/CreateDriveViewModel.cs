@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
@@ -6,6 +6,7 @@ using Helix.App.Models;
 using Helix.App.Resources.Languages;
 using Helix.App.Services;
 using Helix.App.ViewModels;
+using Helix.Application.Abstractions.Connector;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Contracts;
 using Helix.Application.Features.Drives.Queries;
@@ -65,6 +66,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
     public bool SupportsHostnameConnect => DrivePlatform.SupportsHostnameConnect;
 
     public bool SupportsShareBrowsing => DrivePlatform.SupportsShareBrowsing;
+
+    public bool SupportsMacLookUp => App.ServiceProvider.GetRequiredService<IWakeOnLan>().CanLookUp;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasShares))]
@@ -200,7 +203,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 Form.Persistent,
                 Form.ConnectByHostname,
                 NetworkPin.NetworkId,
-                NetworkPin.NetworkName);
+                NetworkPin.NetworkName,
+                Form.MacAddress);
 
             Result<Drive> result = await ScopedHandler.HandleAsync((CreateDrive h) => h.Handle(request));
             if (result.IsFailure)
@@ -239,7 +243,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
             Form.Persistent,
             Form.ConnectByHostname,
             NetworkPin.NetworkId,
-            NetworkPin.NetworkName);
+            NetworkPin.NetworkName,
+            Form.MacAddress);
 
         Result<List<Drive>> result = await ScopedHandler.HandleAsync((CreateDrives h) => h.Handle(request));
         if (result.IsFailure)
@@ -306,6 +311,35 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
             }
 
             await DisplaySuccessAsync(AppResources.ConnectionTestSucceeded);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task LookUpMacAddressAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            var request = new LookUpMacAddress.Request(Form.Host);
+
+            Result<string> result = await ScopedHandler.HandleAsync((LookUpMacAddress h) => h.Handle(request));
+            if (result.IsFailure)
+            {
+                await DisplayErrorAsync(result.Error);
+                return;
+            }
+
+            Form.MacAddress = result.Value;
         }
         finally
         {

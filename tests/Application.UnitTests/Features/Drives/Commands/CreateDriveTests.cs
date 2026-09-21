@@ -219,4 +219,44 @@ public class CreateDriveTests
         result.Value.Name.Should().Be("photos");
         result.Value.Username.Should().Be("bob");
     }
+
+    [Fact]
+    public async Task Handle_Should_ReturnError_WhenTheHardwareAddressIsMalformed()
+    {
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        Result<Drive> result = await _createDrive.Handle(Request with { MacAddress = "not-a-mac" });
+
+        result.Error.Should().Be(DriveErrors.NotAMacAddress);
+        _driveRepositoryMock.DidNotReceive().Insert(Arg.Any<Drive>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_StoreTheHardwareAddressNormalized()
+    {
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        _driveRepositoryMock.IsLetterUniqueAsync(Arg.Any<string>(), UserId, Arg.Any<CancellationToken>())
+            .Returns(true);
+
+        Result<Drive> result = await _createDrive.Handle(Request with { MacAddress = "1A:2B:3C:4D:5E:6F" });
+
+        result.Value.MacAddress.Should().Be("1a-2b-3c-4d-5e-6f");
+    }
+
+    [Fact]
+    public async Task Handle_Should_LeaveTheHardwareAddressEmpty_WhenNoneIsGiven()
+    {
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        _driveRepositoryMock.IsLetterUniqueAsync(Arg.Any<string>(), UserId, Arg.Any<CancellationToken>())
+            .Returns(true);
+
+        Result<Drive> result = await _createDrive.Handle(Request with { MacAddress = "  " });
+
+        result.Value.MacAddress.Should().BeNull();
+    }
 }

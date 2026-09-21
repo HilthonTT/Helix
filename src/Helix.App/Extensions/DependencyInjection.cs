@@ -32,6 +32,8 @@ public static class DependencyInjection
 
         services.AddSingleton<EstateStatus>();
 
+        services.AddSingleton<CommandListener>();
+
         services.AddScoped<HomePage>();
 
         return services;

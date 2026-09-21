@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Helix.Domain.Drives;
 
 namespace Helix.App.Models;
@@ -16,6 +16,7 @@ internal sealed partial class CreateDriveModel : ObservableObject
         AutoConnect = true;
         Persistent = false;
         ConnectByHostname = false;
+        MacAddress = string.Empty;
     }
 
     public static CreateDriveModel CopyOf(Drive drive) => new()
@@ -26,6 +27,7 @@ internal sealed partial class CreateDriveModel : ObservableObject
         AutoConnect = drive.AutoConnect,
         Persistent = drive.Persistent,
         ConnectByHostname = drive.ConnectByHostname,
+        MacAddress = drive.MacAddress ?? string.Empty,
     };
 
     [ObservableProperty]
@@ -51,4 +53,7 @@ internal sealed partial class CreateDriveModel : ObservableObject
 
     [ObservableProperty]
     public partial bool ConnectByHostname { get; set; }
+
+    [ObservableProperty]
+    public partial string MacAddress { get; set; }
 }

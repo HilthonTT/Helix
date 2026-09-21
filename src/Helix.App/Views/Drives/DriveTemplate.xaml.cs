@@ -92,6 +92,10 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
                 Duplicate();
                 return true;
 
+            case RowKey.Wake when drive.CanWake:
+                Wake();
+                return true;
+
             // The chip is not there when the drive is down, so neither is the shortcut:
             // swallowing the key would make Ctrl+O look broken rather than inapplicable.
             case RowKey.Open when drive.Connected:
@@ -214,6 +218,34 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         WeakReferenceMessenger.Default.Send(new DiagnoseDriveMessage(true, drive));
     }
 
+    private void HandleWake(object? sender, EventArgs e) => Wake();
+
+    private async void Wake()
+    {
+        if (BindingContext is not DriveDisplay drive || !drive.CanWake)
+        {
+            return;
+        }
+
+        try
+        {
+            Result result = await ScopedHandler.HandleAsync(
+                (WakeDrive h) => h.Handle(new WakeDrive.Request(drive.Id)));
+
+            if (result.IsFailure)
+            {
+                Notifier.Error($"{drive.Letter}: {result.Error.Description}");
+                return;
+            }
+
+            Notifier.Success(string.Format(AppResources.WakeSent, drive.Name));
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<DriveTemplate>().LogWarning(ex, "Waking drive {Letter}: failed.", drive.Letter);
+        }
+    }
+
     private void HandleUpdate(object? sender, EventArgs e) => Edit();
 
     private void Edit()
@@ -264,6 +296,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
             drive.Letter = m.UpdatedDrive.Letter;
             drive.Name = m.UpdatedDrive.Name;
             drive.Host = m.UpdatedDrive.Host;
+            drive.CanWake = m.UpdatedDrive.CanWake;
 
             RefreshStatus(drive);
         });

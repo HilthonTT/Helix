@@ -854,4 +854,22 @@
   <data name="AddSelected" xml:space="preserve">
     <value>Tambahkan yang dipilih</value>
   </data>
+  <data name="WakeMacAddress" xml:space="preserve">
+    <value>Alamat perangkat keras Wake-on-LAN</value>
+  </data>
+  <data name="WakeMacAddressPlaceholder" xml:space="preserve">
+    <value>mis. 1a-2b-3c-4d-5e-6f</value>
+  </data>
+  <data name="WakeMacAddressDescription" xml:space="preserve">
+    <value>Jika NAS tidak merespons, Helix mengirim paket bangun dan menyambung setelah NAS aktif. Biarkan kosong agar tidak pernah dibangunkan.</value>
+  </data>
+  <data name="LookUpMacAddress" xml:space="preserve">
+    <value>Cari</value>
+  </data>
+  <data name="WakeDrive" xml:space="preserve">
+    <value>Bangunkan NAS</value>
+  </data>
+  <data name="WakeSent" xml:space="preserve">
+    <value>Paket bangun dikirim untuk {0}. Akan tersambung setelah NAS merespons.</value>
+  </data>
 </root>

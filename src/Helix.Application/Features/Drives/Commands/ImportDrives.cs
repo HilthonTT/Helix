@@ -94,16 +94,23 @@ public sealed class ImportDrives(
             .ToList();
 
         List<Drive> candidates = distinct
-            .Select(d => Drive.Create(
-                loggedInUser.UserId,
-                d.Letter,
-                d.EffectiveHost,
-                d.Name,
-                d.Username,
-                d.Password,
-                d.AutoConnect,
-                d.Persistent,
-                d.ConnectByHostname))
+            .Select(d =>
+            {
+                var drive = Drive.Create(
+                    loggedInUser.UserId,
+                    d.Letter,
+                    d.EffectiveHost,
+                    d.Name,
+                    d.Username,
+                    d.Password,
+                    d.AutoConnect,
+                    d.Persistent,
+                    d.ConnectByHostname);
+
+                drive.RememberMacAddress(d.MacAddress);
+
+                return drive;
+            })
             .ToList();
 
         List<string> existingDriveLetters = await driveRepository.GetExistingDriveLettersAsync(

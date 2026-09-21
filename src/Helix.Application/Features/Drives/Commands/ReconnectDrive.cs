@@ -15,6 +15,7 @@ public sealed class ReconnectDrive(
     ILoggedInUser loggedInUser,
     INasConnector nasConnector,
     IHostReachability hostReachability,
+    IWakeOnLan wakeOnLan,
     INetworkLocation networkLocation,
     IDateTimeProvider dateTimeProvider) : IHandler
 {
@@ -65,6 +66,8 @@ public sealed class ReconnectDrive(
         if (!await hostReachability.IsReachableAsync(drive.Host, cancellationToken))
         {
             Error unreachable = DriveErrors.HostUnreachable(drive.Host);
+
+            await wakeOnLan.TryWakeAsync(drive.MacAddress, cancellationToken);
 
             if (request.RecordDrop)
             {

@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
@@ -6,6 +6,7 @@ using Helix.App.Models;
 using Helix.App.Resources.Languages;
 using Helix.App.Services;
 using Helix.App.ViewModels;
+using Helix.Application.Abstractions.Connector;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Domain.Drives;
@@ -89,6 +90,8 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
 
     public bool SupportsHostnameConnect => DrivePlatform.SupportsHostnameConnect;
 
+    public bool SupportsMacLookUp => App.ServiceProvider.GetRequiredService<IWakeOnLan>().CanLookUp;
+
     [RelayCommand]
     private async Task UpdateAsync()
     {
@@ -115,6 +118,7 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 edited.ConnectByHostname,
                 NetworkPin.NetworkId,
                 NetworkPin.NetworkName,
+                edited.MacAddress,
                 ApplyCredentialsToServer && ShowApplyCredentials);
 
             Result result = await ScopedHandler.HandleAsync((UpdateDrive h) => h.Handle(request));
@@ -168,6 +172,35 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
             }
 
             await DisplaySuccessAsync(AppResources.ConnectionTestSucceeded);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task LookUpMacAddressAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            var request = new LookUpMacAddress.Request(Drive.Host);
+
+            Result<string> result = await ScopedHandler.HandleAsync((LookUpMacAddress h) => h.Handle(request));
+            if (result.IsFailure)
+            {
+                await DisplayErrorAsync(result.Error);
+                return;
+            }
+
+            Drive.MacAddress = result.Value;
         }
         finally
         {

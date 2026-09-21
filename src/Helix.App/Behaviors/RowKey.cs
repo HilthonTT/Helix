@@ -21,4 +21,6 @@ internal enum RowKey
     Open,
 
     Duplicate,
+
+    Wake,
 }

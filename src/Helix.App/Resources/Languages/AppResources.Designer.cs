@@ -2442,5 +2442,59 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("AddSelected", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wake-on-LAN hardware address.
+        /// </summary>
+        internal static string WakeMacAddress {
+            get {
+                return ResourceManager.GetString("WakeMacAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to e.g. 1a-2b-3c-4d-5e-6f.
+        /// </summary>
+        internal static string WakeMacAddressPlaceholder {
+            get {
+                return ResourceManager.GetString("WakeMacAddressPlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When the NAS does not answer, Helix sends it a wake-up packet and connects once it is up. Leave empty to never wake it..
+        /// </summary>
+        internal static string WakeMacAddressDescription {
+            get {
+                return ResourceManager.GetString("WakeMacAddressDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Look up.
+        /// </summary>
+        internal static string LookUpMacAddress {
+            get {
+                return ResourceManager.GetString("LookUpMacAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wake NAS.
+        /// </summary>
+        internal static string WakeDrive {
+            get {
+                return ResourceManager.GetString("WakeDrive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A wake-up packet was sent for {0}. It will connect once the NAS answers..
+        /// </summary>
+        internal static string WakeSent {
+            get {
+                return ResourceManager.GetString("WakeSent", resourceCulture);
+            }
+        }
     }
 }

@@ -13,7 +13,8 @@ namespace Helix.Infrastructure.Connector;
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsNasConnector(
     ILogger<WindowsNasConnector> logger,
-    IHostReachability hostReachability) : INasConnector
+    IHostReachability hostReachability,
+    IWakeOnLan wakeOnLan) : INasConnector
 {
     private const int MountTimeoutMilliseconds = 30_000;
 
@@ -354,6 +355,8 @@ internal sealed class WindowsNasConnector(
 
         if (!reachable)
         {
+            await wakeOnLan.TryWakeAsync(drive.MacAddress, cancellationToken);
+
             return Result.Failure(DriveErrors.HostUnreachable(drive.Host));
         }
 

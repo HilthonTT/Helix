@@ -25,7 +25,8 @@ public sealed class CreateDrive(
         bool Persistent = false,
         bool ConnectByHostname = false,
         string? HomeNetworkId = null,
-        string? HomeNetworkName = null);
+        string? HomeNetworkName = null,
+        string? MacAddress = null);
 
     public async Task<Result<Drive>> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -58,6 +59,8 @@ public sealed class CreateDrive(
 
         drive.PinToNetwork(request.HomeNetworkId, request.HomeNetworkName);
 
+        drive.RememberMacAddress(request.MacAddress);
+
         if (nasConnector.GetConnectedLetters().Contains(drive.Letter) && !nasConnector.IsMountedFrom(drive))
         {
             return Result.Failure<Drive>(DriveErrors.LetterInUse(request.Letter));
@@ -80,6 +83,11 @@ public sealed class CreateDrive(
         if (!GeneralValidation.IsValidHost(request.Host))
         {
             return Result.Failure(ValidationErrors.InvalidHost);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.MacAddress) && !MacAddresses.IsValid(request.MacAddress))
+        {
+            return Result.Failure(DriveErrors.NotAMacAddress);
         }
 
         string[] properties = [request.Letter, request.Host, request.Name, request.Username, request.Password];
