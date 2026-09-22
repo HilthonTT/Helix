@@ -491,7 +491,7 @@ internal sealed class TrayIconService
 
     private void RefreshSafely()
     {
-        _ = RefreshAsync().ContinueWith(
+        _ = Task.Run(RefreshAsync).ContinueWith(
             task => _logger.LogError(task.Exception, "The tray icon failed to refresh its menu."),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,

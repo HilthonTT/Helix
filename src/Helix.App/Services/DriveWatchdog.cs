@@ -668,7 +668,7 @@ internal sealed class DriveWatchdog
 
     private void RefreshWatchedDrivesSafely()
     {
-        _ = RefreshWatchedDrivesAsync().ContinueWith(
+        _ = Task.Run(RefreshWatchedDrivesAsync).ContinueWith(
             task => _logger.LogError(task.Exception, "The drive watchdog failed to refresh its watch set."),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,

@@ -121,22 +121,23 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 edited.MacAddress,
                 ApplyCredentialsToServer && ShowApplyCredentials);
 
-            Result result = await ScopedHandler.HandleAsync((UpdateDrive h) => h.Handle(request));
+            Result result = await Task.Run(() => ScopedHandler.HandleAsync((UpdateDrive h) => h.Handle(request)));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
                 return;
             }
 
+            var driveDisplay = new DriveDisplay(edited);
+
+            Close();
+
             if (request.ApplyCredentialsToServer)
             {
                 Notifier.Success(AppResources.CredentialsAppliedToServer);
             }
 
-            var driveDisplay = new DriveDisplay(edited);
             WeakReferenceMessenger.Default.Send(new DriveUpdatedMessage(driveDisplay));
-
-            Close();
         }
         finally
         {
