@@ -303,7 +303,16 @@ first was creating. `RunWithTimeoutAsync` hands the underlying task back through
 `onStarted` for exactly that, and logs what a timed-out mount eventually did. `HostSpelling`
 caches answers, including "nothing", for the life of the process, but **not a lookup that
 timed out** — that switched `ConnectByHostname` off for a host until restart because DNS
-was slow at logon.
+was slow at logon. A timeout is remembered for **one minute** instead, and that minute is not
+optional: the lookup blocks its caller, `IsMountedFrom` is a caller, and `IsMountedFrom` runs
+on the UI thread once per drive from the startup connect, "connect all" and the tray. Away
+from home the reverse lookup of `192.168.1.6` never answers, so with nothing remembered every
+one of those checks waited out the full 1.5s again, and the app hung at boot and after every
+connect.
+
+`IsMountedFrom` also does no lookup it can avoid. It answers "no" as soon as the letter's share
+name is not the drive's — nothing under another share name can be this drive, whatever the
+host is called — and it tries the address as typed before it asks for the other spelling.
 
 A **timed-out mount that then succeeds** is reconciled rather than left standing. The
 caller has already been answered `DriveErrors.ConnectionTimedOut` while the mount is still

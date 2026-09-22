@@ -8,7 +8,12 @@ internal static class HostSpelling
 {
     private const int LookupTimeoutMilliseconds = 1_500;
 
+    private static readonly TimeSpan TimedOutQuietPeriod = TimeSpan.FromMinutes(1);
+
     private static readonly ConcurrentDictionary<string, string?> Cache =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private static readonly ConcurrentDictionary<string, DateTime> TimedOutUntil =
         new(StringComparer.OrdinalIgnoreCase);
 
     internal static bool IsAddress(string host) => IPAddress.TryParse(host, out _);
@@ -20,11 +25,21 @@ internal static class HostSpelling
             return cached;
         }
 
+        if (TimedOutUntil.TryGetValue(uncHost, out DateTime until) && DateTime.UtcNow < until)
+        {
+            return null;
+        }
+
         (bool answered, string? resolved) = Lookup(uncHost);
 
         if (answered)
         {
             Cache.TryAdd(uncHost, resolved);
+            TimedOutUntil.TryRemove(uncHost, out _);
+        }
+        else
+        {
+            TimedOutUntil[uncHost] = DateTime.UtcNow + TimedOutQuietPeriod;
         }
 
         return resolved;

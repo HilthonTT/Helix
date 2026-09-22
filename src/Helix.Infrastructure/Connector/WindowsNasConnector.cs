@@ -81,10 +81,29 @@ internal sealed class WindowsNasConnector(
             return false;
         }
 
+        if (!string.Equals(ShareOf(remote), drive.Name.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
         string host = ToUncHost(drive.Host);
 
         return RemoteIs(remote, host, drive.Name) ||
                (HostSpelling.AlternateOf(host) is string alternate && RemoteIs(remote, alternate, drive.Name));
+    }
+
+    private static string? ShareOf(string remote)
+    {
+        string path = remote.TrimEnd('\\');
+
+        if (!path.StartsWith(@"\\", StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        int separator = path.IndexOf('\\', 2);
+
+        return separator < 0 ? null : path[(separator + 1)..];
     }
 
     public bool HasOtherMountsOn(Drive drive)
