@@ -133,6 +133,17 @@ public sealed class WakeOnLanTests
     }
 
     [Fact]
+    public async Task TryWakeAsync_Should_NotStayQuiet_AfterAPacketThatNeverWentOut()
+    {
+        var wake = new FakeWakeOnLan(ClockAt(Now, Now.AddSeconds(30)), answer: false);
+
+        await wake.TryWakeAsync(Mac);
+        await wake.TryWakeAsync(Mac);
+
+        wake.Sent.Should().HaveCount(2);
+    }
+
+    [Fact]
     public async Task LookUpAsync_Should_AnswerNothing_ForAnEmptyHost()
     {
         var wake = new FakeWakeOnLan(ClockAt(Now, Now));

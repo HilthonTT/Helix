@@ -375,7 +375,9 @@ broadcast for a NAS it is nowhere near.
 `IWakeOnLan.TryWakeAsync` holds a **five-minute quiet period per address**, which is what
 makes calling it from two places, and from thirteen shares of one NAS, harmless: a pool of
 thirteen drives sends one packet, not thirteen, and a NAS that is genuinely gone is not
-broadcast at every thirty seconds all day. `WakeNowAsync` skips it, and is only used by the
+broadcast at every thirty seconds all day. The quiet period starts only on a packet that
+actually went out: a send that failed — the nudge after a resume can run before the adapters
+are back — used to start it anyway and hold off every wake for five minutes. `WakeNowAsync` skips it, and is only used by the
 explicit **Wake NAS** action (the row's menu, Ctrl+W, `--wake`) — a user pressing a button
 has already decided it is worth sending. Addresses are normalized first
 (`MacAddresses.Normalize`, `1a-2b-3c-4d-5e-6f`), so two spellings of one NAS share a quiet
@@ -406,7 +408,14 @@ sweep itself noticing that **more than a minute passed between five-second ticks
 is how resume is detected, deliberately, rather than through `SystemEvents.PowerModeChanged`:
 it needs no package, no eighth platform seam and works on both heads, and the only other thing
 that stalls a timer for a minute is a machine so overloaded that re-checking the drives is the
-right response anyway.
+right response anyway. The gap is measured from the **end** of the previous sweep, not its
+start: a sweep that sat through a few thirty-second mount timeouts ran past a minute on its
+own and was taken for a resume.
+
+"Access back" means a **transition from no access**, not every event `ConnectivityChanged`
+raises. Windows raises one for a VPN or a virtual adapter coming and going, and each of those
+used to be a nudge — which remounts the auto-connect drives that are down, including the ones
+the user had just disconnected by hand.
 
 A nudge polls the monitor, brings **every pending retry forward to now**, and connects the
 auto-connect drives that are down and not away from their home network, through the same
@@ -1418,6 +1427,10 @@ so a typo is not reported as "Helix is not running".
 The pipe **replaced** the `EventWaitHandle` a second launch used to set. An event carries no
 payload, and two mechanisms for "a second copy started" is one too many; a bare launch is now
 `--show` over the same pipe, which restores a window hidden to the tray the way the event did.
+Each connection is answered on its own task. The listener used to take one at a time, so a
+`--connect-all` waiting out a mount timeout left the next client — a second launch's `--show`
+included — to time out and report "did not answer". A request that throws is still answered,
+with a failure, and `--quit` writes its reply before it exits rather than racing it.
 The client still calls `ShowWindow`/`SetForegroundWindow` on the other's visible window itself,
 and grants it `AllowSetForegroundWindow` first — the freshly launched process is the one
 Windows lets take the foreground, not the one sitting in the tray.

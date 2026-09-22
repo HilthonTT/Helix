@@ -38,7 +38,7 @@ internal class WakeOnLan(IDateTimeProvider dateTimeProvider, ILogger<WakeOnLan> 
         byte[]? hardware = MacAddresses.ToBytes(macAddress);
         string? normalized = MacAddresses.Normalize(macAddress);
 
-        if (hardware is null || normalized is null)
+        if (hardware is null || normalized is null || cancellationToken.IsCancellationRequested)
         {
             return Task.FromResult(false);
         }
@@ -55,7 +55,23 @@ internal class WakeOnLan(IDateTimeProvider dateTimeProvider, ILogger<WakeOnLan> 
             _sent[normalized] = now;
         }
 
-        return Task.Run(() => Send(normalized, hardware), cancellationToken);
+        return Task.Run(() =>
+        {
+            bool sent = Send(normalized, hardware);
+
+            if (!sent)
+            {
+                lock (_gate)
+                {
+                    if (_sent.TryGetValue(normalized, out DateTime stamped) && stamped == now)
+                    {
+                        _sent.Remove(normalized);
+                    }
+                }
+            }
+
+            return sent;
+        }, CancellationToken.None);
     }
 
     public Task<string?> LookUpAsync(string host, CancellationToken cancellationToken = default)

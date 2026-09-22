@@ -57,43 +57,114 @@ internal sealed class CommandListener
     {
         while (!cancellationToken.IsCancellationRequested)
         {
+            NamedPipeServerStream? server = null;
+
             try
             {
-                await using var server = new NamedPipeServerStream(
+                server = new NamedPipeServerStream(
                     PipeName,
                     PipeDirection.InOut,
-                    maxNumberOfServerInstances: 1,
+                    NamedPipeServerStream.MaxAllowedServerInstances,
                     PipeTransmissionMode.Byte,
                     PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
 
                 await server.WaitForConnectionAsync(cancellationToken);
 
-                using var reader = new StreamReader(server, Encoding.UTF8, leaveOpen: true);
-                await using var writer = new StreamWriter(server, new UTF8Encoding(false), leaveOpen: true) { AutoFlush = true };
+                _ = AnswerAsync(server, cancellationToken);
 
-                string? payload = await reader.ReadLineAsync(cancellationToken);
-
-                CommandRequest request = CommandRequest.Decode(payload ?? string.Empty);
-
-                (bool ok, string message) = await ExecuteAsync(request);
-
-                await writer.WriteLineAsync((ok ? Success : Failure) + message);
+                server = null;
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
-            catch (IOException ex)
-            {
-                _logger.LogDebug(ex, "A command-line client went away before it was answered.");
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "The command-line listener faulted; it will keep listening.");
 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+            }
+            finally
+            {
+                if (server is not null)
+                {
+                    await server.DisposeAsync();
+                }
             }
         }
+    }
+
+    private async Task AnswerAsync(NamedPipeServerStream server, CancellationToken cancellationToken)
+    {
+        CommandRequest? request = null;
+
+        try
+        {
+            await using (server)
+            {
+                using var reader = new StreamReader(server, Encoding.UTF8, leaveOpen: true);
+                await using var writer = new StreamWriter(server, new UTF8Encoding(false), leaveOpen: true) { AutoFlush = true };
+
+                string? payload = await reader.ReadLineAsync(cancellationToken);
+
+                request = CommandRequest.Decode(payload ?? string.Empty);
+
+                (bool ok, string message) = await ExecuteSafelyAsync(request);
+
+                await writer.WriteLineAsync((ok ? Success : Failure) + message);
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+        catch (IOException ex)
+        {
+            _logger.LogDebug(ex, "A command-line client went away before it was answered.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "A command-line request could not be answered.");
+        }
+
+        if (request?.Verb == CommandVerb.Quit)
+        {
+            Quit();
+        }
+    }
+
+    private async Task<(bool Ok, string Message)> ExecuteSafelyAsync(CommandRequest request)
+    {
+        try
+        {
+            return await ExecuteAsync(request);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "The command-line request {Verb} failed.", request.Verb);
+
+            return (false, "Helix could not do that. The details are in its log.");
+        }
+    }
+
+    private void Quit()
+    {
+        try
+        {
+            App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not take the tray icon down before quitting.");
+        }
+
+        MainWindow.Exit();
     }
 
     private async Task<(bool Ok, string Message)> ExecuteAsync(CommandRequest request)
@@ -114,8 +185,6 @@ internal sealed class CommandListener
                 return (false, $"'{request.Target}' is not something Helix understands.{CommandRequest.LineBreak}{CommandRequest.LineBreak}{CommandRequest.Usage}");
 
             case CommandVerb.Quit:
-                App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
-                MainWindow.Exit();
                 return (true, "Helix is closing.");
         }
 

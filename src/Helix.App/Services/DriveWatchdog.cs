@@ -45,6 +45,7 @@ internal sealed class DriveWatchdog
     private bool _watchingConnectivity;
     private DateTime _lastTickUtc;
     private int _nudging;
+    private int _offline;
 
     public DriveWatchdog(
         IDriveMonitor monitor,
@@ -126,6 +127,8 @@ internal sealed class DriveWatchdog
 
         try
         {
+            _offline = Connectivity.Current.NetworkAccess == NetworkAccess.None ? 1 : 0;
+
             Connectivity.Current.ConnectivityChanged += OnNetworkAccessChanged;
 
             _watchingConnectivity = true;
@@ -157,7 +160,9 @@ internal sealed class DriveWatchdog
 
     private void OnNetworkAccessChanged(object? sender, ConnectivityChangedEventArgs e)
     {
-        if (e.NetworkAccess == NetworkAccess.None)
+        bool wasOffline = Interlocked.Exchange(ref _offline, e.NetworkAccess == NetworkAccess.None ? 1 : 0) == 1;
+
+        if (e.NetworkAccess == NetworkAccess.None || !wasOffline)
         {
             return;
         }
@@ -326,6 +331,13 @@ internal sealed class DriveWatchdog
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "A drive watchdog retry sweep faulted; the next sweep will run as scheduled.");
+                }
+                finally
+                {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        _lastTickUtc = DateTime.UtcNow;
+                    }
                 }
             }
         }
