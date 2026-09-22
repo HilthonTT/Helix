@@ -9,6 +9,10 @@ internal abstract class StorageProbe : IStorageProbe
 
     private readonly ILogger _logger;
 
+    private readonly Lock _gate = new();
+
+    private readonly Dictionary<string, Task<Reading?>> _inFlight = new(StringComparer.OrdinalIgnoreCase);
+
     protected StorageProbe(ILogger logger)
     {
         _logger = logger;
@@ -54,7 +58,14 @@ internal abstract class StorageProbe : IStorageProbe
             volumes[reading.TotalBytes] = new Volume(reading.FreeBytes, [ordered[index]]);
         }
 
-        if (volumes.Count < measured)
+        if (measured == 0)
+        {
+            _logger.LogInformation(
+                "None of the {Count} mounted drives answered within {Timeout}s; there is no storage reading.",
+                ordered.Length,
+                ProbeTimeout.TotalSeconds);
+        }
+        else if (volumes.Count < measured)
         {
             _logger.LogDebug(
                 "Collapsed {Mounts} mounted drives to {Volumes} distinct volumes for the storage total.",
@@ -83,13 +94,47 @@ internal abstract class StorageProbe : IStorageProbe
     {
         try
         {
-            return await Task.Run(() => Measure(letter), cancellationToken).WaitAsync(ProbeTimeout, cancellationToken);
+            return await ReadingOf(letter).WaitAsync(ProbeTimeout, cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogDebug(ex, "Could not measure drive {Letter}; leaving it out of the total.", letter);
 
             return null;
+        }
+    }
+
+    private Task<Reading?> ReadingOf(string letter)
+    {
+        lock (_gate)
+        {
+            if (_inFlight.TryGetValue(letter, out Task<Reading?>? running))
+            {
+                return running;
+            }
+
+            Task<Reading?> reading = Task.Run(() => Measure(letter));
+
+            _inFlight[letter] = reading;
+
+            _ = reading.ContinueWith(
+                finished =>
+                {
+                    _ = finished.Exception;
+
+                    lock (_gate)
+                    {
+                        if (_inFlight.TryGetValue(letter, out Task<Reading?>? current) && current == finished)
+                        {
+                            _inFlight.Remove(letter);
+                        }
+                    }
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+
+            return reading;
         }
     }
 

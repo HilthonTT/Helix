@@ -69,12 +69,14 @@ internal sealed partial class AdoptMappingsViewModel : BaseViewModel
                 AutoConnect: true,
                 Persistent: DrivePlatform.SupportsPersistentMappings);
 
-            Result<List<Drive>> result = await ScopedHandler.HandleAsync((CreateDrives h) => h.Handle(request));
+            Result<List<Drive>> result = await Task.Run(() => ScopedHandler.HandleAsync((CreateDrives h) => h.Handle(request)));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
                 return;
             }
+
+            Close();
 
             foreach (Drive drive in result.Value)
             {
@@ -86,8 +88,6 @@ internal sealed partial class AdoptMappingsViewModel : BaseViewModel
             await DisplaySuccessAsync(result.Value.Count == 1
                 ? AppResources.DriveAddedOne
                 : string.Format(AppResources.DrivesAdded, result.Value.Count));
-
-            Close();
         }
         finally
         {

@@ -192,7 +192,7 @@ public class ConnectAllDrivesTests
         HaveDrives(Automatic, Manual);
 
         _nasConnectorMock.GetConnectedLetters().Returns(["Z"]);
-        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.Letter == "Z")).Returns(true);
+        _nasConnectorMock.IsLiveFrom(Arg.Is<Drive>(d => d.Letter == "Z")).Returns(true);
 
         await _connectAllDrives.Handle();
 
@@ -206,10 +206,42 @@ public class ConnectAllDrivesTests
         HaveDrives(Automatic);
 
         _nasConnectorMock.GetConnectedLetters().Returns(["Z"]);
-        _nasConnectorMock.IsMountedFrom(Automatic).Returns(false);
+        _nasConnectorMock.IsLiveFrom(Automatic).Returns(false);
 
         await _connectAllDrives.Handle();
 
         await _nasConnectorMock.Received(1).ConnectAsync(Automatic, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_ConnectADrive_WhoseMappingIsOnlyRemembered()
+    {
+        HaveDrives(Automatic);
+
+        _nasConnectorMock.GetConnectedLetters().Returns(["Z"]);
+        _nasConnectorMock.IsMountedFrom(Automatic).Returns(true);
+        _nasConnectorMock.IsLiveFrom(Automatic).Returns(false);
+
+        await _connectAllDrives.Handle();
+
+        await _nasConnectorMock.Received(1).ConnectAsync(Automatic, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotReportATimeout_WhenTheMountHasSinceComeUp()
+    {
+        HaveDrives(Automatic);
+
+        _nasConnectorMock.ConnectAsync(Automatic, Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                _nasConnectorMock.IsLiveFrom(Automatic).Returns(true);
+
+                return Result.Failure(DriveErrors.ConnectionTimedOut);
+            });
+
+        Result result = await _connectAllDrives.Handle();
+
+        result.IsSuccess.Should().BeTrue();
     }
 }

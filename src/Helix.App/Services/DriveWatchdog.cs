@@ -300,7 +300,9 @@ internal sealed class DriveWatchdog
 
         _retryCancellation = new CancellationTokenSource();
 
-        _ = RunRetryLoopAsync(_retryCancellation.Token);
+        CancellationToken token = _retryCancellation.Token;
+
+        _ = Task.Run(() => RunRetryLoopAsync(token));
     }
 
     private async Task RunRetryLoopAsync(CancellationToken cancellationToken)
@@ -450,7 +452,7 @@ internal sealed class DriveWatchdog
             .Where(drive => drive.AutoConnect &&
                             (!pinnedOnly || drive.HomeNetworkId is not null) &&
                             (drive.RemoteHost is not null || !drive.IsAwayFrom(here?.Id)) &&
-                            !_nasConnector.IsMountedFrom(drive))
+                            !_nasConnector.IsLiveFrom(drive))
             .Select(drive => drive.Id)];
 
         if (arriving.Length == 0)

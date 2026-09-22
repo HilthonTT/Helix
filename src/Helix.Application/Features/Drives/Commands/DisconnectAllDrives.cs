@@ -29,7 +29,7 @@ public sealed class DisconnectAllDrives(
         HashSet<string> connectedLetters = nasConnector.GetConnectedLetters();
 
         Drive[] connectedDrives = drives
-            .Where(d => DriveMountBatch.IsUp(d, connectedLetters, nasConnector))
+            .Where(d => DriveMountBatch.IsMapped(d, connectedLetters, nasConnector))
             .ToArray();
 
         if (connectedDrives.Length == 0)

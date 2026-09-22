@@ -43,8 +43,9 @@ internal sealed partial class LockViewModel : BaseViewModel
             IsBusy = true;
             Error = string.Empty;
 
-            Result result = await ScopedHandler.HandleAsync(
-                (UnlockSession h) => h.Handle(new UnlockSession.Request(Password)));
+            var request = new UnlockSession.Request(Password);
+
+            Result result = await Task.Run(() => ScopedHandler.HandleAsync((UnlockSession h) => h.Handle(request)));
 
             if (result.IsFailure)
             {

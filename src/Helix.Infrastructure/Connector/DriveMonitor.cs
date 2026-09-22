@@ -139,7 +139,9 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         Stop();
 
         _cancellation = new CancellationTokenSource();
-        _loop = RunAsync(interval, _cancellation.Token);
+        CancellationToken token = _cancellation.Token;
+
+        _loop = Task.Run(() => RunAsync(interval, token));
     }
 
     public void Stop()
@@ -180,15 +182,18 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         {
             while (await timer.WaitForNextTickAsync(cancellationToken))
             {
-                Poll();
+                try
+                {
+                    Poll();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "A drive monitor poll faulted; the next poll will run as scheduled.");
+                }
             }
         }
         catch (OperationCanceledException)
         {
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "The drive monitor loop faulted and has stopped polling.");
         }
     }
 
@@ -221,9 +226,22 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
             }
         }
 
-        if (changes.Count > 0)
+        if (changes.Count == 0 || ConnectivityChanged is not { } handlers)
         {
-            ConnectivityChanged?.Invoke(this, changes);
+            return;
+        }
+
+        foreach (EventHandler<IReadOnlyList<DriveConnectivityChange>> handler in
+                 handlers.GetInvocationList().Cast<EventHandler<IReadOnlyList<DriveConnectivityChange>>>())
+        {
+            try
+            {
+                handler(this, changes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Reporting a change in drive connectivity failed.");
+            }
         }
     }
 

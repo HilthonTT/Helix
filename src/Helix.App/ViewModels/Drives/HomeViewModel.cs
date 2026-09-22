@@ -613,9 +613,9 @@ internal sealed partial class HomeViewModel : BaseViewModel
         {
             TotalConnected = ValidateTotalConnected();
 
-            string storage = await ValidateTotalStorageAsync();
+            string? storage = await ValidateTotalStorageAsync();
 
-            if (request == _totalsRequest)
+            if (storage is not null && request == _totalsRequest)
             {
                 TotalStorage = storage;
             }
@@ -626,7 +626,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
     }
 
-    private async Task<string> ValidateTotalStorageAsync()
+    private async Task<string?> ValidateTotalStorageAsync()
     {
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
 
@@ -635,6 +635,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
             .Select(d => d.Letter)];
 
         IReadOnlyList<VolumeUsage> volumes = await _storageProbe.ProbeAsync(connected);
+
+        if (connected.Length > 0 && volumes.Count == 0)
+        {
+            return null;
+        }
 
         return StorageUsageHelper.FormatCombined(
             volumes.Sum(volume => volume.UsedBytes),

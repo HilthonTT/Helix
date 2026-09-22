@@ -12,7 +12,9 @@ public sealed record DriveImportDto(
     bool Persistent = false,
     bool ConnectByHostname = false,
     string? MacAddress = null,
-    string? RemoteHost = null)
+    string? RemoteHost = null,
+    string? HomeNetworkId = null,
+    string? HomeNetworkName = null)
 {
     [JsonPropertyName("IpAddress")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

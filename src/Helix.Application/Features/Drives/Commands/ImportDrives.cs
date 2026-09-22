@@ -108,6 +108,7 @@ public sealed class ImportDrives(
                     d.ConnectByHostname);
 
                 drive.RememberMacAddress(d.MacAddress);
+                drive.PinToNetwork(d.HomeNetworkId, d.HomeNetworkName);
 
                 if (GeneralValidation.IsValidHost(d.RemoteHost ?? string.Empty))
                 {

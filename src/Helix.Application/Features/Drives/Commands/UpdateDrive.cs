@@ -74,6 +74,8 @@ public sealed class UpdateDrive(
                     request.Username,
                     request.Password);
 
+                candidate.ReachAwayAt(request.RemoteHost);
+
                 if (!nasConnector.IsMountedFrom(candidate))
                 {
                     return Result.Failure(DriveErrors.LetterInUse(request.Letter));

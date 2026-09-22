@@ -329,7 +329,7 @@ drive that a later success would contradict. A late mount that fails is not repo
 either: the failure banner already says so.
 
 `MarkDriveConnected` is addressed by **letter**, because a letter is all the connector
-knows, and it refuses unless `IsMountedFrom` still says that letter points at that drive's
+knows, and it refuses unless `IsLiveFrom` still says that letter points at that drive's
 share — the mount may have been taken down again in the thirty seconds it took to arrive,
 and a stamp is a claim about now. It writes no audit entry, for the same reason
 `ConnectDrive` does not: the interceptor skips a save whose only change is
@@ -340,6 +340,14 @@ top of `HomePage.OnAppearing`, before the startup connect, since that batch is e
 produced the screenshot and its timeouts land while the page is still assembling. It stops
 where `DriveWatchdog` stops — sign-out, in `AppShell` and `IdleLockService` — and not on an
 idle lock, where the drives and the watchdog carry on.
+
+The reconciler cannot fix the case where the late mount lands **before the batch has
+answered**. The per-host gate serializes thirteen shares, so the first drive's timeout settles
+while the other twelve are still mounting, `Notifier.Retract` finds no banner to take its line
+out of, and the batch's aggregated failure (still carrying that line) is posted afterwards.
+`DriveMountBatch.SettledLate` therefore re-checks every `ConnectionTimedOut` against
+`IsLiveFrom` before the failure list is composed, in the batch and in `ConnectAllDrives`, and
+a drive that has since come up counts as connected.
 
 The row says which of the two it is. `DriveDisplay.OfflineReason` carries
 `HostUnreachable` or `Refused`, and the status pill has one for each — amber "Unreachable"
@@ -657,9 +665,39 @@ and treating them as taken meant a vault of thirteen drives imported nothing unt
 share had been disconnected by hand. A vault that ends up importing nothing is reported as
 `JsonErrors.NothingToImport` rather than announced as a success.
 
-`IsMountedFrom` is also what "this drive is up" means to everything that acts on a set of
-drives — `DriveMountBatch.IsUp`, the two all-drives handlers and `GetStorageAlerts`. A
-letter merely present on the machine is not: a USB stick that landed on `E:` used to make
+`INasConnector` answers two different questions about a letter, and they must not be
+confused. `IsMountedFrom` is "this letter **points at** this drive's share", and on Windows
+that includes a **remembered** persistent mapping that is not connected — `WNetGetConnection`
+answers `ERROR_CONNECTION_UNAVAIL` with the remote name when a restore at logon failed because
+the NAS was asleep or the laptop was elsewhere. `IsLiveFrom` is "this drive **is up**", and
+excludes it. Deciding which to ask is deciding whether the remembered entry matters:
+
+- **Is the drive up** — `IsLiveFrom`. `DriveMountBatch.IsUp` (connect all, a group, a
+  selection, the startup connect, the low-space check), `DiagnoseDrive`'s share step,
+  `MarkDriveConnected`, the watchdog's `ConnectDownDrivesAsync`, `--status` and the tray's
+  folder menu. Asking `IsMountedFrom` here was the bug: a persistent drive whose restore
+  failed at logon read as up everywhere, so nothing ever connected it again, and the
+  diagnosis reported it "already mounted" and skipped the credential test.
+- **Does the letter belong to this share** — `IsMountedFrom`. `DisconnectDrive`, "disconnect
+  all" (`DriveMountBatch.IsMapped`), `DeleteDrive`, `UpdateDrive`'s unmount before a share
+  change, and the letter-in-use checks in `CreateDrive`, `CreateDrives` and `ImportDrives`.
+  Cancelling a remembered entry is exactly what a disconnect should do, and a remembered
+  mapping of the same share is the restore-after-reinstall case, not a conflict.
+
+`HasOtherMountsOn` only counts **live** mappings, since a remembered one holds no session
+to inherit. It also asks `HostSpelling` for the other spelling only once it has found a
+network letter that neither the home nor the away address explains, because that lookup
+can block for its full 1.5s.
+
+Mounting onto a letter that holds a remembered entry is refused by `WNetAddConnection2`
+(`ERROR_ALREADY_ASSIGNED`, or `ERROR_DEVICE_ALREADY_REMEMBERED` with
+`CONNECT_UPDATE_PROFILE`). `Connect` then cancels that entry, unforced and only when it is
+**this drive's share and not connected**, and tries once more. An `ERROR_ALREADY_ASSIGNED`
+on a letter that is already **live** from this share is answered as success: it is what two
+overlapping batches (the startup connect and a "connect all" pressed during it) produce,
+and the drive is up.
+
+A letter merely present on the machine is not up either: a USB stick that landed on `E:` used to make
 "connect all" skip the NAS drive defined there, "disconnect all" try to unmount the stick,
 and the low-space check measure it under the drive's name. `DeleteDrive` unmounts whatever
 is mounted from the share, persistent or not, and refuses the delete if that fails, since a
@@ -686,6 +724,15 @@ the routers in the world are `192.168.1.1`; that is only the fallback when ARP w
 answer. The connection profile's name is read for display and nothing else. Readings are
 cached for ten seconds with the in-flight task shared, like `HostReachability`, because
 every reconnect of a pinned drive asks.
+
+The pin travels in the export, id and name both. The id is the gateway's hardware address,
+which is just as true on another machine on the same LAN; a restore used to unpin every
+drive, and they went back to probing the NAS from everywhere.
+
+When the adapter Windows would route through has **no IPv4 gateway** — a full-tunnel VPN,
+commonly — the network is read from the first adapter that has one instead. Reading the VPN
+adapter found nothing, which reads as home, and a laptop at a café probed and woke its
+pinned drives.
 
 A network that **cannot be identified reads as home**, never as away. A false "away" would
 stop a drive reconnecting that would have come back — the same asymmetry
@@ -838,7 +885,14 @@ list below them is not the NAS getting smaller.
 `RefreshTotalsAsync` is raised once per drive by a "connect all", each run probes the shares,
 and the probes finish in whatever order they like — so the storage figure is only applied by
 the **latest** request, or a reading taken before the last drive mounted could land last and
-stay. `DriveCreatedMessage` is ignored for a drive the master list already holds: a fetch that
+stay. A reading that **measured nothing while drives are connected** is not applied at all,
+on the dashboard or in the sidebar: every share of one pool rides the same SMB session, so
+when Windows re-establishes an idle one, or the NAS spins its disks up, all thirteen
+measurements miss the three-second cap together and the probe returns no volumes. That used
+to be shown as "0 TB" for a NAS that was plainly there, until some later refresh happened to
+be quick. Only "no drive is connected" shows zero. The probe writes an Information line when
+it measures nothing, since the per-drive failures are Debug and a release build drops them.
+`DriveCreatedMessage` is ignored for a drive the master list already holds: a fetch that
 was in flight when the drive was saved returns it too, and the duplicate row it left made the
 next `FetchDrivesAsync` throw on its id lookup.
 
@@ -1598,6 +1652,30 @@ before it returns and the sheet only closed after it. `UpdateDriveViewModel` now
 `TrayIconService` do their refresh-on-message on the thread pool. **Do not wrap
 `ScopedHandler` itself in `Task.Run`**: `ImportDrives`, `ExportDrives` and `ExportDiagnostics`
 raise pickers and prompts through presentation services that expect the UI thread.
+The same applies to the **sign-in handlers** (`LoginUser`, `RegisterUser`, `UnlockSession`,
+`ChangeUserPassword`, each a 600k-iteration PBKDF2), to `CreateDrive`/`CreateDrives` (which
+close their sheet before announcing, like the edit sheet), to the dashboard chart's and the
+sidebar's refresh-on-`CheckDrivesStatusMessage`, and to the audit log's paging, which a
+search runs to the end of the history.
+
+**Every background loop is started with `Task.Run`** — `DriveMonitor`, the watchdog's retry
+sweep, `StorageAlertService`, `IdleLockService`, `CommandListener` and the tray's show
+retry. They are started from `HomePage.OnAppearing` or `CreateMauiApp`, on the UI thread, and
+an `await` on a `PeriodicTimer` resumes on the context it was started from: every tick of
+every one of them — the monitor's poll and everything its `ConnectivityChanged` fans out to,
+the watchdog's reconnects and their database writes, the resume nudge's host lookups, every
+command-line request — ran on the UI thread, whatever `Task.Run` its callees used. Whatever
+they touch in the UI is marshalled by the thing that touches it (`PublishToUi`, `Notifier`,
+`MainWindow`, `EstateStatus`, `LockAsync`); a new loop must do the same rather than lean on
+the context it happened to be started from. `DriveMonitor` also invokes each
+`ConnectivityChanged` subscriber on its own and survives a poll that throws: a single
+exception used to end the loop, and drops then went unnoticed until the next sign-in.
+
+`StorageProbe` shares a measurement that is still running for a letter rather than starting
+another. `DriveInfo.TotalSize` on a share whose NAS has died blocks for the SMB timeout, the
+probe's three-second cap only abandons it, and a "connect all" raises a refresh per drive — so
+thirteen dead shares used to pile blocked threads onto the pool until the `HostSpelling`
+lookups queued behind them started timing out as well.
 
 ### Persistence
 

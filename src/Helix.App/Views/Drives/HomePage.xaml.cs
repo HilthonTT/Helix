@@ -76,6 +76,8 @@ public sealed partial class HomePage : ContentPage
 
     private const double CompactCardWidth = 850;
 
+    private int _chartRequest;
+
     protected async override void OnAppearing()
     {
         _isVisible = true;
@@ -191,7 +193,14 @@ public sealed partial class HomePage : ContentPage
 
     private async Task InitializeChartAsync(List<Drive>? providedDrives = null)
     {
+        int request = Interlocked.Increment(ref _chartRequest);
+
         List<Drive> drives = providedDrives ?? await FetchDrivesFromDatabaseAsync();
+
+        if (request != Volatile.Read(ref _chartRequest))
+        {
+            return;
+        }
 
         ChartEntry[] entries = GenerateChartEntries(drives);
         chart.Chart = CreateDonutChart(entries);
@@ -199,7 +208,7 @@ public sealed partial class HomePage : ContentPage
 
     private static async Task<List<Drive>> FetchDrivesFromDatabaseAsync()
     {
-        Result<List<Drive>> result = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+        Result<List<Drive>> result = await Task.Run(() => ScopedHandler.HandleAsync((GetDrives h) => h.Handle()));
         if (result.IsFailure)
         {
             return [];

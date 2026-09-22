@@ -195,6 +195,7 @@ public class DiagnoseDriveTests
     [Fact]
     public async Task Handle_Should_NotTestAgain_WhenTheShareIsAlreadyMounted()
     {
+        _nasConnectorMock.IsLiveFrom(_drive).Returns(true);
         _nasConnectorMock.IsMountedFrom(_drive).Returns(true);
         _nasConnectorMock.IsConnected(_drive.Letter).Returns(true);
 

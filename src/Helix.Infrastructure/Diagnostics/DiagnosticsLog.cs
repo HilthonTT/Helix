@@ -42,7 +42,7 @@ internal sealed class DiagnosticsLog : IDiagnosticsLog
 
         try
         {
-            var destination = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
+            using var destination = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
 
             created = true;
 

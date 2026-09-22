@@ -68,14 +68,18 @@ internal sealed class WindowsNasConnector(
 
     public string GetMountPath(string letter) => $"{letter.Trim().ToUpperInvariant()}:\\";
 
-    public bool IsMountedFrom(Drive drive)
+    public bool IsMountedFrom(Drive drive) => MountedFrom(drive, liveOnly: false);
+
+    public bool IsLiveFrom(Drive drive) => MountedFrom(drive, liveOnly: true);
+
+    private static bool MountedFrom(Drive drive, bool liveOnly)
     {
         if (string.IsNullOrWhiteSpace(drive.Letter))
         {
             return false;
         }
 
-        string? remote = RemoteNameOf($"{drive.Letter.Trim().ToUpperInvariant()}:");
+        string? remote = RemoteNameOf($"{drive.Letter.Trim().ToUpperInvariant()}:", liveOnly);
         if (remote is null)
         {
             return false;
@@ -110,9 +114,9 @@ internal sealed class WindowsNasConnector(
     public bool HasOtherMountsOn(Drive drive)
     {
         string host = ToUncHost(drive.Host);
-        string? alternate = HostSpelling.AlternateOf(host);
         string? away = drive.RemoteHost is null ? null : ToUncHost(drive.RemoteHost);
         string ownLetter = drive.Letter.Trim().ToUpperInvariant();
+        List<string> others = [];
 
         foreach (DriveInfo volume in DriveInfo.GetDrives())
         {
@@ -127,21 +131,26 @@ internal sealed class WindowsNasConnector(
                 continue;
             }
 
-            string? remote = RemoteNameOf($"{letter}:");
+            string? remote = RemoteNameOf($"{letter}:", liveOnly: true);
             if (remote is null)
             {
                 continue;
             }
 
-            if (RemoteHostIs(remote, host) ||
-                (alternate is not null && RemoteHostIs(remote, alternate)) ||
-                (away is not null && RemoteHostIs(remote, away)))
+            if (RemoteHostIs(remote, host) || (away is not null && RemoteHostIs(remote, away)))
             {
                 return true;
             }
+
+            others.Add(remote);
         }
 
-        return false;
+        if (others.Count == 0 || HostSpelling.AlternateOf(host) is not string alternate)
+        {
+            return false;
+        }
+
+        return others.Any(remote => RemoteHostIs(remote, alternate));
     }
 
     public async Task<Result<IReadOnlyList<string>>> ListSharesAsync(
@@ -194,7 +203,11 @@ internal sealed class WindowsNasConnector(
             if (held)
             {
                 _ = listing.ContinueWith(
-                    _ => gate.Release(),
+                    finished =>
+                    {
+                        _ = finished.Exception;
+                        gate.Release();
+                    },
                     CancellationToken.None,
                     TaskContinuationOptions.ExecuteSynchronously,
                     TaskScheduler.Default);
@@ -371,7 +384,16 @@ internal sealed class WindowsNasConnector(
         Func<DriveRoute, Task<Result>> work,
         CancellationToken cancellationToken)
     {
-        Result<DriveRoute> route = await driveRouter.RouteAsync(drive, fresh, cancellationToken);
+        Result<DriveRoute> route;
+
+        try
+        {
+            route = await driveRouter.RouteAsync(drive, fresh, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return Result.Failure(DriveErrors.FailedToConnect("Operation canceled by user."));
+        }
 
         return route.IsSuccess
             ? await work(route.Value)
@@ -420,6 +442,18 @@ internal sealed class WindowsNasConnector(
         uint flags = drive.Persistent ? CONNECT_UPDATE_PROFILE : CONNECT_TEMPORARY;
 
         int code = AddConnection(local, remote, drive.Username, drive.Password, flags);
+
+        if (code == ERROR_ALREADY_ASSIGNED && MountedFrom(drive, liveOnly: true))
+        {
+            return Result.Success();
+        }
+
+        if ((code == ERROR_ALREADY_ASSIGNED || code == ERROR_DEVICE_ALREADY_REMEMBERED) &&
+            ForgetStaleMapping(drive, local))
+        {
+            code = AddConnection(local, remote, drive.Username, drive.Password, flags);
+        }
+
         if (code == NO_ERROR)
         {
             return Result.Success();
@@ -495,6 +529,25 @@ internal sealed class WindowsNasConnector(
         return Result.Failure(DriveErrors.SessionConflict(DescribeWNetError(code)));
     }
 
+    private bool ForgetStaleMapping(Drive drive, string local)
+    {
+        if (RemoteNameOf(local, liveOnly: true) is not null || !MountedFrom(drive, liveOnly: false))
+        {
+            return false;
+        }
+
+        if (WNetCancelConnection2W(local, CONNECT_UPDATE_PROFILE, fForce: false) != NO_ERROR)
+        {
+            return false;
+        }
+
+        logger.LogInformation(
+            "Drive {Letter}: replaced a remembered mapping of its share that was not connected.",
+            drive.Letter);
+
+        return true;
+    }
+
     private Result? TryAlternateSpelling(Drive drive, string local, string host, uint flags)
     {
         string? alternate = HostSpelling.AlternateOf(host);
@@ -552,10 +605,16 @@ internal sealed class WindowsNasConnector(
 
     private static string? RemoteNameOf(string localName, bool liveOnly = false)
     {
-        var buffer = new char[MaxPathLength];
+        var buffer = new char[RemoteNameLength];
         int length = buffer.Length;
 
         int code = WNetGetConnectionW(localName, buffer, ref length);
+
+        if (code == ERROR_MORE_DATA && length > buffer.Length && length <= MaxPathLength)
+        {
+            buffer = new char[length];
+            code = WNetGetConnectionW(localName, buffer, ref length);
+        }
 
         bool known = code == NO_ERROR || (!liveOnly && code == ERROR_CONNECTION_UNAVAIL);
         if (!known)
@@ -696,6 +755,11 @@ internal sealed class WindowsNasConnector(
         Action<Task>? onStarted = null,
         bool reportsMount = false)
     {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return failure("Operation canceled by user.");
+        }
+
         Task<Result> task = Task.Run(work, CancellationToken.None);
         onStarted?.Invoke(task);
 
@@ -716,9 +780,9 @@ internal sealed class WindowsNasConnector(
         catch (OperationCanceledException)
         {
             _ = task.ContinueWith(
-                static finished => _ = finished.Exception,
+                finished => ReportSettledLate(letter, finished, reportsMount),
                 CancellationToken.None,
-                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default);
 
             return failure("Operation canceled by user.");
@@ -781,6 +845,7 @@ internal sealed class WindowsNasConnector(
     private const int NO_ERROR = 0;
 
     private const int ERROR_CONNECTION_UNAVAIL = 1201;
+    private const int ERROR_DEVICE_ALREADY_REMEMBERED = 1202;
     private const int ERROR_ACCESS_DENIED = 5;
     private const int ERROR_ALREADY_ASSIGNED = 85;
     private const int ERROR_BAD_DEV_TYPE = 66;
@@ -793,6 +858,7 @@ internal sealed class WindowsNasConnector(
     private const int ERROR_SESSION_CREDENTIAL_CONFLICT = 1219;
 
     private const int MaxPathLength = 32_767;
+    private const int RemoteNameLength = 1_024;
 
     private const int ERROR_MORE_DATA = 234;
     private const int MAX_PREFERRED_LENGTH = -1;

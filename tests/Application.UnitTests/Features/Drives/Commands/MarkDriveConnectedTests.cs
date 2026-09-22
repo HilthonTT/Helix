@@ -36,7 +36,7 @@ public class MarkDriveConnectedTests
 
         _dateTimeProviderMock.UtcNow.Returns(Now);
 
-        _nasConnectorMock.IsMountedFrom(Arg.Any<Drive>()).Returns(true);
+        _nasConnectorMock.IsLiveFrom(Arg.Any<Drive>()).Returns(true);
 
         _markDriveConnected = new(
             _driveRepositoryMock,
@@ -84,7 +84,7 @@ public class MarkDriveConnectedTests
     {
         HaveDrives(Media);
 
-        _nasConnectorMock.IsMountedFrom(Arg.Any<Drive>()).Returns(false);
+        _nasConnectorMock.IsLiveFrom(Arg.Any<Drive>()).Returns(false);
 
         Result<Drive> result = await _markDriveConnected.Handle(new MarkDriveConnected.Request("Z"));
 

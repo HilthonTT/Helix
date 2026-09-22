@@ -38,7 +38,9 @@ internal sealed class StorageAlertService
 
         _cancellation = new CancellationTokenSource();
 
-        _ = RunAsync(_cancellation.Token);
+        CancellationToken token = _cancellation.Token;
+
+        _ = Task.Run(() => RunAsync(token));
     }
 
     public void Stop()
@@ -111,7 +113,10 @@ internal sealed class StorageAlertService
             }
         }
 
-        WeakReferenceMessenger.Default.Send(new StorageAlertsChangedMessage(alerts.Count));
+        int count = alerts.Count;
+
+        MainThread.BeginInvokeOnMainThread(() =>
+            WeakReferenceMessenger.Default.Send(new StorageAlertsChangedMessage(count)));
 
         foreach (StorageAlert alert in fresh)
         {

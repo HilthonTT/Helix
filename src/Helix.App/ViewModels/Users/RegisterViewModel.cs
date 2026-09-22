@@ -72,7 +72,7 @@ internal sealed partial class RegisterViewModel : BaseViewModel
 
             var request = new RegisterUser.Request(Username, Password, ConfirmedPassword);
 
-            Result<User> result = await ScopedHandler.HandleAsync((RegisterUser h) => h.Handle(request));
+            Result<User> result = await Task.Run(() => ScopedHandler.HandleAsync((RegisterUser h) => h.Handle(request)));
             if (result.IsFailure)
             {
                 IsLoading = false;

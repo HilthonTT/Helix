@@ -64,7 +64,7 @@ internal sealed partial class LoginViewModel : BaseViewModel
 
             var request = new LoginUser.Request(Username, Password);
 
-            Result<User> result = await ScopedHandler.HandleAsync((LoginUser h) => h.Handle(request));
+            Result<User> result = await Task.Run(() => ScopedHandler.HandleAsync((LoginUser h) => h.Handle(request)));
             if (result.IsFailure)
             {
                 IsLoading = false;

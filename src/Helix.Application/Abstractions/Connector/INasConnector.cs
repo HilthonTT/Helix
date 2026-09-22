@@ -22,6 +22,8 @@ public interface INasConnector
 
     bool IsMountedFrom(Drive drive);
 
+    bool IsLiveFrom(Drive drive);
+
     bool HasOtherMountsOn(Drive drive);
 
     Task<Result<IReadOnlyList<string>>> ListSharesAsync(

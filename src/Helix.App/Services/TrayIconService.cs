@@ -89,13 +89,15 @@ internal sealed class TrayIconService
             _subscribed = true;
         }
 
-        _running = _trayIcon.Show(AppInfo.Current.Name);
+        string name = AppInfo.Current.Name;
+
+        _running = await Task.Run(() => _trayIcon.Show(name));
 
         if (!_running)
         {
             _logger.LogWarning("The tray icon is unavailable; the window will minimize to the taskbar instead.");
 
-            _ = RetryShowAsync();
+            _ = Task.Run(RetryShowAsync);
 
             return;
         }
@@ -243,7 +245,7 @@ internal sealed class TrayIconService
         ];
 
         TrayMenuItem[] folders = [.. drives
-            .Where(drive => connected.Contains(drive.Letter) && nasConnector.IsMountedFrom(drive))
+            .Where(drive => connected.Contains(drive.Letter) && nasConnector.IsLiveFrom(drive))
             .OrderBy(drive => drive.Letter, StringComparer.OrdinalIgnoreCase)
             .Select(drive => new TrayMenuItem($"{OpenDriveIdPrefix}{drive.Id}", $"{drive.Letter}: — {drive.Name}"))];
 

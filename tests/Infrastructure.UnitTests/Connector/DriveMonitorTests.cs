@@ -49,6 +49,23 @@ public sealed class DriveMonitorTests
     }
 
     [Fact]
+    public async Task Poll_Should_StillReachEverySubscriber_WhenOneThrows()
+    {
+        DriveMonitor monitor = CreateMonitor("M");
+        monitor.Watch([new WatchedDrive(MediaId, "M")]);
+
+        monitor.ConnectivityChanged += (_, _) => throw new InvalidOperationException("broken subscriber");
+        List<DriveConnectivityChange> changes = Capture(monitor);
+
+        Connected();
+
+        Func<Task> poll = () => monitor.PollAsync();
+
+        await poll.Should().NotThrowAsync();
+        changes.Should().ContainSingle(change => change.Letter == "M" && !change.IsConnected);
+    }
+
+    [Fact]
     public async Task Poll_Should_Report_A_Drive_That_Dropped()
     {
         DriveMonitor monitor = CreateMonitor("M");

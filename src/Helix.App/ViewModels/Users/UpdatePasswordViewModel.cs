@@ -40,7 +40,7 @@ internal sealed partial class UpdatePasswordViewModel : BaseViewModel
 
             var request = new ChangeUserPassword.Request(CurrentPassword, NewPassword, ConfirmedNewPassword);
 
-            Result result = await ScopedHandler.HandleAsync((ChangeUserPassword h) => h.Handle(request));
+            Result result = await Task.Run(() => ScopedHandler.HandleAsync((ChangeUserPassword h) => h.Handle(request)));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);

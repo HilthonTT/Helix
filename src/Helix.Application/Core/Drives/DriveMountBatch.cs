@@ -8,6 +8,9 @@ namespace Helix.Application.Core.Drives;
 internal static class DriveMountBatch
 {
     public static bool IsUp(Drive drive, HashSet<string> connectedLetters, INasConnector nasConnector) =>
+        connectedLetters.Contains(drive.Letter) && nasConnector.IsLiveFrom(drive);
+
+    public static bool IsMapped(Drive drive, HashSet<string> connectedLetters, INasConnector nasConnector) =>
         connectedLetters.Contains(drive.Letter) && nasConnector.IsMountedFrom(drive);
 
     public static async Task<Result> RunAsync(
@@ -26,7 +29,9 @@ internal static class DriveMountBatch
 
         HashSet<string> connected = nasConnector.GetConnectedLetters();
 
-        Drive[] targets = [.. drives.Where(drive => IsUp(drive, connected, nasConnector) == disconnect)];
+        Drive[] targets = [.. drives.Where(drive => disconnect
+            ? IsMapped(drive, connected, nasConnector)
+            : !IsUp(drive, connected, nasConnector))];
         if (targets.Length == 0)
         {
             return Result.Success();
@@ -43,7 +48,7 @@ internal static class DriveMountBatch
 
         for (int i = 0; i < results.Length; i++)
         {
-            if (results[i].IsFailure)
+            if (results[i].IsFailure && (disconnect || !SettledLate(targets[i], results[i], nasConnector)))
             {
                 failures.Add($"{targets[i].Letter}: {results[i].Error.Description}");
                 continue;
@@ -72,4 +77,8 @@ internal static class DriveMountBatch
             ? DriveErrors.FailedToDisconnect(detail)
             : DriveErrors.FailedToConnect(detail));
     }
+
+    public static bool SettledLate(Drive drive, Result result, INasConnector nasConnector) =>
+        result.Error.Code == DriveErrors.ConnectionTimedOut.Code &&
+        nasConnector.IsLiveFrom(drive);
 }

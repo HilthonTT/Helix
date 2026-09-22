@@ -42,7 +42,7 @@ public sealed class MarkDriveConnected(
             return Result.Failure<Drive>(DriveErrors.LetterNotFound(letter));
         }
 
-        if (!nasConnector.IsMountedFrom(drive))
+        if (!nasConnector.IsLiveFrom(drive))
         {
             return Result.Failure<Drive>(DriveErrors.MountNotAvailable);
         }

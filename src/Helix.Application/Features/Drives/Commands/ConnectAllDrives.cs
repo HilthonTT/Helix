@@ -63,7 +63,7 @@ public sealed class ConnectAllDrives(
 
         for (int i = 0; i < results.Length; i++)
         {
-            if (results[i].IsFailure)
+            if (results[i].IsFailure && !DriveMountBatch.SettledLate(disconnectedDrives[i], results[i], nasConnector))
             {
                 failures.Add($"{disconnectedDrives[i].Letter}: {results[i].Error.Description}");
                 continue;

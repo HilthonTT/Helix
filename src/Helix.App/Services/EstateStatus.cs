@@ -106,7 +106,7 @@ public sealed partial class EstateStatus : ObservableObject
     {
         try
         {
-            Result<List<Drive>> result = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+            Result<List<Drive>> result = await Task.Run(() => ScopedHandler.HandleAsync((GetDrives h) => h.Handle()));
             if (result.IsFailure)
             {
                 _logger.LogDebug("The sidebar could not read the drives: {Reason}", result.Error.Description);
@@ -124,9 +124,11 @@ public sealed partial class EstateStatus : ObservableObject
 
             IReadOnlyList<VolumeUsage> volumes = await _storageProbe.ProbeAsync(connected);
 
-            string storage = StorageUsageHelper.FormatCombined(
-                volumes.Sum(volume => volume.UsedBytes),
-                volumes.Sum(volume => volume.TotalBytes));
+            string? storage = connected.Length > 0 && volumes.Count == 0
+                ? null
+                : StorageUsageHelper.FormatCombined(
+                    volumes.Sum(volume => volume.UsedBytes),
+                    volumes.Sum(volume => volume.TotalBytes));
 
             if (!_isRunning)
             {
@@ -137,7 +139,7 @@ public sealed partial class EstateStatus : ObservableObject
             {
                 DriveCount = drives.Count;
                 ConnectedCount = connected.Length;
-                StorageSummary = storage;
+                StorageSummary = storage ?? StorageSummary;
             });
         }
         catch (Exception ex)

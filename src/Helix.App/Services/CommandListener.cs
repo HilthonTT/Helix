@@ -50,7 +50,9 @@ internal sealed class CommandListener
 
         _cancellation = new CancellationTokenSource();
 
-        _ = ListenAsync(_cancellation.Token);
+        CancellationToken token = _cancellation.Token;
+
+        _ = Task.Run(() => ListenAsync(token));
     }
 
     private async Task ListenAsync(CancellationToken cancellationToken)
@@ -245,7 +247,7 @@ internal sealed class CommandListener
 
         IEnumerable<string> lines = drives.Value
             .OrderBy(drive => drive.Letter, StringComparer.OrdinalIgnoreCase)
-            .Select(drive => $"{drive.Letter}:  {drive.Name.PadRight(width)}  {(_nasConnector.IsMountedFrom(drive) ? "connected" : "disconnected")}");
+            .Select(drive => $"{drive.Letter}:  {drive.Name.PadRight(width)}  {(_nasConnector.IsLiveFrom(drive) ? "connected" : "disconnected")}");
 
         return (true, string.Join(CommandRequest.LineBreak, lines));
     }

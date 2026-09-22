@@ -97,7 +97,7 @@ public sealed class DiagnoseDrive(
                 DiagnosticFinding.None);
         }
 
-        if (nasConnector.IsMountedFrom(drive))
+        if (nasConnector.IsLiveFrom(drive))
         {
             return new DiagnosticResult(
                 DiagnosticStep.ShareAndCredentials,

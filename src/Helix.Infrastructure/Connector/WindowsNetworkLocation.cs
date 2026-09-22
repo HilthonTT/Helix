@@ -86,15 +86,18 @@ internal sealed class WindowsNetworkLocation(
                 n.Supports(NetworkInterfaceComponent.IPv4) &&
                 n.GetIPProperties().GetIPv4Properties()?.Index == bestIndex);
 
-            if (best is not null)
+            if (best is not null && HasIPv4Gateway(best))
             {
                 return best;
             }
         }
 
-        return adapters.FirstOrDefault(n => n.GetIPProperties().GatewayAddresses
-            .Any(g => g.Address.AddressFamily == AddressFamily.InterNetwork));
+        return adapters.FirstOrDefault(HasIPv4Gateway);
     }
+
+    private static bool HasIPv4Gateway(NetworkInterface adapter) =>
+        adapter.GetIPProperties().GatewayAddresses
+            .Any(g => g.Address.AddressFamily == AddressFamily.InterNetwork);
 
     private static string? HardwareAddressOf(IPAddress address)
     {

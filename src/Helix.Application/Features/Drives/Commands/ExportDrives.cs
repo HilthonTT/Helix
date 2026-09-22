@@ -54,7 +54,9 @@ public sealed class ExportDrives(
                 d.Persistent,
                 d.ConnectByHostname,
                 d.MacAddress,
-                d.RemoteHost))
+                d.RemoteHost,
+                d.HomeNetworkId,
+                d.HomeNetworkName))
             .ToList();
 
         string plaintext = JsonSerializer.Serialize(exportable, JsonSerializerOptions);

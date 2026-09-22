@@ -36,7 +36,9 @@ internal sealed class IdleLockService
 
         _cancellation = new CancellationTokenSource();
 
-        _ = RunAsync(_cancellation.Token);
+        CancellationToken token = _cancellation.Token;
+
+        _ = Task.Run(() => RunAsync(token));
     }
 
     public void Stop()

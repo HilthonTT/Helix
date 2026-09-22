@@ -223,8 +223,8 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
     {
         SortOrder order = SortOrder;
 
-        Result<AuditlogPage> result = await ScopedHandler.HandleAsync((GetAuditlogs h) =>
-            h.Handle(new GetAuditlogs.Request(skip, take, order)));
+        Result<AuditlogPage> result = await Task.Run(() => ScopedHandler.HandleAsync((GetAuditlogs h) =>
+            h.Handle(new GetAuditlogs.Request(skip, take, order))));
 
         if (result.IsFailure || order != SortOrder)
         {

@@ -71,6 +71,8 @@ internal sealed class MacNasConnector : INasConnector
 
     public bool IsMountedFrom(Drive drive) => IsConnected(drive.Letter);
 
+    public bool IsLiveFrom(Drive drive) => IsMountedFrom(drive);
+
     public bool HasOtherMountsOn(Drive drive) => false;
 
     public Task<Result<IReadOnlyList<string>>> ListSharesAsync(
@@ -88,7 +90,16 @@ internal sealed class MacNasConnector : INasConnector
         Func<DriveRoute, Task<Result>> work,
         CancellationToken cancellationToken)
     {
-        Result<DriveRoute> route = await _driveRouter.RouteAsync(drive, fresh, cancellationToken);
+        Result<DriveRoute> route;
+
+        try
+        {
+            route = await _driveRouter.RouteAsync(drive, fresh, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return Result.Failure(DriveErrors.FailedToConnect("Operation canceled by user."));
+        }
 
         return route.IsSuccess
             ? await work(route.Value)
@@ -259,6 +270,11 @@ internal sealed class MacNasConnector : INasConnector
         CancellationToken cancellationToken,
         bool reportsMount = false)
     {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            return failure("Operation canceled by user.");
+        }
+
         Task<Result> task = Task.Run(work, CancellationToken.None);
 
         try
@@ -278,9 +294,9 @@ internal sealed class MacNasConnector : INasConnector
         catch (OperationCanceledException)
         {
             _ = task.ContinueWith(
-                static finished => _ = finished.Exception,
+                finished => ReportSettledLate(letter, finished, reportsMount),
                 CancellationToken.None,
-                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default);
 
             return failure("Operation canceled by user.");
