@@ -1494,6 +1494,14 @@ A sandboxed process cannot mount a network filesystem, write a LaunchAgent or to
 real Desktop, so sandboxing it would break every platform service at once. That makes the
 macOS build Developer ID / direct distribution, not Mac App Store.
 
+#### A `Picker` bound to a value needs its items first
+
+`UpdateDriveViewModel` loads `AvailableLetters` **before** it assigns `Drive`. A `Picker`
+whose `SelectedItem` arrives while its `ItemsSource` is empty, or still holds the previous
+drive's letters, selects nothing, and replacing the list afterwards does not select it
+either — so the sheet opened with no letter chosen and every edit had to start by choosing
+the same letter again.
+
 #### XAML conventions
 
 XML namespace prefixes are consistent across every page and modal:

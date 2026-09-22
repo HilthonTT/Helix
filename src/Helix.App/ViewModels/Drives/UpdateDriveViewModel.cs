@@ -261,11 +261,11 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
                 _otherDrives = drives.IsSuccess ? [.. drives.Value.Where(d => d.Id != m.DriveId)] : [];
 
+                await LoadAvailableLettersAsync(m.DriveId);
+
                 Drive = new UpdateDriveModel(result.Value);
 
                 await NetworkPin.LoadAsync(result.Value.HomeNetworkId, result.Value.HomeNetworkName);
-
-                await LoadAvailableLettersAsync(m.DriveId);
             }
             catch (Exception ex)
             {
