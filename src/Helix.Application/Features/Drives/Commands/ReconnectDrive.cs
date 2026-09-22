@@ -14,8 +14,7 @@ public sealed class ReconnectDrive(
     IUnitOfWork unitOfWork,
     ILoggedInUser loggedInUser,
     INasConnector nasConnector,
-    IHostReachability hostReachability,
-    IWakeOnLan wakeOnLan,
+    IDriveRouter driveRouter,
     INetworkLocation networkLocation,
     IDateTimeProvider dateTimeProvider) : IHandler
 {
@@ -51,7 +50,7 @@ public sealed class ReconnectDrive(
             return Result.Success();
         }
 
-        if (drive.HomeNetworkId is not null)
+        if (drive.HomeNetworkId is not null && drive.RemoteHost is null)
         {
             NetworkLocation? here = await networkLocation.GetCurrentAsync(cancellationToken);
 
@@ -63,20 +62,17 @@ public sealed class ReconnectDrive(
             }
         }
 
-        if (!await hostReachability.IsReachableAsync(drive.Host, cancellationToken))
+        Result<DriveRoute> route = await driveRouter.RouteAsync(drive, cancellationToken: cancellationToken);
+        if (route.IsFailure)
         {
-            Error unreachable = DriveErrors.HostUnreachable(drive.Host);
-
-            await wakeOnLan.TryWakeAsync(drive.MacAddress, cancellationToken);
-
             if (request.RecordDrop)
             {
-                Log(AuditAction.DriveReconnectFailed, unreachable.Description);
+                Log(AuditAction.DriveReconnectFailed, route.Error.Description);
             }
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return Result.Failure(unreachable);
+            return Result.Failure(route.Error);
         }
 
         Result result = await nasConnector.ConnectAsync(drive, cancellationToken);

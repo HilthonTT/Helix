@@ -107,6 +107,8 @@ public static class DependencyInjection
 
         services.AddSingleton<IWakeOnLan, WakeOnLan>();
 
+        services.AddSingleton<IDriveRouter, DriveRouter>();
+
         services.AddSingleton<IHostDiagnostics, HostDiagnostics>();
 
         services.AddSingleton<IUpdateChecker>(sp => new GitHubUpdateChecker(

@@ -18,7 +18,8 @@ public sealed class TestDriveConnection(
         string Name,
         string Username,
         string Password,
-        bool ConnectByHostname = false);
+        bool ConnectByHostname = false,
+        string? RemoteHost = null);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -42,6 +43,8 @@ public sealed class TestDriveConnection(
             request.Password,
             connectByHostname: request.ConnectByHostname);
 
+        candidate.ReachAwayAt(request.RemoteHost);
+
         return await nasConnector.TestAsync(candidate, cancellationToken);
     }
 
@@ -55,6 +58,11 @@ public sealed class TestDriveConnection(
         if (!GeneralValidation.IsValidHost(request.Host))
         {
             return Result.Failure(ValidationErrors.InvalidHost);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.RemoteHost) && !GeneralValidation.IsValidHost(request.RemoteHost))
+        {
+            return Result.Failure(DriveErrors.InvalidRemoteHost);
         }
 
         string[] properties = [request.Letter, request.Host, request.Name, request.Username, request.Password];

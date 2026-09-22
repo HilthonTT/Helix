@@ -72,6 +72,20 @@ public class ConnectAllDrivesTests
             .Returns(new NetworkLocation(networkId, "Network"));
 
     [Fact]
+    public async Task Handle_Should_KeepAPinnedDrive_ThatHasAnAddressForAway()
+    {
+        Drive office = PinnedTo("gateway:office", "O");
+        office.ReachAwayAt("office.tailnet.ts.net");
+        HaveDrives(office);
+        BeOn("gateway:home");
+
+        Result result = await _connectAllDrives.Handle(new ConnectAllDrives.Request(OnlyAutoConnect: true));
+
+        result.IsSuccess.Should().BeTrue();
+        await _nasConnectorMock.Received(1).ConnectAsync(office, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_Should_SkipDrivesPinnedToAnotherNetwork_WhenThePassIsUnattended()
     {
         Drive office = PinnedTo("gateway:office", "O");

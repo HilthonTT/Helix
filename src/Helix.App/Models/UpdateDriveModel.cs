@@ -35,6 +35,9 @@ internal sealed partial class UpdateDriveModel : ObservableObject
     [ObservableProperty]
     public partial string MacAddress { get; set; }
 
+    [ObservableProperty]
+    public partial string RemoteHost { get; set; }
+
     public UpdateDriveModel()
     {
         Letter = string.Empty;
@@ -46,6 +49,7 @@ internal sealed partial class UpdateDriveModel : ObservableObject
         Persistent = false;
         ConnectByHostname = false;
         MacAddress = string.Empty;
+        RemoteHost = string.Empty;
     }
 
     public UpdateDriveModel(Drive drive)
@@ -61,5 +65,6 @@ internal sealed partial class UpdateDriveModel : ObservableObject
         Persistent = drive.Persistent;
         ConnectByHostname = drive.ConnectByHostname;
         MacAddress = drive.MacAddress ?? string.Empty;
+        RemoteHost = drive.RemoteHost ?? string.Empty;
     }
 }

@@ -14,7 +14,7 @@ namespace Helix.Infrastructure.Connector;
 internal sealed class WindowsNasConnector(
     ILogger<WindowsNasConnector> logger,
     IHostReachability hostReachability,
-    IWakeOnLan wakeOnLan) : INasConnector
+    IDriveRouter driveRouter) : INasConnector
 {
     private const int MountTimeoutMilliseconds = 30_000;
 
@@ -27,11 +27,11 @@ internal sealed class WindowsNasConnector(
         WhenReachableAsync(
             drive,
             fresh: false,
-            () => WithHostGateAsync(
-                drive,
+            route => WithHostGateAsync(
+                route,
                 started => RunWithTimeoutAsync(
                     drive.Letter,
-                    () => Connect(drive),
+                    () => Connect(drive, route),
                     timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                     failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                     cancellationToken,
@@ -53,11 +53,11 @@ internal sealed class WindowsNasConnector(
         WhenReachableAsync(
             drive,
             fresh: true,
-            () => WithHostGateAsync(
-                drive,
+            route => WithHostGateAsync(
+                route,
                 started => RunWithTimeoutAsync(
                     drive.Letter,
-                    () => Test(drive),
+                    () => Test(drive, route),
                     timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                     failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                     cancellationToken,
@@ -89,6 +89,7 @@ internal sealed class WindowsNasConnector(
         string host = ToUncHost(drive.Host);
 
         return RemoteIs(remote, host, drive.Name) ||
+               (drive.RemoteHost is not null && RemoteIs(remote, ToUncHost(drive.RemoteHost), drive.Name)) ||
                (HostSpelling.AlternateOf(host) is string alternate && RemoteIs(remote, alternate, drive.Name));
     }
 
@@ -110,6 +111,7 @@ internal sealed class WindowsNasConnector(
     {
         string host = ToUncHost(drive.Host);
         string? alternate = HostSpelling.AlternateOf(host);
+        string? away = drive.RemoteHost is null ? null : ToUncHost(drive.RemoteHost);
         string ownLetter = drive.Letter.Trim().ToUpperInvariant();
 
         foreach (DriveInfo volume in DriveInfo.GetDrives())
@@ -132,7 +134,8 @@ internal sealed class WindowsNasConnector(
             }
 
             if (RemoteHostIs(remote, host) ||
-                (alternate is not null && RemoteHostIs(remote, alternate)))
+                (alternate is not null && RemoteHostIs(remote, alternate)) ||
+                (away is not null && RemoteHostIs(remote, away)))
             {
                 return true;
             }
@@ -365,21 +368,14 @@ internal sealed class WindowsNasConnector(
     private async Task<Result> WhenReachableAsync(
         Drive drive,
         bool fresh,
-        Func<Task<Result>> work,
+        Func<DriveRoute, Task<Result>> work,
         CancellationToken cancellationToken)
     {
-        bool reachable = fresh
-            ? await hostReachability.ProbeNowAsync(drive.Host, cancellationToken)
-            : await hostReachability.IsReachableAsync(drive.Host, cancellationToken);
+        Result<DriveRoute> route = await driveRouter.RouteAsync(drive, fresh, cancellationToken);
 
-        if (!reachable)
-        {
-            await wakeOnLan.TryWakeAsync(drive.MacAddress, cancellationToken);
-
-            return Result.Failure(DriveErrors.HostUnreachable(drive.Host));
-        }
-
-        return await work();
+        return route.IsSuccess
+            ? await work(route.Value)
+            : Result.Failure(route.Error);
     }
 
     public bool IsConnected(string letter)
@@ -415,10 +411,10 @@ internal sealed class WindowsNasConnector(
         return letters;
     }
 
-    private Result Connect(Drive drive)
+    private Result Connect(Drive drive, DriveRoute route)
     {
         string local = $"{drive.Letter.ToUpperInvariant()}:";
-        string host = EffectiveHostFor(drive);
+        string host = EffectiveHostFor(drive, route);
         string remote = ShareOn(host, drive.Name);
 
         uint flags = drive.Persistent ? CONNECT_UPDATE_PROFILE : CONNECT_TEMPORARY;
@@ -520,11 +516,11 @@ internal sealed class WindowsNasConnector(
         return Result.Success();
     }
 
-    private static string EffectiveHostFor(Drive drive)
+    private static string EffectiveHostFor(Drive drive, DriveRoute route)
     {
-        string host = ToUncHost(drive.Host);
+        string host = ToUncHost(route.Host);
 
-        if (!drive.ConnectByHostname || !HostSpelling.IsAddress(host))
+        if (route.IsRemote || !drive.ConnectByHostname || !HostSpelling.IsAddress(host))
         {
             return host;
         }
@@ -599,9 +595,9 @@ internal sealed class WindowsNasConnector(
             : Result.Failure(DriveErrors.FailedToDisconnect(DescribeWNetError(code)));
     }
 
-    private static Result Test(Drive drive)
+    private static Result Test(Drive drive, DriveRoute route)
     {
-        string host = EffectiveHostFor(drive);
+        string host = EffectiveHostFor(drive, route);
         string remoteName = ShareOn(host, drive.Name);
 
         int code = AddConnection(local: null, remoteName, drive.Username, drive.Password, CONNECT_TEMPORARY);
@@ -654,12 +650,12 @@ internal sealed class WindowsNasConnector(
     }
 
     private async Task<Result> WithHostGateAsync(
-        Drive drive,
+        DriveRoute route,
         Func<Action<Task>, Task<Result>> work,
         Func<string, Result> failure,
         CancellationToken cancellationToken)
     {
-        SemaphoreSlim gate = _hostGates.GetOrAdd(ToUncHost(drive.Host), _ => new SemaphoreSlim(1, 1));
+        SemaphoreSlim gate = _hostGates.GetOrAdd(ToUncHost(route.Host), _ => new SemaphoreSlim(1, 1));
 
         bool held;
 

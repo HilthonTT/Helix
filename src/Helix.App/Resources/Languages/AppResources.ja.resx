@@ -872,4 +872,13 @@
   <data name="WakeSent" xml:space="preserve">
     <value>{0} にウェイクアップ パケットを送信しました。NAS が応答したら接続します。</value>
   </data>
+  <data name="RemoteHost" xml:space="preserve">
+    <value>外出先でのアドレス</value>
+  </data>
+  <data name="RemoteHostPlaceholder" xml:space="preserve">
+    <value>nas.example.ts.net または 100.64.0.5</value>
+  </data>
+  <data name="RemoteHostDescription" xml:space="preserve">
+    <value>上のアドレスで NAS に届かないとき、またはドライブをホーム ネットワークに固定していて外出中のとき、Helix はこのアドレスに接続します。VPN や Tailscale で割り当てられたアドレスを使用してください。上のアドレスだけを使う場合は空のままにします。</value>
+  </data>
 </root>

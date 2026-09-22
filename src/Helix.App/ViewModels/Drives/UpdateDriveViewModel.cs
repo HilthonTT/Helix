@@ -119,7 +119,8 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 NetworkPin.NetworkId,
                 NetworkPin.NetworkName,
                 edited.MacAddress,
-                ApplyCredentialsToServer && ShowApplyCredentials);
+                ApplyCredentialsToServer && ShowApplyCredentials,
+                edited.RemoteHost);
 
             Result result = await Task.Run(() => ScopedHandler.HandleAsync((UpdateDrive h) => h.Handle(request)));
             if (result.IsFailure)
@@ -163,7 +164,8 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 Drive.Name,
                 Drive.Username,
                 Drive.Password,
-                Drive.ConnectByHostname);
+                Drive.ConnectByHostname,
+                Drive.RemoteHost);
 
             Result result = await ScopedHandler.HandleAsync((TestDriveConnection h) => h.Handle(request));
             if (result.IsFailure)

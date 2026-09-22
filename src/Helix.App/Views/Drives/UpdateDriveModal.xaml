@@ -152,6 +152,16 @@
                     </Grid>
 
                     <VerticalStackLayout Spacing="6" Margin="0,8,0,0">
+                        <Label Text="{l10n:Translate RemoteHost}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{l10n:Translate RemoteHostPlaceholder}"
+                                   Text="{Binding Drive.RemoteHost}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                        <Label Text="{l10n:Translate RemoteHostDescription}" Style="{StaticResource Caption}"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6" Margin="0,8,0,0">
                         <Label Text="{l10n:Translate WakeMacAddress}" Style="{StaticResource FieldLabel}"/>
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <Border Style="{StaticResource Field}">

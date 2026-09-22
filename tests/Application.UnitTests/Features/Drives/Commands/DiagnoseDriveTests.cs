@@ -129,6 +129,26 @@ public class DiagnoseDriveTests
     }
 
     [Fact]
+    public async Task Handle_Should_DiagnoseTheAddressForAway_WhenHomeIsSilentAndAwayAnswers()
+    {
+        _drive.ReachAwayAt("nas.tailnet.ts.net");
+
+        _hostDiagnosticsMock
+            .ProbeAsync(_drive.Host, Arg.Any<CancellationToken>())
+            .Returns(new HostProbe(false, null, null));
+
+        _hostDiagnosticsMock
+            .ProbeAsync("nas.tailnet.ts.net", Arg.Any<CancellationToken>())
+            .Returns(new HostProbe(true, 445, "100.64.0.5"));
+
+        Result<DriveDiagnosis> result = await _diagnoseDrive.Handle(new DiagnoseDrive.Request(_drive.Id));
+
+        result.Value.Host.Should().Be("nas.tailnet.ts.net");
+        StepOf(result.Value, DiagnosticStep.HostReachable).Outcome.Should().Be(DiagnosticOutcome.Passed);
+        await _nasConnectorMock.Received(1).TestAsync(_drive, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_Should_SkipTheShareCheck_WhenTheHostIsSilent()
     {
         _hostDiagnosticsMock

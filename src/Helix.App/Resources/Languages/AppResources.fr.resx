@@ -872,4 +872,13 @@
   <data name="WakeSent" xml:space="preserve">
     <value>Un paquet de réveil a été envoyé pour {0}. La connexion suivra dès que le NAS répondra.</value>
   </data>
+  <data name="RemoteHost" xml:space="preserve">
+    <value>Adresse hors du domicile</value>
+  </data>
+  <data name="RemoteHostPlaceholder" xml:space="preserve">
+    <value>nas.example.ts.net ou 100.64.0.5</value>
+  </data>
+  <data name="RemoteHostDescription" xml:space="preserve">
+    <value>L’adresse à laquelle Helix se connecte quand le NAS ne répond pas à l’adresse ci-dessus, ou dès que vous êtes hors de son réseau domestique si le lecteur y est épinglé. Utilisez l’adresse que lui donne votre VPN ou Tailscale. Laissez vide pour n’utiliser que l’adresse ci-dessus.</value>
+  </data>
 </root>

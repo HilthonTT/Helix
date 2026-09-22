@@ -109,6 +109,11 @@ public sealed class ImportDrives(
 
                 drive.RememberMacAddress(d.MacAddress);
 
+                if (GeneralValidation.IsValidHost(d.RemoteHost ?? string.Empty))
+                {
+                    drive.ReachAwayAt(d.RemoteHost);
+                }
+
                 return drive;
             })
             .ToList();

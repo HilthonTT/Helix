@@ -872,4 +872,13 @@
   <data name="WakeSent" xml:space="preserve">
     <value>Er is een wekpakket verstuurd voor {0}. Het verbindt zodra de NAS antwoordt.</value>
   </data>
+  <data name="RemoteHost" xml:space="preserve">
+    <value>Adres buiten de deur</value>
+  </data>
+  <data name="RemoteHostPlaceholder" xml:space="preserve">
+    <value>nas.example.ts.net of 100.64.0.5</value>
+  </data>
+  <data name="RemoteHostDescription" xml:space="preserve">
+    <value>Hier verbindt Helix wanneer de NAS niet bereikbaar is op het adres hierboven, of altijd buiten zijn thuisnetwerk als de schijf daaraan vastgezet is. Gebruik het adres dat je VPN of Tailscale hem geeft. Laat leeg om alleen het adres hierboven te gebruiken.</value>
+  </data>
 </root>

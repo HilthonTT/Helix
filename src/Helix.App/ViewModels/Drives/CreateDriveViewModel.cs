@@ -204,7 +204,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 Form.ConnectByHostname,
                 NetworkPin.NetworkId,
                 NetworkPin.NetworkName,
-                Form.MacAddress);
+                Form.MacAddress,
+                Form.RemoteHost);
 
             Result<Drive> result = await ScopedHandler.HandleAsync((CreateDrive h) => h.Handle(request));
             if (result.IsFailure)
@@ -244,7 +245,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
             Form.ConnectByHostname,
             NetworkPin.NetworkId,
             NetworkPin.NetworkName,
-            Form.MacAddress);
+            Form.MacAddress,
+            Form.RemoteHost);
 
         Result<List<Drive>> result = await ScopedHandler.HandleAsync((CreateDrives h) => h.Handle(request));
         if (result.IsFailure)
@@ -301,7 +303,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 Form.Name,
                 Form.Username,
                 Form.Password,
-                Form.ConnectByHostname);
+                Form.ConnectByHostname,
+                Form.RemoteHost);
 
             Result result = await ScopedHandler.HandleAsync((TestDriveConnection h) => h.Handle(request));
             if (result.IsFailure)

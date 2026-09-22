@@ -35,17 +35,29 @@ public sealed class DiagnoseDrive(
             return Result.Failure<DriveDiagnosis>(AuthenticationErrors.InvalidPermissions);
         }
 
-        HostProbe probe = await hostDiagnostics.ProbeAsync(drive.Host, cancellationToken);
+        string host = drive.Host;
+        HostProbe probe = await hostDiagnostics.ProbeAsync(host, cancellationToken);
+
+        if (!probe.Reachable && drive.RemoteHost is not null)
+        {
+            HostProbe away = await hostDiagnostics.ProbeAsync(drive.RemoteHost, cancellationToken);
+
+            if (away.Reachable)
+            {
+                host = drive.RemoteHost;
+                probe = away;
+            }
+        }
 
         List<DiagnosticResult> steps =
         [
             Resolution(probe),
-            Reachability(drive, probe),
-            await ShareAndCredentialsAsync(drive, probe, cancellationToken),
+            Reachability(host, probe),
+            await ShareAndCredentialsAsync(drive, host, probe, cancellationToken),
             LetterAvailability(drive),
         ];
 
-        return Result.Success(new DriveDiagnosis(drive.Id, drive.Letter, drive.Name, drive.Host, steps));
+        return Result.Success(new DriveDiagnosis(drive.Id, drive.Letter, drive.Name, host, steps));
     }
 
     private static DiagnosticResult Resolution(HostProbe probe) => probe.AlternateSpelling is null
@@ -59,7 +71,7 @@ public sealed class DiagnoseDrive(
             DiagnosticFinding.HostSpellingResolved,
             probe.AlternateSpelling);
 
-    private static DiagnosticResult Reachability(Drive drive, HostProbe probe) => probe.Reachable
+    private static DiagnosticResult Reachability(string host, HostProbe probe) => probe.Reachable
         ? new DiagnosticResult(
             DiagnosticStep.HostReachable,
             DiagnosticOutcome.Passed,
@@ -69,10 +81,11 @@ public sealed class DiagnoseDrive(
             DiagnosticStep.HostReachable,
             DiagnosticOutcome.Failed,
             DiagnosticFinding.HostSilent,
-            drive.Host);
+            host);
 
     private async Task<DiagnosticResult> ShareAndCredentialsAsync(
         Drive drive,
+        string host,
         HostProbe probe,
         CancellationToken cancellationToken)
     {
@@ -102,7 +115,7 @@ public sealed class DiagnoseDrive(
                     DiagnosticStep.ShareAndCredentials,
                     DiagnosticOutcome.Warned,
                     DiagnosticFinding.CredentialsUntested,
-                    drive.Host)
+                    host)
                 : new DiagnosticResult(
                     DiagnosticStep.ShareAndCredentials,
                     DiagnosticOutcome.Passed,

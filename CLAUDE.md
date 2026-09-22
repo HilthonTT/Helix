@@ -270,8 +270,8 @@ never disagree about what is running.
 
 ### Reconnecting away from the NAS
 
-`ReconnectDrive` asks `IHostReachability` whether the NAS answers before it tries to
-mount anything, and returns `DriveErrors.HostUnreachable` when it does not. The point is
+`ReconnectDrive` asks `IDriveRouter` — and through it `IHostReachability` — whether the NAS
+answers before it tries to mount anything, and returns `DriveErrors.HostUnreachable` when it does not. The point is
 that a drive whose host is absent has not failed to connect: on the NAS's own network a
 bad mount fails in milliseconds, but away from it every attempt waits out the platform's
 SMB timeout and files a warning naming a share that was never going to answer.
@@ -312,7 +312,9 @@ connect.
 
 `IsMountedFrom` also does no lookup it can avoid. It answers "no" as soon as the letter's share
 name is not the drive's — nothing under another share name can be this drive, whatever the
-host is called — and it tries the address as typed before it asks for the other spelling.
+host is called — and it tries the home address and the away address as typed before it asks
+for the other spelling. A drive mounted through its away address used to fall through to the
+lookup on every check.
 
 A **timed-out mount that then succeeds** is reconciled rather than left standing. The
 caller has already been answered `DriveErrors.ConnectionTimedOut` while the mount is still
@@ -374,12 +376,14 @@ a try for somebody to walk over and press the NAS's power button. Now it is the 
 fixes it: the packet goes out, the drive stays on that flat thirty-second retry, and the
 first retry after the NAS has booted connects it.
 
-The wake is sent from **both** places that decide a host is unreachable: `ReconnectDrive`'s
-own gate, which answers before the connector is reached, and the connectors'
-`WhenReachableAsync`, which is behind every deliberate connect — a row, a group, a selection,
-"connect all" and the startup batch. Either on its own would leave half the paths unable to
-wake anything. It is sent **after** the home-network check, so a laptop at a café does not
-broadcast for a NAS it is nowhere near.
+The wake is sent by `IDriveRouter`, which is the one thing that decides a host is
+unreachable, and both paths go through it: `ReconnectDrive`'s own gate, which answers before
+the connector is reached, and the connectors' `WhenReachableAsync`, which is behind every
+deliberate connect — a row, a group, a selection, "connect all" and the startup batch. Either
+on its own would leave half the paths unable to wake anything. It is **not sent at all** when
+the drive is pinned to a home network and the laptop is somewhere else, deliberate connect or
+not, so a laptop at a café does not broadcast for a NAS it is nowhere near — a wake-up packet
+does not leave the local network, so it could not have reached it anyway.
 
 `IWakeOnLan.TryWakeAsync` holds a **five-minute quiet period per address**, which is what
 makes calling it from two places, and from thirteen shares of one NAS, harmless: a pool of
@@ -696,6 +700,59 @@ for somebody to press something. The first reading of a session is only a baseli
 startup connect has just handled that network. An `AwayFromHomeNetwork` reconnect is
 treated like `HostUnreachable`: a flat thirty-second retry, logged at Debug, not counted as
 a failure.
+
+### A second address for away from home
+
+A drive can carry an **address for away from home** (`Drive.RemoteHost`) — usually what a VPN
+or Tailscale gives the NAS. Pinning a drive to its home network made a laptop stop hammering a
+NAS it could not reach, but "Away" was then a dead end for everybody who *can* reach their NAS
+from elsewhere, just not at `192.168.1.6`.
+
+Which address a connect uses is decided in one place, `IDriveRouter`, and every mount and
+test goes through it — the connectors' `WhenReachableAsync` and `ReconnectDrive`'s own gate.
+It is not a platform seam: one implementation (`Infrastructure/Connector/DriveRouter`) covers
+both heads, registered outside `AddPlatformServices()`, like `IHostReachability`, which it is
+built on. The rule:
+
+- **Pinned, and away from the home network:** straight to the away address. The home address
+  is not probed — the pin already answered that — and no wake-up packet is sent.
+- **Otherwise** (on the home network, unpinned, or a network that cannot be identified):
+  the home address is preferred, and the away address used only if home is silent. Both are
+  probed **at once**, so falling back costs one probe timeout rather than two in a row; the
+  extra probe when home answers is one cached TCP connect. An unpinned drive gets the
+  fallback too.
+- Neither answers: `DriveErrors.HostUnreachable`, naming the address that was the last hope —
+  the away one when away, the home one otherwise — so the watchdog's flat 30-second retry and
+  the amber pill carry on exactly as before.
+
+A drive with an away address is therefore **never** "Away": `ReconnectDrive` only answers
+`AwayFromHomeNetwork` for a pinned drive that has none, and the startup
+`ConnectAllDrives(OnlyAutoConnect)` and the watchdog's `ConnectDownDrivesAsync` keep it in the
+batch rather than dropping it.
+
+The away address is its own **server name string**, so on Windows it is its own credential
+context and its own per-host gate — the gate is keyed by the address actually used, not
+`Drive.Host`. That is the same property `TryAlternateSpelling` relies on, and it means a drive
+coming up over the VPN never collides with a leftover session under the LAN address.
+`ConnectByHostname` applies to the home address only; the away address is used as typed.
+
+`IsMountedFrom` and `HasOtherMountsOn` recognise a mount under the away address as the
+drive's own, or disconnecting it would have been refused as `LetterInUse`. Editing the away
+address of a drive mounted **through** it unmounts it first (`UpdateDrive`), the same as
+changing its share, for the same reason — the letter would otherwise point at an address
+nothing in Helix claims. A drive mounted through its home address is left alone.
+
+What it does **not** do: move a drive back to the home address on arriving home. A mount made
+over the VPN keeps working while the VPN is up, and switching means unmounting a share
+somebody may have a file open on. When the VPN drops, the drive drops, and the reconnect that
+follows takes the home address.
+
+`DiagnoseDrive` follows the same choice: when the home address is silent and the away one
+answers, the report is about the away address — that is what a connect would have used.
+
+The address travels in the export and is dropped rather than refused on import when it does not
+parse, like the hardware address. Duplicating a drive copies it. It is not a credential and is
+not tied to the home-network pin: a drive can have one without the other.
 
 ### Adding drives from what is already there
 

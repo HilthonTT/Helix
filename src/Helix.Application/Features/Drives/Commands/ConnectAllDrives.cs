@@ -41,11 +41,11 @@ public sealed class ConnectAllDrives(
             .Where(d => !onlyAutoConnect || d.AutoConnect)
             .ToArray();
 
-        if (onlyAutoConnect && disconnectedDrives.Any(d => d.HomeNetworkId is not null))
+        if (onlyAutoConnect && disconnectedDrives.Any(d => d.HomeNetworkId is not null && d.RemoteHost is null))
         {
             NetworkLocation? here = await networkLocation.GetCurrentAsync(cancellationToken);
 
-            disconnectedDrives = [.. disconnectedDrives.Where(d => !d.IsAwayFrom(here?.Id))];
+            disconnectedDrives = [.. disconnectedDrives.Where(d => d.RemoteHost is not null || !d.IsAwayFrom(here?.Id))];
         }
 
         if (disconnectedDrives.Length == 0)

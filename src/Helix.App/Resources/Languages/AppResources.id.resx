@@ -872,4 +872,13 @@
   <data name="WakeSent" xml:space="preserve">
     <value>Paket bangun dikirim untuk {0}. Akan tersambung setelah NAS merespons.</value>
   </data>
+  <data name="RemoteHost" xml:space="preserve">
+    <value>Alamat saat di luar rumah</value>
+  </data>
+  <data name="RemoteHostPlaceholder" xml:space="preserve">
+    <value>nas.example.ts.net atau 100.64.0.5</value>
+  </data>
+  <data name="RemoteHostDescription" xml:space="preserve">
+    <value>Alamat yang dipakai Helix saat NAS tidak dapat dijangkau di alamat di atas, atau setiap kali Anda berada di luar jaringan rumahnya jika drive disematkan ke jaringan itu. Gunakan alamat dari VPN atau Tailscale Anda. Biarkan kosong untuk hanya memakai alamat di atas.</value>
+  </data>
 </root>

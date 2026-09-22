@@ -22,28 +22,25 @@ internal sealed class MacNasConnector : INasConnector
         "Helix Drives");
 
     private readonly ILogger<MacNasConnector> _logger;
-    private readonly IHostReachability _hostReachability;
-    private readonly IWakeOnLan _wakeOnLan;
+    private readonly IDriveRouter _driveRouter;
 
     public event EventHandler<LateMountOutcome>? MountSettledLate;
 
     public MacNasConnector(
         ILogger<MacNasConnector> logger,
-        IHostReachability hostReachability,
-        IWakeOnLan wakeOnLan)
+        IDriveRouter driveRouter)
     {
         _logger = logger;
-        _hostReachability = hostReachability;
-        _wakeOnLan = wakeOnLan;
+        _driveRouter = driveRouter;
     }
 
     public Task<Result> ConnectAsync(Drive drive, CancellationToken cancellationToken = default) =>
         WhenReachableAsync(
             drive,
             fresh: false,
-            () => RunWithTimeoutAsync(
+            route => RunWithTimeoutAsync(
                 drive.Letter,
-                () => Connect(drive),
+                () => Connect(drive, route),
                 timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                 failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                 cancellationToken,
@@ -62,9 +59,9 @@ internal sealed class MacNasConnector : INasConnector
         WhenReachableAsync(
             drive,
             fresh: true,
-            () => RunWithTimeoutAsync(
+            route => RunWithTimeoutAsync(
                 drive.Letter,
-                () => Test(drive),
+                () => Test(drive, route),
                 timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                 failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
                 cancellationToken),
@@ -88,21 +85,14 @@ internal sealed class MacNasConnector : INasConnector
     private async Task<Result> WhenReachableAsync(
         Drive drive,
         bool fresh,
-        Func<Task<Result>> work,
+        Func<DriveRoute, Task<Result>> work,
         CancellationToken cancellationToken)
     {
-        bool reachable = fresh
-            ? await _hostReachability.ProbeNowAsync(drive.Host, cancellationToken)
-            : await _hostReachability.IsReachableAsync(drive.Host, cancellationToken);
+        Result<DriveRoute> route = await _driveRouter.RouteAsync(drive, fresh, cancellationToken);
 
-        if (!reachable)
-        {
-            await _wakeOnLan.TryWakeAsync(drive.MacAddress, cancellationToken);
-
-            return Result.Failure(DriveErrors.HostUnreachable(drive.Host));
-        }
-
-        return await work();
+        return route.IsSuccess
+            ? await work(route.Value)
+            : Result.Failure(route.Error);
     }
 
     public bool IsConnected(string letter)
@@ -148,15 +138,15 @@ internal sealed class MacNasConnector : INasConnector
             : null;
     }
 
-    private static Result Connect(Drive drive) => Mount(drive, MountPointFor(drive.Letter));
+    private static Result Connect(Drive drive, DriveRoute route) => Mount(drive, route, MountPointFor(drive.Letter));
 
-    private Result Test(Drive drive)
+    private Result Test(Drive drive, DriveRoute route)
     {
         string mountPoint = Path.Combine(MountRoot, $".test-{Guid.NewGuid():N}");
 
         try
         {
-            return Mount(drive, mountPoint);
+            return Mount(drive, route, mountPoint);
         }
         finally
         {
@@ -173,7 +163,7 @@ internal sealed class MacNasConnector : INasConnector
         }
     }
 
-    private static Result Mount(Drive drive, string mountPoint)
+    private static Result Mount(Drive drive, DriveRoute route, string mountPoint)
     {
         try
         {
@@ -185,7 +175,7 @@ internal sealed class MacNasConnector : INasConnector
                 $"Could not prepare the mount point '{mountPoint}': {ex.Message}"));
         }
 
-        var url = new NSUrl($"smb://{ToUrlHost(drive.Host)}/{Uri.EscapeDataString(drive.Name)}");
+        var url = new NSUrl($"smb://{ToUrlHost(route.Host)}/{Uri.EscapeDataString(drive.Name)}");
         var mountPath = NSUrl.FromFilename(mountPoint);
         var user = new NSString(drive.Username);
         var password = new NSString(drive.Password);

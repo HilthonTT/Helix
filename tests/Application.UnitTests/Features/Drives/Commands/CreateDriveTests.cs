@@ -221,6 +221,30 @@ public class CreateDriveTests
     }
 
     [Fact]
+    public async Task Handle_Should_ReturnError_WhenTheAddressForAwayIsMalformed()
+    {
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        Result<Drive> result = await _createDrive.Handle(Request with { RemoteHost = "not a host!" });
+
+        result.Error.Should().Be(DriveErrors.InvalidRemoteHost);
+        _driveRepositoryMock.DidNotReceive().Insert(Arg.Any<Drive>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_KeepTheAddressForAway()
+    {
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+        _driveRepositoryMock.IsLetterUniqueAsync(Arg.Any<string>(), UserId, Arg.Any<CancellationToken>()).Returns(true);
+
+        Result<Drive> result = await _createDrive.Handle(Request with { RemoteHost = " nas.tailnet.ts.net " });
+
+        result.Value.RemoteHost.Should().Be("nas.tailnet.ts.net");
+    }
+
+    [Fact]
     public async Task Handle_Should_ReturnError_WhenTheHardwareAddressIsMalformed()
     {
         _loggedInUserMock.UserId.Returns(UserId);

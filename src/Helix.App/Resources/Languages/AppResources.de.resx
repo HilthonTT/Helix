@@ -872,4 +872,13 @@
   <data name="WakeSent" xml:space="preserve">
     <value>Ein Weckpaket wurde für {0} gesendet. Die Verbindung folgt, sobald das NAS antwortet.</value>
   </data>
+  <data name="RemoteHost" xml:space="preserve">
+    <value>Adresse unterwegs</value>
+  </data>
+  <data name="RemoteHostPlaceholder" xml:space="preserve">
+    <value>nas.example.ts.net oder 100.64.0.5</value>
+  </data>
+  <data name="RemoteHostDescription" xml:space="preserve">
+    <value>Hierhin verbindet Helix, wenn das NAS unter der obigen Adresse nicht erreichbar ist, oder immer außerhalb seines Heimnetzes, wenn das Laufwerk daran gebunden ist. Verwenden Sie die Adresse aus Ihrem VPN oder Tailscale. Leer lassen, um nur die obige Adresse zu verwenden.</value>
+  </data>
 </root>

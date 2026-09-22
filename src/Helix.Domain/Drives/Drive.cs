@@ -73,6 +73,8 @@ public sealed class Drive : Entity, IAuditable
 
     public string? MacAddress { get; private set; }
 
+    public string? RemoteHost { get; private set; }
+
     public DateTime? LastConnectedOnUtc { get; private set; }
 
     public DateTime CreatedOnUtc { get; set; }
@@ -106,6 +108,15 @@ public sealed class Drive : Entity, IAuditable
     public void RememberMacAddress(string? macAddress)
     {
         MacAddress = MacAddresses.Normalize(macAddress);
+    }
+
+    public void ReachAwayAt(string? remoteHost)
+    {
+        string? candidate = string.IsNullOrWhiteSpace(remoteHost) ? null : remoteHost.Trim();
+
+        RemoteHost = candidate is not null && string.Equals(candidate, Host, StringComparison.OrdinalIgnoreCase)
+            ? null
+            : candidate;
     }
 
     public void ChangeCredentials(string username, string password)

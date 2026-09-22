@@ -872,4 +872,13 @@
   <data name="WakeSent" xml:space="preserve">
     <value>A wake-up packet was sent for {0}. It will connect once the NAS answers.</value>
   </data>
+  <data name="RemoteHost" xml:space="preserve">
+    <value>Address away from home</value>
+  </data>
+  <data name="RemoteHostPlaceholder" xml:space="preserve">
+    <value>nas.example.ts.net or 100.64.0.5</value>
+  </data>
+  <data name="RemoteHostDescription" xml:space="preserve">
+    <value>Where Helix connects when the NAS cannot be reached at the address above, or whenever you are away from its home network if the drive is pinned to one. Use the address your VPN or Tailscale gives it. Leave empty to only ever use the address above.</value>
+  </data>
 </root>

@@ -449,7 +449,7 @@ internal sealed class DriveWatchdog
         Guid[] arriving = [.. drives.Value
             .Where(drive => drive.AutoConnect &&
                             (!pinnedOnly || drive.HomeNetworkId is not null) &&
-                            !drive.IsAwayFrom(here?.Id) &&
+                            (drive.RemoteHost is not null || !drive.IsAwayFrom(here?.Id)) &&
                             !_nasConnector.IsMountedFrom(drive))
             .Select(drive => drive.Id)];
 

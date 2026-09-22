@@ -150,6 +150,41 @@ public sealed class UpdateDriveTests
     }
 
     [Fact]
+    public async Task Handle_Should_Unmount_WhenMountedThroughTheAddressForAwayThatIsBeingChanged()
+    {
+        Drive drive = Drive.Create(UserId, "L", "192.168.0.1", "Name", "Username", "Password");
+        drive.ReachAwayAt("old.tailnet.ts.net");
+        Editing(drive);
+
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.RemoteHost == "old.tailnet.ts.net")).Returns(true);
+        _nasConnectorMock.IsMountedFrom(Arg.Is<Drive>(d => d.RemoteHost == null)).Returns(false);
+        _nasConnectorMock.DisconnectAsync(Arg.Any<Drive>()).Returns(Result.Success());
+
+        Result result = await _updateDrive.Handle(
+            NewCredentialsFor(drive, applyToServer: false) with { RemoteHost = "new.tailnet.ts.net" });
+
+        result.IsSuccess.Should().BeTrue();
+        await _nasConnectorMock.Received(1).DisconnectAsync(drive);
+        drive.RemoteHost.Should().Be("new.tailnet.ts.net");
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotUnmount_WhenTheAddressForAwayChangesButTheMountIsThroughHome()
+    {
+        Drive drive = Drive.Create(UserId, "L", "192.168.0.1", "Name", "Username", "Password");
+        drive.ReachAwayAt("old.tailnet.ts.net");
+        Editing(drive);
+
+        _nasConnectorMock.IsMountedFrom(Arg.Any<Drive>()).Returns(true);
+
+        Result result = await _updateDrive.Handle(
+            NewCredentialsFor(drive, applyToServer: false) with { RemoteHost = "new.tailnet.ts.net" });
+
+        result.IsSuccess.Should().BeTrue();
+        await _nasConnectorMock.DidNotReceive().DisconnectAsync(Arg.Any<Drive>());
+    }
+
+    [Fact]
     public async Task Handle_Should_NotUnmount_WhenTheLetterIsUnchanged()
     {
         Drive drive = Drive.Create(UserId, "L", "192.168.0.1", "Name", "Username", "Password");

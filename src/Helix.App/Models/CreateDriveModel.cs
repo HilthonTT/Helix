@@ -17,6 +17,7 @@ internal sealed partial class CreateDriveModel : ObservableObject
         Persistent = false;
         ConnectByHostname = false;
         MacAddress = string.Empty;
+        RemoteHost = string.Empty;
     }
 
     public static CreateDriveModel CopyOf(Drive drive) => new()
@@ -28,6 +29,7 @@ internal sealed partial class CreateDriveModel : ObservableObject
         Persistent = drive.Persistent,
         ConnectByHostname = drive.ConnectByHostname,
         MacAddress = drive.MacAddress ?? string.Empty,
+        RemoteHost = drive.RemoteHost ?? string.Empty,
     };
 
     [ObservableProperty]
@@ -56,4 +58,7 @@ internal sealed partial class CreateDriveModel : ObservableObject
 
     [ObservableProperty]
     public partial string MacAddress { get; set; }
+
+    [ObservableProperty]
+    public partial string RemoteHost { get; set; }
 }

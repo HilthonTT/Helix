@@ -98,6 +98,21 @@ public class TestDriveConnectionTests
     }
 
     [Fact]
+    public async Task Handle_Should_TestWithTheAddressForAway_WhenTheFormHasOne()
+    {
+        SignIn();
+
+        _nasConnectorMock.TestAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+
+        await _testDriveConnection.Handle(Request with { RemoteHost = "100.68.211.81" });
+
+        await _nasConnectorMock.Received(1).TestAsync(
+            Arg.Is<Drive>(d => d.RemoteHost == "100.68.211.81"),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Handle_Should_NeverConnectOrMountTheCandidate()
     {
         SignIn();

@@ -68,6 +68,10 @@ public static class DriveErrors
         "Drive.MacAddressNotFound",
         $"The hardware address of '{host}' could not be read. It answers only on this network, while it is awake.");
 
+    public static readonly Error InvalidRemoteHost = Error.Problem(
+        "Drive.InvalidRemoteHost",
+        "The address for away from home must be an IP address or a hostname, such as nas.example.ts.net.");
+
     public static readonly Error NotAMacAddress = Error.Problem(
         "Drive.NotAMacAddress",
         "That is not a hardware address. Six pairs of hex digits are expected, such as 1a-2b-3c-4d-5e-6f.");

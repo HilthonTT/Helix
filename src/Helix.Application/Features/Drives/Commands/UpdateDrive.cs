@@ -29,7 +29,8 @@ public sealed class UpdateDrive(
         string? HomeNetworkId = null,
         string? HomeNetworkName = null,
         string? MacAddress = null,
-        bool ApplyCredentialsToServer = false);
+        bool ApplyCredentialsToServer = false,
+        string? RemoteHost = null);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -84,7 +85,8 @@ public sealed class UpdateDrive(
         bool isSameShare = string.Equals(drive.Host, request.Host.Trim(), StringComparison.OrdinalIgnoreCase) &&
                            string.Equals(drive.Name, request.Name.Trim(), StringComparison.OrdinalIgnoreCase);
 
-        if ((!isSameLetter || !isSameShare) && nasConnector.IsMountedFrom(drive))
+        if ((!isSameLetter || !isSameShare || IsMountedThroughAnOldAddressForAway(drive, request)) &&
+            nasConnector.IsMountedFrom(drive))
         {
             using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
 
@@ -109,6 +111,8 @@ public sealed class UpdateDrive(
 
         drive.RememberMacAddress(request.MacAddress);
 
+        drive.ReachAwayAt(request.RemoteHost);
+
         if (request.ApplyCredentialsToServer)
         {
             List<Drive> drives = await driveRepository.GetAsync(loggedInUser.UserId, cancellationToken);
@@ -122,6 +126,27 @@ public sealed class UpdateDrive(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
+    }
+
+    private bool IsMountedThroughAnOldAddressForAway(Drive drive, Request request)
+    {
+        string? requested = string.IsNullOrWhiteSpace(request.RemoteHost) ? null : request.RemoteHost.Trim();
+
+        if (drive.RemoteHost is null ||
+            string.Equals(drive.RemoteHost, requested, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var homeOnly = Drive.Create(
+            drive.UserId,
+            drive.Letter,
+            drive.Host,
+            drive.Name,
+            drive.Username,
+            drive.Password);
+
+        return nasConnector.IsMountedFrom(drive) && !nasConnector.IsMountedFrom(homeOnly);
     }
 
     private static Result Validate(Request request)
@@ -139,6 +164,11 @@ public sealed class UpdateDrive(
         if (!string.IsNullOrWhiteSpace(request.MacAddress) && !MacAddresses.IsValid(request.MacAddress))
         {
             return Result.Failure(DriveErrors.NotAMacAddress);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.RemoteHost) && !GeneralValidation.IsValidHost(request.RemoteHost))
+        {
+            return Result.Failure(DriveErrors.InvalidRemoteHost);
         }
 
         string[] properties = [request.Letter, request.Host, request.Name, request.Username, request.Password];

@@ -2444,6 +2444,33 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Address away from home.
+        /// </summary>
+        internal static string RemoteHost {
+            get {
+                return ResourceManager.GetString("RemoteHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Where Helix connects when the NAS cannot be reached at the address above, or whenever you are away from its home network if the drive is pinned to one. Use the address your VPN or Tailscale gives it. Leave empty to only ever use the address above..
+        /// </summary>
+        internal static string RemoteHostDescription {
+            get {
+                return ResourceManager.GetString("RemoteHostDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to nas.example.ts.net or 100.64.0.5.
+        /// </summary>
+        internal static string RemoteHostPlaceholder {
+            get {
+                return ResourceManager.GetString("RemoteHostPlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wake-on-LAN hardware address.
         /// </summary>
         internal static string WakeMacAddress {
