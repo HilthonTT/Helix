@@ -32,8 +32,23 @@ dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --filter "F
 EF Core migrations target `Helix.Infrastructure` but `Microsoft.EntityFrameworkCore.Tools` is referenced from `Helix.App`, so migrations are run with the App as the startup project:
 
 ```bash
-dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App
+dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App --framework net10.0-windows10.0.19041.0
 ```
+
+`scripts/` wraps these in PowerShell (5.1 or 7), each with `Get-Help` documentation. They
+pick the right projects for the host OS, so `test.ps1` on a Mac runs only the Application
+suite:
+
+```powershell
+./scripts/build.ps1 [-Configuration Release] [-Clean]
+./scripts/test.ps1 [-Suite Application,Architecture] [-Filter CreateDriveTests] [-NoBuild] [-Trx]
+./scripts/clean.ps1                      # every bin/obj under src and tests
+./scripts/publish.ps1 [-Runtime win-x64,win-arm64] [-Zip] [-Tag v2.2.6]   # as release.yml does
+./scripts/migration.ps1 add <Name> | remove | list
+```
+
+`dotnet ef` also needs `--framework` now that the projects are multi-targeted; `migration.ps1`
+passes the host's head.
 
 Running the MAUI app itself is normally done via Visual Studio 2022 (`Helix.App` startup project), not `dotnet run`, because of the MAUI/Windows packaging configuration.
 
