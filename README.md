@@ -14,7 +14,7 @@ and keep your credentials encrypted at rest.
 [![CI](https://github.com/HilthonTT/Helix/actions/workflows/ci.yml/badge.svg)](https://github.com/HilthonTT/Helix/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/HilthonTT/Helix/actions/workflows/codeql.yml/badge.svg)](https://github.com/HilthonTT/Helix/actions/workflows/codeql.yml)
 [![Release](https://img.shields.io/github/v/release/HilthonTT/Helix?include_prereleases&label=release&style=flat-square)](https://github.com/HilthonTT/Helix/releases)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-orange.svg?style=flat-square)](LICENSE)
 ![Windows 10+](https://img.shields.io/badge/Windows%2010%2B-0078D6?style=flat-square&logo=windows&logoColor=white)
 ![macOS 15+](https://img.shields.io/badge/macOS%2015%2B-000000?style=flat-square&logo=apple&logoColor=white)
 
@@ -372,4 +372,10 @@ Participation is governed by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
-Helix is licensed under the [MIT License](LICENSE).
+Helix is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE).
+You may use, modify and share it for any noncommercial purpose; commercial use —
+selling it, or shipping it in a paid product or service — needs separate
+permission from the author.
+
+Releases up to and including v2.2.6 were published under the MIT License, and
+those copies remain available under MIT.
