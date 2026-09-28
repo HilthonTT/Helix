@@ -66,7 +66,7 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     }
 
     public bool SupportsTray =>
-        App.ServiceProvider.GetRequiredService<TrayIconService>().IsSupported;
+        OperatingSystem.IsWindows() && App.ServiceProvider.GetRequiredService<TrayIconService>().IsSupported;
 
     public int MaximumStorageAlertThresholdPercent =>
         SettingsModel.MaximumStorageAlertThresholdPercent;
@@ -119,6 +119,12 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     private static void EditPassword()
     {
         WeakReferenceMessenger.Default.Send(new UpdatePasswordMessage(true));
+    }
+
+    [RelayCommand]
+    private static void CreateRecoveryKey()
+    {
+        WeakReferenceMessenger.Default.Send(new CreateRecoveryKeyMessage(true));
     }
 
     [RelayCommand]

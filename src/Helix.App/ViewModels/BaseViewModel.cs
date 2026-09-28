@@ -138,7 +138,7 @@ public abstract partial class BaseViewModel : ObservableObject
     {
         TrayIconService tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
 
-        if (tray.IsRunning)
+        if (tray.IsRunning && OperatingSystem.IsWindows())
         {
             MainWindow.HideToTray();
             tray.NotifyHiddenToTray();

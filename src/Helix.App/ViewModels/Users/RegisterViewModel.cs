@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using Helix.Application.Features.Users.Commands;
 using Helix.Domain.Settings;
-using Helix.Domain.Users;
 using System.Collections.ObjectModel;
 
 namespace Helix.App.ViewModels.Users;
@@ -17,6 +16,7 @@ internal sealed partial class RegisterViewModel : BaseViewModel
         SelectedLanguage = string.Empty;
         HidePassword = true;
         HideConfirmedPassword = true;
+        RecoveryKey = string.Empty;
 
         Languages = new(CultureSwitcher.Languages);
     }
@@ -56,10 +56,16 @@ internal sealed partial class RegisterViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool IsLoading { get; set; }
 
+    [ObservableProperty]
+    public partial string RecoveryKey { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsShowingRecoveryKey { get; set; }
+
     [RelayCommand]
     private async Task RegisterAsync()
     {
-        if (IsBusy)
+        if (IsBusy || IsShowingRecoveryKey)
         {
             return;
         }
@@ -72,7 +78,7 @@ internal sealed partial class RegisterViewModel : BaseViewModel
 
             var request = new RegisterUser.Request(Username, Password, ConfirmedPassword);
 
-            Result<User> result = await Task.Run(() => ScopedHandler.HandleAsync((RegisterUser h) => h.Handle(request)));
+            Result<RegisterUser.Response> result = await Task.Run(() => ScopedHandler.HandleAsync((RegisterUser h) => h.Handle(request)));
             if (result.IsFailure)
             {
                 IsLoading = false;
@@ -80,11 +86,34 @@ internal sealed partial class RegisterViewModel : BaseViewModel
                 return;
             }
 
-            await Task.Delay(100);
+            Clear();
+
+            RecoveryKey = result.Value.RecoveryKey;
+            IsShowingRecoveryKey = true;
+            IsLoading = false;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ContinueAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
 
             await Shell.Current.GoToAsync($"//{PageNames.HomePage}", true);
 
-            Clear();
+            RecoveryKey = string.Empty;
+            IsShowingRecoveryKey = false;
         }
         finally
         {

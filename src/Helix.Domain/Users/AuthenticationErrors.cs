@@ -21,4 +21,8 @@ public static class AuthenticationErrors
     public static readonly Error NewPasswordsDoNotMatch = Error.Problem(
         "Authentication.NewPasswordsDoNotMatch",
         "Your new specified passwords do not match.");
+
+    public static readonly Error InvalidUsernameOrRecoveryKey = Error.Problem(
+        "Authentication.InvalidUsernameOrRecoveryKey",
+        "The specified username or recovery key are incorrect.");
 }

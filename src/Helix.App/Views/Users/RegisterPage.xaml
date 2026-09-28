@@ -5,6 +5,7 @@
              xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:l10n="clr-namespace:Helix.App.Localization"
              xmlns:controls="clr-namespace:Helix.App.Controls"
+             xmlns:views="clr-namespace:Helix.App.Views.Users"
              x:DataType="vm:RegisterViewModel"
              x:Class="Helix.App.Views.Users.RegisterPage"
              Title=""
@@ -34,94 +35,112 @@
                            HeightRequest="57"
                            HorizontalOptions="Start"/>
 
-                    <Label Text="{l10n:Translate RegisterMessage}"
-                           Style="{StaticResource Display}"
-                           Margin="0,20,0,28"/>
+                    <VerticalStackLayout Spacing="0" IsVisible="{Binding IsShowingRecoveryKey, Converter={StaticResource InvertedBoolConverter}}">
 
-                    <Label Text="{l10n:Translate Username}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/>
-                    <Border Style="{StaticResource Field}">
-                        <Entry Placeholder="{l10n:Translate Username}"
-                               Text="{Binding Username}"
-                               IsEnabled="{Binding IsNotBusy}"/>
-                    </Border>
+                        <Label Text="{l10n:Translate RegisterMessage}"
+                               Style="{StaticResource Display}"
+                               Margin="0,20,0,28"/>
 
-                    <Label Text="{l10n:Translate Password}" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
-                    <Border Style="{StaticResource Field}">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Entry Placeholder="{l10n:Translate Password}"
-                                   IsPassword="{Binding HidePassword}"
-                                   Text="{Binding Password}"
-                                   Margin="14,0,0,0"
+                        <Label Text="{l10n:Translate Username}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="{l10n:Translate Username}"
+                                   Text="{Binding Username}"
                                    IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
 
-                            <Border Grid.Column="1"
-                                    Style="{StaticResource IconChip}"
-                                    Stroke="Transparent"
-                                    Margin="0,0,7,0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding TogglePasswordHiddenCommand}"/>
-                                </Border.GestureRecognizers>
-                                <Grid InputTransparent="True">
-                                    <Label Text="{x:Static icons:IconFont.Eye}"
-                                           Style="{StaticResource IconSm}"
-                                           IsVisible="{Binding HidePassword}"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
-                                    <Label Text="{x:Static icons:IconFont.EyeSlash}"
-                                           Style="{StaticResource IconSm}"
-                                           IsVisible="{Binding HidePassword, Converter={StaticResource InvertedBoolConverter}}"
-                                           TextColor="{StaticResource Brand}"/>
-                                </Grid>
-                            </Border>
-                        </Grid>
-                    </Border>
+                        <Label Text="{l10n:Translate Password}" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
+                        <Border Style="{StaticResource Field}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Entry Placeholder="{l10n:Translate Password}"
+                                       IsPassword="{Binding HidePassword}"
+                                       Text="{Binding Password}"
+                                       Margin="14,0,0,0"
+                                       IsEnabled="{Binding IsNotBusy}"/>
 
-                    <Label Text="{l10n:Translate ConfirmPassword}" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
-                    <Border Style="{StaticResource Field}">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Entry Placeholder="{l10n:Translate ConfirmPassword}"
-                                   IsPassword="{Binding HideConfirmedPassword}"
-                                   Text="{Binding ConfirmedPassword}"
-                                   Margin="14,0,0,0"
-                                   IsEnabled="{Binding IsNotBusy}"/>
+                                <Border Grid.Column="1"
+                                        Style="{StaticResource IconChip}"
+                                        Stroke="Transparent"
+                                        Margin="0,0,7,0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding TogglePasswordHiddenCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid InputTransparent="True">
+                                        <Label Text="{x:Static icons:IconFont.Eye}"
+                                               Style="{StaticResource IconSm}"
+                                               IsVisible="{Binding HidePassword}"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                        <Label Text="{x:Static icons:IconFont.EyeSlash}"
+                                               Style="{StaticResource IconSm}"
+                                               IsVisible="{Binding HidePassword, Converter={StaticResource InvertedBoolConverter}}"
+                                               TextColor="{StaticResource Brand}"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Border>
 
-                            <Border Grid.Column="1"
-                                    Style="{StaticResource IconChip}"
-                                    Stroke="Transparent"
-                                    Margin="0,0,7,0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ToggleConfirmedPasswordHiddenCommand}"/>
-                                </Border.GestureRecognizers>
-                                <Grid InputTransparent="True">
-                                    <Label Text="{x:Static icons:IconFont.Eye}"
-                                           Style="{StaticResource IconSm}"
-                                           IsVisible="{Binding HideConfirmedPassword}"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
-                                    <Label Text="{x:Static icons:IconFont.EyeSlash}"
-                                           Style="{StaticResource IconSm}"
-                                           IsVisible="{Binding HideConfirmedPassword, Converter={StaticResource InvertedBoolConverter}}"
-                                           TextColor="{StaticResource Brand}"/>
-                                </Grid>
-                            </Border>
-                        </Grid>
-                    </Border>
+                        <Label Text="{l10n:Translate ConfirmPassword}" Style="{StaticResource FieldLabel}" Margin="0,16,0,6"/>
+                        <Border Style="{StaticResource Field}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Entry Placeholder="{l10n:Translate ConfirmPassword}"
+                                       IsPassword="{Binding HideConfirmedPassword}"
+                                       Text="{Binding ConfirmedPassword}"
+                                       Margin="14,0,0,0"
+                                       IsEnabled="{Binding IsNotBusy}"/>
 
-                    <Button Text="{l10n:Translate Register}"
-                            Margin="0,24,0,0"
-                            HorizontalOptions="Fill"
-                            Command="{Binding RegisterCommand}"
-                            IsEnabled="{Binding IsNotBusy}"/>
+                                <Border Grid.Column="1"
+                                        Style="{StaticResource IconChip}"
+                                        Stroke="Transparent"
+                                        Margin="0,0,7,0">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ToggleConfirmedPasswordHiddenCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid InputTransparent="True">
+                                        <Label Text="{x:Static icons:IconFont.Eye}"
+                                               Style="{StaticResource IconSm}"
+                                               IsVisible="{Binding HideConfirmedPassword}"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                        <Label Text="{x:Static icons:IconFont.EyeSlash}"
+                                               Style="{StaticResource IconSm}"
+                                               IsVisible="{Binding HideConfirmedPassword, Converter={StaticResource InvertedBoolConverter}}"
+                                               TextColor="{StaticResource Brand}"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Border>
 
-                    <Label Text="{l10n:Translate PressCtrlEnter}"
-                           Style="{StaticResource Faint}"
-                           HorizontalOptions="Center"
-                           Margin="0,10,0,0"/>
+                        <Button Text="{l10n:Translate Register}"
+                                Margin="0,24,0,0"
+                                HorizontalOptions="Fill"
+                                Command="{Binding RegisterCommand}"
+                                IsEnabled="{Binding IsNotBusy}"/>
 
-                    <Button Text="{l10n:Translate AlreadyHaveAnAccount}"
-                            Style="{StaticResource ButtonGhost}"
-                            Margin="0,8,0,0"
-                            HorizontalOptions="Center"
-                            Command="{Binding GoToLoginCommand}"
-                            IsEnabled="{Binding IsNotBusy}"/>
+                        <Label Text="{l10n:Translate PressCtrlEnter}"
+                               Style="{StaticResource Faint}"
+                               HorizontalOptions="Center"
+                               Margin="0,10,0,0"/>
+
+                        <Button Text="{l10n:Translate AlreadyHaveAnAccount}"
+                                Style="{StaticResource ButtonGhost}"
+                                Margin="0,8,0,0"
+                                HorizontalOptions="Center"
+                                Command="{Binding GoToLoginCommand}"
+                                IsEnabled="{Binding IsNotBusy}"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="0" IsVisible="{Binding IsShowingRecoveryKey}">
+
+                        <Label Text="{l10n:Translate RecoveryKey}"
+                               Style="{StaticResource Display}"
+                               Margin="0,20,0,28"/>
+
+                        <views:RecoveryKeyPanel RecoveryKey="{Binding RecoveryKey}"/>
+
+                        <Button Text="{l10n:Translate RecoveryKeySaved}"
+                                Margin="0,24,0,0"
+                                HorizontalOptions="Fill"
+                                Command="{Binding ContinueCommand}"
+                                IsEnabled="{Binding IsNotBusy}"/>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Grid>
 

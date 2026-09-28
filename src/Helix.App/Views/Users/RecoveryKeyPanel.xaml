@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:Class="Helix.App.Views.Users.RecoveryKeyPanel">
+
+    <VerticalStackLayout Spacing="10">
+
+        <Label Text="{l10n:Translate YourRecoveryKey}" Style="{StaticResource FieldLabel}"/>
+
+        <Border Style="{StaticResource CardInset}" Padding="14,10">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <Label x:Name="KeyLabel"
+                       Style="{StaticResource Mono}"
+                       FontSize="16"
+                       VerticalOptions="Center"
+                       LineBreakMode="CharacterWrap"/>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Center"
+                        ToolTipProperties.Text="{l10n:Translate CopyRecoveryKey}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCopyTapped"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Copy}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Label Text="{l10n:Translate RecoveryKeySaveWarning}" Style="{StaticResource WarningText}"/>
+
+    </VerticalStackLayout>
+
+</ContentView>

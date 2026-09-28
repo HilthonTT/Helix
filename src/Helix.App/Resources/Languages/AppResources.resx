@@ -881,4 +881,52 @@
   <data name="RemoteHostDescription" xml:space="preserve">
     <value>Where Helix connects when the NAS cannot be reached at the address above, or whenever you are away from its home network if the drive is pinned to one. Use the address your VPN or Tailscale gives it. Leave empty to only ever use the address above.</value>
   </data>
+  <data name="RecoveryKey" xml:space="preserve">
+    <value>Recovery key</value>
+  </data>
+  <data name="RecoveryKeyDescription" xml:space="preserve">
+    <value>Resets your password if you forget it. Creating a new key makes the old one stop working.</value>
+  </data>
+  <data name="CreateRecoveryKey" xml:space="preserve">
+    <value>Create a new recovery key</value>
+  </data>
+  <data name="CreateRecoveryKeyMessage" xml:space="preserve">
+    <value>Enter your password to create a new recovery key. Your current key will stop working.</value>
+  </data>
+  <data name="YourRecoveryKey" xml:space="preserve">
+    <value>Your recovery key</value>
+  </data>
+  <data name="RecoveryKeySaveWarning" xml:space="preserve">
+    <value>Write this down or keep it in a password manager. It is shown only once, and it is the only way back into Helix if you forget your password.</value>
+  </data>
+  <data name="RecoveryKeyReplaced" xml:space="preserve">
+    <value>Your old recovery key has been used up. This is your new one.</value>
+  </data>
+  <data name="CopyRecoveryKey" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="RecoveryKeyCopied" xml:space="preserve">
+    <value>Recovery key copied.</value>
+  </data>
+  <data name="RecoveryKeySaved" xml:space="preserve">
+    <value>I've saved it</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Forgot your password?</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reset your password</value>
+  </data>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>Enter your username and the recovery key you saved, then choose a new password.</value>
+  </data>
+  <data name="ResetPasswordAction" xml:space="preserve">
+    <value>Reset password</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>Back to sign in</value>
+  </data>
+  <data name="NoRecoveryKeyNudge" xml:space="preserve">
+    <value>You have no recovery key. Create one in Settings so a forgotten password cannot lock you out.</value>
+  </data>
 </root>

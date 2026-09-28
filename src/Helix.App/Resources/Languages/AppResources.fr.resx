@@ -881,4 +881,52 @@
   <data name="RemoteHostDescription" xml:space="preserve">
     <value>L’adresse à laquelle Helix se connecte quand le NAS ne répond pas à l’adresse ci-dessus, ou dès que vous êtes hors de son réseau domestique si le lecteur y est épinglé. Utilisez l’adresse que lui donne votre VPN ou Tailscale. Laissez vide pour n’utiliser que l’adresse ci-dessus.</value>
   </data>
+  <data name="RecoveryKey" xml:space="preserve">
+    <value>Clé de récupération</value>
+  </data>
+  <data name="RecoveryKeyDescription" xml:space="preserve">
+    <value>Réinitialise votre mot de passe si vous l'oubliez. Créer une nouvelle clé désactive l'ancienne.</value>
+  </data>
+  <data name="CreateRecoveryKey" xml:space="preserve">
+    <value>Créer une nouvelle clé de récupération</value>
+  </data>
+  <data name="CreateRecoveryKeyMessage" xml:space="preserve">
+    <value>Saisissez votre mot de passe pour créer une nouvelle clé de récupération. Votre clé actuelle ne fonctionnera plus.</value>
+  </data>
+  <data name="YourRecoveryKey" xml:space="preserve">
+    <value>Votre clé de récupération</value>
+  </data>
+  <data name="RecoveryKeySaveWarning" xml:space="preserve">
+    <value>Notez-la ou conservez-la dans un gestionnaire de mots de passe. Elle n'est affichée qu'une seule fois, et c'est le seul moyen de revenir dans Helix si vous oubliez votre mot de passe.</value>
+  </data>
+  <data name="RecoveryKeyReplaced" xml:space="preserve">
+    <value>Votre ancienne clé de récupération a été utilisée. Voici la nouvelle.</value>
+  </data>
+  <data name="CopyRecoveryKey" xml:space="preserve">
+    <value>Copier</value>
+  </data>
+  <data name="RecoveryKeyCopied" xml:space="preserve">
+    <value>Clé de récupération copiée.</value>
+  </data>
+  <data name="RecoveryKeySaved" xml:space="preserve">
+    <value>Je l'ai enregistrée</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Mot de passe oublié ?</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Réinitialiser votre mot de passe</value>
+  </data>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>Saisissez votre nom d'utilisateur et la clé de récupération que vous avez conservée, puis choisissez un nouveau mot de passe.</value>
+  </data>
+  <data name="ResetPasswordAction" xml:space="preserve">
+    <value>Réinitialiser le mot de passe</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>Retour à la connexion</value>
+  </data>
+  <data name="NoRecoveryKeyNudge" xml:space="preserve">
+    <value>Vous n'avez pas de clé de récupération. Créez-en une dans les paramètres pour qu'un mot de passe oublié ne vous bloque pas.</value>
+  </data>
 </root>

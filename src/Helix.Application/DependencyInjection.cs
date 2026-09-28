@@ -116,9 +116,11 @@ public static class DependencyInjection
     private static IServiceCollection AddUsersHandlers(this IServiceCollection services)
     {
         services.AddScoped<ChangeUserPassword>();
+        services.AddScoped<CreateRecoveryKey>();
         services.AddScoped<LoginUser>();
         services.AddScoped<LogoutUser>();
         services.AddScoped<RegisterUser>();
+        services.AddScoped<ResetPasswordWithRecoveryKey>();
         services.AddScoped<UnlockSession>();
         services.AddScoped<UpdateUser>();
 

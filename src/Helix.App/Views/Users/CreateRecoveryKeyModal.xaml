@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Users"
+             xmlns:views="clr-namespace:Helix.App.Views.Users"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:Class="Helix.App.Views.Users.CreateRecoveryKeyModal"
+             x:DataType="vm:CreateRecoveryKeyViewModel"
+             BackgroundColor="Transparent">
+
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{l10n:Translate CreateRecoveryKey}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{l10n:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                </Border>
+            </Grid>
+
+            <ScrollView Grid.Row="1">
+                <Grid Padding="24,4,24,20">
+
+                    <VerticalStackLayout Spacing="14" IsVisible="{Binding IsAskingForPassword}">
+                        <Label Text="{l10n:Translate CreateRecoveryKeyMessage}" Style="{StaticResource Caption}"/>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{l10n:Translate YourCurrentPassword}" Style="{StaticResource FieldLabel}"/>
+                            <Border Style="{StaticResource Field}">
+                                <Entry Placeholder="{l10n:Translate AddCurrentPasswordPlaceholder}"
+                                       IsPassword="True"
+                                       Text="{Binding CurrentPassword}"
+                                       ReturnCommand="{Binding CreateCommand}"
+                                       IsEnabled="{Binding IsNotBusy}"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
+                    <views:RecoveryKeyPanel RecoveryKey="{Binding RecoveryKey}"
+                                            IsVisible="{Binding IsShowingRecoveryKey}"/>
+                </Grid>
+            </ScrollView>
+
+            <Grid Grid.Row="2"
+                  ColumnDefinitions="*,*"
+                  ColumnSpacing="12"
+                  Padding="24,4,24,24"
+                  IsVisible="{Binding IsAskingForPassword}">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Cancel}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Grid.Column="1"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Continue}"
+                        Command="{Binding CreateCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+
+            <Button Grid.Row="2"
+                    Margin="24,4,24,24"
+                    HorizontalOptions="Fill"
+                    Text="{l10n:Translate RecoveryKeySaved}"
+                    Command="{Binding CloseCommand}"
+                    IsVisible="{Binding IsShowingRecoveryKey}"/>
+        </Grid>
+    </Border>
+
+</ContentView>

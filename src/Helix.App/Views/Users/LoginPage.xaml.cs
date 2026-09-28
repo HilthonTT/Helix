@@ -55,7 +55,7 @@ public sealed partial class LoginPage : ContentPage
         {
             try
             {
-                await viewModel.LoginCommand.ExecuteAsync(null);
+                await viewModel.SubmitCommand.ExecuteAsync(null);
             }
             catch (Exception ex)
             {

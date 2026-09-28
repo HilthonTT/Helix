@@ -2523,5 +2523,149 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("WakeSent", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery key.
+        /// </summary>
+        internal static string RecoveryKey {
+            get {
+                return ResourceManager.GetString("RecoveryKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resets your password if you forget it. Creating a new key makes the old one stop working..
+        /// </summary>
+        internal static string RecoveryKeyDescription {
+            get {
+                return ResourceManager.GetString("RecoveryKeyDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create a new recovery key.
+        /// </summary>
+        internal static string CreateRecoveryKey {
+            get {
+                return ResourceManager.GetString("CreateRecoveryKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter your password to create a new recovery key. Your current key will stop working..
+        /// </summary>
+        internal static string CreateRecoveryKeyMessage {
+            get {
+                return ResourceManager.GetString("CreateRecoveryKeyMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your recovery key.
+        /// </summary>
+        internal static string YourRecoveryKey {
+            get {
+                return ResourceManager.GetString("YourRecoveryKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Write this down or keep it in a password manager. It is shown only once, and it is the only way back into Helix if you forget your password..
+        /// </summary>
+        internal static string RecoveryKeySaveWarning {
+            get {
+                return ResourceManager.GetString("RecoveryKeySaveWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your old recovery key has been used up. This is your new one..
+        /// </summary>
+        internal static string RecoveryKeyReplaced {
+            get {
+                return ResourceManager.GetString("RecoveryKeyReplaced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy.
+        /// </summary>
+        internal static string CopyRecoveryKey {
+            get {
+                return ResourceManager.GetString("CopyRecoveryKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery key copied..
+        /// </summary>
+        internal static string RecoveryKeyCopied {
+            get {
+                return ResourceManager.GetString("RecoveryKeyCopied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to I've saved it.
+        /// </summary>
+        internal static string RecoveryKeySaved {
+            get {
+                return ResourceManager.GetString("RecoveryKeySaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Forgot your password?.
+        /// </summary>
+        internal static string ForgotPassword {
+            get {
+                return ResourceManager.GetString("ForgotPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset your password.
+        /// </summary>
+        internal static string ResetPassword {
+            get {
+                return ResourceManager.GetString("ResetPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter your username and the recovery key you saved, then choose a new password..
+        /// </summary>
+        internal static string ResetPasswordMessage {
+            get {
+                return ResourceManager.GetString("ResetPasswordMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset password.
+        /// </summary>
+        internal static string ResetPasswordAction {
+            get {
+                return ResourceManager.GetString("ResetPasswordAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Back to sign in.
+        /// </summary>
+        internal static string BackToLogin {
+            get {
+                return ResourceManager.GetString("BackToLogin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have no recovery key. Create one in Settings so a forgotten password cannot lock you out..
+        /// </summary>
+        internal static string NoRecoveryKeyNudge {
+            get {
+                return ResourceManager.GetString("NoRecoveryKeyNudge", resourceCulture);
+            }
+        }
     }
 }

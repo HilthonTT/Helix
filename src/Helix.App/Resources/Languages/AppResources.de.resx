@@ -881,4 +881,52 @@
   <data name="RemoteHostDescription" xml:space="preserve">
     <value>Hierhin verbindet Helix, wenn das NAS unter der obigen Adresse nicht erreichbar ist, oder immer außerhalb seines Heimnetzes, wenn das Laufwerk daran gebunden ist. Verwenden Sie die Adresse aus Ihrem VPN oder Tailscale. Leer lassen, um nur die obige Adresse zu verwenden.</value>
   </data>
+  <data name="RecoveryKey" xml:space="preserve">
+    <value>Wiederherstellungsschlüssel</value>
+  </data>
+  <data name="RecoveryKeyDescription" xml:space="preserve">
+    <value>Setzt Ihr Passwort zurück, falls Sie es vergessen. Ein neuer Schlüssel macht den alten ungültig.</value>
+  </data>
+  <data name="CreateRecoveryKey" xml:space="preserve">
+    <value>Neuen Wiederherstellungsschlüssel erstellen</value>
+  </data>
+  <data name="CreateRecoveryKeyMessage" xml:space="preserve">
+    <value>Geben Sie Ihr Passwort ein, um einen neuen Wiederherstellungsschlüssel zu erstellen. Ihr bisheriger Schlüssel wird ungültig.</value>
+  </data>
+  <data name="YourRecoveryKey" xml:space="preserve">
+    <value>Ihr Wiederherstellungsschlüssel</value>
+  </data>
+  <data name="RecoveryKeySaveWarning" xml:space="preserve">
+    <value>Notieren Sie ihn oder speichern Sie ihn in einem Passwort-Manager. Er wird nur einmal angezeigt und ist der einzige Weg zurück in Helix, wenn Sie Ihr Passwort vergessen.</value>
+  </data>
+  <data name="RecoveryKeyReplaced" xml:space="preserve">
+    <value>Ihr alter Wiederherstellungsschlüssel ist verbraucht. Dies ist Ihr neuer.</value>
+  </data>
+  <data name="CopyRecoveryKey" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="RecoveryKeyCopied" xml:space="preserve">
+    <value>Wiederherstellungsschlüssel kopiert.</value>
+  </data>
+  <data name="RecoveryKeySaved" xml:space="preserve">
+    <value>Ich habe ihn gespeichert</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Passwort vergessen?</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Passwort zurücksetzen</value>
+  </data>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>Geben Sie Ihren Benutzernamen und den gespeicherten Wiederherstellungsschlüssel ein und wählen Sie dann ein neues Passwort.</value>
+  </data>
+  <data name="ResetPasswordAction" xml:space="preserve">
+    <value>Passwort zurücksetzen</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>Zurück zur Anmeldung</value>
+  </data>
+  <data name="NoRecoveryKeyNudge" xml:space="preserve">
+    <value>Sie haben keinen Wiederherstellungsschlüssel. Erstellen Sie einen in den Einstellungen, damit ein vergessenes Passwort Sie nicht aussperrt.</value>
+  </data>
 </root>

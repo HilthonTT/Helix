@@ -881,4 +881,52 @@
   <data name="RemoteHostDescription" xml:space="preserve">
     <value>Hier verbindt Helix wanneer de NAS niet bereikbaar is op het adres hierboven, of altijd buiten zijn thuisnetwerk als de schijf daaraan vastgezet is. Gebruik het adres dat je VPN of Tailscale hem geeft. Laat leeg om alleen het adres hierboven te gebruiken.</value>
   </data>
+  <data name="RecoveryKey" xml:space="preserve">
+    <value>Herstelsleutel</value>
+  </data>
+  <data name="RecoveryKeyDescription" xml:space="preserve">
+    <value>Hiermee stel je je wachtwoord opnieuw in als je het vergeet. Een nieuwe sleutel maakt de oude ongeldig.</value>
+  </data>
+  <data name="CreateRecoveryKey" xml:space="preserve">
+    <value>Nieuwe herstelsleutel maken</value>
+  </data>
+  <data name="CreateRecoveryKeyMessage" xml:space="preserve">
+    <value>Voer je wachtwoord in om een nieuwe herstelsleutel te maken. Je huidige sleutel werkt daarna niet meer.</value>
+  </data>
+  <data name="YourRecoveryKey" xml:space="preserve">
+    <value>Je herstelsleutel</value>
+  </data>
+  <data name="RecoveryKeySaveWarning" xml:space="preserve">
+    <value>Schrijf hem op of bewaar hem in een wachtwoordbeheerder. Hij wordt maar één keer getoond en is de enige weg terug naar Helix als je je wachtwoord vergeet.</value>
+  </data>
+  <data name="RecoveryKeyReplaced" xml:space="preserve">
+    <value>Je oude herstelsleutel is gebruikt. Dit is je nieuwe.</value>
+  </data>
+  <data name="CopyRecoveryKey" xml:space="preserve">
+    <value>Kopiëren</value>
+  </data>
+  <data name="RecoveryKeyCopied" xml:space="preserve">
+    <value>Herstelsleutel gekopieerd.</value>
+  </data>
+  <data name="RecoveryKeySaved" xml:space="preserve">
+    <value>Ik heb hem bewaard</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Wachtwoord vergeten?</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Je wachtwoord opnieuw instellen</value>
+  </data>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>Voer je gebruikersnaam en de bewaarde herstelsleutel in en kies daarna een nieuw wachtwoord.</value>
+  </data>
+  <data name="ResetPasswordAction" xml:space="preserve">
+    <value>Wachtwoord opnieuw instellen</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>Terug naar aanmelden</value>
+  </data>
+  <data name="NoRecoveryKeyNudge" xml:space="preserve">
+    <value>Je hebt geen herstelsleutel. Maak er een aan in Instellingen, zodat een vergeten wachtwoord je niet buitensluit.</value>
+  </data>
 </root>

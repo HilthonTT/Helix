@@ -150,13 +150,13 @@ public static class DependencyInjection
         services.AddScoped<IStartupService, MacStartupService>();
         services.AddScoped<IDesktopService, MacDesktopService>();
 
-        services.AddSingleton<ITrayIcon, UnsupportedTrayIcon>();
+        services.AddSingleton<ITrayIcon, MacTrayIcon>();
 
         services.AddSingleton<IStorageProbe, MacStorageProbe>();
 
         services.AddSingleton<IIdleTimeProvider, MacIdleTimeProvider>();
 
-        services.AddSingleton<INetworkLocation, UnsupportedNetworkLocation>();
+        services.AddSingleton<INetworkLocation, MacNetworkLocation>();
 #else
         throw new PlatformNotSupportedException(
             "Helix has no platform services for this target framework. Add implementations of " +
@@ -171,6 +171,7 @@ public static class DependencyInjection
     private static IServiceCollection AddAuthenticationInternal(this IServiceCollection services)
     {
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IRecoveryKeyGenerator, RecoveryKeyGenerator>();
 
         services.AddSingleton<ILoggedInUser, LoggedInUser>();
 

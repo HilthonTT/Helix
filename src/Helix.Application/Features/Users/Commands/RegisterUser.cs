@@ -11,34 +11,40 @@ namespace Helix.Application.Features.Users.Commands;
 public sealed class RegisterUser(
     IUserRepository userRepository,
     IUnitOfWork unitOfWork,
-    IPasswordHasher passwordHasher, 
+    IPasswordHasher passwordHasher,
+    IRecoveryKeyGenerator recoveryKeyGenerator,
     ILoggedInUser loggedInUser) : IHandler
 {
     public sealed record Request(string Username, string Password, string ConfirmedPassword);
 
-    public async Task<Result<User>> Handle(Request request, CancellationToken cancellationToken = default)
+    public sealed record Response(User User, string RecoveryKey);
+
+    public async Task<Result<Response>> Handle(Request request, CancellationToken cancellationToken = default)
     {
         Result validationResult = Validate(request);
         if (validationResult.IsFailure)
         {
-            return Result.Failure<User>(validationResult.Error);
+            return Result.Failure<Response>(validationResult.Error);
         }
 
         if (request.Password != request.ConfirmedPassword)
         {
-            return Result.Failure<User>(AuthenticationErrors.PasswordsDoNotMatch);
+            return Result.Failure<Response>(AuthenticationErrors.PasswordsDoNotMatch);
         }
 
         string username = request.Username.Trim();
 
         if (!await userRepository.IsUsernameUniqueAsync(username, cancellationToken))
         {
-            return Result.Failure<User>(AuthenticationErrors.UsernameNotUnique);
+            return Result.Failure<Response>(AuthenticationErrors.UsernameNotUnique);
         }
 
         string passwordHash = passwordHasher.Hash(request.Password);
 
         var user = User.Create(username, passwordHash);
+
+        string recoveryKey = recoveryKeyGenerator.Generate();
+        user.SetRecoveryKey(passwordHasher.Hash(recoveryKey));
 
         userRepository.Insert(user);
 
@@ -48,12 +54,12 @@ public sealed class RegisterUser(
         }
         catch (DbUpdateException)
         {
-            return Result.Failure<User>(AuthenticationErrors.UsernameNotUnique);
+            return Result.Failure<Response>(AuthenticationErrors.UsernameNotUnique);
         }
 
         loggedInUser.Login(user.Id, user.Username);
 
-        return user;
+        return new Response(user, recoveryKey);
     }
 
     private static Result Validate(Request request)

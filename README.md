@@ -109,8 +109,9 @@ and then rejected at connect time.
 
 **Runs from the notification area.** A tray icon shows how many drives are up, connects or
 disconnects any of them from its menu, and raises a notification when one drops or comes
-back. Auto-minimize puts the window away there rather than onto the taskbar. Windows only —
-on macOS the window stays in the Dock.
+back. Auto-minimize puts the window away there rather than onto the taskbar. On macOS the
+same menu lives in the menu bar and notifications go to Notification Center; the window
+itself stays in the Dock.
 
 **Auto-connect on startup.** Optionally reconnect drives when the app launches, and start
 Helix when you sign in. Auto-connect can be turned off per drive, so the ones you only want
@@ -155,7 +156,9 @@ and which desktop integrations exist.
 | Mount API | `mpr.dll` WNet | `NetFSMountURLSync` |
 | Start at sign-in | shortcut in the Startup folder | LaunchAgent plist |
 | Desktop shortcut | `.lnk` on the Desktop | symlink to the `.app` |
-| Tray icon | yes | no |
+| Tray icon | notification area | menu bar |
+| Home-network pin | gateway MAC via `SendARP` | gateway MAC via `route` and `arp` |
+| Browse a server's shares | yes | not available |
 | Persistent mapping | yes (`CONNECT_UPDATE_PROFILE`) | not available |
 
 macOS has no drive letters, so a drive's "letter" names a directory under the mount root
@@ -170,6 +173,9 @@ behaves the same on both.
   to create the database rather than leaving you one that could never be reopened.
 - **Password hashing.** Account passwords are hashed with PBKDF2-SHA512 (600,000 iterations,
   per OWASP guidance). Older hashes are transparently upgraded on sign-in.
+- **Recovery key.** Registering shows a one-time recovery key; "Forgot your password?" on the
+  sign-in page uses it to set a new password and issues a replacement. Only its hash is
+  stored. Accounts created earlier can make one under Settings → Account.
 - **Encrypted exports.** `.helixvault` files are encrypted with AES-256-GCM using a key
   derived from your passphrase via PBKDF2-SHA512.
 - **Native credential handling.** Drive credentials are passed to the operating system through

@@ -881,4 +881,52 @@
   <data name="RemoteHostDescription" xml:space="preserve">
     <value>上のアドレスで NAS に届かないとき、またはドライブをホーム ネットワークに固定していて外出中のとき、Helix はこのアドレスに接続します。VPN や Tailscale で割り当てられたアドレスを使用してください。上のアドレスだけを使う場合は空のままにします。</value>
   </data>
+  <data name="RecoveryKey" xml:space="preserve">
+    <value>回復キー</value>
+  </data>
+  <data name="RecoveryKeyDescription" xml:space="preserve">
+    <value>パスワードを忘れたときにリセットできます。新しいキーを作成すると、古いキーは使えなくなります。</value>
+  </data>
+  <data name="CreateRecoveryKey" xml:space="preserve">
+    <value>新しい回復キーを作成</value>
+  </data>
+  <data name="CreateRecoveryKeyMessage" xml:space="preserve">
+    <value>新しい回復キーを作成するには、パスワードを入力してください。現在のキーは使えなくなります。</value>
+  </data>
+  <data name="YourRecoveryKey" xml:space="preserve">
+    <value>あなたの回復キー</value>
+  </data>
+  <data name="RecoveryKeySaveWarning" xml:space="preserve">
+    <value>書き留めるか、パスワードマネージャーに保存してください。表示されるのは一度だけで、パスワードを忘れた場合に Helix に戻る唯一の方法です。</value>
+  </data>
+  <data name="RecoveryKeyReplaced" xml:space="preserve">
+    <value>以前の回復キーは使用済みです。こちらが新しいキーです。</value>
+  </data>
+  <data name="CopyRecoveryKey" xml:space="preserve">
+    <value>コピー</value>
+  </data>
+  <data name="RecoveryKeyCopied" xml:space="preserve">
+    <value>回復キーをコピーしました。</value>
+  </data>
+  <data name="RecoveryKeySaved" xml:space="preserve">
+    <value>保存しました</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>パスワードをお忘れですか？</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>パスワードのリセット</value>
+  </data>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>ユーザー名と保存した回復キーを入力し、新しいパスワードを設定してください。</value>
+  </data>
+  <data name="ResetPasswordAction" xml:space="preserve">
+    <value>パスワードをリセット</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>サインインに戻る</value>
+  </data>
+  <data name="NoRecoveryKeyNudge" xml:space="preserve">
+    <value>回復キーがありません。パスワードを忘れても締め出されないよう、設定で作成してください。</value>
+  </data>
 </root>

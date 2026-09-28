@@ -23,6 +23,10 @@ public sealed class User : Entity, IAuditable
 
     public string PasswordHash { get; private set; }
 
+    public string? RecoveryKeyHash { get; private set; }
+
+    public bool HasRecoveryKey => RecoveryKeyHash is not null;
+
     public DateTime CreatedOnUtc { get; set; }
 
     public DateTime? ModifiedOnUtc { get; set; }
@@ -37,6 +41,13 @@ public sealed class User : Entity, IAuditable
     public void ChangePassword(string passwordHash)
     {
         PasswordHash = passwordHash;
+    }
+
+    public void SetRecoveryKey(string recoveryKeyHash)
+    {
+        Ensure.NotNullOrEmpty(recoveryKeyHash, nameof(recoveryKeyHash));
+
+        RecoveryKeyHash = recoveryKeyHash;
     }
 
     public void Update(string username)

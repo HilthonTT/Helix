@@ -881,4 +881,52 @@
   <data name="RemoteHostDescription" xml:space="preserve">
     <value>Alamat yang dipakai Helix saat NAS tidak dapat dijangkau di alamat di atas, atau setiap kali Anda berada di luar jaringan rumahnya jika drive disematkan ke jaringan itu. Gunakan alamat dari VPN atau Tailscale Anda. Biarkan kosong untuk hanya memakai alamat di atas.</value>
   </data>
+  <data name="RecoveryKey" xml:space="preserve">
+    <value>Kunci pemulihan</value>
+  </data>
+  <data name="RecoveryKeyDescription" xml:space="preserve">
+    <value>Mengatur ulang kata sandi Anda jika Anda lupa. Membuat kunci baru membuat kunci lama tidak berlaku.</value>
+  </data>
+  <data name="CreateRecoveryKey" xml:space="preserve">
+    <value>Buat kunci pemulihan baru</value>
+  </data>
+  <data name="CreateRecoveryKeyMessage" xml:space="preserve">
+    <value>Masukkan kata sandi Anda untuk membuat kunci pemulihan baru. Kunci Anda saat ini tidak akan berlaku lagi.</value>
+  </data>
+  <data name="YourRecoveryKey" xml:space="preserve">
+    <value>Kunci pemulihan Anda</value>
+  </data>
+  <data name="RecoveryKeySaveWarning" xml:space="preserve">
+    <value>Catat kunci ini atau simpan di pengelola kata sandi. Kunci ini hanya ditampilkan sekali, dan merupakan satu-satunya cara masuk kembali ke Helix jika Anda lupa kata sandi.</value>
+  </data>
+  <data name="RecoveryKeyReplaced" xml:space="preserve">
+    <value>Kunci pemulihan lama Anda sudah terpakai. Ini kunci baru Anda.</value>
+  </data>
+  <data name="CopyRecoveryKey" xml:space="preserve">
+    <value>Salin</value>
+  </data>
+  <data name="RecoveryKeyCopied" xml:space="preserve">
+    <value>Kunci pemulihan disalin.</value>
+  </data>
+  <data name="RecoveryKeySaved" xml:space="preserve">
+    <value>Sudah saya simpan</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Lupa kata sandi?</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Atur ulang kata sandi Anda</value>
+  </data>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>Masukkan nama pengguna dan kunci pemulihan yang Anda simpan, lalu pilih kata sandi baru.</value>
+  </data>
+  <data name="ResetPasswordAction" xml:space="preserve">
+    <value>Atur ulang kata sandi</value>
+  </data>
+  <data name="BackToLogin" xml:space="preserve">
+    <value>Kembali ke halaman masuk</value>
+  </data>
+  <data name="NoRecoveryKeyNudge" xml:space="preserve">
+    <value>Anda belum memiliki kunci pemulihan. Buat di Pengaturan agar kata sandi yang terlupa tidak mengunci Anda.</value>
+  </data>
 </root>

@@ -117,6 +117,28 @@
                                            TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
                                 </Border>
                             </Grid>
+
+                            <BoxView Style="{StaticResource Divider}"/>
+
+                            <Grid Style="{StaticResource PreferenceRow}">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{l10n:Translate RecoveryKey}" Style="{StaticResource Title3}"/>
+                                    <Label Text="{l10n:Translate RecoveryKeyDescription}" Style="{StaticResource Caption}"/>
+                                </VerticalStackLayout>
+
+                                <Border Grid.Column="1"
+                                        Style="{StaticResource IconChip}"
+                                        IsEnabled="{Binding IsNotBusy}"
+                                        ToolTipProperties.Text="{l10n:Translate CreateRecoveryKey}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding CreateRecoveryKeyCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{x:Static icons:IconFont.Key}"
+                                           Style="{StaticResource IconSm}"
+                                           InputTransparent="True"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                </Border>
+                            </Grid>
                         </VerticalStackLayout>
                     </Border>
 
@@ -357,6 +379,14 @@
                                                 MaximumHeightRequest="560"
                                                 AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
                                                 AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="CreateRecoveryKeyLayout" IsVisible="False">
+            <users:CreateRecoveryKeyModal x:Name="CreateRecoveryKeyView"
+                                          WidthRequest="460"
+                                          MaximumHeightRequest="560"
+                                          AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                          AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
         <controls:NotificationHost/>
