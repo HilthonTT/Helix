@@ -96,16 +96,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Select the newest Xcode
-        run: |
-          ls -d /Applications/Xcode*.app
-          XCODE="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
-          echo "Selecting $XCODE"
-          sudo xcode-select -s "$XCODE/Contents/Developer"
-          xcodebuild -version
-
       - name: Install .NET MAUI workload
-        run: dotnet workload install maui
+        run: dotnet workload install maui --version 10.0.401
 
       - name: Build Mac Catalyst head
         run: >-

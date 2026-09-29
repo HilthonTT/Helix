@@ -65,6 +65,11 @@ dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
 CI covers both: a Windows job builds and runs all three suites, a macOS job compile-verifies the
 Catalyst head and runs the Application suite.
 
+The macOS jobs in `ci.yml` and `release.yml` install the MAUI workload **pinned to 10.0.401**.
+Workload set 10.0.401.1 brought the Mac Catalyst 27.0 SDK, which requires Xcode 27, and the
+`macos-latest` image tops out at Xcode 26.6 — an unpinned install failed the build on the SDK's
+Xcode check. Lift the pin once the runner image carries the Xcode the latest set asks for.
+
 ## Build configuration
 
 Two repo-root files own the shared MSBuild configuration; keep project files free of anything they already cover:
