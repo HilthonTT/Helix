@@ -88,6 +88,22 @@ internal sealed partial class DriveDisplay : ObservableObject
 
     private bool IsOffline => !Connected && !IsBusy;
 
+    public void RefreshLocalizedText()
+    {
+        OnPropertyChanged(nameof(LastConnected));
+        OnPropertyChanged(nameof(Subtitle));
+        OnPropertyChanged(nameof(ToggleConnectText));
+
+        if (OfflineReason == DriveOfflineReason.HostUnreachable)
+        {
+            OfflineDetail = AppResources.StatusUnreachableHint;
+        }
+        else if (OfflineReason == DriveOfflineReason.AwayFromHome)
+        {
+            OfflineDetail = AppResources.StatusAwayHint;
+        }
+    }
+
     public void MarkOffline(DriveOfflineReason reason, string detail)
     {
         OfflineReason = reason;

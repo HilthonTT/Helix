@@ -2,7 +2,10 @@
 using Helix.App.Messaging.Drives;
 using Helix.App.Models;
 using Helix.App.Services;
+using Helix.Application.Abstractions.Connector;
 using Helix.Application.Features.DriveGroups.Commands;
+using Helix.Application.Features.Drives.Queries;
+using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 
 namespace Helix.App.Common;
@@ -18,6 +21,11 @@ internal static class DriveGroupActions
 
         try
         {
+            if (disconnect && !await DisconnectConfirmation.ConfirmAsync(await CountMountedAsync(group)))
+            {
+                return;
+            }
+
             group.IsBusy = true;
 
             var request = new ConnectDriveGroup.Request(group.Id, disconnect);
@@ -44,5 +52,20 @@ internal static class DriveGroupActions
         {
             group.IsBusy = false;
         }
+    }
+
+    private static async Task<int> CountMountedAsync(DriveGroupDisplay group)
+    {
+        Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+        if (drives.IsFailure)
+        {
+            return group.DriveIds.Count;
+        }
+
+        INasConnector nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
+        HashSet<Guid> members = [.. group.DriveIds];
+
+        return await Task.Run(() => drives.Value.Count(drive =>
+            members.Contains(drive.Id) && nasConnector.IsMountedFrom(drive)));
     }
 }

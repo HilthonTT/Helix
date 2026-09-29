@@ -72,7 +72,9 @@ internal sealed class CommandListener
 
                 await server.WaitForConnectionAsync(cancellationToken);
 
-                _ = AnswerAsync(server, cancellationToken);
+                NamedPipeServerStream connection = server;
+
+                _ = Task.Run(() => AnswerAsync(connection, cancellationToken), CancellationToken.None);
 
                 server = null;
             }

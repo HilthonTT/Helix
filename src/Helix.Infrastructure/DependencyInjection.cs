@@ -52,7 +52,13 @@ public static class DependencyInjection
         services.AddSingleton<IDiagnosticsLog, DiagnosticsLog>();
 
         services.AddLogging(logging =>
-            logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning));
+        {
+#if DEBUG
+            logging.SetMinimumLevel(LogLevel.Debug);
+            logging.AddFilter("Microsoft", LogLevel.Information);
+#endif
+            logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
+        });
 
         services.AddSingleton<ILoggerProvider>(sp => new FileLoggerProvider(
             sp.GetRequiredService<LogFileWriter>(),

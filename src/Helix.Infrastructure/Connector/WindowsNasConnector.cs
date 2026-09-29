@@ -28,6 +28,7 @@ internal sealed class WindowsNasConnector(
             drive,
             fresh: false,
             route => WithHostGateAsync(
+                drive,
                 route,
                 started => RunWithTimeoutAsync(
                     drive.Letter,
@@ -54,6 +55,7 @@ internal sealed class WindowsNasConnector(
             drive,
             fresh: true,
             route => WithHostGateAsync(
+                drive,
                 route,
                 started => RunWithTimeoutAsync(
                     drive.Letter,
@@ -709,12 +711,17 @@ internal sealed class WindowsNasConnector(
     }
 
     private async Task<Result> WithHostGateAsync(
+        Drive drive,
         DriveRoute route,
         Func<Action<Task>, Task<Result>> work,
         Func<string, Result> failure,
         CancellationToken cancellationToken)
     {
-        SemaphoreSlim gate = _hostGates.GetOrAdd(ToUncHost(route.Host), _ => new SemaphoreSlim(1, 1));
+        string gateHost = drive.ConnectByHostname
+            ? await Task.Run(() => EffectiveHostFor(drive, route), CancellationToken.None)
+            : ToUncHost(route.Host);
+
+        SemaphoreSlim gate = _hostGates.GetOrAdd(gateHost, _ => new SemaphoreSlim(1, 1));
 
         bool held;
 

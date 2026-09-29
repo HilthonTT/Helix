@@ -456,7 +456,10 @@ the user had just disconnected by hand.
 A nudge polls the monitor, brings **every pending retry forward to now**, and connects the
 auto-connect drives that are down and not away from their home network, through the same
 `ConnectDownDrivesAsync` the home-network arrival uses — arrival passes `pinnedOnly: true`,
-a nudge does not. Nudges do not overlap: a resume that also brings the network back is one
+a nudge does not. A drive that batch leaves down is put on the flat thirty-second retry rather
+than forgotten: the batch's suppression re-seeds its letter as down, so the monitor will never
+report it again, and a NAS still booting after the resume would otherwise wait for somebody to
+press something. Nudges do not overlap: a resume that also brings the network back is one
 recheck, not two. The ordinary sweep is skipped on the tick that detected the resume, since
 the nudge has just done its work.
 
@@ -665,7 +668,9 @@ than a result. Deleting a single drive was confirmed and unmounting thirteen at 
 was not, which had the risk backwards: an unmount pulls the filesystem out from under
 whatever has a file open on it. The confirmation is skipped when nothing would actually
 come down, because a confirmation for a no-op teaches the user to dismiss them unread, and
-it has a singular and a plural form rather than one string with a number in it. The tray's
+it has a singular and a plural form rather than one string with a number in it. A group's
+disconnect, from the strip or the sidebar, is confirmed the same way through
+`Common/DisconnectConfirmation`, counting the members `IsMountedFrom` reports. The tray's
 own "disconnect all" is not confirmed and should not be: there is no window to put a dialog
 on when it is used.
 

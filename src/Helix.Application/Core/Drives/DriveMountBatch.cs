@@ -79,6 +79,6 @@ internal static class DriveMountBatch
     }
 
     public static bool SettledLate(Drive drive, Result result, INasConnector nasConnector) =>
-        result.Error.Code == DriveErrors.ConnectionTimedOut.Code &&
+        result.Error == DriveErrors.ConnectionTimedOut &&
         nasConnector.IsLiveFrom(drive);
 }

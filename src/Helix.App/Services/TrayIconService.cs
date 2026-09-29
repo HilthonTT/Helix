@@ -227,7 +227,16 @@ internal sealed class TrayIconService
             _trayIcon.SetMenu(BuildMenu(drives, groups, connected, _nasConnector));
 
             _running = _trayIcon.Show($"{AppInfo.Current.Name} — {CountConnected(drives, connected)}/{drives.Count}");
+
+            if (_running)
+            {
+                return;
+            }
         }
+
+        _logger.LogWarning("The tray icon was lost; retrying.");
+
+        _ = Task.Run(RetryShowAsync);
     }
 
     private static int CountConnected(List<Drive> drives, HashSet<string> connected) =>

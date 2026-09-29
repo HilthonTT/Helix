@@ -188,6 +188,11 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
         }
 
         await ReloadIfRequestedAsync();
+
+        if (!string.IsNullOrEmpty(SearchTerm?.Trim()) && HasMore)
+        {
+            await WidenSearchAsync();
+        }
     }
 
     private async Task LoadRestAsync()

@@ -167,7 +167,7 @@ internal sealed class DriveWatchdog
             return;
         }
 
-        _ = NudgeAsync("the network came back");
+        _ = Task.Run(() => NudgeAsync("the network came back"));
     }
 
     private async Task NudgeAsync(string reason)
@@ -448,17 +448,18 @@ internal sealed class DriveWatchdog
             return;
         }
 
-        Guid[] arriving = [.. drives.Value
+        Drive[] down = [.. drives.Value
             .Where(drive => drive.AutoConnect &&
                             (!pinnedOnly || drive.HomeNetworkId is not null) &&
                             (drive.RemoteHost is not null || !drive.IsAwayFrom(here?.Id)) &&
-                            !_nasConnector.IsLiveFrom(drive))
-            .Select(drive => drive.Id)];
+                            !_nasConnector.IsLiveFrom(drive))];
 
-        if (arriving.Length == 0)
+        if (down.Length == 0)
         {
             return;
         }
+
+        Guid[] arriving = [.. down.Select(drive => drive.Id)];
 
         _logger.LogInformation(
             "Connecting the {Count} drive(s) that are down because {Reason}.",
@@ -476,9 +477,16 @@ internal sealed class DriveWatchdog
                 result.Error.Description);
         }
 
-        foreach (Guid driveId in arriving)
+        foreach (Drive drive in down)
         {
-            Forget(driveId);
+            if (_nasConnector.IsLiveFrom(drive))
+            {
+                Forget(drive.Id);
+            }
+            else
+            {
+                ScheduleOfflineRetry(drive.Id, drive.Letter);
+            }
         }
 
         await _monitor.PollAsync();

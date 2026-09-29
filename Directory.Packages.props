@@ -3,14 +3,14 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup Label="MAUI">
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.101" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.101" />
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.110" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.110" />
     <PackageVersion Include="CommunityToolkit.Maui" Version="15.0.1" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
   </ItemGroup>
   <ItemGroup Label="Charts">
     <PackageVersion Include="Microcharts.Maui" Version="2.0.0.3" />
-    <PackageVersion Include="SkiaSharp.Views.Maui.Controls" Version="4.152.0" />
+    <PackageVersion Include="SkiaSharp.Views.Maui.Controls" Version="4.153.0" />
   </ItemGroup>
   <ItemGroup Label="Data">
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />

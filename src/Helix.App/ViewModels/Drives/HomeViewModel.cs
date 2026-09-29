@@ -405,23 +405,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
     }
 
-    private static async Task<bool> ConfirmDisconnectAsync(int connectedCount)
-    {
-        if (connectedCount == 0)
-        {
-            return true;
-        }
-
-        string message = connectedCount == 1
-            ? AppResources.DisconnectConfirmOne
-            : string.Format(AppResources.DisconnectConfirmMany, connectedCount);
-
-        return await Shell.Current.DisplayAlertAsync(
-            AppResources.DisconnectConfirmTitle,
-            message,
-            AppResources.Disconnect,
-            AppResources.Cancel);
-    }
+    private static Task<bool> ConfirmDisconnectAsync(int connectedCount) =>
+        DisconnectConfirmation.ConfirmAsync(connectedCount);
 
     [RelayCommand]
     private async Task ConnectDrivesAsync()
@@ -512,12 +497,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
-        if (_allDrives.All(d => connectedLetters.Contains(d.Letter)))
-        {
-            return;
-        }
-
         Result connectResult = await ScopedHandler.HandleAsync(
             (ConnectAllDrives h) => h.Handle(new ConnectAllDrives.Request(OnlyAutoConnect: true)));
 
@@ -562,6 +541,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
                 row.Host = drive.Host;
                 row.LastConnectedOnUtc = drive.LastConnectedOnUtc;
                 row.CanWake = drive.MacAddress is not null;
+                row.RefreshLocalizedText();
 
                 _allDrives.Add(row);
             }

@@ -97,7 +97,7 @@ internal sealed class WindowsNetworkLocation(
 
     private static bool HasIPv4Gateway(NetworkInterface adapter) =>
         adapter.GetIPProperties().GatewayAddresses
-            .Any(g => g.Address.AddressFamily == AddressFamily.InterNetwork);
+            .Any(g => g.Address.AddressFamily == AddressFamily.InterNetwork && !g.Address.Equals(IPAddress.Any));
 
     private static string? HardwareAddressOf(IPAddress address)
     {

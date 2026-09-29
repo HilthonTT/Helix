@@ -1,4 +1,4 @@
-﻿using Microsoft.Maui.Layouts;
+using Microsoft.Maui.Layouts;
 using StackLayoutManager = Microsoft.Maui.Layouts.StackLayoutManager;
 
 namespace Helix.App.Controls;
@@ -30,7 +30,7 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
         double top = padding.Top + bounds.Top;
         double left = padding.Left + bounds.Left;
 
-        return ArrangeViews(bounds, top, left);
+        return ArrangeViews(bounds, top, left, bounds.Right - padding.Right);
     }
 
     private (double totalWidth, double totalHeight) CalculateDimensions(double widthConstraint, double heightConstraint)
@@ -50,19 +50,18 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
 
             Size measure = child.Measure(double.PositiveInfinity, heightConstraint);
 
-            if (IsNewRowNeeded(currentRowWidth, measure.Width, widthConstraint))
+            if (currentRowWidth > 0 && IsNewRowNeeded(currentRowWidth, measure.Width, widthConstraint))
             {
-                totalWidth = UpdateTotalWidth(totalWidth, currentRowWidth);
+                totalWidth = UpdateTotalWidth(totalWidth, currentRowWidth - _horizontalStackLayout.Spacing);
                 totalHeight += currentRowHeight + _horizontalStackLayout.Spacing;
-                ResetRowDimensions(out currentRowWidth, out currentRowHeight, measure);
+                currentRowWidth = 0;
+                currentRowHeight = 0;
             }
-            else
-            {
-                UpdateCurrentRowDimensions(ref currentRowWidth, ref currentRowHeight, measure, i);
-            }
+
+            UpdateCurrentRowDimensions(ref currentRowWidth, ref currentRowHeight, measure);
         }
 
-        totalWidth = Math.Max(totalWidth, currentRowWidth);
+        totalWidth = Math.Max(totalWidth, Math.Max(0, currentRowWidth - _horizontalStackLayout.Spacing));
         totalHeight += currentRowHeight;
 
         return (totalWidth, totalHeight);
@@ -74,21 +73,10 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
     private static double UpdateTotalWidth(double totalWidth, double currentRowWidth) =>
         Math.Max(totalWidth, currentRowWidth);
 
-    private static void ResetRowDimensions(out double currentRowWidth, out double currentRowHeight, Size measure)
+    private void UpdateCurrentRowDimensions(ref double currentRowWidth, ref double currentRowHeight, Size measure)
     {
-        currentRowWidth = measure.Width;
-        currentRowHeight = measure.Height;
-    }
-
-    private void UpdateCurrentRowDimensions(ref double currentRowWidth, ref double currentRowHeight, Size measure, int index)
-    {
-        currentRowWidth += measure.Width;
+        currentRowWidth += measure.Width + _horizontalStackLayout.Spacing;
         currentRowHeight = Math.Max(currentRowHeight, measure.Height);
-
-        if (index < _horizontalStackLayout.Count - 1)
-        {
-            currentRowWidth += _horizontalStackLayout.Spacing;
-        }
     }
 
     private Size ApplyPaddingAndConstraints(double totalWidth, double totalHeight, Thickness padding, double widthConstraint, double heightConstraint)
@@ -102,7 +90,7 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
         return new Size(finalWidth, finalHeight);
     }
 
-    private Size ArrangeViews(Rect bounds, double top, double left)
+    private Size ArrangeViews(Rect bounds, double top, double left, double right)
     {
         double currentRowTop = top;
         double currentX = left;
@@ -117,9 +105,9 @@ internal sealed class HorizontalWrapLayoutManager : StackLayoutManager
                 continue;
             }
 
-            if (IsNewRowNeeded(currentX, child.DesiredSize.Width, bounds.Right))
+            if (currentX > left && IsNewRowNeeded(currentX, child.DesiredSize.Width, right))
             {
-                maxStackWidth = Math.Max(maxStackWidth, currentX);
+                maxStackWidth = Math.Max(maxStackWidth, currentX - _horizontalStackLayout.Spacing);
                 MoveToNextRow(ref currentX, ref currentRowTop, currentRowHeight, left);
                 currentRowHeight = 0;
             }
