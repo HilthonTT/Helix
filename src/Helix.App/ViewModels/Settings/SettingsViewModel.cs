@@ -5,6 +5,7 @@ using Helix.App.Messaging.Updates;
 using Helix.App.Messaging.Users;
 using Helix.App.Models;
 using Helix.App.Services;
+using Helix.App.Theming;
 using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Updates;
@@ -37,6 +38,16 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         UpdateStatus = string.Empty;
 
         Username = _loggedInUser.Username;
+
+        Themes = new(Enum.GetValues<ThemeChoice>().Select(c => new ThemeOptionDisplay(c, c == ThemeSwitcher.Current)));
+
+        LocalizationResourceManager.Instance.PropertyChanged += (_, _) =>
+        {
+            foreach (ThemeOptionDisplay theme in Themes)
+            {
+                theme.RefreshName();
+            }
+        };
 
         LoadLanguages();
         RegisterMessages();
@@ -102,6 +113,19 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial Language Language { get; set; }
+
+    public ObservableCollection<ThemeOptionDisplay> Themes { get; }
+
+    [RelayCommand]
+    private void SelectTheme(ThemeOptionDisplay theme)
+    {
+        ThemeSwitcher.Switch(theme.Choice);
+
+        foreach (ThemeOptionDisplay option in Themes)
+        {
+            option.IsSelected = option.Choice == ThemeSwitcher.Current;
+        }
+    }
 
     [ObservableProperty]
     public partial string Username { get; set; }

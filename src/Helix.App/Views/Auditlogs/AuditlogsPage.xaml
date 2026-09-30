@@ -47,7 +47,7 @@
                                        Style="{StaticResource IconSm}"
                                        Margin="12,0,0,0"
                                        VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                       TextColor="{DynamicResource TextFaint}"/>
 
                                 <Entry Grid.Column="1"
                                        Margin="8,0,10,0"
@@ -68,7 +68,7 @@
                                            InputTransparent="True"
                                            HorizontalOptions="Center"
                                            VerticalOptions="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                           TextColor="{DynamicResource TextMuted}"/>
                                 </Border>
                             </Grid>
                         </Border>
@@ -126,7 +126,7 @@
                                 HorizontalOptions="Center">
                             <Label Text="{x:Static icons:IconFont.Search}"
                                    Style="{StaticResource IconLg}"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                   TextColor="{DynamicResource TextMuted}"/>
                         </Border>
 
                         <Label Text="{l10n:Translate NoAuditlogsMatchTitle}"
@@ -157,7 +157,7 @@
                                 HorizontalOptions="Center">
                             <Label Text="{x:Static icons:IconFont.History}"
                                    Style="{StaticResource IconLg}"
-                                   TextColor="{StaticResource Brand}"/>
+                                   TextColor="{DynamicResource Accent}"/>
                         </Border>
 
                         <Label Text="{l10n:Translate NoAuditlogsTitle}"

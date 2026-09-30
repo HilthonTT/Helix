@@ -10,6 +10,7 @@ using SharpHook.Data;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 #if WINDOWS
 using Helix.App.Services;
+using Helix.Infrastructure.Desktop;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
@@ -89,6 +90,9 @@ public static class MauiProgram
                     appWindow.MoveAndResize(new RectInt32(bounds.X, bounds.Y, bounds.Width, bounds.Height));
 
                     appWindow.Closing += OnWindowClosing;
+
+                    ApplyWindowIcon(appWindow);
+                    window.Activated += (_, _) => ApplyWindowIcon(appWindow);
                 });
             });
         });
@@ -267,6 +271,28 @@ public static class MauiProgram
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    private static string? _windowIcon;
+
+    private static void ApplyWindowIcon(AppWindow appWindow)
+    {
+        string? icon = ShellIcons.CurrentPath();
+
+        if (icon is null || icon == _windowIcon)
+        {
+            return;
+        }
+
+        try
+        {
+            appWindow.SetIcon(icon);
+            _windowIcon = icon;
+        }
+        catch (Exception ex)
+        {
+            AppLog.For(typeof(MauiProgram)).LogWarning(ex, "The window icon could not be set.");
+        }
+    }
 
     private static void OnWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
     {

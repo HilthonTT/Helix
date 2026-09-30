@@ -29,7 +29,7 @@
                                      WidthRequest="360"
                                      Spacing="0">
 
-                    <Image Source="logoipsum.png"
+                    <Image Source="{DynamicResource LogoImage}"
                            Aspect="AspectFit"
                            WidthRequest="44"
                            HeightRequest="57"
@@ -68,11 +68,11 @@
                                         <Label Text="{x:Static icons:IconFont.Eye}"
                                                Style="{StaticResource IconSm}"
                                                IsVisible="{Binding HidePassword}"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                               TextColor="{DynamicResource TextFaint}"/>
                                         <Label Text="{x:Static icons:IconFont.EyeSlash}"
                                                Style="{StaticResource IconSm}"
                                                IsVisible="{Binding HidePassword, Converter={StaticResource InvertedBoolConverter}}"
-                                               TextColor="{StaticResource Brand}"/>
+                                               TextColor="{DynamicResource Accent}"/>
                                     </Grid>
                                 </Border>
                             </Grid>
@@ -98,11 +98,11 @@
                                         <Label Text="{x:Static icons:IconFont.Eye}"
                                                Style="{StaticResource IconSm}"
                                                IsVisible="{Binding HideConfirmedPassword}"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                               TextColor="{DynamicResource TextFaint}"/>
                                         <Label Text="{x:Static icons:IconFont.EyeSlash}"
                                                Style="{StaticResource IconSm}"
                                                IsVisible="{Binding HideConfirmedPassword, Converter={StaticResource InvertedBoolConverter}}"
-                                               TextColor="{StaticResource Brand}"/>
+                                               TextColor="{DynamicResource Accent}"/>
                                     </Grid>
                                 </Border>
                             </Grid>
@@ -170,9 +170,9 @@
         </Grid>
 
         <Grid IsVisible="{Binding IsLoading}"
-              Background="{AppThemeBinding Light={StaticResource CanvasLightBrush}, Dark={StaticResource CanvasDarkBrush}}">
+              Background="{DynamicResource CanvasBrush}">
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="16">
-                <Image Source="logoipsum.png" Aspect="AspectFit" WidthRequest="36" HeightRequest="46"/>
+                <Image Source="{DynamicResource LogoImage}" Aspect="AspectFit" WidthRequest="36" HeightRequest="46"/>
                 <ActivityIndicator IsRunning="{Binding IsLoading}" WidthRequest="28" HeightRequest="28"/>
             </VerticalStackLayout>
         </Grid>

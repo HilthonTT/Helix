@@ -60,7 +60,7 @@
                            InputTransparent="True"
                            HorizontalOptions="Center"
                            VerticalOptions="Center"
-                           TextColor="{StaticResource White}"/>
+                           TextColor="{StaticResource OnAccent}"/>
                 </Border>
             </Grid>
 
@@ -110,7 +110,7 @@
                                Style="{StaticResource IconSm}"
                                FontSize="8"
                                VerticalOptions="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                               TextColor="{DynamicResource Success}"/>
                         <Label Text="{l10n:Translate Connected}"
                                Style="{StaticResource SuccessText}"
                                FontSize="12"
@@ -131,7 +131,7 @@
                                Style="{StaticResource IconSm}"
                                FontSize="8"
                                VerticalOptions="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                               TextColor="{DynamicResource Danger}"/>
                         <Label Text="{l10n:Translate Disconnected}"
                                Style="{StaticResource DangerText}"
                                FontSize="12"
@@ -152,7 +152,7 @@
                                Style="{StaticResource IconSm}"
                                FontSize="8"
                                VerticalOptions="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"/>
+                               TextColor="{DynamicResource Warning}"/>
                         <Label Text="{l10n:Translate StatusUnreachable}"
                                Style="{StaticResource WarningText}"
                                FontSize="12"
@@ -173,7 +173,7 @@
                                Style="{StaticResource IconSm}"
                                FontSize="9"
                                VerticalOptions="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                               TextColor="{DynamicResource Danger}"/>
                         <Label Text="{l10n:Translate StatusFailed}"
                                Style="{StaticResource DangerText}"
                                FontSize="12"
@@ -194,7 +194,7 @@
                                Style="{StaticResource IconSm}"
                                FontSize="9"
                                VerticalOptions="Center"
-                               TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                               TextColor="{DynamicResource TextMuted}"/>
                         <Label Text="{l10n:Translate StatusAway}"
                                Style="{StaticResource Caption}"
                                FontSize="12"
@@ -230,7 +230,7 @@
                     <Label Text="{x:Static icons:IconFont.FolderOpen}"
                            Style="{StaticResource IconSm}"
                            InputTransparent="True"
-                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                           TextColor="{DynamicResource TextMuted}"/>
                 </Border>
 
                 <Border Style="{StaticResource IconChip}"
@@ -241,7 +241,7 @@
                     <Label Text="{x:Static icons:IconFont.Stethoscope}"
                            Style="{StaticResource IconSm}"
                            InputTransparent="True"
-                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                           TextColor="{DynamicResource TextMuted}"/>
                 </Border>
 
                 <Border Style="{StaticResource IconChip}"
@@ -252,7 +252,7 @@
                     <Label Text="{x:Static icons:IconFont.PencilAlt}"
                            Style="{StaticResource IconSm}"
                            InputTransparent="True"
-                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                           TextColor="{DynamicResource TextMuted}"/>
                 </Border>
 
                 <Border Style="{StaticResource IconChip}"
@@ -263,7 +263,7 @@
                     <Label Text="{x:Static icons:IconFont.Trash}"
                            Style="{StaticResource IconSm}"
                            InputTransparent="True"
-                           TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                           TextColor="{DynamicResource Danger}"/>
                 </Border>
             </HorizontalStackLayout>
 

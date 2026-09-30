@@ -14,10 +14,10 @@
                             <VisualState.Setters>
                                 <Setter TargetName="Pill"
                                         Property="Border.Background"
-                                        Value="{AppThemeBinding Light={StaticResource BrandWashLightBrush}, Dark={StaticResource BrandWashDarkBrush}}"/>
+                                        Value="{DynamicResource AccentWashBrush}"/>
                                 <Setter TargetName="Indicator" Property="Border.Opacity" Value="1"/>
-                                <Setter TargetName="NavIcon" Property="Label.TextColor" Value="{StaticResource Brand}"/>
-                                <Setter TargetName="NavLabel" Property="Label.TextColor" Value="{StaticResource Brand}"/>
+                                <Setter TargetName="NavIcon" Property="Label.TextColor" Value="{DynamicResource Accent}"/>
+                                <Setter TargetName="NavLabel" Property="Label.TextColor" Value="{DynamicResource Accent}"/>
                                 <Setter TargetName="NavLabel" Property="Label.FontFamily" Value="{StaticResource FontSemibold}"/>
                             </VisualState.Setters>
                         </VisualState>
@@ -28,10 +28,10 @@
                                 <Setter TargetName="Indicator" Property="Border.Opacity" Value="0"/>
                                 <Setter TargetName="NavIcon"
                                         Property="Label.TextColor"
-                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                        Value="{DynamicResource TextMuted}"/>
                                 <Setter TargetName="NavLabel"
                                         Property="Label.TextColor"
-                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                        Value="{DynamicResource TextMuted}"/>
                                 <Setter TargetName="NavLabel" Property="Label.FontFamily" Value="{StaticResource FontRegular}"/>
                             </VisualState.Setters>
                         </VisualState>
@@ -45,10 +45,10 @@
                     StrokeThickness="0"
                     StrokeShape="{RoundRectangle CornerRadius=11}"
                     HeightRequest="44"
-                    behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}"/>
+                    behaviors:Hover.Background="{DynamicResource SurfaceHover}"/>
 
             <Border x:Name="Indicator"
-                    Background="{StaticResource BrandBrush}"
+                    Background="{DynamicResource AccentBrush}"
                     Stroke="Transparent"
                     StrokeThickness="0"
                     StrokeShape="{RoundRectangle CornerRadius=999}"
@@ -81,10 +81,10 @@
                             <VisualState.Setters>
                                 <Setter TargetName="Pill"
                                         Property="Border.Background"
-                                        Value="{AppThemeBinding Light={StaticResource BrandWashLightBrush}, Dark={StaticResource BrandWashDarkBrush}}"/>
-                                <Setter TargetName="Pill" Property="Border.Stroke" Value="{StaticResource BrandBrush}"/>
-                                <Setter TargetName="SectionIcon" Property="Label.TextColor" Value="{StaticResource Brand}"/>
-                                <Setter TargetName="SectionTitle" Property="Label.TextColor" Value="{StaticResource Brand}"/>
+                                        Value="{DynamicResource AccentWashBrush}"/>
+                                <Setter TargetName="Pill" Property="Border.Stroke" Value="{DynamicResource AccentBrush}"/>
+                                <Setter TargetName="SectionIcon" Property="Label.TextColor" Value="{DynamicResource Accent}"/>
+                                <Setter TargetName="SectionTitle" Property="Label.TextColor" Value="{DynamicResource Accent}"/>
                             </VisualState.Setters>
                         </VisualState>
 
@@ -94,10 +94,10 @@
                                 <Setter TargetName="Pill" Property="Border.Stroke" Value="Transparent"/>
                                 <Setter TargetName="SectionIcon"
                                         Property="Label.TextColor"
-                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                        Value="{DynamicResource TextMuted}"/>
                                 <Setter TargetName="SectionTitle"
                                         Property="Label.TextColor"
-                                        Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"/>
+                                        Value="{DynamicResource Text}"/>
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>
@@ -109,7 +109,7 @@
                     Stroke="Transparent"
                     StrokeThickness="1"
                     StrokeShape="{RoundRectangle CornerRadius=12}"
-                    behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}">
+                    behaviors:Hover.Background="{DynamicResource SurfaceHover}">
 
                 <Grid ColumnDefinitions="Auto,*"
                       RowDefinitions="Auto,Auto"
@@ -146,7 +146,7 @@
 
     <ControlTemplate x:Key="SegmentTemplate" x:DataType="RadioButton">
         <Border x:Name="Segment"
-                Stroke="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"
+                Stroke="{DynamicResource BorderControl}"
                 StrokeThickness="1"
                 StrokeShape="{RoundRectangle CornerRadius=999}"
                 Background="Transparent"
@@ -156,8 +156,8 @@
                     <VisualStateGroup x:Name="CheckedStates">
                         <VisualState x:Name="Checked">
                             <VisualState.Setters>
-                                <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
-                                <Setter Property="Stroke" Value="{StaticResource BrandBrush}"/>
+                                <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Stroke" Value="{DynamicResource AccentBrush}"/>
                                 <Setter TargetName="SegmentLabel" Property="Label.TextColor" Value="#FFFFFF"/>
                                 <Setter TargetName="SegmentLabel" Property="Label.FontFamily" Value="{StaticResource FontSemibold}"/>
                             </VisualState.Setters>
@@ -167,10 +167,10 @@
                             <VisualState.Setters>
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="Stroke"
-                                        Value="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"/>
+                                        Value="{DynamicResource BorderControl}"/>
                                 <Setter TargetName="SegmentLabel"
                                         Property="Label.TextColor"
-                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                        Value="{DynamicResource TextMuted}"/>
                                 <Setter TargetName="SegmentLabel" Property="Label.FontFamily" Value="{StaticResource FontRegular}"/>
                             </VisualState.Setters>
                         </VisualState>
@@ -188,7 +188,7 @@
 
     <ControlTemplate x:Key="ButtonRadioTemplate" x:DataType="RadioButton">
         <Border x:Name="Segment"
-                Stroke="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"
+                Stroke="{DynamicResource BorderControl}"
                 StrokeThickness="1"
                 StrokeShape="{RoundRectangle CornerRadius=999}"
                 Background="Transparent"
@@ -198,8 +198,8 @@
                     <VisualStateGroup x:Name="CheckedStates">
                         <VisualState x:Name="Checked">
                             <VisualState.Setters>
-                                <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
-                                <Setter Property="Stroke" Value="{StaticResource BrandBrush}"/>
+                                <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Stroke" Value="{DynamicResource AccentBrush}"/>
                                 <Setter TargetName="SegmentLabel" Property="Label.TextColor" Value="#FFFFFF"/>
                             </VisualState.Setters>
                         </VisualState>
@@ -208,7 +208,7 @@
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter TargetName="SegmentLabel"
                                         Property="Label.TextColor"
-                                        Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                        Value="{DynamicResource TextMuted}"/>
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>
@@ -220,8 +220,8 @@
     </ControlTemplate>
 
     <ControlTemplate x:Key="OptionTemplate" x:DataType="x:String">
-        <Border Background="{AppThemeBinding Light={StaticResource SurfaceAltLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"
-                Stroke="{AppThemeBinding Light={StaticResource BorderLightBrush}, Dark={StaticResource BorderDarkBrush}}"
+        <Border Background="{DynamicResource SurfaceAltBrush}"
+                Stroke="{DynamicResource BorderBrush}"
                 StrokeThickness="1"
                 StrokeShape="{RoundRectangle CornerRadius=10}">
             <VisualStateManager.VisualStateGroups>
@@ -229,13 +229,13 @@
                     <VisualStateGroup x:Name="CheckedStates">
                         <VisualState x:Name="Checked">
                             <VisualState.Setters>
-                                <Setter Property="Stroke" Value="{StaticResource BrandBrush}"/>
+                                <Setter Property="Stroke" Value="{DynamicResource AccentBrush}"/>
                             </VisualState.Setters>
                         </VisualState>
                         <VisualState x:Name="Unchecked">
                             <VisualState.Setters>
                                 <Setter Property="Stroke"
-                                        Value="{AppThemeBinding Light={StaticResource BorderLightBrush}, Dark={StaticResource BorderDarkBrush}}"/>
+                                        Value="{DynamicResource BorderBrush}"/>
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>

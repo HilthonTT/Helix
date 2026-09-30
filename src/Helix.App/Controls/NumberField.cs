@@ -77,7 +77,7 @@ internal sealed class NumberField : ContentView
             MaxLines = 1
         };
 
-        _suffix.SetAppThemeColor(Label.TextColorProperty, Resource("TextMutedLight"), Resource("TextMutedDark"));
+        _suffix.SetDynamicResource(Label.TextColorProperty, "TextMuted");
 
         var layout = new Grid
         {
@@ -160,7 +160,7 @@ internal sealed class NumberField : ContentView
             VerticalOptions = LayoutOptions.Center
         };
 
-        label.SetAppThemeColor(Label.TextColorProperty, Resource("TextMutedLight"), Resource("TextMutedDark"));
+        label.SetDynamicResource(Label.TextColorProperty, "TextMuted");
 
         var tap = new TapGestureRecognizer();
         tap.Tapped += (_, _) => Nudge(glyph == "+" ? Step : -Step);
@@ -213,15 +213,5 @@ internal sealed class NumberField : ContentView
         {
             _rendering = false;
         }
-    }
-
-    private static Color Resource(string key)
-    {
-        if (AppBase.Current?.Resources.TryGetValue(key, out object? value) == true && value is Color color)
-        {
-            return color;
-        }
-
-        return Colors.Grey;
     }
 }

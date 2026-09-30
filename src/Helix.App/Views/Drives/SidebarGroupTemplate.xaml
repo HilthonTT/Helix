@@ -34,7 +34,7 @@
                    InputTransparent="True"
                    HorizontalOptions="Center"
                    VerticalOptions="Center"
-                   TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                   TextColor="{DynamicResource Success}"/>
         </Border>
 
         <Border Grid.Column="2"
@@ -51,7 +51,7 @@
                    InputTransparent="True"
                    HorizontalOptions="Center"
                    VerticalOptions="Center"
-                   TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                   TextColor="{DynamicResource Danger}"/>
         </Border>
 
     </Grid>

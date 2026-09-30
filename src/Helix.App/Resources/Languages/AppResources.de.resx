@@ -929,4 +929,31 @@
   <data name="NoRecoveryKeyNudge" xml:space="preserve">
     <value>Sie haben keinen Wiederherstellungsschlüssel. Erstellen Sie einen in den Einstellungen, damit ein vergessenes Passwort Sie nicht aussperrt.</value>
   </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Design</value>
+  </data>
+  <data name="ThemeDescription" xml:space="preserve">
+    <value>Legt fest, wie Helix aussieht. System folgt der hellen oder dunklen Einstellung des Betriebssystems.</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Hell</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Dunkel</value>
+  </data>
+  <data name="ThemeMidnight" xml:space="preserve">
+    <value>Mitternacht</value>
+  </data>
+  <data name="ThemeAmethyst" xml:space="preserve">
+    <value>Amethyst</value>
+  </data>
+  <data name="ThemeSand" xml:space="preserve">
+    <value>Sand</value>
+  </data>
+  <data name="ThemeGlacier" xml:space="preserve">
+    <value>Gletscher</value>
+  </data>
 </root>

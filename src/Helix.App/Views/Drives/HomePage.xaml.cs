@@ -2,6 +2,7 @@
 using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
 using Helix.App.Services;
+using Helix.App.Theming;
 using Helix.App.ViewModels.Drives;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
@@ -232,15 +233,12 @@ public sealed partial class HomePage : ContentPage
 
     private static ChartEntry[] BuildEntries(int connected, int disconnected)
     {
-        bool isLight = Microsoft.Maui.Controls.Application.Current?.RequestedTheme == AppTheme.Light;
-
-        Color connectedColor = Color.FromArgb(isLight ? "#0E9F6E" : "#34D399");
-        Color disconnectedColor = Color.FromArgb(isLight ? "#DC2626" : "#F87171");
+        ThemePalette palette = ThemeSwitcher.Palette;
 
         return
         [
-            new ChartEntry(connected) { Color = connectedColor.ToSKColor() },
-            new ChartEntry(disconnected) { Color = disconnectedColor.ToSKColor() }
+            new ChartEntry(connected) { Color = palette.Success.ToSKColor() },
+            new ChartEntry(disconnected) { Color = palette.Danger.ToSKColor() }
         ];
     }
 

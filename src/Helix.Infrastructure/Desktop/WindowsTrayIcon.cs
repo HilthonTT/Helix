@@ -350,6 +350,13 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
             return IntPtr.Zero;
         }
 
+        if (message == WM_SETTINGCHANGE
+            && lParam != IntPtr.Zero
+            && Marshal.PtrToStringUni(lParam) == ShellIcons.ColorSetChanged)
+        {
+            RefreshIcon();
+        }
+
         if (message == WM_CLOSE)
         {
             DestroyWindow(hWnd);
@@ -492,6 +499,31 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         Shell_NotifyIconW(NIM_MODIFY, ref data);
     }
 
+    private void RefreshIcon()
+    {
+        lock (_gate)
+        {
+            IntPtr previous = _icon;
+            bool ownedPrevious = _ownsIcon;
+
+            (_icon, _ownsIcon) = LoadApplicationIcon();
+
+            if (_iconAdded)
+            {
+                NOTIFYICONDATAW data = CreateIconData();
+                data.uFlags = NIF_ICON;
+                data.hIcon = _icon;
+
+                Shell_NotifyIconW(NIM_MODIFY, ref data);
+            }
+
+            if (ownedPrevious && previous != IntPtr.Zero && previous != _icon)
+            {
+                DestroyIcon(previous);
+            }
+        }
+    }
+
     private void RemoveIcon()
     {
         if (!_iconAdded)
@@ -519,6 +551,26 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
     {
         try
         {
+            string? themed = ShellIcons.CurrentPath();
+
+            if (themed is not null)
+            {
+                IntPtr loaded = LoadImageW(
+                    IntPtr.Zero,
+                    themed,
+                    IMAGE_ICON,
+                    GetSystemMetrics(SM_CXSMICON),
+                    GetSystemMetrics(SM_CYSMICON),
+                    LR_LOADFROMFILE);
+
+                if (loaded != IntPtr.Zero)
+                {
+                    return (loaded, true);
+                }
+
+                _logger.LogWarning("Could not load the tray icon from {File} (Win32 error {Error}); using the application icon.", Path.GetFileName(themed), Marshal.GetLastWin32Error());
+            }
+
             string? executable = Environment.ProcessPath;
 
             if (!string.IsNullOrEmpty(executable))
@@ -575,6 +627,7 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
     private const uint WM_NULL = 0x0000;
     private const uint WM_DESTROY = 0x0002;
     private const uint WM_CLOSE = 0x0010;
+    private const uint WM_SETTINGCHANGE = 0x001A;
     private const uint WM_CONTEXTMENU = 0x007B;
     private const uint WM_LBUTTONUP = 0x0202;
     private const uint WM_RBUTTONUP = 0x0205;
@@ -602,6 +655,11 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
     private const uint TPM_NONOTIFY = 0x0080;
 
     private static readonly IntPtr IDI_APPLICATION = 32512;
+
+    private const uint IMAGE_ICON = 1;
+    private const uint LR_LOADFROMFILE = 0x00000010;
+    private const int SM_CXSMICON = 49;
+    private const int SM_CYSMICON = 50;
 
     private delegate IntPtr WndProcDelegate(IntPtr hWnd, uint message, IntPtr wParam, IntPtr lParam);
 
@@ -659,6 +717,12 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         public Guid guidItem;
         public IntPtr hBalloonIcon;
     }
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern IntPtr LoadImageW(IntPtr hInst, string name, uint type, int cx, int cy, uint fuLoad);
+
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int nIndex);
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern bool Shell_NotifyIconW(uint dwMessage, ref NOTIFYICONDATAW lpData);

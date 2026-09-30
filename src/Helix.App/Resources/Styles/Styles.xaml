@@ -21,11 +21,11 @@
 
     <Style x:Key="BaseStyle" TargetType="Element">
         <Setter Property="Shell.BackgroundColor"
-                Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceDark}}"/>
+                Value="{DynamicResource Surface}"/>
         <Setter Property="Shell.ForegroundColor"
-                Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"/>
+                Value="{DynamicResource Text}"/>
         <Setter Property="Shell.TitleColor"
-                Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"/>
+                Value="{DynamicResource Text}"/>
         <Setter Property="Shell.NavBarHasShadow" Value="False"/>
     </Style>
 
@@ -34,7 +34,7 @@
     <Style TargetType="Page" ApplyToDerivedTypes="True">
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource CanvasLightBrush}, Dark={StaticResource CanvasDarkBrush}}"/>
+                Value="{DynamicResource CanvasBrush}"/>
         <Setter Property="Shell.NavBarIsVisible" Value="False"/>
     </Style>
 
@@ -43,7 +43,7 @@
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="LineHeight" Value="1.35"/>
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"/>
+                Value="{DynamicResource Text}"/>
     </Style>
 
     <Style TargetType="Label" BasedOn="{StaticResource LabelBase}"/>
@@ -76,19 +76,19 @@
 
     <Style x:Key="Muted" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                Value="{DynamicResource TextMuted}"/>
     </Style>
 
     <Style x:Key="Caption" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                Value="{DynamicResource TextMuted}"/>
     </Style>
 
     <Style x:Key="Faint" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                Value="{DynamicResource TextFaint}"/>
     </Style>
 
     <Style x:Key="Overline" TargetType="Label" BasedOn="{StaticResource LabelBase}">
@@ -96,14 +96,14 @@
         <Setter Property="FontSize" Value="11"/>
         <Setter Property="CharacterSpacing" Value="0.9"/>
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                Value="{DynamicResource TextFaint}"/>
     </Style>
 
     <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                Value="{DynamicResource TextMuted}"/>
     </Style>
 
     <Style x:Key="Mono" TargetType="Label" BasedOn="{StaticResource LabelBase}">
@@ -118,21 +118,21 @@
 
     <Style x:Key="SuccessText" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                Value="{DynamicResource Success}"/>
     </Style>
 
     <Style x:Key="DangerText" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                Value="{DynamicResource Danger}"/>
     </Style>
 
     <Style x:Key="WarningText" TargetType="Label" BasedOn="{StaticResource LabelBase}">
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"/>
+                Value="{DynamicResource Warning}"/>
     </Style>
 
     <Style x:Key="BrandText" TargetType="Label" BasedOn="{StaticResource LabelBase}">
-        <Setter Property="TextColor" Value="{StaticResource Brand}"/>
+        <Setter Property="TextColor" Value="{DynamicResource Accent}"/>
     </Style>
 
     <Style x:Key="Icon" TargetType="Label" BasedOn="{StaticResource LabelBase}">
@@ -153,9 +153,9 @@
 
     <Style x:Key="Card" TargetType="Border">
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceDarkBrush}}"/>
+                Value="{DynamicResource SurfaceBrush}"/>
         <Setter Property="Stroke"
-                Value="{AppThemeBinding Light={StaticResource BorderLightBrush}, Dark={StaticResource BorderDarkBrush}}"/>
+                Value="{DynamicResource BorderBrush}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=16}"/>
         <Setter Property="Padding" Value="0"/>
@@ -163,13 +163,13 @@
 
     <Style x:Key="CardInteractive" TargetType="Border" BasedOn="{StaticResource Card}">
         <Setter Property="behaviors:Hover.Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"/>
+                Value="{DynamicResource SurfaceAlt}"/>
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
     <Style x:Key="CardInset" TargetType="Border">
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceAltLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"/>
+                Value="{DynamicResource SurfaceAltBrush}"/>
         <Setter Property="Stroke" Value="Transparent"/>
         <Setter Property="StrokeThickness" Value="0"/>
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=12}"/>
@@ -191,7 +191,7 @@
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=12}"/>
         <Setter Property="Padding" Value="10,8"/>
         <Setter Property="behaviors:Hover.Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceAltLight}, Dark={StaticResource SurfaceAltDark}}"/>
+                Value="{DynamicResource SurfaceAlt}"/>
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="FocusStates">
@@ -202,7 +202,7 @@
                     </VisualState>
                     <VisualState x:Name="Focused">
                         <VisualState.Setters>
-                            <Setter Property="Stroke" Value="{StaticResource Brand}"/>
+                            <Setter Property="Stroke" Value="{DynamicResource Accent}"/>
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -221,28 +221,28 @@
 
     <Style x:Key="PillSuccess" TargetType="Border" BasedOn="{StaticResource Pill}">
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource SuccessWashLightBrush}, Dark={StaticResource SuccessWashDarkBrush}}"/>
+                Value="{DynamicResource SuccessWashBrush}"/>
     </Style>
 
     <Style x:Key="PillDanger" TargetType="Border" BasedOn="{StaticResource Pill}">
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource DangerWashLightBrush}, Dark={StaticResource DangerWashDarkBrush}}"/>
+                Value="{DynamicResource DangerWashBrush}"/>
     </Style>
 
     <Style x:Key="PillWarning" TargetType="Border" BasedOn="{StaticResource Pill}">
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource WarningWashLightBrush}, Dark={StaticResource WarningWashDarkBrush}}"/>
+                Value="{DynamicResource WarningWashBrush}"/>
     </Style>
 
     <Style x:Key="PillNeutral" TargetType="Border" BasedOn="{StaticResource Pill}">
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceAltLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"/>
+                Value="{DynamicResource SurfaceAltBrush}"/>
     </Style>
 
     <Style x:Key="Tick" TargetType="Border">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Stroke"
-                Value="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"/>
+                Value="{DynamicResource BorderControl}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=5}"/>
         <Setter Property="WidthRequest" Value="18"/>
@@ -251,20 +251,20 @@
     </Style>
 
     <Style x:Key="TickChecked" TargetType="Border" BasedOn="{StaticResource Tick}">
-        <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
-        <Setter Property="Stroke" Value="{StaticResource BrandBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+        <Setter Property="Stroke" Value="{DynamicResource AccentBrush}"/>
     </Style>
 
     <Style x:Key="Chip" TargetType="Border">
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"/>
+                Value="{DynamicResource SurfaceRaisedBrush}"/>
         <Setter Property="Stroke"
-                Value="{AppThemeBinding Light={StaticResource BorderLightBrush}, Dark={StaticResource BorderDarkBrush}}"/>
+                Value="{DynamicResource BorderBrush}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=10}"/>
         <Setter Property="Padding" Value="14,9"/>
         <Setter Property="behaviors:Hover.Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}"/>
+                Value="{DynamicResource SurfaceHover}"/>
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
@@ -278,29 +278,29 @@
         <Setter Property="HeightRequest" Value="26"/>
         <Setter Property="VerticalOptions" Value="Center"/>
         <Setter Property="behaviors:Hover.Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}"/>
+                Value="{DynamicResource SurfaceHover}"/>
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
     <Style x:Key="IconChip" TargetType="Border">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Stroke"
-                Value="{AppThemeBinding Light={StaticResource BorderLightBrush}, Dark={StaticResource BorderDarkBrush}}"/>
+                Value="{DynamicResource BorderBrush}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=9}"/>
         <Setter Property="WidthRequest" Value="32"/>
         <Setter Property="HeightRequest" Value="32"/>
         <Setter Property="VerticalOptions" Value="Center"/>
         <Setter Property="behaviors:Hover.Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}"/>
+                Value="{DynamicResource SurfaceHover}"/>
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
     <Style x:Key="Sheet" TargetType="Border">
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceDarkBrush}}"/>
+                Value="{DynamicResource SurfaceBrush}"/>
         <Setter Property="Stroke"
-                Value="{AppThemeBinding Light={StaticResource BorderLightBrush}, Dark={StaticResource BorderDarkBrush}}"/>
+                Value="{DynamicResource BorderBrush}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=18}"/>
         <Setter Property="Shadow">
@@ -310,7 +310,7 @@
 
     <Style x:Key="Divider" TargetType="BoxView">
         <Setter Property="Color"
-                Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"/>
+                Value="{DynamicResource Border}"/>
         <Setter Property="HeightRequest" Value="1"/>
     </Style>
 
@@ -318,7 +318,7 @@
         <Setter Property="FontFamily" Value="{StaticResource FontSemibold}"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="TextColor" Value="#FFFFFF"/>
-        <Setter Property="BackgroundColor" Value="{StaticResource Brand}"/>
+        <Setter Property="BackgroundColor" Value="{DynamicResource Accent}"/>
         <Setter Property="BorderWidth" Value="0"/>
         <Setter Property="CornerRadius" Value="10"/>
         <Setter Property="Padding" Value="18,12"/>
@@ -330,27 +330,27 @@
                 <VisualStateGroup x:Name="CommonStates">
                     <VisualState x:Name="Normal">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="{StaticResource Brand}"/>
+                            <Setter Property="BackgroundColor" Value="{DynamicResource Accent}"/>
                             <Setter Property="Scale" Value="1"/>
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="{StaticResource BrandOrange}"/>
+                            <Setter Property="BackgroundColor" Value="{DynamicResource AccentHover}"/>
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Pressed">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="{StaticResource BrandDeep}"/>
+                            <Setter Property="BackgroundColor" Value="{DynamicResource AccentPressed}"/>
                             <Setter Property="Scale" Value="0.98"/>
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
                             <Setter Property="BackgroundColor"
-                                    Value="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}"/>
+                                    Value="{DynamicResource SurfaceHover}"/>
                             <Setter Property="TextColor"
-                                    Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                    Value="{DynamicResource TextFaint}"/>
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -367,11 +367,11 @@
         <Setter Property="HorizontalOptions" Value="Start"/>
         <Setter Property="BorderWidth" Value="1"/>
         <Setter Property="BorderColor"
-                Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"/>
+                Value="{DynamicResource Border}"/>
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"/>
+                Value="{DynamicResource Text}"/>
         <Setter Property="BackgroundColor"
-                Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceAltDark}}"/>
+                Value="{DynamicResource SurfaceRaised}"/>
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
@@ -384,7 +384,7 @@
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
                             <Setter Property="BackgroundColor"
-                                    Value="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}"/>
+                                    Value="{DynamicResource SurfaceHover}"/>
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Pressed">
@@ -395,7 +395,7 @@
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
                             <Setter Property="TextColor"
-                                    Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                    Value="{DynamicResource TextFaint}"/>
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -408,7 +408,7 @@
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="TextColor" Value="#FFFFFF"/>
         <Setter Property="BackgroundColor"
-                Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerLight}}"/>
+                Value="{StaticResource DangerSolid}"/>
         <Setter Property="BorderWidth" Value="0"/>
         <Setter Property="CornerRadius" Value="10"/>
         <Setter Property="Padding" Value="18,12"/>
@@ -425,7 +425,7 @@
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#B91C1C"/>
+                            <Setter Property="BackgroundColor" Value="{StaticResource DangerSolidHover}"/>
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Pressed">
@@ -436,9 +436,9 @@
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
                             <Setter Property="BackgroundColor"
-                                    Value="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}"/>
+                                    Value="{DynamicResource SurfaceHover}"/>
                             <Setter Property="TextColor"
-                                    Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                    Value="{DynamicResource TextFaint}"/>
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -453,7 +453,7 @@
         <Setter Property="BorderWidth" Value="0"/>
         <Setter Property="CornerRadius" Value="10"/>
         <Setter Property="Padding" Value="12,10"/>
-        <Setter Property="TextColor" Value="{StaticResource Brand}"/>
+        <Setter Property="TextColor" Value="{DynamicResource Accent}"/>
         <Setter Property="HorizontalOptions" Value="Start"/>
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
         <Setter Property="VisualStateManager.VisualStateGroups">
@@ -462,13 +462,13 @@
                     <VisualState x:Name="Normal"/>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="TextColor" Value="{StaticResource BrandOrange}"/>
+                            <Setter Property="TextColor" Value="{DynamicResource AccentHover}"/>
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
                             <Setter Property="TextColor"
-                                    Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                    Value="{DynamicResource TextFaint}"/>
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -495,9 +495,9 @@
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="BackgroundColor" Value="Transparent"/>
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"/>
+                Value="{DynamicResource Text}"/>
         <Setter Property="PlaceholderColor"
-                Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                Value="{DynamicResource TextFaint}"/>
         <Setter Property="Margin" Value="14,0"/>
         <Setter Property="HorizontalOptions" Value="Fill"/>
         <Setter Property="VerticalOptions" Value="Center"/>
@@ -505,9 +505,9 @@
 
     <Style x:Key="Field" TargetType="Border">
         <Setter Property="Background"
-                Value="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceAltDarkBrush}}"/>
+                Value="{DynamicResource SurfaceRaisedBrush}"/>
         <Setter Property="Stroke"
-                Value="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderDark}}"/>
+                Value="{DynamicResource BorderControl}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=10}"/>
         <Setter Property="HeightRequest" Value="46"/>
@@ -517,7 +517,7 @@
     <Style TargetType="Editor">
         <Setter Property="FontFamily" Value="{StaticResource FontRegular}"/>
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"/>
+                Value="{DynamicResource Text}"/>
         <Setter Property="BackgroundColor" Value="Transparent"/>
     </Style>
 
@@ -525,29 +525,29 @@
         <Setter Property="FontFamily" Value="{StaticResource FontRegular}"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="TextColor"
-                Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"/>
+                Value="{DynamicResource Text}"/>
         <Setter Property="TitleColor"
-                Value="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                Value="{DynamicResource TextFaint}"/>
         <Setter Property="BackgroundColor"
-                Value="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource SurfaceAltDark}}"/>
+                Value="{DynamicResource SurfaceRaised}"/>
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
     <Style TargetType="Switch">
-        <Setter Property="OnColor" Value="{StaticResource Brand}"/>
+        <Setter Property="OnColor" Value="{DynamicResource Accent}"/>
         <Setter Property="ThumbColor" Value="#FFFFFF"/>
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
     <Style TargetType="Slider">
-        <Setter Property="MinimumTrackColor" Value="{StaticResource Brand}"/>
+        <Setter Property="MinimumTrackColor" Value="{DynamicResource Accent}"/>
         <Setter Property="MaximumTrackColor"
-                Value="{AppThemeBinding Light={StaticResource BorderStrongLight}, Dark={StaticResource BorderStrongDark}}"/>
-        <Setter Property="ThumbColor" Value="{StaticResource Brand}"/>
+                Value="{DynamicResource BorderStrong}"/>
+        <Setter Property="ThumbColor" Value="{DynamicResource Accent}"/>
     </Style>
 
     <Style TargetType="ActivityIndicator">
-        <Setter Property="Color" Value="{StaticResource Brand}"/>
+        <Setter Property="Color" Value="{DynamicResource Accent}"/>
     </Style>
 
     <Style TargetType="Image">

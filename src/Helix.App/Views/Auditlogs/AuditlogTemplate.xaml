@@ -12,7 +12,7 @@
                    Style="{StaticResource IconSm}"
                    FontSize="7"
                    VerticalOptions="Center"
-                   TextColor="{StaticResource Brand}"/>
+                   TextColor="{DynamicResource Accent}"/>
 
             <Label Grid.Column="1"
                    Text="{Binding Description}"

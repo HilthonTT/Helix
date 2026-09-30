@@ -53,12 +53,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#121110" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" Color="#121110" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'windows'" />
 
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#121110" BaseSize="128,165" />
 
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\logoipsum.svg" BaseSize="124,160" />
+		<MauiImage Update="Resources\Images\logo_on_dark.svg" BaseSize="124,160" />
 
 		<MauiFont Include="Resources\Fonts\*" />
 	</ItemGroup>

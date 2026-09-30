@@ -209,17 +209,14 @@ internal sealed class NotificationHost : ContentView
             Kind = kind;
             Message = message;
 
-            (string glyph, string lightKey, string darkKey) = Appearance(kind);
+            (string glyph, string colorKey) = Appearance(kind);
 
             StrokeThickness = 1;
             StrokeShape = new RoundRectangle { CornerRadius = 12 };
             Padding = new Thickness(14, 12);
 
-            this.SetAppThemeColor(BackgroundColorProperty, Resource("SurfaceLight"), Resource("SurfaceDark"));
-            this.SetAppTheme(
-                StrokeProperty,
-                new SolidColorBrush(Resource("BorderLight")),
-                new SolidColorBrush(Resource("BorderDark")));
+            this.SetDynamicResource(BackgroundColorProperty, "Surface");
+            this.SetDynamicResource(StrokeProperty, "BorderBrush");
 
             var icon = new Label
             {
@@ -230,7 +227,7 @@ internal sealed class NotificationHost : ContentView
                 Margin = new Thickness(0, 1, 0, 0)
             };
 
-            icon.SetAppThemeColor(Label.TextColorProperty, Resource(lightKey), Resource(darkKey));
+            icon.SetDynamicResource(Label.TextColorProperty, colorKey);
 
             _text = new Label
             {
@@ -240,7 +237,7 @@ internal sealed class NotificationHost : ContentView
                 VerticalOptions = LayoutOptions.Center
             };
 
-            _text.SetAppThemeColor(Label.TextColorProperty, Resource("TextLight"), Resource("TextDark"));
+            _text.SetDynamicResource(Label.TextColorProperty, "Text");
 
             var close = new Label
             {
@@ -251,7 +248,7 @@ internal sealed class NotificationHost : ContentView
                 Margin = new Thickness(0, 2, 0, 0)
             };
 
-            close.SetAppThemeColor(Label.TextColorProperty, Resource("TextFaintLight"), Resource("TextFaintDark"));
+            close.SetDynamicResource(Label.TextColorProperty, "TextFaint");
 
             var closeTap = new TapGestureRecognizer();
             closeTap.Tapped += (_, _) => Dismissed?.Invoke(this, EventArgs.Empty);
@@ -311,27 +308,17 @@ internal sealed class NotificationHost : ContentView
 
         public void StopLifetime() => _lifetime.Stop();
 
-        private static (string Glyph, string LightKey, string DarkKey) Appearance(NotificationKind kind) => kind switch
+        private static (string Glyph, string ColorKey) Appearance(NotificationKind kind) => kind switch
         {
-            NotificationKind.Success => (IconFont.CheckCircle, "SuccessLight", "SuccessDark"),
-            NotificationKind.Warning => (IconFont.ExclamationTriangle, "WarningLight", "WarningDark"),
-            NotificationKind.Error => (IconFont.ExclamationCircle, "DangerLight", "DangerDark"),
-            _ => (IconFont.InfoCircle, "Brand", "Brand")
+            NotificationKind.Success => (IconFont.CheckCircle, "Success"),
+            NotificationKind.Warning => (IconFont.ExclamationTriangle, "Warning"),
+            NotificationKind.Error => (IconFont.ExclamationCircle, "Danger"),
+            _ => (IconFont.InfoCircle, "Accent")
         };
 
         private static string IconFontFamily =>
             AppBase.Current?.Resources.TryGetValue("FontIcon", out object? value) == true && value is string family
                 ? family
                 : "FontAwesome";
-
-        private static Color Resource(string key)
-        {
-            if (AppBase.Current?.Resources.TryGetValue(key, out object? value) == true && value is Color color)
-            {
-                return color;
-            }
-
-            return Colors.Grey;
-        }
     }
 }

@@ -26,7 +26,7 @@
                     <Label Text="{x:Static icons:IconFont.Times}"
                            Style="{StaticResource IconSm}"
                            InputTransparent="True"
-                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                           TextColor="{DynamicResource TextMuted}"/>
                 </Border>
             </Grid>
 

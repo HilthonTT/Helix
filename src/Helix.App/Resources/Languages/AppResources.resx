@@ -929,4 +929,31 @@
   <data name="NoRecoveryKeyNudge" xml:space="preserve">
     <value>You have no recovery key. Create one in Settings so a forgotten password cannot lock you out.</value>
   </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="ThemeDescription" xml:space="preserve">
+    <value>Choose how Helix looks. System follows the light or dark setting of your operating system.</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="ThemeMidnight" xml:space="preserve">
+    <value>Midnight</value>
+  </data>
+  <data name="ThemeAmethyst" xml:space="preserve">
+    <value>Amethyst</value>
+  </data>
+  <data name="ThemeSand" xml:space="preserve">
+    <value>Sand</value>
+  </data>
+  <data name="ThemeGlacier" xml:space="preserve">
+    <value>Glacier</value>
+  </data>
 </root>

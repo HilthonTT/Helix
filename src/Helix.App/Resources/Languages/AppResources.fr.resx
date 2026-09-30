@@ -929,4 +929,31 @@
   <data name="NoRecoveryKeyNudge" xml:space="preserve">
     <value>Vous n'avez pas de clé de récupération. Créez-en une dans les paramètres pour qu'un mot de passe oublié ne vous bloque pas.</value>
   </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Thème</value>
+  </data>
+  <data name="ThemeDescription" xml:space="preserve">
+    <value>Choisissez l'apparence de Helix. Système suit le réglage clair ou sombre de votre système d'exploitation.</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Système</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Clair</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Sombre</value>
+  </data>
+  <data name="ThemeMidnight" xml:space="preserve">
+    <value>Minuit</value>
+  </data>
+  <data name="ThemeAmethyst" xml:space="preserve">
+    <value>Améthyste</value>
+  </data>
+  <data name="ThemeSand" xml:space="preserve">
+    <value>Sable</value>
+  </data>
+  <data name="ThemeGlacier" xml:space="preserve">
+    <value>Glacier</value>
+  </data>
 </root>

@@ -27,7 +27,7 @@
                         HorizontalOptions="Start">
                     <Label Text="{x:Static icons:IconFont.Lock}"
                            Style="{StaticResource IconLg}"
-                           TextColor="{StaticResource Brand}"/>
+                           TextColor="{DynamicResource Accent}"/>
                 </Border>
 
                 <Label Text="{l10n:Translate LockTitle}"

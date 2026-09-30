@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using AppBase = Microsoft.Maui.Controls.Application;
 using Helix.App.Resources.Languages;
 using Helix.App.Services;
+using Helix.App.Theming;
 
 namespace Helix.App;
 
@@ -13,6 +14,8 @@ public sealed partial class App : AppBase
     public App(IServiceProvider serviceProvider)
     {
         InitializeComponent();
+
+        ThemeSwitcher.Initialize(this);
 
         ServiceProvider = serviceProvider;
 

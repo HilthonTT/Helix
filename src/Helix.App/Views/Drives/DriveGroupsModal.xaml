@@ -27,7 +27,7 @@
                     <Label Text="{x:Static icons:IconFont.Times}"
                            Style="{StaticResource IconSm}"
                            InputTransparent="True"
-                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                           TextColor="{DynamicResource TextMuted}"/>
                 </Border>
             </Grid>
 
@@ -63,7 +63,7 @@
                                                 <Label Text="{x:Static icons:IconFont.PencilAlt}"
                                                        Style="{StaticResource IconSm}"
                                                        InputTransparent="True"
-                                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                                       TextColor="{DynamicResource TextMuted}"/>
                                             </Border>
 
                                             <Border Grid.Column="2"
@@ -77,7 +77,7 @@
                                                 <Label Text="{x:Static icons:IconFont.Trash}"
                                                        Style="{StaticResource IconSm}"
                                                        InputTransparent="True"
-                                                       TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                                       TextColor="{DynamicResource Danger}"/>
                                             </Border>
                                         </Grid>
                                     </Border>

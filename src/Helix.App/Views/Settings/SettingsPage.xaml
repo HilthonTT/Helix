@@ -4,6 +4,8 @@
              xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:vm="clr-namespace:Helix.App.ViewModels.Settings"
              xmlns:controls="clr-namespace:Helix.App.Controls"
+             xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
+             xmlns:models="clr-namespace:Helix.App.Models"
              xmlns:icons="clr-namespace:Helix.App.Icons"
              xmlns:users="clr-namespace:Helix.App.Views.Users"
              xmlns:l10n="clr-namespace:Helix.App.Localization"
@@ -92,7 +94,7 @@
                                     <Label Text="{x:Static icons:IconFont.PencilAlt}"
                                            Style="{StaticResource IconSm}"
                                            InputTransparent="True"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                           TextColor="{DynamicResource TextMuted}"/>
                                 </Border>
                             </Grid>
 
@@ -114,7 +116,7 @@
                                     <Label Text="{x:Static icons:IconFont.PencilAlt}"
                                            Style="{StaticResource IconSm}"
                                            InputTransparent="True"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                           TextColor="{DynamicResource TextMuted}"/>
                                 </Border>
                             </Grid>
 
@@ -136,7 +138,7 @@
                                     <Label Text="{x:Static icons:IconFont.Key}"
                                            Style="{StaticResource IconSm}"
                                            InputTransparent="True"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                           TextColor="{DynamicResource TextMuted}"/>
                                 </Border>
                             </Grid>
                         </VerticalStackLayout>
@@ -238,6 +240,78 @@
                             </Grid>
 
                             <BoxView Style="{StaticResource Divider}"/>
+
+                            <VerticalStackLayout Spacing="14">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{l10n:Translate Theme}" Style="{StaticResource Title3}"/>
+                                    <Label Text="{l10n:Translate ThemeDescription}" Style="{StaticResource Caption}"/>
+                                </VerticalStackLayout>
+
+                                <controls:HorizontalWrapLayout Spacing="10" BindableLayout.ItemsSource="{Binding Themes}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:ThemeOptionDisplay">
+                                            <Border WidthRequest="116"
+                                                    Padding="6"
+                                                    Background="Transparent"
+                                                    Stroke="{DynamicResource BorderBrush}"
+                                                    StrokeThickness="2"
+                                                    StrokeShape="{RoundRectangle CornerRadius=12}"
+                                                    SemanticProperties.Description="{Binding Name}"
+                                                    ToolTipProperties.Text="{Binding Name}"
+                                                    behaviors:Hover.Cursor="True"
+                                                    behaviors:Hover.Background="{DynamicResource SurfaceHover}">
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="Stroke" Value="{DynamicResource AccentBrush}"/>
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=SelectThemeCommand, x:DataType=vm:SettingsViewModel}"
+                                                                          CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+
+                                                <VerticalStackLayout Spacing="8" InputTransparent="True">
+                                                    <Border HeightRequest="58"
+                                                            Padding="8"
+                                                            Background="{Binding CanvasBrush}"
+                                                            StrokeThickness="0"
+                                                            StrokeShape="{RoundRectangle CornerRadius=8}">
+                                                        <Grid RowDefinitions="*,Auto" RowSpacing="6">
+                                                            <Border Background="{Binding SurfaceBrush}"
+                                                                    StrokeThickness="0"
+                                                                    StrokeShape="{RoundRectangle CornerRadius=4}"/>
+                                                            <HorizontalStackLayout Grid.Row="1" Spacing="4">
+                                                                <Border WidthRequest="26"
+                                                                        HeightRequest="8"
+                                                                        Background="{Binding AccentBrush}"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="{RoundRectangle CornerRadius=4}"/>
+                                                                <Border WidthRequest="8"
+                                                                        HeightRequest="8"
+                                                                        Background="{Binding SoftBrush}"
+                                                                        StrokeThickness="0"
+                                                                        StrokeShape="{RoundRectangle CornerRadius=4}"/>
+                                                            </HorizontalStackLayout>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <Grid ColumnDefinitions="*,Auto" Margin="4,0,4,2">
+                                                        <Label Text="{Binding Name}"
+                                                               FontSize="13"
+                                                               LineBreakMode="TailTruncation"
+                                                               MaxLines="1"/>
+                                                        <Label Grid.Column="1"
+                                                               Text="{x:Static icons:IconFont.Check}"
+                                                               Style="{StaticResource IconSm}"
+                                                               TextColor="{DynamicResource Accent}"
+                                                               IsVisible="{Binding IsSelected}"/>
+                                                    </Grid>
+                                                </VerticalStackLayout>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </controls:HorizontalWrapLayout>
+                            </VerticalStackLayout>
 
                             <Grid Style="{StaticResource PreferenceRow}">
                                 <VerticalStackLayout Spacing="2">

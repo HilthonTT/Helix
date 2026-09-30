@@ -33,7 +33,7 @@
                 <Label Text="{x:Static icons:IconFont.Link}"
                        Style="{StaticResource IconSm}"
                        InputTransparent="True"
-                       TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                       TextColor="{DynamicResource Success}"/>
             </Border>
 
             <Border Style="{StaticResource IconChip}"
@@ -45,7 +45,7 @@
                 <Label Text="{x:Static icons:IconFont.Unlink}"
                        Style="{StaticResource IconSm}"
                        InputTransparent="True"
-                       TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                       TextColor="{DynamicResource Danger}"/>
             </Border>
         </HorizontalStackLayout>
     </Border>

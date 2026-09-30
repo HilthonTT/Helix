@@ -2667,5 +2667,86 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("NoRecoveryKeyNudge", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Theme.
+        /// </summary>
+        internal static string Theme {
+            get {
+                return ResourceManager.GetString("Theme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose how Helix looks. System follows the light or dark setting of your operating system..
+        /// </summary>
+        internal static string ThemeDescription {
+            get {
+                return ResourceManager.GetString("ThemeDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to System.
+        /// </summary>
+        internal static string ThemeSystem {
+            get {
+                return ResourceManager.GetString("ThemeSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Light.
+        /// </summary>
+        internal static string ThemeLight {
+            get {
+                return ResourceManager.GetString("ThemeLight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dark.
+        /// </summary>
+        internal static string ThemeDark {
+            get {
+                return ResourceManager.GetString("ThemeDark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Midnight.
+        /// </summary>
+        internal static string ThemeMidnight {
+            get {
+                return ResourceManager.GetString("ThemeMidnight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Amethyst.
+        /// </summary>
+        internal static string ThemeAmethyst {
+            get {
+                return ResourceManager.GetString("ThemeAmethyst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sand.
+        /// </summary>
+        internal static string ThemeSand {
+            get {
+                return ResourceManager.GetString("ThemeSand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Glacier.
+        /// </summary>
+        internal static string ThemeGlacier {
+            get {
+                return ResourceManager.GetString("ThemeGlacier", resourceCulture);
+            }
+        }
     }
 }

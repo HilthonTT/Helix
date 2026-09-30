@@ -32,4 +32,8 @@
 	  <InternalsVisibleTo Include="Infrastructure.UnitTests" />
 	</ItemGroup>
 
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+	  <Content Include="Desktop\Icons\*.ico" Link="Icons\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
+
 </Project>

@@ -79,7 +79,7 @@
                             <Label Text="{x:Static icons:IconFont.Clock}"
                                    Style="{StaticResource IconSm}"
                                    VerticalOptions="Center"
-                                   TextColor="{StaticResource BrandOrange}"/>
+                                   TextColor="{DynamicResource AccentHover}"/>
 
                             <Label Text="{Binding CountdownDisplay}"
                                    Style="{StaticResource Mono}"
@@ -98,7 +98,7 @@
                                        InputTransparent="True"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                       TextColor="{DynamicResource Danger}"/>
                             </Border>
 
                             <Border Style="{StaticResource IconHit}"
@@ -113,7 +113,7 @@
                                        InputTransparent="True"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                       TextColor="{DynamicResource TextMuted}"/>
                             </Border>
                         </HorizontalStackLayout>
                     </Border>
@@ -142,7 +142,7 @@
                                 <Border Style="{StaticResource IconTile}">
                                     <Label Text="{x:Static icons:IconFont.Database}"
                                            Style="{StaticResource Icon}"
-                                           TextColor="{StaticResource BrandAmber}"/>
+                                           TextColor="{DynamicResource AccentSoft}"/>
                                 </Border>
                                 <Label Text="{l10n:Translate StorageUsage}"
                                        Style="{StaticResource Overline}"
@@ -166,7 +166,7 @@
                                 <Border Style="{StaticResource IconTile}">
                                     <Label Text="{x:Static icons:IconFont.Plug}"
                                            Style="{StaticResource Icon}"
-                                           TextColor="{StaticResource Brand}"/>
+                                           TextColor="{DynamicResource Accent}"/>
                                 </Border>
                                 <Label Text="{l10n:Translate Connection}"
                                        Style="{StaticResource Overline}"
@@ -226,7 +226,7 @@
                                     Padding="10,3"
                                     HorizontalOptions="Start"
                                     Margin="4,0,0,0"
-                                    Background="{AppThemeBinding Light={StaticResource BrandWashLightBrush}, Dark={StaticResource BrandWashDarkBrush}}"
+                                    Background="{DynamicResource AccentWashBrush}"
                                     IsVisible="{Binding HasSelection}">
                                 <Label Text="{Binding SelectionSummary}"
                                        Style="{StaticResource BrandText}"
@@ -243,7 +243,7 @@
                                            Style="{StaticResource IconSm}"
                                            Margin="12,0,0,0"
                                            VerticalOptions="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                           TextColor="{DynamicResource TextFaint}"/>
 
                                     <Entry x:Name="DriveSearch"
                                            Grid.Column="1"
@@ -265,7 +265,7 @@
                                                InputTransparent="True"
                                                HorizontalOptions="Center"
                                                VerticalOptions="Center"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                               TextColor="{DynamicResource TextMuted}"/>
                                     </Border>
                                 </Grid>
                             </Border>
@@ -292,7 +292,7 @@
                                     <HorizontalStackLayout Spacing="9" InputTransparent="True">
                                         <Label Text="{x:Static icons:IconFont.Link}"
                                                Style="{StaticResource IconSm}"
-                                               TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                                               TextColor="{DynamicResource Success}"/>
                                         <Label Text="{l10n:Translate ConnectAll}"
                                                FontSize="13"
                                                VerticalOptions="Center"
@@ -311,7 +311,7 @@
                                     <HorizontalStackLayout Spacing="9" InputTransparent="True">
                                         <Label Text="{x:Static icons:IconFont.Unlink}"
                                                Style="{StaticResource IconSm}"
-                                               TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                               TextColor="{DynamicResource Danger}"/>
                                         <Label Text="{l10n:Translate DisconnectAll}"
                                                FontSize="13"
                                                VerticalOptions="Center"
@@ -328,7 +328,7 @@
                                     <HorizontalStackLayout Spacing="9" InputTransparent="True">
                                         <Label Text="{x:Static icons:IconFont.LayerGroup}"
                                                Style="{StaticResource IconSm}"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                               TextColor="{DynamicResource TextMuted}"/>
                                         <Label Text="{l10n:Translate DriveGroups}"
                                                FontSize="13"
                                                VerticalOptions="Center"
@@ -350,7 +350,7 @@
                                     <HorizontalStackLayout Spacing="9" InputTransparent="True">
                                         <Label Text="{x:Static icons:IconFont.Link}"
                                                Style="{StaticResource IconSm}"
-                                               TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                                               TextColor="{DynamicResource Success}"/>
                                         <Label Text="{l10n:Translate Connect}" FontSize="13" VerticalOptions="Center"/>
                                     </HorizontalStackLayout>
                                 </Border>
@@ -364,7 +364,7 @@
                                     <HorizontalStackLayout Spacing="9" InputTransparent="True">
                                         <Label Text="{x:Static icons:IconFont.Unlink}"
                                                Style="{StaticResource IconSm}"
-                                               TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                               TextColor="{DynamicResource Danger}"/>
                                         <Label Text="{l10n:Translate Disconnect}" FontSize="13" VerticalOptions="Center"/>
                                     </HorizontalStackLayout>
                                 </Border>
@@ -376,7 +376,7 @@
                                     <HorizontalStackLayout Spacing="9" InputTransparent="True">
                                         <Label Text="{x:Static icons:IconFont.Times}"
                                                Style="{StaticResource IconSm}"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                               TextColor="{DynamicResource TextMuted}"/>
                                         <Label Text="{l10n:Translate ClearSelection}" FontSize="13" VerticalOptions="Center"/>
                                     </HorizontalStackLayout>
                                 </Border>
@@ -416,7 +416,7 @@
                                                InputTransparent="True"
                                                HorizontalOptions="Center"
                                                VerticalOptions="Center"
-                                               TextColor="{StaticResource White}"/>
+                                               TextColor="{StaticResource OnAccent}"/>
                                     </Border>
                                 </Grid>
 
@@ -503,7 +503,7 @@
                                     HorizontalOptions="Center">
                                 <Label Text="{x:Static icons:IconFont.Search}"
                                        Style="{StaticResource IconLg}"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                       TextColor="{DynamicResource TextMuted}"/>
                             </Border>
 
                             <Label Text="{l10n:Translate NoDrivesMatchTitle}"
@@ -534,7 +534,7 @@
                                     HorizontalOptions="Center">
                                 <Label Text="{x:Static icons:IconFont.Server}"
                                        Style="{StaticResource IconLg}"
-                                       TextColor="{StaticResource Brand}"/>
+                                       TextColor="{DynamicResource Accent}"/>
                             </Border>
 
                             <Label Text="{l10n:Translate NoDrivesTitle}"
@@ -577,7 +577,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto">
                             <Border WidthRequest="10"
                                     HeightRequest="10"
-                                    Background="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"
+                                    Background="{DynamicResource Success}"
                                     Stroke="Transparent"
                                     StrokeThickness="0"
                                     StrokeShape="{RoundRectangle CornerRadius=999}"
@@ -597,7 +597,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto">
                             <Border WidthRequest="10"
                                     HeightRequest="10"
-                                    Background="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"
+                                    Background="{DynamicResource Danger}"
                                     Stroke="Transparent"
                                     StrokeThickness="0"
                                     StrokeShape="{RoundRectangle CornerRadius=999}"

@@ -21,7 +21,7 @@
         <DataTemplate x:DataType="local:AppShell">
 
             <Grid ColumnDefinitions="*,1"
-                  Background="{AppThemeBinding Light={StaticResource SurfaceLightBrush}, Dark={StaticResource SurfaceDarkBrush}}">
+                  Background="{DynamicResource SurfaceBrush}">
 
                 <BoxView Grid.Column="1"
                          Style="{StaticResource Divider}"
@@ -34,7 +34,7 @@
                       RadioButtonGroup.SelectedValue="{Binding SelectedRoute}">
 
                     <HorizontalStackLayout Grid.Row="0" Spacing="12" Margin="26,28,20,26">
-                        <Image Source="logoipsum.png"
+                        <Image Source="{DynamicResource LogoImage}"
                                Aspect="AspectFit"
                                WidthRequest="24"
                                HeightRequest="31"
@@ -110,7 +110,7 @@
                                        Style="{StaticResource IconSm}"
                                        FontSize="12"
                                        VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                       TextColor="{DynamicResource TextFaint}"/>
                                 <Label Grid.Column="1"
                                        Text="{l10n:Translate Connected}"
                                        Style="{StaticResource Faint}"
@@ -130,7 +130,7 @@
                                        Style="{StaticResource IconSm}"
                                        FontSize="12"
                                        VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}"/>
+                                       TextColor="{DynamicResource TextFaint}"/>
                                 <Label Grid.Column="1"
                                        Text="{l10n:Translate Storage}"
                                        Style="{StaticResource Faint}"
@@ -146,14 +146,14 @@
                                     Padding="12,9"
                                     Style="{StaticResource Pill}"
                                     StrokeShape="{RoundRectangle CornerRadius=11}"
-                                    Background="{AppThemeBinding Light={StaticResource WarningWashLightBrush}, Dark={StaticResource WarningWashDarkBrush}}"
+                                    Background="{DynamicResource WarningWashBrush}"
                                     IsVisible="{Binding Estate.HasLowSpace}">
                                 <HorizontalStackLayout Spacing="10">
                                     <Label Text="{x:Static icons:IconFont.ExclamationTriangle}"
                                            Style="{StaticResource IconSm}"
                                            FontSize="12"
                                            VerticalOptions="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"/>
+                                           TextColor="{DynamicResource Warning}"/>
                                     <Label Text="{l10n:Translate TrayStorageLow}"
                                            Style="{StaticResource Caption}"
                                            VerticalOptions="Center"
@@ -166,7 +166,7 @@
                                     Padding="12,9"
                                     Style="{StaticResource Pill}"
                                     StrokeShape="{RoundRectangle CornerRadius=11}"
-                                    Background="{AppThemeBinding Light={StaticResource BrandWashLightBrush}, Dark={StaticResource BrandWashDarkBrush}}"
+                                    Background="{DynamicResource AccentWashBrush}"
                                     behaviors:Hover.Cursor="True"
                                     ToolTipProperties.Text="{l10n:Translate CheckForUpdates}"
                                     IsVisible="{Binding UpdateAvailable}">
@@ -178,7 +178,7 @@
                                            Style="{StaticResource IconSm}"
                                            FontSize="12"
                                            VerticalOptions="Center"
-                                           TextColor="{StaticResource Brand}"/>
+                                           TextColor="{DynamicResource Accent}"/>
                                     <Label Grid.Column="1"
                                            Text="{l10n:Translate UpdateAvailableShort}"
                                            Style="{StaticResource BrandText}"
@@ -191,7 +191,7 @@
                                            Style="{StaticResource Mono}"
                                            FontSize="11"
                                            VerticalOptions="Center"
-                                           TextColor="{StaticResource Brand}"/>
+                                           TextColor="{DynamicResource Accent}"/>
                                 </Grid>
                             </Border>
 
@@ -206,7 +206,7 @@
                         <HorizontalStackLayout Spacing="10">
                             <Label Text="{x:Static icons:IconFont.UserCircle}"
                                    Style="{StaticResource IconLg}"
-                                   TextColor="{StaticResource Brand}"
+                                   TextColor="{DynamicResource Accent}"
                                    VerticalOptions="Center"/>
                             <VerticalStackLayout Spacing="0" VerticalOptions="Center">
                                 <Label Text="{Binding Username}"
@@ -227,7 +227,7 @@
                                 StrokeShape="{RoundRectangle CornerRadius=11}"
                                 ToolTipProperties.Text="{l10n:Translate LockNow}"
                                 behaviors:Hover.Cursor="True"
-                                behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}">
+                                behaviors:Hover.Background="{DynamicResource SurfaceHover}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnLockNow"/>
                             </Border.GestureRecognizers>
@@ -236,7 +236,7 @@
                                        Style="{StaticResource Icon}"
                                        FontSize="15"
                                        WidthRequest="20"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                       TextColor="{DynamicResource TextMuted}"/>
                                 <Label Text="{l10n:Translate LockNow}"
                                        Style="{StaticResource Muted}"
                                        VerticalOptions="Center"/>
@@ -251,7 +251,7 @@
                                 StrokeShape="{RoundRectangle CornerRadius=11}"
                                 ToolTipProperties.Text="{l10n:Translate Logout}"
                                 behaviors:Hover.Cursor="True"
-                                behaviors:Hover.Background="{AppThemeBinding Light={StaticResource SurfaceHoverLight}, Dark={StaticResource SurfaceHoverDark}}">
+                                behaviors:Hover.Background="{DynamicResource SurfaceHover}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnLogout"/>
                             </Border.GestureRecognizers>
@@ -260,7 +260,7 @@
                                        Style="{StaticResource Icon}"
                                        FontSize="15"
                                        WidthRequest="20"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                       TextColor="{DynamicResource TextMuted}"/>
                                 <Label Text="{l10n:Translate Logout}"
                                        Style="{StaticResource Muted}"
                                        VerticalOptions="Center"/>
@@ -290,7 +290,7 @@
                                 <Label Text="{x:Static icons:IconFont.Code}"
                                        Style="{StaticResource IconSm}"
                                        InputTransparent="True"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                                       TextColor="{DynamicResource TextMuted}"/>
                             </Border>
                         </Grid>
                     </VerticalStackLayout>

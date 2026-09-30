@@ -16,10 +16,10 @@
                         WidthRequest="48"
                         HeightRequest="48"
                         HorizontalOptions="Start"
-                        Background="{AppThemeBinding Light={StaticResource DangerWashLightBrush}, Dark={StaticResource DangerWashDarkBrush}}">
+                        Background="{DynamicResource DangerWashBrush}">
                     <Label Text="{x:Static icons:IconFont.Trash}"
                            Style="{StaticResource IconLg}"
-                           TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                           TextColor="{DynamicResource Danger}"/>
                 </Border>
 
                 <Label Text="{l10n:Translate DeleteDrive}" Style="{StaticResource Title1}"/>

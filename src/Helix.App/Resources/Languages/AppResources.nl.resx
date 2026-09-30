@@ -929,4 +929,31 @@
   <data name="NoRecoveryKeyNudge" xml:space="preserve">
     <value>Je hebt geen herstelsleutel. Maak er een aan in Instellingen, zodat een vergeten wachtwoord je niet buitensluit.</value>
   </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Thema</value>
+  </data>
+  <data name="ThemeDescription" xml:space="preserve">
+    <value>Hoe Helix eruitziet. Systeem volgt de lichte of donkere instelling van het besturingssysteem.</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Systeem</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Licht</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Donker</value>
+  </data>
+  <data name="ThemeMidnight" xml:space="preserve">
+    <value>Middernacht</value>
+  </data>
+  <data name="ThemeAmethyst" xml:space="preserve">
+    <value>Amethist</value>
+  </data>
+  <data name="ThemeSand" xml:space="preserve">
+    <value>Zand</value>
+  </data>
+  <data name="ThemeGlacier" xml:space="preserve">
+    <value>Gletsjer</value>
+  </data>
 </root>

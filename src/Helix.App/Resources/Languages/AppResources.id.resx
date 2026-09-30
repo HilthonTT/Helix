@@ -929,4 +929,31 @@
   <data name="NoRecoveryKeyNudge" xml:space="preserve">
     <value>Anda belum memiliki kunci pemulihan. Buat di Pengaturan agar kata sandi yang terlupa tidak mengunci Anda.</value>
   </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="ThemeDescription" xml:space="preserve">
+    <value>Pilih tampilan Helix. Sistem mengikuti pengaturan terang atau gelap sistem operasi Anda.</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Sistem</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Terang</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Gelap</value>
+  </data>
+  <data name="ThemeMidnight" xml:space="preserve">
+    <value>Tengah Malam</value>
+  </data>
+  <data name="ThemeAmethyst" xml:space="preserve">
+    <value>Ametis</value>
+  </data>
+  <data name="ThemeSand" xml:space="preserve">
+    <value>Pasir</value>
+  </data>
+  <data name="ThemeGlacier" xml:space="preserve">
+    <value>Gletser</value>
+  </data>
 </root>

@@ -33,7 +33,7 @@
                     <Label Text="{x:Static icons:IconFont.Times}"
                            Style="{StaticResource IconSm}"
                            InputTransparent="True"
-                           TextColor="{AppThemeBinding Light={StaticResource TextMutedLight}, Dark={StaticResource TextMutedDark}}"/>
+                           TextColor="{DynamicResource TextMuted}"/>
                 </Border>
             </Grid>
 
@@ -58,13 +58,13 @@
                                    Style="{StaticResource IconSm}"
                                    VerticalOptions="Center"
                                    IsVisible="{Binding ShowHealthy}"
-                                   TextColor="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                                   TextColor="{DynamicResource Success}"/>
 
                             <Label Text="{x:Static icons:IconFont.ExclamationCircle}"
                                    Style="{StaticResource IconSm}"
                                    VerticalOptions="Center"
                                    IsVisible="{Binding ShowProblem}"
-                                   TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                   TextColor="{DynamicResource Danger}"/>
 
                             <Label Text="{Binding Summary}"
                                    Style="{StaticResource BodyStrong}"
@@ -81,19 +81,19 @@
                                                Style="{StaticResource IconSm}"
                                                VerticalOptions="Start"
                                                Margin="0,2,0,0"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextFaintLight}, Dark={StaticResource TextFaintDark}}">
+                                               TextColor="{DynamicResource TextFaint}">
                                             <Label.Triggers>
                                                 <DataTrigger TargetType="Label" Binding="{Binding IsPassed}" Value="True">
                                                     <Setter Property="TextColor"
-                                                            Value="{AppThemeBinding Light={StaticResource SuccessLight}, Dark={StaticResource SuccessDark}}"/>
+                                                            Value="{DynamicResource Success}"/>
                                                 </DataTrigger>
                                                 <DataTrigger TargetType="Label" Binding="{Binding IsWarned}" Value="True">
                                                     <Setter Property="TextColor"
-                                                            Value="{AppThemeBinding Light={StaticResource WarningLight}, Dark={StaticResource WarningDark}}"/>
+                                                            Value="{DynamicResource Warning}"/>
                                                 </DataTrigger>
                                                 <DataTrigger TargetType="Label" Binding="{Binding IsFailed}" Value="True">
                                                     <Setter Property="TextColor"
-                                                            Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}"/>
+                                                            Value="{DynamicResource Danger}"/>
                                                 </DataTrigger>
                                             </Label.Triggers>
                                         </Label>
