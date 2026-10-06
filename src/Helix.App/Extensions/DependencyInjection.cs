@@ -28,6 +28,8 @@ public static class DependencyInjection
 
         services.AddSingleton<StorageAlertService>();
 
+        services.AddSingleton<ScheduleService>();
+
         services.AddSingleton<IdleLockService>();
 
         services.AddSingleton<EstateStatus>();

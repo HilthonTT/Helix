@@ -956,4 +956,94 @@
   <data name="ThemeGlacier" xml:space="preserve">
     <value>Gletsjer</value>
   </data>
+  <data name="Schedules" xml:space="preserve">
+    <value>Planningen</value>
+  </data>
+  <data name="YourSchedules" xml:space="preserve">
+    <value>Je planningen</value>
+  </data>
+  <data name="NewSchedule" xml:space="preserve">
+    <value>Nieuwe planning</value>
+  </data>
+  <data name="EditSchedule" xml:space="preserve">
+    <value>Planning bewerken</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>Planning verwijderen</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>"{0}" verwijderen? De planning wordt niet meer uitgevoerd.</value>
+  </data>
+  <data name="ScheduleAction" xml:space="preserve">
+    <value>Actie</value>
+  </data>
+  <data name="ScheduleActionConnect" xml:space="preserve">
+    <value>Verbinden</value>
+  </data>
+  <data name="ScheduleActionDisconnect" xml:space="preserve">
+    <value>Verbreken</value>
+  </data>
+  <data name="ScheduleTarget" xml:space="preserve">
+    <value>Stations</value>
+  </data>
+  <data name="ScheduleEveryDrive" xml:space="preserve">
+    <value>Alle stations</value>
+  </data>
+  <data name="ScheduleTime" xml:space="preserve">
+    <value>Tijd</value>
+  </data>
+  <data name="ScheduleDays" xml:space="preserve">
+    <value>Dagen</value>
+  </data>
+  <data name="ScheduleEveryDay" xml:space="preserve">
+    <value>Elke dag</value>
+  </data>
+  <data name="ScheduleWeekdays" xml:space="preserve">
+    <value>Werkdagen</value>
+  </data>
+  <data name="ScheduleWeekends" xml:space="preserve">
+    <value>Weekenden</value>
+  </data>
+  <data name="ScheduleWhen" xml:space="preserve">
+    <value>{0} om {1}</value>
+  </data>
+  <data name="ScheduleConnectAll" xml:space="preserve">
+    <value>Alle stations verbinden</value>
+  </data>
+  <data name="ScheduleDisconnectAll" xml:space="preserve">
+    <value>Alle stations verbreken</value>
+  </data>
+  <data name="ScheduleConnectGroup" xml:space="preserve">
+    <value>{0} verbinden</value>
+  </data>
+  <data name="ScheduleDisconnectGroup" xml:space="preserve">
+    <value>{0} verbreken</value>
+  </data>
+  <data name="ScheduleEnabled" xml:space="preserve">
+    <value>Deze planning uitvoeren</value>
+  </data>
+  <data name="ScheduleHint" xml:space="preserve">
+    <value>Planningen lopen zolang je bent aangemeld, ook achter het vergrendelscherm. Een tijdstip dat meer dan tien minuten is gemist — de computer sliep, of niemand was aangemeld — wordt overgeslagen in plaats van te laat uitgevoerd.</value>
+  </data>
+  <data name="NoSchedules" xml:space="preserve">
+    <value>Nog geen planningen. Verbind elke ochtend een groep, of verbreek 's nachts alle stations.</value>
+  </data>
+  <data name="ScheduleRanConnectAll" xml:space="preserve">
+    <value>Alle stations zijn volgens planning verbonden.</value>
+  </data>
+  <data name="ScheduleRanDisconnectAll" xml:space="preserve">
+    <value>Alle stations zijn volgens planning verbroken.</value>
+  </data>
+  <data name="ScheduleRanConnectGroup" xml:space="preserve">
+    <value>{0} is volgens planning verbonden.</value>
+  </data>
+  <data name="ScheduleRanDisconnectGroup" xml:space="preserve">
+    <value>{0} is volgens planning verbroken.</value>
+  </data>
+  <data name="ScheduleRunFailed" xml:space="preserve">
+    <value>Gepland: {0} — niet elk station lukte.</value>
+  </data>
+  <data name="ScheduleNotification" xml:space="preserve">
+    <value>Planning</value>
+  </data>
 </root>

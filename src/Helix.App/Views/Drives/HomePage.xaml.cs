@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
+using Helix.App.Messaging.Schedules;
 using Helix.App.Services;
 using Helix.App.Theming;
 using Helix.App.ViewModels.Drives;
@@ -23,6 +24,7 @@ public sealed partial class HomePage : ContentPage
     private const string DeleteDrive = "delete-drive";
     private const string DiagnoseDrive = "diagnose-drive";
     private const string DriveGroups = "drive-groups";
+    private const string Schedules = "schedules";
     private const string AdoptMappings = "adopt-mappings";
 
     private static bool _isFirstView = true;
@@ -38,6 +40,7 @@ public sealed partial class HomePage : ContentPage
     private readonly TrayIconService _tray;
     private readonly HotkeyService _hotkeys;
     private readonly StorageAlertService _storageAlerts;
+    private readonly ScheduleService _schedules;
     private readonly IdleLockService _idleLock;
 
     public HomePage()
@@ -54,6 +57,7 @@ public sealed partial class HomePage : ContentPage
         _tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
         _hotkeys = App.ServiceProvider.GetRequiredService<HotkeyService>();
         _storageAlerts = App.ServiceProvider.GetRequiredService<StorageAlertService>();
+        _schedules = App.ServiceProvider.GetRequiredService<ScheduleService>();
         _idleLock = App.ServiceProvider.GetRequiredService<IdleLockService>();
 
         _modals = new ModalHost(BlockScreen);
@@ -62,6 +66,7 @@ public sealed partial class HomePage : ContentPage
         _modals.Register(DeleteDrive, DeleteDriveLayout, DeleteDriveView);
         _modals.Register(DiagnoseDrive, DiagnoseDriveLayout, DiagnoseDriveView);
         _modals.Register(DriveGroups, DriveGroupsLayout, DriveGroupsView);
+        _modals.Register(Schedules, SchedulesLayout, SchedulesView);
         _modals.Register(AdoptMappings, AdoptMappingsLayout, AdoptMappingsView);
         _modals.AttachEscapeToDismiss(this);
 
@@ -120,6 +125,8 @@ public sealed partial class HomePage : ContentPage
             await _hotkeys.StartAsync();
 
             _storageAlerts.Start();
+
+            _schedules.Start();
 
             _idleLock.Start();
 
@@ -271,6 +278,9 @@ public sealed partial class HomePage : ContentPage
         WeakReferenceMessenger.Default.Register<DriveGroupsMessage>(
             this, async (r, m) => await _modals.ToggleAsync(DriveGroups, m.Show));
 
+        WeakReferenceMessenger.Default.Register<SchedulesMessage>(
+            this, async (r, m) => await _modals.ToggleAsync(Schedules, m.Show));
+
         WeakReferenceMessenger.Default.Register<AdoptMappingsMessage>(
             this, async (r, m) => await _modals.ToggleAsync(AdoptMappings, m.Value));
 
@@ -311,6 +321,14 @@ public sealed partial class HomePage : ContentPage
         if (_viewModel.OpenDriveGroupsModalCommand.CanExecute(null))
         {
             _viewModel.OpenDriveGroupsModalCommand.Execute(null);
+        }
+    }
+
+    private void Schedules_Clicked(object sender, EventArgs e)
+    {
+        if (_viewModel.OpenSchedulesModalCommand.CanExecute(null))
+        {
+            _viewModel.OpenSchedulesModalCommand.Execute(null);
         }
     }
 

@@ -95,6 +95,7 @@ internal sealed class IdleLockService
         App.ServiceProvider.GetRequiredService<TrayIconService>().Stop();
         App.ServiceProvider.GetRequiredService<HotkeyService>().Stop();
         App.ServiceProvider.GetRequiredService<StorageAlertService>().Stop();
+        App.ServiceProvider.GetRequiredService<ScheduleService>().Stop();
 
         Stop();
 

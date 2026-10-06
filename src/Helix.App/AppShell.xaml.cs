@@ -295,6 +295,8 @@ public sealed partial class AppShell : Shell
 
         App.ServiceProvider.GetRequiredService<StorageAlertService>().Stop();
 
+        App.ServiceProvider.GetRequiredService<ScheduleService>().Stop();
+
         App.ServiceProvider.GetRequiredService<IdleLockService>().Stop();
 
         BaseViewModel.ResetCountdown();

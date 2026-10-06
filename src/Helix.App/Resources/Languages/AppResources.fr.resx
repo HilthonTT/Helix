@@ -956,4 +956,94 @@
   <data name="ThemeGlacier" xml:space="preserve">
     <value>Glacier</value>
   </data>
+  <data name="Schedules" xml:space="preserve">
+    <value>Planifications</value>
+  </data>
+  <data name="YourSchedules" xml:space="preserve">
+    <value>Vos planifications</value>
+  </data>
+  <data name="NewSchedule" xml:space="preserve">
+    <value>Nouvelle planification</value>
+  </data>
+  <data name="EditSchedule" xml:space="preserve">
+    <value>Modifier la planification</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>Supprimer la planification</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>Supprimer « {0} » ? Elle ne s’exécutera plus.</value>
+  </data>
+  <data name="ScheduleAction" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="ScheduleActionConnect" xml:space="preserve">
+    <value>Connecter</value>
+  </data>
+  <data name="ScheduleActionDisconnect" xml:space="preserve">
+    <value>Déconnecter</value>
+  </data>
+  <data name="ScheduleTarget" xml:space="preserve">
+    <value>Lecteurs</value>
+  </data>
+  <data name="ScheduleEveryDrive" xml:space="preserve">
+    <value>Tous les lecteurs</value>
+  </data>
+  <data name="ScheduleTime" xml:space="preserve">
+    <value>Heure</value>
+  </data>
+  <data name="ScheduleDays" xml:space="preserve">
+    <value>Jours</value>
+  </data>
+  <data name="ScheduleEveryDay" xml:space="preserve">
+    <value>Tous les jours</value>
+  </data>
+  <data name="ScheduleWeekdays" xml:space="preserve">
+    <value>En semaine</value>
+  </data>
+  <data name="ScheduleWeekends" xml:space="preserve">
+    <value>Le week-end</value>
+  </data>
+  <data name="ScheduleWhen" xml:space="preserve">
+    <value>{0} à {1}</value>
+  </data>
+  <data name="ScheduleConnectAll" xml:space="preserve">
+    <value>Connecter tous les lecteurs</value>
+  </data>
+  <data name="ScheduleDisconnectAll" xml:space="preserve">
+    <value>Déconnecter tous les lecteurs</value>
+  </data>
+  <data name="ScheduleConnectGroup" xml:space="preserve">
+    <value>Connecter {0}</value>
+  </data>
+  <data name="ScheduleDisconnectGroup" xml:space="preserve">
+    <value>Déconnecter {0}</value>
+  </data>
+  <data name="ScheduleEnabled" xml:space="preserve">
+    <value>Exécuter cette planification</value>
+  </data>
+  <data name="ScheduleHint" xml:space="preserve">
+    <value>Les planifications s’exécutent tant que vous êtes connecté, y compris derrière l’écran de verrouillage. Une échéance manquée de plus de dix minutes — ordinateur en veille ou personne de connecté — est ignorée plutôt qu’exécutée en retard.</value>
+  </data>
+  <data name="NoSchedules" xml:space="preserve">
+    <value>Aucune planification pour l’instant. Connectez un groupe chaque matin, ou déconnectez tous les lecteurs la nuit.</value>
+  </data>
+  <data name="ScheduleRanConnectAll" xml:space="preserve">
+    <value>Tous les lecteurs ont été connectés comme prévu.</value>
+  </data>
+  <data name="ScheduleRanDisconnectAll" xml:space="preserve">
+    <value>Tous les lecteurs ont été déconnectés comme prévu.</value>
+  </data>
+  <data name="ScheduleRanConnectGroup" xml:space="preserve">
+    <value>{0} a été connecté comme prévu.</value>
+  </data>
+  <data name="ScheduleRanDisconnectGroup" xml:space="preserve">
+    <value>{0} a été déconnecté comme prévu.</value>
+  </data>
+  <data name="ScheduleRunFailed" xml:space="preserve">
+    <value>Planifié : {0} — certains lecteurs n’ont pas abouti.</value>
+  </data>
+  <data name="ScheduleNotification" xml:space="preserve">
+    <value>Planification</value>
+  </data>
 </root>

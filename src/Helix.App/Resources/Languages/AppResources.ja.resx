@@ -956,4 +956,94 @@
   <data name="ThemeGlacier" xml:space="preserve">
     <value>グレイシャー</value>
   </data>
+  <data name="Schedules" xml:space="preserve">
+    <value>スケジュール</value>
+  </data>
+  <data name="YourSchedules" xml:space="preserve">
+    <value>スケジュール一覧</value>
+  </data>
+  <data name="NewSchedule" xml:space="preserve">
+    <value>新しいスケジュール</value>
+  </data>
+  <data name="EditSchedule" xml:space="preserve">
+    <value>スケジュールを編集</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>スケジュールを削除</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>「{0}」を削除しますか？今後は実行されません。</value>
+  </data>
+  <data name="ScheduleAction" xml:space="preserve">
+    <value>動作</value>
+  </data>
+  <data name="ScheduleActionConnect" xml:space="preserve">
+    <value>接続</value>
+  </data>
+  <data name="ScheduleActionDisconnect" xml:space="preserve">
+    <value>切断</value>
+  </data>
+  <data name="ScheduleTarget" xml:space="preserve">
+    <value>ドライブ</value>
+  </data>
+  <data name="ScheduleEveryDrive" xml:space="preserve">
+    <value>すべてのドライブ</value>
+  </data>
+  <data name="ScheduleTime" xml:space="preserve">
+    <value>時刻</value>
+  </data>
+  <data name="ScheduleDays" xml:space="preserve">
+    <value>曜日</value>
+  </data>
+  <data name="ScheduleEveryDay" xml:space="preserve">
+    <value>毎日</value>
+  </data>
+  <data name="ScheduleWeekdays" xml:space="preserve">
+    <value>平日</value>
+  </data>
+  <data name="ScheduleWeekends" xml:space="preserve">
+    <value>週末</value>
+  </data>
+  <data name="ScheduleWhen" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>
+  <data name="ScheduleConnectAll" xml:space="preserve">
+    <value>すべてのドライブを接続</value>
+  </data>
+  <data name="ScheduleDisconnectAll" xml:space="preserve">
+    <value>すべてのドライブを切断</value>
+  </data>
+  <data name="ScheduleConnectGroup" xml:space="preserve">
+    <value>{0} を接続</value>
+  </data>
+  <data name="ScheduleDisconnectGroup" xml:space="preserve">
+    <value>{0} を切断</value>
+  </data>
+  <data name="ScheduleEnabled" xml:space="preserve">
+    <value>このスケジュールを実行</value>
+  </data>
+  <data name="ScheduleHint" xml:space="preserve">
+    <value>スケジュールはサインイン中、ロック画面の裏でも実行されます。10 分以上過ぎてしまった実行（スリープ中やサインインしていない間）は、遅れて実行せずにスキップします。</value>
+  </data>
+  <data name="NoSchedules" xml:space="preserve">
+    <value>スケジュールはまだありません。毎朝グループを接続したり、夜にすべてのドライブを切断したりできます。</value>
+  </data>
+  <data name="ScheduleRanConnectAll" xml:space="preserve">
+    <value>スケジュールどおりすべてのドライブを接続しました。</value>
+  </data>
+  <data name="ScheduleRanDisconnectAll" xml:space="preserve">
+    <value>スケジュールどおりすべてのドライブを切断しました。</value>
+  </data>
+  <data name="ScheduleRanConnectGroup" xml:space="preserve">
+    <value>スケジュールどおり {0} を接続しました。</value>
+  </data>
+  <data name="ScheduleRanDisconnectGroup" xml:space="preserve">
+    <value>スケジュールどおり {0} を切断しました。</value>
+  </data>
+  <data name="ScheduleRunFailed" xml:space="preserve">
+    <value>スケジュール: {0} — 一部のドライブで失敗しました。</value>
+  </data>
+  <data name="ScheduleNotification" xml:space="preserve">
+    <value>スケジュール</value>
+  </data>
 </root>

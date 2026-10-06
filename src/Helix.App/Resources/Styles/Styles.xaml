@@ -533,6 +533,16 @@
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
+    <Style TargetType="TimePicker">
+        <Setter Property="FontFamily" Value="{StaticResource FontRegular}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="TextColor"
+                Value="{DynamicResource Text}"/>
+        <Setter Property="BackgroundColor"
+                Value="{DynamicResource SurfaceRaised}"/>
+        <Setter Property="behaviors:Hover.Cursor" Value="True"/>
+    </Style>
+
     <Style TargetType="Switch">
         <Setter Property="OnColor" Value="{DynamicResource Accent}"/>
         <Setter Property="ThumbColor" Value="#FFFFFF"/>

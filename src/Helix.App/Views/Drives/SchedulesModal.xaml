@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
+             xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:DataType="vm:SchedulesViewModel"
+             x:Class="Helix.App.Views.Drives.SchedulesModal"
+             BackgroundColor="Transparent">
+
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{l10n:Translate Schedules}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{l10n:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{DynamicResource TextMuted}"/>
+                </Border>
+            </Grid>
+
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16" Padding="24,4,24,20">
+
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{l10n:Translate YourSchedules}" Style="{StaticResource FieldLabel}"/>
+
+                        <Label Text="{l10n:Translate NoSchedules}"
+                               Style="{StaticResource Caption}"
+                               IsVisible="{Binding Schedules.Count, Converter={StaticResource CountToBoolConverter}, ConverterParameter=Invert}"/>
+
+                        <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Schedules}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:ScheduleDisplay">
+                                    <Border Style="{StaticResource Row}" Padding="12,10">
+                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10">
+                                            <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                                <Label Text="{Binding Title}"
+                                                       Style="{StaticResource BodyStrong}"
+                                                       LineBreakMode="TailTruncation"
+                                                       MaxLines="1"/>
+                                                <Label Style="{StaticResource Caption}"
+                                                       FontSize="11"
+                                                       Text="{Binding When}"/>
+                                            </VerticalStackLayout>
+
+                                            <Switch Grid.Column="1"
+                                                    Scale="0.85"
+                                                    VerticalOptions="Center"
+                                                    ToolTipProperties.Text="{l10n:Translate ScheduleEnabled}"
+                                                    IsToggled="{Binding IsEnabled, Mode=TwoWay}"/>
+
+                                            <Border Grid.Column="2"
+                                                    Style="{StaticResource IconChip}"
+                                                    ToolTipProperties.Text="{l10n:Translate EditSchedule}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SchedulesViewModel}}, Path=EditCommand, x:DataType=vm:SchedulesViewModel}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <Label Text="{x:Static icons:IconFont.PencilAlt}"
+                                                       Style="{StaticResource IconSm}"
+                                                       InputTransparent="True"
+                                                       TextColor="{DynamicResource TextMuted}"/>
+                                            </Border>
+
+                                            <Border Grid.Column="3"
+                                                    Style="{StaticResource IconChip}"
+                                                    ToolTipProperties.Text="{l10n:Translate DeleteSchedule}">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SchedulesViewModel}}, Path=DeleteCommand, x:DataType=vm:SchedulesViewModel}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                                <Label Text="{x:Static icons:IconFont.Trash}"
+                                                       Style="{StaticResource IconSm}"
+                                                       InputTransparent="True"
+                                                       TextColor="{DynamicResource Danger}"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <BoxView Style="{StaticResource Divider}" Margin="0,6"/>
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="{Binding EditorTitle}" Style="{StaticResource Title3}" VerticalOptions="Center"/>
+
+                        <Border Grid.Column="1"
+                                Style="{StaticResource Chip}"
+                                IsVisible="{Binding IsEditing}"
+                                ToolTipProperties.Text="{l10n:Translate NewSchedule}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StartNewScheduleCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="{l10n:Translate NewSchedule}" FontSize="13" InputTransparent="True"/>
+                        </Border>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{l10n:Translate ScheduleAction}" Style="{StaticResource FieldLabel}"/>
+                            <Border Style="{StaticResource Field}">
+                                <Picker Margin="8,0"
+                                        BackgroundColor="Transparent"
+                                        ItemsSource="{Binding Actions}"
+                                        SelectedIndex="{Binding SelectedActionIndex}"
+                                        IsEnabled="{Binding IsNotBusy}"/>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="6">
+                            <Label Text="{l10n:Translate ScheduleTime}" Style="{StaticResource FieldLabel}"/>
+                            <Border Style="{StaticResource Field}">
+                                <TimePicker Margin="8,0"
+                                            BackgroundColor="Transparent"
+                                            Time="{Binding Time}"
+                                            IsEnabled="{Binding IsNotBusy}"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate ScheduleTarget}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Picker Margin="8,0"
+                                    BackgroundColor="Transparent"
+                                    ItemsSource="{Binding Targets}"
+                                    ItemDisplayBinding="{Binding Name, x:DataType=models:ScheduleTargetOption}"
+                                    SelectedItem="{Binding SelectedTarget}"
+                                    IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate ScheduleDays}" Style="{StaticResource FieldLabel}"/>
+
+                        <HorizontalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Days}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:ScheduleDayOption">
+                                    <VerticalStackLayout Spacing="0" WidthRequest="56">
+                                        <CheckBox IsChecked="{Binding IsSelected}" HorizontalOptions="Center"/>
+                                        <Label Text="{Binding Label}"
+                                               Style="{StaticResource Caption}"
+                                               HorizontalOptions="Center"/>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                    <Label Text="{l10n:Translate ScheduleHint}" Style="{StaticResource Caption}"/>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="24,4,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Close}"
+                        Command="{Binding CloseCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+
+                <Button Grid.Column="1"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Save}"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding IsNotBusy}"/>
+            </Grid>
+        </Grid>
+    </Border>
+
+</ContentView>

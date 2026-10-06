@@ -956,4 +956,94 @@
   <data name="ThemeGlacier" xml:space="preserve">
     <value>Gletser</value>
   </data>
+  <data name="Schedules" xml:space="preserve">
+    <value>Jadwal</value>
+  </data>
+  <data name="YourSchedules" xml:space="preserve">
+    <value>Jadwal Anda</value>
+  </data>
+  <data name="NewSchedule" xml:space="preserve">
+    <value>Jadwal baru</value>
+  </data>
+  <data name="EditSchedule" xml:space="preserve">
+    <value>Ubah jadwal</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>Hapus jadwal</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>Hapus "{0}"? Jadwal ini tidak akan dijalankan lagi.</value>
+  </data>
+  <data name="ScheduleAction" xml:space="preserve">
+    <value>Tindakan</value>
+  </data>
+  <data name="ScheduleActionConnect" xml:space="preserve">
+    <value>Sambungkan</value>
+  </data>
+  <data name="ScheduleActionDisconnect" xml:space="preserve">
+    <value>Putuskan</value>
+  </data>
+  <data name="ScheduleTarget" xml:space="preserve">
+    <value>Drive</value>
+  </data>
+  <data name="ScheduleEveryDrive" xml:space="preserve">
+    <value>Semua drive</value>
+  </data>
+  <data name="ScheduleTime" xml:space="preserve">
+    <value>Waktu</value>
+  </data>
+  <data name="ScheduleDays" xml:space="preserve">
+    <value>Hari</value>
+  </data>
+  <data name="ScheduleEveryDay" xml:space="preserve">
+    <value>Setiap hari</value>
+  </data>
+  <data name="ScheduleWeekdays" xml:space="preserve">
+    <value>Hari kerja</value>
+  </data>
+  <data name="ScheduleWeekends" xml:space="preserve">
+    <value>Akhir pekan</value>
+  </data>
+  <data name="ScheduleWhen" xml:space="preserve">
+    <value>{0} pukul {1}</value>
+  </data>
+  <data name="ScheduleConnectAll" xml:space="preserve">
+    <value>Sambungkan semua drive</value>
+  </data>
+  <data name="ScheduleDisconnectAll" xml:space="preserve">
+    <value>Putuskan semua drive</value>
+  </data>
+  <data name="ScheduleConnectGroup" xml:space="preserve">
+    <value>Sambungkan {0}</value>
+  </data>
+  <data name="ScheduleDisconnectGroup" xml:space="preserve">
+    <value>Putuskan {0}</value>
+  </data>
+  <data name="ScheduleEnabled" xml:space="preserve">
+    <value>Jalankan jadwal ini</value>
+  </data>
+  <data name="ScheduleHint" xml:space="preserve">
+    <value>Jadwal berjalan selama Anda masuk, termasuk saat layar terkunci. Jadwal yang terlewat lebih dari sepuluh menit — komputer tertidur atau tidak ada yang masuk — dilewati, bukan dijalankan terlambat.</value>
+  </data>
+  <data name="NoSchedules" xml:space="preserve">
+    <value>Belum ada jadwal. Sambungkan sebuah grup setiap pagi, atau putuskan semua drive di malam hari.</value>
+  </data>
+  <data name="ScheduleRanConnectAll" xml:space="preserve">
+    <value>Semua drive telah disambungkan sesuai jadwal.</value>
+  </data>
+  <data name="ScheduleRanDisconnectAll" xml:space="preserve">
+    <value>Semua drive telah diputuskan sesuai jadwal.</value>
+  </data>
+  <data name="ScheduleRanConnectGroup" xml:space="preserve">
+    <value>{0} telah disambungkan sesuai jadwal.</value>
+  </data>
+  <data name="ScheduleRanDisconnectGroup" xml:space="preserve">
+    <value>{0} telah diputuskan sesuai jadwal.</value>
+  </data>
+  <data name="ScheduleRunFailed" xml:space="preserve">
+    <value>Terjadwal: {0} — tidak semua drive berhasil.</value>
+  </data>
+  <data name="ScheduleNotification" xml:space="preserve">
+    <value>Jadwal</value>
+  </data>
 </root>

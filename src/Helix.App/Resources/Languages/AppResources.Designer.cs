@@ -2748,5 +2748,275 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("ThemeGlacier", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Schedules.
+        /// </summary>
+        internal static string Schedules {
+            get {
+                return ResourceManager.GetString("Schedules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your schedules.
+        /// </summary>
+        internal static string YourSchedules {
+            get {
+                return ResourceManager.GetString("YourSchedules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New schedule.
+        /// </summary>
+        internal static string NewSchedule {
+            get {
+                return ResourceManager.GetString("NewSchedule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit schedule.
+        /// </summary>
+        internal static string EditSchedule {
+            get {
+                return ResourceManager.GetString("EditSchedule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete schedule.
+        /// </summary>
+        internal static string DeleteSchedule {
+            get {
+                return ResourceManager.GetString("DeleteSchedule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete "{0}"? It will no longer run..
+        /// </summary>
+        internal static string DeleteScheduleConfirm {
+            get {
+                return ResourceManager.GetString("DeleteScheduleConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Action.
+        /// </summary>
+        internal static string ScheduleAction {
+            get {
+                return ResourceManager.GetString("ScheduleAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        internal static string ScheduleActionConnect {
+            get {
+                return ResourceManager.GetString("ScheduleActionConnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect.
+        /// </summary>
+        internal static string ScheduleActionDisconnect {
+            get {
+                return ResourceManager.GetString("ScheduleActionDisconnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drives.
+        /// </summary>
+        internal static string ScheduleTarget {
+            get {
+                return ResourceManager.GetString("ScheduleTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Every drive.
+        /// </summary>
+        internal static string ScheduleEveryDrive {
+            get {
+                return ResourceManager.GetString("ScheduleEveryDrive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Time.
+        /// </summary>
+        internal static string ScheduleTime {
+            get {
+                return ResourceManager.GetString("ScheduleTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Days.
+        /// </summary>
+        internal static string ScheduleDays {
+            get {
+                return ResourceManager.GetString("ScheduleDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Every day.
+        /// </summary>
+        internal static string ScheduleEveryDay {
+            get {
+                return ResourceManager.GetString("ScheduleEveryDay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weekdays.
+        /// </summary>
+        internal static string ScheduleWeekdays {
+            get {
+                return ResourceManager.GetString("ScheduleWeekdays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weekends.
+        /// </summary>
+        internal static string ScheduleWeekends {
+            get {
+                return ResourceManager.GetString("ScheduleWeekends", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} at {1}.
+        /// </summary>
+        internal static string ScheduleWhen {
+            get {
+                return ResourceManager.GetString("ScheduleWhen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect every drive.
+        /// </summary>
+        internal static string ScheduleConnectAll {
+            get {
+                return ResourceManager.GetString("ScheduleConnectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect every drive.
+        /// </summary>
+        internal static string ScheduleDisconnectAll {
+            get {
+                return ResourceManager.GetString("ScheduleDisconnectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect {0}.
+        /// </summary>
+        internal static string ScheduleConnectGroup {
+            get {
+                return ResourceManager.GetString("ScheduleConnectGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect {0}.
+        /// </summary>
+        internal static string ScheduleDisconnectGroup {
+            get {
+                return ResourceManager.GetString("ScheduleDisconnectGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Run this schedule.
+        /// </summary>
+        internal static string ScheduleEnabled {
+            get {
+                return ResourceManager.GetString("ScheduleEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Schedules run while you are signed in, behind the lock screen too. One missed by more than ten minutes — the computer asleep, or nobody signed in — is skipped rather than run late..
+        /// </summary>
+        internal static string ScheduleHint {
+            get {
+                return ResourceManager.GetString("ScheduleHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No schedules yet. Connect a group every morning, or put every drive down at night..
+        /// </summary>
+        internal static string NoSchedules {
+            get {
+                return ResourceManager.GetString("NoSchedules", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Every drive was connected on schedule..
+        /// </summary>
+        internal static string ScheduleRanConnectAll {
+            get {
+                return ResourceManager.GetString("ScheduleRanConnectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Every drive was disconnected on schedule..
+        /// </summary>
+        internal static string ScheduleRanDisconnectAll {
+            get {
+                return ResourceManager.GetString("ScheduleRanDisconnectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} was connected on schedule..
+        /// </summary>
+        internal static string ScheduleRanConnectGroup {
+            get {
+                return ResourceManager.GetString("ScheduleRanConnectGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} was disconnected on schedule..
+        /// </summary>
+        internal static string ScheduleRanDisconnectGroup {
+            get {
+                return ResourceManager.GetString("ScheduleRanDisconnectGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scheduled: {0} — not every drive could be reached..
+        /// </summary>
+        internal static string ScheduleRunFailed {
+            get {
+                return ResourceManager.GetString("ScheduleRunFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Schedule.
+        /// </summary>
+        internal static string ScheduleNotification {
+            get {
+                return ResourceManager.GetString("ScheduleNotification", resourceCulture);
+            }
+        }
     }
 }

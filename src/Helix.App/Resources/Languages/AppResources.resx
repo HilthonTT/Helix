@@ -956,4 +956,94 @@
   <data name="ThemeGlacier" xml:space="preserve">
     <value>Glacier</value>
   </data>
+  <data name="Schedules" xml:space="preserve">
+    <value>Schedules</value>
+  </data>
+  <data name="YourSchedules" xml:space="preserve">
+    <value>Your schedules</value>
+  </data>
+  <data name="NewSchedule" xml:space="preserve">
+    <value>New schedule</value>
+  </data>
+  <data name="EditSchedule" xml:space="preserve">
+    <value>Edit schedule</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>Delete schedule</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>Delete "{0}"? It will no longer run.</value>
+  </data>
+  <data name="ScheduleAction" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="ScheduleActionConnect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ScheduleActionDisconnect" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+  <data name="ScheduleTarget" xml:space="preserve">
+    <value>Drives</value>
+  </data>
+  <data name="ScheduleEveryDrive" xml:space="preserve">
+    <value>Every drive</value>
+  </data>
+  <data name="ScheduleTime" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="ScheduleDays" xml:space="preserve">
+    <value>Days</value>
+  </data>
+  <data name="ScheduleEveryDay" xml:space="preserve">
+    <value>Every day</value>
+  </data>
+  <data name="ScheduleWeekdays" xml:space="preserve">
+    <value>Weekdays</value>
+  </data>
+  <data name="ScheduleWeekends" xml:space="preserve">
+    <value>Weekends</value>
+  </data>
+  <data name="ScheduleWhen" xml:space="preserve">
+    <value>{0} at {1}</value>
+  </data>
+  <data name="ScheduleConnectAll" xml:space="preserve">
+    <value>Connect every drive</value>
+  </data>
+  <data name="ScheduleDisconnectAll" xml:space="preserve">
+    <value>Disconnect every drive</value>
+  </data>
+  <data name="ScheduleConnectGroup" xml:space="preserve">
+    <value>Connect {0}</value>
+  </data>
+  <data name="ScheduleDisconnectGroup" xml:space="preserve">
+    <value>Disconnect {0}</value>
+  </data>
+  <data name="ScheduleEnabled" xml:space="preserve">
+    <value>Run this schedule</value>
+  </data>
+  <data name="ScheduleHint" xml:space="preserve">
+    <value>Schedules run while you are signed in, behind the lock screen too. One missed by more than ten minutes — the computer asleep, or nobody signed in — is skipped rather than run late.</value>
+  </data>
+  <data name="NoSchedules" xml:space="preserve">
+    <value>No schedules yet. Connect a group every morning, or put every drive down at night.</value>
+  </data>
+  <data name="ScheduleRanConnectAll" xml:space="preserve">
+    <value>Every drive was connected on schedule.</value>
+  </data>
+  <data name="ScheduleRanDisconnectAll" xml:space="preserve">
+    <value>Every drive was disconnected on schedule.</value>
+  </data>
+  <data name="ScheduleRanConnectGroup" xml:space="preserve">
+    <value>{0} was connected on schedule.</value>
+  </data>
+  <data name="ScheduleRanDisconnectGroup" xml:space="preserve">
+    <value>{0} was disconnected on schedule.</value>
+  </data>
+  <data name="ScheduleRunFailed" xml:space="preserve">
+    <value>Scheduled: {0} — not every drive could be reached.</value>
+  </data>
+  <data name="ScheduleNotification" xml:space="preserve">
+    <value>Schedule</value>
+  </data>
 </root>

@@ -12,6 +12,7 @@ using Helix.Application.Abstractions.Time;
 using Helix.Domain.Auditlogs;
 using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
+using Helix.Domain.Schedules;
 using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using Helix.Infrastructure.Authentication;
@@ -93,6 +94,8 @@ public static class DependencyInjection
 
         services.AddScoped<IDriveGroupRepository, DriveGroupRepository>();
 
+        services.AddScoped<IScheduleRepository, ScheduleRepository>();
+
         services.AddScoped<ISettingsRepository, SettingsRepository>();
 
         services.AddScoped<IAuditlogRepository, AuditlogRepository>();
@@ -103,6 +106,7 @@ public static class DependencyInjection
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddSingleton<ILocalTimeZone, LocalTimeZone>();
 
         services.AddSingleton<IFileBrowser, FileBrowser>();
         services.AddSingleton<ICountdownService, CountdownService>();

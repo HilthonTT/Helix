@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
 using Helix.App.Messaging.Navigation;
+using Helix.App.Messaging.Schedules;
 using Helix.App.Icons;
 using Helix.App.Models;
 using Helix.Application.Core.Sorting;
@@ -151,6 +152,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
     private static void OpenDriveGroupsModal()
     {
         WeakReferenceMessenger.Default.Send(new DriveGroupsMessage(true));
+    }
+
+    [RelayCommand]
+    private static void OpenSchedulesModal()
+    {
+        WeakReferenceMessenger.Default.Send(new SchedulesMessage(true));
     }
 
     [ObservableProperty]

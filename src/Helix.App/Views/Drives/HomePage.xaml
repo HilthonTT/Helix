@@ -31,6 +31,12 @@
                 </MenuFlyoutItem.KeyboardAccelerators>
             </MenuFlyoutItem>
 
+            <MenuFlyoutItem Text="{l10n:Translate Schedules}" Clicked="Schedules_Clicked">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="T" Modifiers="Ctrl"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
             <MenuFlyoutItem Text="{l10n:Translate Search}" Clicked="Search_Clicked">
                 <MenuFlyoutItem.KeyboardAccelerators>
                     <KeyboardAccelerator Key="F" Modifiers="Ctrl"/>
@@ -645,6 +651,14 @@
                                           MaximumHeightRequest="600"
                                           AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
                                           AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
+        <AbsoluteLayout x:Name="SchedulesLayout" IsVisible="False">
+            <views:SchedulesModal x:Name="SchedulesView"
+                                  WidthRequest="480"
+                                  MaximumHeightRequest="680"
+                                  AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                  AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
         <AbsoluteLayout x:Name="DiagnoseDriveLayout" IsVisible="False">

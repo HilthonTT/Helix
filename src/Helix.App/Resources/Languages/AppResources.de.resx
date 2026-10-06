@@ -956,4 +956,94 @@
   <data name="ThemeGlacier" xml:space="preserve">
     <value>Gletscher</value>
   </data>
+  <data name="Schedules" xml:space="preserve">
+    <value>Zeitpläne</value>
+  </data>
+  <data name="YourSchedules" xml:space="preserve">
+    <value>Deine Zeitpläne</value>
+  </data>
+  <data name="NewSchedule" xml:space="preserve">
+    <value>Neuer Zeitplan</value>
+  </data>
+  <data name="EditSchedule" xml:space="preserve">
+    <value>Zeitplan bearbeiten</value>
+  </data>
+  <data name="DeleteSchedule" xml:space="preserve">
+    <value>Zeitplan löschen</value>
+  </data>
+  <data name="DeleteScheduleConfirm" xml:space="preserve">
+    <value>„{0}“ löschen? Der Zeitplan wird nicht mehr ausgeführt.</value>
+  </data>
+  <data name="ScheduleAction" xml:space="preserve">
+    <value>Aktion</value>
+  </data>
+  <data name="ScheduleActionConnect" xml:space="preserve">
+    <value>Verbinden</value>
+  </data>
+  <data name="ScheduleActionDisconnect" xml:space="preserve">
+    <value>Trennen</value>
+  </data>
+  <data name="ScheduleTarget" xml:space="preserve">
+    <value>Laufwerke</value>
+  </data>
+  <data name="ScheduleEveryDrive" xml:space="preserve">
+    <value>Alle Laufwerke</value>
+  </data>
+  <data name="ScheduleTime" xml:space="preserve">
+    <value>Uhrzeit</value>
+  </data>
+  <data name="ScheduleDays" xml:space="preserve">
+    <value>Tage</value>
+  </data>
+  <data name="ScheduleEveryDay" xml:space="preserve">
+    <value>Täglich</value>
+  </data>
+  <data name="ScheduleWeekdays" xml:space="preserve">
+    <value>Werktags</value>
+  </data>
+  <data name="ScheduleWeekends" xml:space="preserve">
+    <value>Am Wochenende</value>
+  </data>
+  <data name="ScheduleWhen" xml:space="preserve">
+    <value>{0} um {1}</value>
+  </data>
+  <data name="ScheduleConnectAll" xml:space="preserve">
+    <value>Alle Laufwerke verbinden</value>
+  </data>
+  <data name="ScheduleDisconnectAll" xml:space="preserve">
+    <value>Alle Laufwerke trennen</value>
+  </data>
+  <data name="ScheduleConnectGroup" xml:space="preserve">
+    <value>{0} verbinden</value>
+  </data>
+  <data name="ScheduleDisconnectGroup" xml:space="preserve">
+    <value>{0} trennen</value>
+  </data>
+  <data name="ScheduleEnabled" xml:space="preserve">
+    <value>Diesen Zeitplan ausführen</value>
+  </data>
+  <data name="ScheduleHint" xml:space="preserve">
+    <value>Zeitpläne laufen, solange du angemeldet bist, auch hinter der Sperre. Ein Termin, der um mehr als zehn Minuten verpasst wurde — der Computer schlief oder niemand war angemeldet —, wird übersprungen statt verspätet ausgeführt.</value>
+  </data>
+  <data name="NoSchedules" xml:space="preserve">
+    <value>Noch keine Zeitpläne. Verbinde morgens eine Gruppe oder trenne nachts alle Laufwerke.</value>
+  </data>
+  <data name="ScheduleRanConnectAll" xml:space="preserve">
+    <value>Alle Laufwerke wurden planmäßig verbunden.</value>
+  </data>
+  <data name="ScheduleRanDisconnectAll" xml:space="preserve">
+    <value>Alle Laufwerke wurden planmäßig getrennt.</value>
+  </data>
+  <data name="ScheduleRanConnectGroup" xml:space="preserve">
+    <value>{0} wurde planmäßig verbunden.</value>
+  </data>
+  <data name="ScheduleRanDisconnectGroup" xml:space="preserve">
+    <value>{0} wurde planmäßig getrennt.</value>
+  </data>
+  <data name="ScheduleRunFailed" xml:space="preserve">
+    <value>Geplant: {0} — nicht jedes Laufwerk war erreichbar.</value>
+  </data>
+  <data name="ScheduleNotification" xml:space="preserve">
+    <value>Zeitplan</value>
+  </data>
 </root>

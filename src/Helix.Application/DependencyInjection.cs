@@ -5,6 +5,8 @@ using Helix.Application.Features.DriveGroups.Commands;
 using Helix.Application.Features.DriveGroups.Queries;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Queries;
+using Helix.Application.Features.Schedules.Commands;
+using Helix.Application.Features.Schedules.Queries;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
 using Helix.Application.Features.Storage.Queries;
@@ -23,6 +25,7 @@ public static class DependencyInjection
             .AddDiagnosticsHandlers()
             .AddDriveGroupsHandlers()
             .AddDrivesHandlers()
+            .AddSchedulesHandlers()
             .AddSettingsHandlers()
             .AddStorageHandlers()
             .AddUpdatesHandlers()
@@ -85,6 +88,17 @@ public static class DependencyInjection
 
         services.AddScoped<ExportDrives>();
         services.AddScoped<ImportDrives>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddSchedulesHandlers(this IServiceCollection services)
+    {
+        services.AddScoped<CreateSchedule>();
+        services.AddScoped<DeleteSchedule>();
+        services.AddScoped<GetSchedules>();
+        services.AddScoped<RunDueSchedules>();
+        services.AddScoped<UpdateSchedule>();
 
         return services;
     }
