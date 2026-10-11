@@ -28,18 +28,12 @@
     </radialGradient>
     <mask id="gridMask"><rect width="1200" height="1500" fill="url(#gridFade)"/></mask>
     <linearGradient id="foot" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#050505" stop-opacity="0"/><stop offset="1" stop-color="#050505" stop-opacity=".85"/></linearGradient>
-    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
   </defs>
 
   <rect width="1200" height="1500" fill="url(#field)"/>
   <rect width="1200" height="1500" fill="url(#grid)" mask="url(#gridMask)"/>
   <rect width="1200" height="1500" fill="url(#bloom)"/>
   <rect width="1200" height="1500" fill="url(#ember)"/>
-
-  <g filter="url(#soft)" opacity=".3">
-    <path d="M-100 360C250 250 700 520 1300 300" stroke="#ff4d67" stroke-width="70" fill="none" opacity=".35"/>
-    <path d="M-100 520C300 420 750 660 1300 470" stroke="#c4142f" stroke-width="80" fill="none" opacity=".3"/>
-  </g>
 
   <g transform="translate(700 -60) rotate(18)" fill="none" stroke-linecap="round">
     <g stroke="url(#strand)" stroke-width="14" opacity=".3">

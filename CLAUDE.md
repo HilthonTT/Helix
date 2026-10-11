@@ -1908,7 +1908,11 @@ both places**. The `LogoImage` resource is `helix_logo.png` (a deeper gradient, 
 on white) on light palettes and `helix_logo_on_dark.png` on dark ones; the `Image`s bind it
 dynamically. The sign-in and lock pages' artwork is `brand_background.svg` — the helix on a
 near-black field with a crimson bloom — behind `BrandGradientBrush`, and is dark on purpose:
-the "Helix" caption over its lower left is white whatever the theme.
+the "Helix" caption over its lower left is white whatever the theme. **No SVG under
+`Resources/` may use a `<filter>`** (`feGaussianBlur` and friends): on the Mac head the
+resizetizer's Svg.Skia calls an `SKImageFilter` overload its SkiaSharp does not have and the
+build fails with `MAUIR0001 … MissingMethodException`, while Windows builds the same file
+happily. Soft glows are radial gradients instead.
 
 #### The tray and taskbar icon
 
