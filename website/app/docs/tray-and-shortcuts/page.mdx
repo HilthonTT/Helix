@@ -1,0 +1,66 @@
+export const metadata = { title: "Tray & shortcuts" };
+
+# Tray & shortcuts
+
+Most of what Helix does happens while its window is out of sight. The tray icon, notifications and global shortcuts are how you reach it then.
+
+## The tray icon
+
+While you are signed in, Helix puts an icon in the Windows notification area — on macOS, in the menu bar. It shows how many drives are up, and its menu reaches every drive without opening the window.
+
+| Menu item | Action |
+| --- | --- |
+| **Open Helix** | bring the window back |
+| **Open folder** | a submenu of the drives that are mounted; pick one to open it |
+| **Connect** / **Disconnect** *Z: — name* | one entry per drive, toggling it |
+| **Connect all drives** / **Disconnect all drives** | every drive at once, without asking first |
+| **Connect** *group* | one entry per [group](/docs/groups/) |
+| **Exit Helix** | quit for real |
+
+A tray action that fails says so in a notification and in the [diagnostic log](/docs/troubleshooting/), since there is no window to show a banner on.
+
+## Notifications
+
+Helix raises a system notification (on macOS, through Notification Center) when:
+
+- a drive drops, and when the background reconnect brings it back,
+- a NAS volume runs low on space (see the low-space warning in [Settings](/docs/settings/)),
+- a [schedule](/docs/schedules/) runs,
+- Helix hides itself in the tray for the first time in a session.
+
+Results of things you do in the window — connecting a drive, saving a setting — appear as a banner at the top of the page instead, which dismisses itself.
+
+## Closing the window
+
+On Windows, two switches in Settings decide what the window's close button does.
+
+| Setting | Default | Effect |
+| --- | --- | --- |
+| **Close to the system tray** | on | closing hides Helix to the tray, and it keeps reconnecting drops, warning about space and running schedules. Off makes the close button quit |
+| **Notify when hidden to the tray** | on | the first time Helix hides itself each session, a notification says it is still running |
+
+<Callout>
+Helix only does its work while it is running. If you turn **Close to the system tray** off, nothing reconnects your drives once the window is closed. **Exit Helix** on the tray menu is the way to quit when it is on.
+</Callout>
+
+**Auto minimize app** (see [Settings](/docs/settings/)) hides the window to the tray after a countdown on the dashboard. Neither close switch is offered on macOS, where the window stays in the Dock.
+
+## Global shortcuts
+
+Switch on **Global shortcuts** in Settings to control your drives from any application:
+
+| Shortcut | Action |
+| --- | --- |
+| <Kbd>Ctrl</Kbd>+<Kbd>Alt</Kbd>+<Kbd>Shift</Kbd>+<Kbd>C</Kbd> | connect every drive |
+| <Kbd>Ctrl</Kbd>+<Kbd>Alt</Kbd>+<Kbd>Shift</Kbd>+<Kbd>D</Kbd> | disconnect every drive |
+
+- Off by default.
+- Three modifiers, because <Kbd>Ctrl</Kbd>+<Kbd>Alt</Kbd> is AltGr on many European keyboards, where AltGr+C and AltGr+D type characters.
+- They do not ask for confirmation, and the result appears in a tray notification.
+- They do nothing while you are signed out or while the [idle lock](/docs/settings/) is up.
+- The keys are not swallowed, so another app bound to the same chord still sees them.
+- On macOS, Helix needs Accessibility access for them to work.
+
+## Shortcuts inside the window
+
+The keyboard shortcuts for the drive list and the **Drives** menu are listed on [the dashboard](/docs/dashboard/) page.

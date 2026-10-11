@@ -36,8 +36,8 @@
                     <HorizontalStackLayout Grid.Row="0" Spacing="12" Margin="26,28,20,26">
                         <Image Source="{DynamicResource LogoImage}"
                                Aspect="AspectFit"
-                               WidthRequest="24"
-                               HeightRequest="31"
+                               WidthRequest="28"
+                               HeightRequest="28"
                                VerticalOptions="Center"/>
                         <VerticalStackLayout Spacing="0" VerticalOptions="Center">
                             <Label Text="Helix"

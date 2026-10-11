@@ -1,0 +1,40 @@
+export const metadata = { title: "Introduction" };
+
+# Introduction
+
+Helix is a desktop app for managing connections to your NAS drives, on Windows and macOS. It maps network shares to drive letters, shows at a glance which are up, puts them back when they drop, and keeps the credentials they use encrypted at rest.
+
+<Media src="overview.gif" alt="Signing in to Helix, then walking the dashboard, the audit log and the settings page" caption="Signing in, then the dashboard, the audit log and settings." />
+
+## What it does
+
+- **Connects and disconnects shares** — one at a time, a saved group at a time, a ticked selection, or all of them at once. A failure names the drive and says why, rather than interrupting you with a dialog.
+- **Watches them while you work** — a drive that drops is reconnected in the background, and a tray notification tells you it happened.
+- **Knows where you are** — a drive can be pinned to its home network, given a second address for use over a VPN, and woken with Wake-on-LAN when the NAS is asleep.
+- **Explains a failure** — a four-step connection check tells "the NAS is off" apart from "the password is wrong" and "the drive letter is taken".
+- **Runs on a timetable** — schedules connect a group in the morning or put everything down at night.
+- **Stays out of the way** — it lives in the tray (or the macOS menu bar), answers global shortcuts and a command line, and can lock itself when you step away.
+- **Keeps a record** — every change, drop and automatic reconnect lands in an audit log, in your own language.
+
+## How it is built
+
+| Part | What it is |
+| --- | --- |
+| UI | .NET MAUI, one set of pages shared by both platforms |
+| Mounting | the Win32 WNet API on Windows, NetFS on macOS |
+| Storage | a local SQLite database encrypted with SQLCipher |
+| Accounts | several local accounts per machine, each seeing only its own drives |
+| Languages | English, French, German, Dutch, Indonesian and Japanese |
+
+Helix is open source under the MIT License.
+
+## Where to go next
+
+| If you want to | Read |
+| --- | --- |
+| Download and run it | [Installation](/docs/installation/) |
+| Get a first drive connected | [Quick start](/docs/quick-start/) |
+| Find your way around the main screen | [The dashboard](/docs/dashboard/) |
+| Fix a drive that will not connect | [Diagnosing a drive](/docs/diagnosing/) and [Troubleshooting](/docs/troubleshooting/) |
+| Use Helix on a laptop | [Away from home](/docs/away-from-home/) |
+| Build it or contribute | [Architecture](/docs/architecture/) and [Development](/docs/development/) |

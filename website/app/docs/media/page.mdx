@@ -1,0 +1,41 @@
+export const metadata = { title: "Recording media" };
+
+# Recording media
+
+Every GIF and screenshot on this site is recorded from the real app, not mocked up.
+
+## The demo account
+
+The recordings run against a throwaway account with invented drives. Their addresses are [RFC 5737](https://www.rfc-editor.org/rfc/rfc5737) documentation addresses, ranges reserved for examples that reach nothing on any network, so no real NAS, share or credential ever appears on screen. That is also why the drives read as disconnected and the storage figures are zero.
+
+## The recorder
+
+`website/scripts/record-media.py` does the whole run:
+
+1. publishes Helix with `-p:Company=HelixMedia -p:AssemblyTitle=HelixMedia`, which moves its data folder to `%LOCALAPPDATA%\HelixMedia` so a real install's account and drives are never touched,
+2. starts it, registers the demo account and adds the demo drives and groups,
+3. drives the window through Windows UI Automation, and captures it with `PrintWindow`, so other windows on the desktop never end up in a frame,
+4. assembles the frames into GIFs with Pillow and saves the stills as PNGs in `website/public/media`,
+5. stops the app and deletes the demo data folder.
+
+```powershell
+python -m venv .venv
+.venv\Scripts\pip install pywinauto pillow
+.venv\Scripts\python website\scripts\record-media.py
+```
+
+<Callout type="warn">
+Quit any running Helix first: the single-instance check would hand the launch to it. A few steps click with the real mouse, because the drive rows' chips have no UI Automation pattern to invoke, so leave the machine alone while it runs.
+</Callout>
+
+Pass `--no-publish` to reuse the last published build.
+
+## Updating a recording
+
+Change the scene in the script, run it, and commit what changed under `website/public/media`. Pages reference media by file name:
+
+```mdx
+<Media src="dashboard.png" alt="The Helix dashboard" caption="Optional caption." />
+```
+
+`alt` is required; `caption` is optional.

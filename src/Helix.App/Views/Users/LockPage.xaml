@@ -10,7 +10,7 @@
              Shell.NavBarIsVisible="False">
 
     <Grid Background="{StaticResource BrandGradientBrush}">
-        <Image Source="orange_background.png"
+        <Image Source="brand_background.png"
                Aspect="AspectFill"
                HorizontalOptions="Fill"
                VerticalOptions="Fill"/>

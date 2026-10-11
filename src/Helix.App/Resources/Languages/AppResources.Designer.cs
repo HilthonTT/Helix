@@ -2750,6 +2750,15 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Crimson.
+        /// </summary>
+        internal static string ThemeCrimson {
+            get {
+                return ResourceManager.GetString("ThemeCrimson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Schedules.
         /// </summary>
         internal static string Schedules {

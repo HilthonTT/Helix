@@ -1,0 +1,50 @@
+export const metadata = { title: "Schedules" };
+
+# Schedules
+
+A schedule connects or disconnects a group, or every drive, at a time of day on chosen days: "connect *Office* at 07:00 on weekdays", "disconnect everything at 23:00".
+
+## Creating a schedule
+
+Open **Drives → Schedules** (<Kbd>Ctrl</Kbd>+<Kbd>T</Kbd>) and press **New schedule**.
+
+| Field | Choices |
+| --- | --- |
+| **Action** | Connect or Disconnect |
+| **Drives** | **Every drive**, or one of your [groups](/docs/groups/) |
+| **Time** | a time of day |
+| **Days** | tick the days of the week it runs on |
+
+The list shows each schedule in words — what it does, and when, such as "Weekdays at 07:00". The switch on each row (**Run this schedule**) turns one off without deleting it; the pencil and bin buttons edit and delete it.
+
+## When it runs
+
+Schedules run while you are signed in to Helix — **behind the lock screen too**, since a schedule is a standing instruction like the background reconnects. They stop when you sign out or quit.
+
+The time is your computer's local time. If you travel and the time zone changes, 07:00 means 07:00 where you are now.
+
+### The ten-minute grace
+
+A schedule runs if its time passed **no more than ten minutes ago**. One missed by more than that — the computer asleep, Helix not running, nobody signed in — is **skipped, not run late**:
+
+- Opening a laptop at 08:00 after it slept through 23:00 does not pull every drive down the moment it wakes.
+- A "connect at 07:00" missed until 10:00 is skipped; that is what auto-connect on launch is for.
+- Ten minutes still covers waking up a few minutes after the hour, or signing in right at the time.
+
+A schedule you create or edit **after** its time today waits for the next occurrence rather than firing on the spot.
+
+Each occurrence runs once. A run that fails is reported and not retried; the background reconnect and you take it from there.
+
+## What it does
+
+A scheduled run is the same as pressing a group button: every drive in the target is connected or disconnected, whether or not it has **Connect automatically** on.
+
+The one exception is the home-network pin. On a **connect**, a drive [pinned to its home network](/docs/away-from-home/) with no away address is left out when this computer is elsewhere, so a 07:00 "connect Office" on a Saturday at home does not try to reach — or wake — a NAS across town. A **disconnect** ignores the pin: a drive mounted over a VPN still comes down at 23:00.
+
+## Being told
+
+Each run says what it did — "Office was connected on schedule" — through a tray notification when the tray icon is up, or a banner in the window otherwise. If some drives could not be reached, it says so.
+
+<Callout>
+Schedules and groups are not included in a [drive export](/docs/import-export/). Recreate them after restoring a vault on another machine.
+</Callout>

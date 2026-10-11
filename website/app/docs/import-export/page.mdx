@@ -1,0 +1,54 @@
+export const metadata = { title: "Import & export" };
+
+# Import & export
+
+Your drives can be saved to a single encrypted file, a **vault**, and restored from it — on this computer after a reinstall, or on another one, Windows or Mac.
+
+## Exporting
+
+Press **Export Drives** on the dashboard, or <Kbd>Ctrl</Kbd>+<Kbd>E</Kbd>.
+
+1. Enter a **passphrase**, then enter it again to confirm.
+2. Choose a folder.
+
+Helix writes a `.helixvault` file there. A NAS share is a fine place for it.
+
+<Callout type="warn">
+The vault holds your NAS passwords. It is encrypted with AES-256-GCM under a key derived from your passphrase with PBKDF2-SHA512, so it is only as strong as the passphrase. Choose a long one, and do not lose it — there is no way to open a vault without it.
+</Callout>
+
+## Importing
+
+Press **Import Drives**, or <Kbd>Ctrl</Kbd>+<Kbd>I</Kbd>, pick the `.helixvault` file and enter the passphrase it was exported with. The drives are added to the account you are signed in to.
+
+- A drive whose letter you already have a drive on is skipped.
+- A drive whose letter is in use by something else on this computer — a USB stick, another mapping — is skipped.
+- A drive whose letter is **already mapped to that same share** is imported. That is the usual state after a reinstall: the Windows mappings survived, and the vault brings back the records that describe them.
+- If nothing could be imported, Helix says so rather than reporting success.
+- A wrong passphrase or a damaged file imports nothing.
+
+## What travels
+
+| In the vault | Not in the vault |
+| --- | --- |
+| letter, share name and NAS address | groups |
+| username and password | schedules |
+| **Connect automatically**, **Reconnect at Windows sign-in**, **Connect using the server name** | settings and theme |
+| away address | the audit log |
+| Wake-on-LAN hardware address | your Helix account and recovery key |
+| home network pin | |
+
+The home network pin is the router's hardware address, which is just as valid on another computer on the same network, so pinned drives stay pinned after a restore.
+
+An away address or hardware address that is not valid is dropped on import rather than failing the drive.
+
+## Moving between Windows and macOS
+
+A vault exported on one platform imports on the other. On a Mac, a drive's letter becomes a folder under `~/Helix Drives`, and the Windows-only switches are kept but have no effect.
+
+## Moving to a new computer
+
+1. Export a vault on the old computer.
+2. [Install](/docs/installation/) Helix on the new one and register an account.
+3. Import the vault.
+4. Recreate your [groups](/docs/groups/) and [schedules](/docs/schedules/), and set your [preferences](/docs/settings/).

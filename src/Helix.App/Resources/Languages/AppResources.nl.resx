@@ -956,6 +956,9 @@
   <data name="ThemeGlacier" xml:space="preserve">
     <value>Gletsjer</value>
   </data>
+  <data name="ThemeCrimson" xml:space="preserve">
+    <value>Karmijn</value>
+  </data>
   <data name="Schedules" xml:space="preserve">
     <value>Planningen</value>
   </data>

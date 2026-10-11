@@ -1,0 +1,93 @@
+export const metadata = { title: "Architecture" };
+
+# Architecture
+
+Helix is Clean Architecture: four layers plus a shared kernel, with dependencies pointing inward only. Tests enforce the rule, so a change that breaks it fails the build.
+
+```
+Helix.App               MAUI pages, viewmodels, tray, localization, DI composition
+   │
+Helix.Infrastructure    EF Core + SQLCipher, platform services, update check
+   │
+Helix.Application       use cases (handlers) and the interfaces they need
+   │
+Helix.Domain            entities, domain errors, repository interfaces
+   │
+SharedKernel            Result, Error, Entity, Enumeration — framework-free
+```
+
+## The layers
+
+| Project | Holds | May not reference |
+| --- | --- | --- |
+| `SharedKernel` | `Result`, `Result<T>`, `Error`, `Entity`, `Enumeration`, `Ensure` | MAUI, EF Core, anything else in the repo |
+| `Helix.Domain` | entities and repository interfaces, one folder per aggregate (`Drives/`, `DriveGroups/`, `Schedules/`, `Settings/`, `Users/`, `Auditlogs/`) | MAUI, EF Core, Application, Infrastructure |
+| `Helix.Application` | `Features/` (one folder per feature, split into `Commands` and `Queries`), `Abstractions/` (interfaces only), `Core/` (cross-feature helpers) | Infrastructure, MAUI |
+| `Helix.Infrastructure` | the database, repositories, cryptography and every platform service | the presentation layer |
+| `Helix.App` | XAML pages, viewmodels, background services, tray, localization | — |
+
+Things that need a person to answer — file and folder pickers, the passphrase prompt — are interfaces in `Application/Abstractions/Desktop` implemented in the presentation layer, which keeps every handler unit-testable on any OS.
+
+**Namespaces mirror folders exactly.** Move a file, move its namespace.
+
+## Handlers
+
+Every use case is a sealed class implementing the marker interface `IHandler`, under `Helix.Application/Features/`:
+
+```csharp
+public sealed class CreateDrive(IDriveRepository repo, IUnitOfWork uow, ...) : IHandler
+{
+    public sealed record Request(/* inputs */);
+
+    public async Task<Result<Drive>> Handle(Request request, CancellationToken ct = default)
+    {
+        // 1. validate the request
+        // 2. authorize through ILoggedInUser
+        // 3. check domain rules through repositories
+        // 4. mutate through the repository
+        // 5. await uow.SaveChangesAsync(ct)
+        // 6. return Result / Result<T>
+    }
+}
+```
+
+Handlers **never throw for an expected failure**; they return a `Result` carrying an `Error` from a static error class such as `DriveErrors`. New handlers are registered in `Helix.Application/DependencyInjection.cs`.
+
+Handlers are scoped. The presentation layer calls them through a fresh DI scope per operation, so each gets its own `AppDbContext`:
+
+```csharp
+Result result = await ScopedHandler.HandleAsync(
+    (ConnectDrive h) => h.Handle(new ConnectDrive.Request(driveId)));
+```
+
+Never cache a handler in a viewmodel or page field. Only a handful of singletons — `ILoggedInUser`, `INasConnector`, `IDriveMonitor` and similar — may be resolved from `App.ServiceProvider` and kept.
+
+## Platform seams
+
+Seven abstractions have a genuinely different implementation per OS, bound in `AddPlatformServices()` behind `#if WINDOWS` / `#elif MACCATALYST`:
+
+| Abstraction | Windows | macOS |
+| --- | --- | --- |
+| `INasConnector` | WNet (`mpr.dll`), mounts to `Z:` | `NetFSMountURLSync`, mounts to `~/Helix Drives/Z` |
+| `IStartupService` | `.lnk` in the Startup folder | LaunchAgent plist |
+| `IDesktopService` | `.lnk` on the Desktop | symlink to the `.app` |
+| `ITrayIcon` | `Shell_NotifyIcon` | `NSStatusItem` through the Objective-C runtime |
+| `IStorageProbe` | measures `Z:\` | measures `~/Helix Drives/Z` |
+| `IIdleTimeProvider` | `GetLastInputInfo` | `CGEventSourceSecondsSinceLastEventType` |
+| `INetworkLocation` | default gateway's MAC via `SendARP` | `route get default` and `arp` |
+
+Everything else that touches the OS — host reachability, Wake-on-LAN, address routing, the drive diagnosis, opening a folder — has one implementation for both heads.
+
+## Persistence
+
+`AppDbContext` implements both `IDbContext` and `IUnitOfWork`. The SQLite database is encrypted with SQLCipher under a key from the platform's secure store, entity configurations live in `Database/Configurations/`, and an EF interceptor writes audit entries on save.
+
+## Architecture tests
+
+`tests/ArchitectureTests` uses NetArchTest to hold the design in place:
+
+- `Layers/LayerTests.cs` — the dependency direction between layers, and that Application has no MAUI dependency.
+- `Infrastructure/InfrastructureTests.cs` — namespaces mirror folders in Infrastructure.
+- `Application/ApplicationTests.cs` — handler conventions and namespaces.
+
+If one fails, the fix is the design, not the test. The repository's `CLAUDE.md` records the reasoning behind the sharper edges in detail.

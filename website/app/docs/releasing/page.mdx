@@ -1,0 +1,75 @@
+export const metadata = { title: "Releasing" };
+
+# Releasing
+
+A release is a pushed `v*` tag. The release workflow builds every archive, optionally signs them, and attaches them to a GitHub release, which is where the in-app updater looks.
+
+## 1. Bump the version
+
+The version lives in `src/Helix.App/Helix.App.csproj`:
+
+```xml
+<ApplicationDisplayVersion>2.2.8</ApplicationDisplayVersion>
+<ApplicationVersion>3</ApplicationVersion>
+```
+
+`ApplicationDisplayVersion` is three-part to match the tag (`v2.2.8`). Bump only the `.csproj`.
+
+<Callout type="warn">
+Leave `Platforms/Windows/Package.appxmanifest` on its `0.0.0.0` placeholder. On Windows the running version is read from that manifest, and MAUI only stamps `ApplicationDisplayVersion` into it when it is the placeholder; a real number there wins, and the app announces an update to itself. A build target in the `.csproj` also refreshes the stale generated manifest under `obj` when the version changes — if the sidebar still shows the old version, `./scripts/clean.ps1` and rebuild.
+</Callout>
+
+## 2. Try the publish locally
+
+`publish.ps1` runs the same Windows publish as the workflow:
+
+```powershell
+./scripts/publish.ps1                                        # publish/win-x64
+./scripts/publish.ps1 -Runtime win-x64, win-arm64 -Zip -Tag v2.2.8
+```
+
+Each runtime is published self-contained to `publish/<rid>`, which is cleared first, and with `-Zip` archived as `artifacts/Helix-<tag>-<rid>.zip`. Without `-Tag`, the latest tag reachable from `HEAD` is used. Local archives are never signed. The macOS archive can only be produced on a Mac, and normally comes from the workflow.
+
+## 3. Tag and push
+
+```sh
+git tag v2.2.8
+git push origin v2.2.8
+```
+
+`.github/workflows/release.yml` can also be started by hand with a tag as input.
+
+| Job | Runner | Produces |
+| --- | --- | --- |
+| **Publish win-x64** / **win-arm64** | `windows-latest` | `Helix-<tag>-win-x64.zip`, `Helix-<tag>-win-arm64.zip` |
+| **Publish maccatalyst** | `macos-latest` | `Helix-<tag>-macos.zip`, a universal unsigned `.app` archived with `ditto` |
+| **Create GitHub release** | `ubuntu-latest` | signs the archives if a key is set, then creates the release with generated notes, or uploads to it if it already exists |
+
+## Asset names matter
+
+The updater picks its download by the moniker in the file name — `-win-x64.`, `-win-arm64.` or `-macos.` — and only considers `.zip` files. Keep the `Helix-<tag>-<moniker>.zip` pattern exactly, and never publish another asset whose name contains a moniker.
+
+## Signing
+
+Releases can carry a detached **ECDSA P-256** signature over each archive's SHA-256, checked by the app against a public key compiled into it. GitHub's own digest only proves the bytes arrived intact; the signature proves who built them.
+
+1. Generate a key pair once, somewhere you trust and outside the repository:
+
+   ```sh
+   openssl ecparam -name prime256v1 -genkey -noout -out helix-release.pem
+   openssl ec -in helix-release.pem -pubout -outform DER | base64 -w0
+   ```
+
+2. Put the whole private `.pem` in the repository's Actions secrets as `RELEASE_SIGNING_KEY`. Without it, the release is published unsigned with a warning.
+3. Put the base64 public key in `UpdateConfiguration.SigningPublicKey`.
+4. Back up the private key offline. Losing it means pinned installs stop accepting updates until replaced by hand.
+
+<Callout type="warn">
+Ship steps 2 and 3 **one release apart**: publish a signed release first, then the build that pins the key. While the key is empty nothing is checked; once it is set, a missing or wrong signature refuses the update.
+</Callout>
+
+A signed release gains one extra asset, `Helix-<tag>-signatures.txt`, with one `<asset name> <base64 signature>` line per archive. It is a single manifest rather than a `.sig` beside each archive because older builds select their download by moniker with no extension filter, and `Helix-<tag>-win-x64.zip.sig` would match. **Do not rename it to anything containing a moniker.**
+
+There is no revocation list. To rotate the key, publish one release signed with both keys, or accept that older installs update by hand once.
+
+The signature does not make the archives code-signed: SmartScreen and Gatekeeper still know nothing about them, and a first download from the releases page trusts GitHub and the account. `docs/release-signing.md` in the repository has the full details.

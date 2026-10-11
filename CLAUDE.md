@@ -70,6 +70,26 @@ Workload set 10.0.401.1 brought the Mac Catalyst 27.0 SDK, which requires Xcode 
 `macos-latest` image tops out at Xcode 26.6 — an unpinned install failed the build on the SDK's
 Xcode check. Lift the pin once the runner image carries the Xcode the latest set asks for.
 
+## Documentation website
+
+`website/` is the documentation site, a Next.js static export with MDX pages under
+`app/docs/<page>/page.mdx` and the sidebar order in `lib/docs.ts`. `.github/workflows/website.yml`
+builds it on every change under `website/` and deploys `main` to GitHub Pages with
+`NEXT_PUBLIC_BASE_PATH=/Helix`; the repository's Pages source has to be **GitHub Actions** for
+the deploy job to succeed.
+
+```bash
+cd website && npm ci && npm run dev
+```
+
+The GIFs and screenshots in `website/public/media` are recorded from the real app by
+`website/scripts/record-media.py`. It publishes Helix with `-p:Company=HelixMedia
+-p:AssemblyTitle=HelixMedia`, which is what moves `FileSystem.AppDataDirectory` (see **Where
+the data lives**) to `%LOCALAPPDATA%\HelixMedia`, so recording never touches a real install's
+account; the demo drives use RFC 5737 addresses so no probe reaches a real LAN. The README embeds
+two of those GIFs rather than keeping screenshots of its own — re-record rather than adding
+images elsewhere.
+
 ## Build configuration
 
 Two repo-root files own the shared MSBuild configuration; keep project files free of anything they already cover:
@@ -1849,8 +1869,12 @@ yet at either point, so nothing else could have said anything.
 
 ### Themes
 
-Settings → Preferences offers **System**, **Light**, **Dark** and four custom palettes
-(Midnight, Amethyst, Sand, Glacier). Every color that differs between themes is a
+Settings → Preferences offers **Crimson**, **System**, **Light**, **Dark** and four custom
+palettes (Midnight, Amethyst, Sand, Glacier). **Crimson is the default** — a near-black canvas
+with the brand's crimson accent, the same look as the documentation site — and is what an
+install with no saved choice, or an unreadable one, gets. A user who had picked **System**
+keeps it. Light and Dark carry the crimson accent too, so the logo never sits beside an
+accent from the old orange brand. Every color that differs between themes is a
 **`{DynamicResource}` token**, never an `AppThemeBinding` and never a `StaticResource`:
 `AppThemeBinding` only knows two themes, and a `StaticResource` is resolved once, so a theme
 picked at runtime would have repainted nothing. The tokens are written into
@@ -1878,20 +1902,24 @@ be read. It is per Windows user rather than per Helix account for the same reaso
 chrome — the title bar, text selection, picker drop-downs — matches, and under **System**
 it re-applies on `RequestedThemeChanged`.
 
-The logo's lower half is dark ink (`#422520`), which vanished on every dark palette. The
-`LogoImage` resource is `logoipsum.png` on light palettes and `logo_on_dark.png` — the same
-artwork with a light ink — on dark ones; the `Image`s bind it dynamically.
+The logo is a double helix in a crimson gradient, square, drawn on a 32-unit grid; the
+website's `components/logo.tsx` and `public/logo.svg` carry the same paths, so **change it in
+both places**. The `LogoImage` resource is `helix_logo.png` (a deeper gradient, for contrast
+on white) on light palettes and `helix_logo_on_dark.png` on dark ones; the `Image`s bind it
+dynamically. The sign-in and lock pages' artwork is `brand_background.svg` — the helix on a
+near-black field with a crimson bloom — behind `BrandGradientBrush`, and is dark on purpose:
+the "Helix" caption over its lower left is white whatever the theme.
 
 #### The tray and taskbar icon
 
-The Windows app icon (`MauiIcon`) has **no background color**: `Color="#121110"` filled
+The Windows app icon (`MauiIcon`) has **no background color**: `Color="#050505"` filled
 the whole square, and that black tile is what the taskbar and the tray showed. The Mac head
 keeps the color, since a Mac app icon is expected to be a full tile. A stale icon survives
 an incremental build; delete the app's `obj/.../resizetizer` folder if the tile persists.
 
-Transparent alone would not have been enough, because the same dark ink disappears on a
-dark taskbar. `Helix.Infrastructure/Desktop/Icons` therefore carries two `.ico` files —
-`helix-light-taskbar` (dark ink) and `helix-dark-taskbar` (light ink), 16 to 256 px — and
+`Helix.Infrastructure/Desktop/Icons` carries two `.ico` files —
+`helix-light-taskbar` (the deeper crimson) and `helix-dark-taskbar` (the brighter one), 16 to
+256 px, rendered from the logo SVG at each size rather than scaled from one — and
 `ShellIcons.CurrentPath()` picks by `SystemUsesLightTheme`, which is the **taskbar's**
 setting, independent of both Windows' app mode and the Helix theme. `WindowsTrayIcon` loads
 it at the small-icon size and swaps it on `WM_SETTINGCHANGE` "ImmersiveColorSet";

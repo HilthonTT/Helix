@@ -1,0 +1,69 @@
+export const metadata = { title: "Installation" };
+
+# Installation
+
+Helix is distributed as a zip on each [GitHub release](https://github.com/HilthonTT/Helix/releases). There is no installer: unzip it and run it.
+
+## Requirements
+
+| | Windows | macOS |
+| --- | --- | --- |
+| Minimum version | Windows 10 build 19041 | macOS 15 |
+| Architectures | x64 and Arm64 | Intel and Apple Silicon (one universal bundle) |
+| Anything else to install | nothing | nothing |
+
+## Windows
+
+Download the archive for your machine from the latest release:
+
+| File | For |
+| --- | --- |
+| `Helix-<tag>-win-x64.zip` | most PCs |
+| `Helix-<tag>-win-arm64.zip` | Windows on Arm |
+
+Unzip it into a folder of its own, for example `C:\Helix`, and run `Helix.App.exe`. The build is self-contained: the .NET runtime, the Windows App SDK and the native SQLCipher library are all inside the folder.
+
+<Callout type="warn">
+Give Helix a folder of its own. The release zip has no wrapper folder, and the updater replaces the whole folder the app runs from, so it refuses to update an install that sits directly in Downloads, on the Desktop or at a drive root.
+</Callout>
+
+The archives are not code-signed, so SmartScreen may warn on the first launch. Choose **More info** and **Run anyway** for a build you downloaded from the releases page.
+
+## macOS
+
+Download `Helix-<tag>-macos.zip`, unzip it and drag `Helix.app` to `/Applications`.
+
+The bundle is **unsigned and not notarized**, so Gatekeeper refuses the first launch. Either right-click the app, choose **Open** and confirm, or clear the quarantine flag:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Helix.app
+```
+
+Only do this for a build you downloaded from the Helix releases page.
+
+macOS asks for **Accessibility** access before an app may listen for global keys. Without it Helix runs normally, but the global shortcuts and the Ctrl+Enter shortcut on the sign-in page do nothing. Grant it under System Settings, Privacy & Security, Accessibility.
+
+## Where your data lives
+
+Your data is never kept next to the app, so replacing or moving the app folder does not touch your drives, settings or history.
+
+| What | Where (Windows release builds) |
+| --- | --- |
+| Encrypted database | `%LOCALAPPDATA%\Helix.App\Helix.App\Data\helix.db` |
+| Database key | `Settings\securestorage.dat` in the same folder, protected by Windows |
+| Logs | `logs\` in the same folder, kept for 14 days |
+
+On macOS the same files live in the app's data directory under your user Library, and the database key is held in the Keychain.
+
+## Updating
+
+Settings has a **Check for updates** button, and Helix checks once each time you sign in; when a newer release exists, a badge appears in the sidebar.
+
+Choosing **Download and install** downloads the archive for your machine, checks it against the SHA-256 digest GitHub publishes, unpacks it and confirms it contains Helix — all while the app keeps running. **Install and restart** then closes Helix, swaps the new version in and starts it again. If anything fails mid-swap, the previous version is put back.
+
+- Pre-releases are never offered.
+- Your drives, settings and audit log are kept.
+- A Windows on Arm machine falls back to the x64 build if a release carries no Arm64 one.
+- What the updater did is written to `helix-updates.log` in the logs folder.
+
+You can always update by hand instead: quit Helix, replace the folder (or the `.app`) with the new one, and start it again.

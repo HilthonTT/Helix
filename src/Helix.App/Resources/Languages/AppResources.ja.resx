@@ -956,6 +956,9 @@
   <data name="ThemeGlacier" xml:space="preserve">
     <value>グレイシャー</value>
   </data>
+  <data name="ThemeCrimson" xml:space="preserve">
+    <value>クリムゾン</value>
+  </data>
   <data name="Schedules" xml:space="preserve">
     <value>スケジュール</value>
   </data>

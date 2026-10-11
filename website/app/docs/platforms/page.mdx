@@ -1,0 +1,49 @@
+export const metadata = { title: "Platform support" };
+
+# Platform support
+
+Helix runs on Windows and macOS from one codebase. The pages, the encrypted database, the audit log and vault import and export behave the same on both; what differs is how a share is mounted and which desktop integrations exist.
+
+## At a glance
+
+| | Windows | macOS |
+| --- | --- | --- |
+| Minimum version | Windows 10 build 19041 | macOS 15 |
+| Architectures | x64, Arm64 | universal (Intel and Apple Silicon) |
+| Distributed as | self-contained zip | unsigned `.app` in a zip |
+| Mount target | a drive letter, `Z:\` | a folder, `~/Helix Drives/Z` |
+| Mount API | Win32 WNet (`mpr.dll`) | NetFS |
+| Start at sign-in | shortcut in the Startup folder | LaunchAgent |
+| Desktop shortcut | `.lnk` on the Desktop | link to the `.app` |
+| Tray icon | notification area | menu bar |
+| Notifications | notification area balloons | Notification Center |
+| Home-network pin | yes | yes |
+| Wake-on-LAN | yes | yes |
+| Hardware address **Look up** | yes | no — type it |
+| Browse a server's shares | yes | no |
+| Add existing mappings | yes | no |
+| Persistent mapping (restore at sign-in) | yes | no |
+| Connect using the server name | yes | no |
+| Close to tray, auto-minimize hiding | yes | no — the window stays in the Dock |
+| Global shortcuts | yes | yes, with Accessibility access |
+| Keyboard navigation of drive rows | yes | no — mouse only |
+| Command line | yes | no |
+| In-app updates | yes | yes |
+
+Switches that do not apply on macOS are hidden rather than shown and ignored.
+
+## Drive letters on macOS
+
+macOS has no drive letters, so a drive's letter names a folder under `~/Helix Drives`: drive `Z` is mounted at `~/Helix Drives/Z`. The data is stored the same way on both platforms, which is why a vault moves between them unchanged.
+
+## Credentials per server
+
+Windows allows one set of credentials per server for your whole sign-in session, which is behind most connection trouble with several shares on one NAS — see [Troubleshooting](/docs/troubleshooting/). macOS signs in per mount, so none of that applies there, and the connection check never warns that a password went untested.
+
+## Why the macOS build is unsigned
+
+Signing and notarizing a Mac app needs a paid Apple Developer identity, which cannot live in a public repository. The app also runs with the App Sandbox off, because a sandboxed app cannot mount a network filesystem, write a LaunchAgent or touch your real Desktop. That makes it a direct download rather than a Mac App Store app. See [Installation](/docs/installation/) for getting past Gatekeeper.
+
+## Not supported
+
+There is no Linux, iOS or Android version.

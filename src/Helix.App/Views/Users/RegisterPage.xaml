@@ -31,8 +31,8 @@
 
                     <Image Source="{DynamicResource LogoImage}"
                            Aspect="AspectFit"
-                           WidthRequest="44"
-                           HeightRequest="57"
+                           WidthRequest="52"
+                           HeightRequest="52"
                            HorizontalOptions="Start"/>
 
                     <VerticalStackLayout Spacing="0" IsVisible="{Binding IsShowingRecoveryKey, Converter={StaticResource InvertedBoolConverter}}">
@@ -145,7 +145,7 @@
             </Grid>
 
             <Grid Grid.Column="1" Background="{StaticResource BrandGradientBrush}">
-                <Image Source="orange_background.png"
+                <Image Source="brand_background.png"
                        Aspect="AspectFill"
                        HorizontalOptions="Fill"
                        VerticalOptions="Fill"/>
@@ -172,7 +172,7 @@
         <Grid IsVisible="{Binding IsLoading}"
               Background="{DynamicResource CanvasBrush}">
             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="16">
-                <Image Source="{DynamicResource LogoImage}" Aspect="AspectFit" WidthRequest="36" HeightRequest="46"/>
+                <Image Source="{DynamicResource LogoImage}" Aspect="AspectFit" WidthRequest="44" HeightRequest="44"/>
                 <ActivityIndicator IsRunning="{Binding IsLoading}" WidthRequest="28" HeightRequest="28"/>
             </VerticalStackLayout>
         </Grid>

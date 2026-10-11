@@ -27,5 +27,5 @@ public sealed record ThemePalette(
 
     public float StatusWashAlpha => IsDark ? 0.15f : 0.12f;
 
-    public string LogoImage => IsDark ? "logo_on_dark.png" : "logoipsum.png";
+    public string LogoImage => IsDark ? "helix_logo_on_dark.png" : "helix_logo.png";
 }

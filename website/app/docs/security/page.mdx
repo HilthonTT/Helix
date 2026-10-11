@@ -1,0 +1,51 @@
+export const metadata = { title: "Security" };
+
+# Security
+
+Helix holds your NAS passwords and your account password on the machine it runs on. This page is what protects them, and how to report a problem.
+
+## How your data is protected
+
+| What | How |
+| --- | --- |
+| **The database** | a local SQLite database encrypted with SQLCipher. The key is random, generated with a cryptographically secure generator, and held in the platform's secure store — Windows secure storage, or the macOS Keychain |
+| **Your account password** | hashed with PBKDF2-SHA512 at 600,000 iterations. Older, weaker hashes are upgraded the next time you sign in |
+| **The recovery key** | 125 random bits, stored only as a hash like the password, and shown to you once |
+| **Vault exports** | AES-256-GCM, with a key derived from your passphrase with PBKDF2-SHA512 |
+| **NAS credentials** | passed to the operating system's mount API as a separate credential, never on a command line where another process could read them |
+| **Other accounts** | every query is scoped to the signed-in account; one account cannot read another's drives, settings or history |
+| **The command line** | a named pipe only your own user account can open, and it refuses while signed out or locked |
+
+Helix refuses to create a database whose key it could not save, and never generates a new key while a database exists, so a temporary failure can not leave you with a database nothing can open.
+
+## Locking and recovering
+
+- The [idle lock](/docs/settings/) asks for your password after a set time without input, and the **Lock** button in the sidebar locks at once. Global shortcuts and command-line requests are refused while locked.
+- **Forgot your password?** on the sign-in page needs your username and recovery key. A wrong key and an unknown username get the same answer, so the form does not reveal which accounts exist.
+
+## Updates
+
+The update check is an unauthenticated read of GitHub's public releases API. When you choose to install an update, the download is checked against the SHA-256 digest GitHub publishes before anything is unpacked, and the install folder is only replaced after the new build has been verified. Releases can also be signed with a release key; see [Releasing](/docs/releasing/) for what that does and does not prove.
+
+<Callout type="warn">
+The release archives are not code-signed. Windows SmartScreen and macOS Gatekeeper know nothing about them, and the macOS app is not notarized. Download Helix only from the [releases page](https://github.com/HilthonTT/Helix/releases).
+</Callout>
+
+## What it does not protect against
+
+Someone already signed in to your computer account, or with administrator or physical access, is outside what Helix can defend against. A NAS password also travels to the NAS with whatever protection your SMB configuration gives it.
+
+## Reporting a vulnerability
+
+Please **do not open a public issue**. Report it privately through [GitHub's security advisories](https://github.com/HilthonTT/Helix/security/advisories/new), describing the issue, the version affected and how to reproduce it.
+
+Never include real credentials, real NAS addresses or a real `.helixvault` file — use dummy values.
+
+| Expect | Within |
+| --- | --- |
+| An acknowledgement | 7 days |
+| An assessment and planned fix timeline | 14 days |
+
+Fixes ship in the latest release only; older releases are not patched. You are credited in the release notes unless you prefer otherwise.
+
+In scope: the encrypted database and its key, password hashing and sign-in, vault encryption, how NAS credentials reach the operating system, and isolation between accounts. Out of scope: attacks that need an already-compromised account or administrator access, and vulnerabilities in Windows, macOS, .NET or third-party packages, which belong upstream.

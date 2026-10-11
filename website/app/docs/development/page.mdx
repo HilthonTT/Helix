@@ -1,0 +1,108 @@
+export const metadata = { title: "Development" };
+
+# Development
+
+Building Helix from source, running its tests, and what CI checks.
+
+## Prerequisites
+
+| | Windows | macOS |
+| --- | --- | --- |
+| SDK | [.NET 10 SDK](https://dotnet.microsoft.com/download) | .NET 10 SDK |
+| Workload | .NET MAUI (Visual Studio installer, or `dotnet workload install maui`) | `dotnet workload install maui` |
+| IDE / toolchain | Visual Studio 2022 | Xcode |
+
+The Mac Catalyst head can only be compiled on a Mac.
+
+## Build
+
+```sh
+git clone https://github.com/HilthonTT/Helix.git
+cd Helix
+dotnet build Helix.slnx
+```
+
+`Helix.App` and `Helix.Infrastructure` choose their target framework from the host OS — `net10.0-windows10.0.19041.0` on Windows, `net10.0-maccatalyst` on a Mac — so no `-f` switch is needed. On a Mac, build the app project on its own, because the solution also holds Windows-only test projects:
+
+```sh
+dotnet build src/Helix.App/Helix.App.csproj
+```
+
+## Run
+
+On Windows, open `Helix.slnx` in Visual Studio 2022, set `Helix.App` as the startup project and press <Kbd>F5</Kbd>. The app is run from the IDE rather than with `dotnet run` because of its Windows packaging configuration.
+
+## Test
+
+```sh
+dotnet test Helix.slnx
+dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
+dotnet test tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj
+dotnet test tests/ArchitectureTests/ArchitectureTests.csproj
+
+# a single test
+dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --filter "FullyQualifiedName~CreateDriveTests"
+```
+
+| Suite | Target | Runs on |
+| --- | --- | --- |
+| `Application.UnitTests` | `net10.0` | anywhere |
+| `Infrastructure.UnitTests` | Windows head | Windows |
+| `ArchitectureTests` | Windows head | Windows |
+
+## Scripts
+
+`scripts/` wraps the common commands for Windows PowerShell 5.1 and PowerShell 7. Each has `Get-Help` documentation and picks the right projects for the host OS.
+
+```powershell
+./scripts/build.ps1 [-Configuration Release] [-Clean]
+./scripts/test.ps1 [-Suite Application,Architecture] [-Filter CreateDriveTests] [-NoBuild] [-Trx]
+./scripts/clean.ps1
+./scripts/publish.ps1 [-Runtime win-x64,win-arm64] [-Zip] [-Tag v2.2.8]
+./scripts/migration.ps1 add <Name> | remove | list
+```
+
+| Script | Does |
+| --- | --- |
+| `build.ps1` | builds the solution (Windows) or the app project (macOS); `-Clean` runs `clean.ps1` first |
+| `test.ps1` | runs the suites, continuing past a failing one; on a Mac only Application runs |
+| `clean.ps1` | deletes every `bin` and `obj` under `src` and `tests` — the fix for a build that keeps reporting the old version |
+| `publish.ps1` | the Windows publish the release workflow does — see [Releasing](/docs/releasing/) |
+| `migration.ps1` | EF Core migrations with the right projects and framework |
+
+## Database migrations
+
+Migrations live in `Helix.Infrastructure`, but the EF tooling is referenced from `Helix.App`, so the app is the startup project, and `--framework` is required because the projects are multi-targeted:
+
+```sh
+dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App --framework net10.0-windows10.0.19041.0
+```
+
+`./scripts/migration.ps1 add <Name>` does the same and restores `dotnet-ef` from the local tool manifest first.
+
+## Conventions
+
+- Central Package Management: every NuGet version is in `Directory.Packages.props`, and project files reference packages without a `Version`.
+- `.editorconfig` defines the style; run `dotnet format Helix.slnx`.
+- File-scoped namespaces, primary constructors, `sealed` by default, nullable enabled and warning-free.
+- Log through `ILogger<T>`, never `Debug.WriteLine`.
+- Every user-facing string goes in `Resources/Languages/AppResources.resx`; adding the English string is enough, translations can follow.
+
+## Continuous integration
+
+Every push and pull request to `main` runs `.github/workflows/ci.yml`:
+
+| Job | Runner | Does |
+| --- | --- | --- |
+| **Build & Test (Windows)** | `windows-latest` | builds `Helix.slnx` in Release and runs all three suites |
+| **Build (macOS)** | `macos-latest` | compile-verifies the Mac Catalyst head and runs the Application suite |
+
+<Callout>
+The macOS jobs install the MAUI workload pinned to `10.0.401`, because a newer workload set requires an Xcode the runner image does not have yet. Lift the pin once the image catches up.
+</Callout>
+
+CodeQL scans the C# sources and the workflows on every push, every pull request and weekly, and Dependabot opens grouped weekly updates for NuGet packages and GitHub Actions.
+
+## Pull requests
+
+Run the build and all three suites before opening one; that is exactly what CI runs. Keep each PR to one logical change, add tests for behaviour changes, and include before-and-after screenshots for UI changes. Never commit credentials, real NAS addresses or `.helixvault` files.

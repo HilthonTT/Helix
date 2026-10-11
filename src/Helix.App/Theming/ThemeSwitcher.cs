@@ -9,9 +9,9 @@ public static class ThemeSwitcher
 
     public static event EventHandler? Changed;
 
-    public static ThemeChoice Current { get; private set; } = ThemeChoice.System;
+    public static ThemeChoice Current { get; private set; } = ThemeChoice.Crimson;
 
-    public static ThemePalette Palette { get; private set; } = ThemePalettes.Light;
+    public static ThemePalette Palette { get; private set; } = ThemePalettes.Crimson;
 
     public static void Initialize(AppBase app)
     {
@@ -53,16 +53,16 @@ public static class ThemeSwitcher
     {
         try
         {
-            return Enum.TryParse(Preferences.Default.Get(PreferenceKey, nameof(ThemeChoice.System)), out ThemeChoice choice)
+            return Enum.TryParse(Preferences.Default.Get(PreferenceKey, nameof(ThemeChoice.Crimson)), out ThemeChoice choice)
                 && Enum.IsDefined(choice)
                 ? choice
-                : ThemeChoice.System;
+                : ThemeChoice.Crimson;
         }
         catch (Exception ex)
         {
-            AppLog.For(typeof(ThemeSwitcher)).LogWarning(ex, "The saved theme could not be read; following the system.");
+            AppLog.For(typeof(ThemeSwitcher)).LogWarning(ex, "The saved theme could not be read; using Crimson.");
 
-            return ThemeChoice.System;
+            return ThemeChoice.Crimson;
         }
     }
 

@@ -1,0 +1,56 @@
+export const metadata = { title: "Away from home" };
+
+# Away from home
+
+Helix is built for laptops as much as desktops. A NAS that is out of reach is not a failure, a NAS that is asleep can be woken, and drives come back by themselves after the lid opens.
+
+## The background reconnect
+
+While you are signed in, Helix watches every mounted drive. When one drops, it is reconnected in the background, with a tray notification when it goes and when it comes back, and an entry in the audit log. Only drives with **Connect automatically** on are reconnected.
+
+| The drop | What Helix does |
+| --- | --- |
+| The NAS refused the mount | retries with a growing delay |
+| The NAS is not answering (**Unreachable**) | retries every 30 seconds, without counting it as a failure, so it reconnects within seconds of the NAS coming back |
+| The drive is pinned and you are elsewhere (**Away**) | waits; nothing is attempted |
+| You disconnected it yourself | nothing — a deliberate disconnect is never "fixed" |
+
+Before trying to mount, Helix checks whether the NAS answers at all, so an absent NAS costs a two-second check rather than a thirty-second timeout.
+
+### After sleep and network changes
+
+When the computer wakes from sleep, or the network comes back after being down, Helix immediately rechecks every drive and connects the auto-connect drives that are down, instead of waiting out whatever retry delay had built up.
+
+## A drive's home network
+
+Edit a drive and switch on **Reconnect automatically only on** *your network*. The drive is then pinned to the network you are on now.
+
+- **On that network**, nothing changes.
+- **Anywhere else**, the background reconnect and the connect on launch leave the drive alone. Its row shows a neutral grey **Away** pill instead of an amber Unreachable one.
+- **Arriving back** on the home network connects the pinned auto-connect drives that are down.
+- Anything you press — the row, a group, a selection, **Connect all** — still connects.
+
+A network is recognised by the hardware address of its router, not its Wi-Fi name, so it works on a wired dock and two cafés called "Guest" are not confused. If the network cannot be identified, Helix assumes you are home rather than wrongly holding drives back.
+
+## An address for away from home
+
+If you can reach the NAS from elsewhere — over a VPN or Tailscale — give the drive an **Address away from home**, such as `nas.example.ts.net` or `100.64.0.5`.
+
+| Situation | Address used |
+| --- | --- |
+| Pinned, and away from the home network | the away address, directly |
+| On the home network, unpinned, or network unknown | the home address, falling back to the away address if home does not answer |
+| Neither answers | the drive shows **Unreachable** and Helix keeps retrying |
+
+A drive with an away address is never "Away" — it always has somewhere to connect. A mount made over the VPN stays on the VPN until it drops; Helix does not move it back to the home address on arriving home, since that would mean unmounting a share you might have a file open on.
+
+## Waking a sleeping NAS
+
+Give a drive its NAS's **Wake-on-LAN hardware address** (MAC address, such as `1a-2b-3c-4d-5e-6f`), and when the NAS does not answer, Helix sends it a wake-up packet and connects once it has booted.
+
+- On Windows, **Look up** next to the field finds the address for you. It works while you are on the NAS's network and the NAS is awake — which is usually when you are adding it. macOS has no lookup; type the address.
+- Packets are sent at most once every five minutes per NAS, so thirteen shares of one NAS send one packet.
+- No packet is sent when a pinned drive's computer is away from home — it could not reach the NAS anyway.
+- **Wake NAS** on the right-click menu, <Kbd>Ctrl</Kbd>+<Kbd>W</Kbd> on a row, or `--wake` on the [command line](/docs/command-line/) sends one immediately.
+
+The NAS itself must have Wake-on-LAN enabled, and the packet does not leave the local network.

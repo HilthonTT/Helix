@@ -2,6 +2,25 @@ namespace Helix.App.Theming;
 
 public static class ThemePalettes
 {
+    public static readonly ThemePalette Crimson = new(
+        IsDark: true,
+        Canvas: Color.FromArgb("#050505"),
+        Surface: Color.FromArgb("#0D0D0D"),
+        SurfaceAlt: Color.FromArgb("#151314"),
+        SurfaceHover: Color.FromArgb("#1C1819"),
+        Border: Color.FromArgb("#221D1E"),
+        BorderStrong: Color.FromArgb("#3A3233"),
+        Text: Color.FromArgb("#F7F7F7"),
+        TextMuted: Color.FromArgb("#B3ADAE"),
+        TextFaint: Color.FromArgb("#858585"),
+        Success: Color.FromArgb("#2ECC70"),
+        Danger: Color.FromArgb("#FF6B7D"),
+        Warning: Color.FromArgb("#F9B81F"),
+        Accent: Color.FromArgb("#F0193D"),
+        AccentHover: Color.FromArgb("#FF4D67"),
+        AccentPressed: Color.FromArgb("#C4142F"),
+        AccentSoft: Color.FromArgb("#FF8095"));
+
     public static readonly ThemePalette Light = new(
         IsDark: false,
         Canvas: Color.FromArgb("#F7F6F4"),
@@ -16,10 +35,10 @@ public static class ThemePalettes
         Success: Color.FromArgb("#0E9F6E"),
         Danger: Color.FromArgb("#DC2626"),
         Warning: Color.FromArgb("#B45309"),
-        Accent: Color.FromArgb("#F14E23"),
-        AccentHover: Color.FromArgb("#F77C1C"),
-        AccentPressed: Color.FromArgb("#D33F1A"),
-        AccentSoft: Color.FromArgb("#FFC212"));
+        Accent: Color.FromArgb("#D81B3C"),
+        AccentHover: Color.FromArgb("#F0193D"),
+        AccentPressed: Color.FromArgb("#B3122E"),
+        AccentSoft: Color.FromArgb("#FF4D67"));
 
     public static readonly ThemePalette Dark = new(
         IsDark: true,
@@ -35,10 +54,10 @@ public static class ThemePalettes
         Success: Color.FromArgb("#34D399"),
         Danger: Color.FromArgb("#F87171"),
         Warning: Color.FromArgb("#FBBF24"),
-        Accent: Color.FromArgb("#F14E23"),
-        AccentHover: Color.FromArgb("#F77C1C"),
-        AccentPressed: Color.FromArgb("#D33F1A"),
-        AccentSoft: Color.FromArgb("#FFC212"));
+        Accent: Color.FromArgb("#F0193D"),
+        AccentHover: Color.FromArgb("#FF4D67"),
+        AccentPressed: Color.FromArgb("#C4142F"),
+        AccentSoft: Color.FromArgb("#FF8095"));
 
     public static readonly ThemePalette Midnight = new(
         IsDark: true,
@@ -118,6 +137,7 @@ public static class ThemePalettes
 
     public static ThemePalette For(ThemeChoice choice, bool systemIsDark) => choice switch
     {
+        ThemeChoice.Crimson => Crimson,
         ThemeChoice.Light => Light,
         ThemeChoice.Dark => Dark,
         ThemeChoice.Midnight => Midnight,
