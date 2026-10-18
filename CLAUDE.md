@@ -700,6 +700,16 @@ disconnect, from the strip or the sidebar, is confirmed the same way through
 own "disconnect all" is not confirmed and should not be: there is no window to put a dialog
 on when it is used.
 
+The question names the letters that still have something **open** on them, from
+`INasConnector.CountOpenHandles` — on Windows `NetUseGetInfo`'s `ui1_refcount`, the same count
+`net use /delete` warns from, which covers files, directories and an Explorer window's change
+notifications. It is a count, not a list of programs, and deliberately so: the only way to name
+the process is to enumerate every handle on the system and resolve each one's path, which needs
+access to other processes, hangs on some handle types, and on a share means asking the NAS. A
+**single row's** disconnect asks only when its letter is in use — a confirmation for every row
+would be the no-op question that teaches people to dismiss them — and the count is taken off the
+UI thread. macOS returns null (unknown), which leaves the question as it was.
+
 ### Schedules
 
 A `Schedule` connects or disconnects a group, or every drive, at a time of day on chosen

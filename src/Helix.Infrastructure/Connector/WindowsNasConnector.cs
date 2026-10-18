@@ -70,6 +70,30 @@ internal sealed class WindowsNasConnector(
 
     public string GetMountPath(string letter) => $"{letter.Trim().ToUpperInvariant()}:\\";
 
+    public int? CountOpenHandles(string letter)
+    {
+        string localName = $"{letter.Trim().ToUpperInvariant()}:";
+
+        int status = NetUseGetInfo(null, localName, 1, out IntPtr buffer);
+
+        try
+        {
+            if (status != NO_ERROR || buffer == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            return (int)Marshal.PtrToStructure<USE_INFO_1>(buffer).ui1_refcount;
+        }
+        finally
+        {
+            if (buffer != IntPtr.Zero)
+            {
+                NetApiBufferFree(buffer);
+            }
+        }
+    }
+
     public bool IsMountedFrom(Drive drive) => MountedFrom(drive, liveOnly: false);
 
     public bool IsLiveFrom(Drive drive) => MountedFrom(drive, liveOnly: true);
@@ -893,6 +917,25 @@ internal sealed class WindowsNasConnector(
 
     [DllImport("netapi32.dll")]
     private static extern int NetApiBufferFree(IntPtr buffer);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct USE_INFO_1
+    {
+        [MarshalAs(UnmanagedType.LPWStr)] public string ui1_local;
+        [MarshalAs(UnmanagedType.LPWStr)] public string ui1_remote;
+        [MarshalAs(UnmanagedType.LPWStr)] public string ui1_password;
+        public uint ui1_status;
+        public uint ui1_asg_type;
+        public uint ui1_refcount;
+        public uint ui1_usecount;
+    }
+
+    [DllImport("netapi32.dll", CharSet = CharSet.Unicode)]
+    private static extern int NetUseGetInfo(
+        string? UncServerName,
+        string UseName,
+        int LevelFlags,
+        out IntPtr BufPtr);
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct NETRESOURCE

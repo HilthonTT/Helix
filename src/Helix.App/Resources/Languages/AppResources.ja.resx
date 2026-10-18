@@ -1049,4 +1049,7 @@
   <data name="ScheduleNotification" xml:space="preserve">
     <value>スケジュール</value>
   </data>
+  <data name="DisconnectInUse" xml:space="preserve">
+    <value>{0} でファイルまたはフォルダーがまだ開かれています。先に閉じてください。閉じないと、それを使用しているプログラムの未保存の作業が失われる可能性があります。</value>
+  </data>
 </root>

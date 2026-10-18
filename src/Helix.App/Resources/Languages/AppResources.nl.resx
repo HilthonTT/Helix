@@ -1049,4 +1049,7 @@
   <data name="ScheduleNotification" xml:space="preserve">
     <value>Planning</value>
   </data>
+  <data name="DisconnectInUse" xml:space="preserve">
+    <value>Er zijn nog bestanden of mappen geopend op {0}. Sluit ze eerst, anders kunnen de programma's die ze gebruiken niet-opgeslagen werk verliezen.</value>
+  </data>
 </root>

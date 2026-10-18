@@ -1049,4 +1049,7 @@
   <data name="ScheduleNotification" xml:space="preserve">
     <value>Jadwal</value>
   </data>
+  <data name="DisconnectInUse" xml:space="preserve">
+    <value>Masih ada file atau folder yang terbuka di {0}. Tutup terlebih dahulu, atau program yang menggunakannya dapat kehilangan pekerjaan yang belum disimpan.</value>
+  </data>
 </root>

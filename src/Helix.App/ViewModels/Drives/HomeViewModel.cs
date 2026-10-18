@@ -380,7 +380,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        if (disconnect && !await ConfirmDisconnectAsync(selected.Count(drive => drive.Connected)))
+        if (disconnect && !await ConfirmDisconnectAsync([.. selected.Where(drive => drive.Connected).Select(drive => drive.Letter)]))
         {
             return;
         }
@@ -412,8 +412,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
         }
     }
 
-    private static Task<bool> ConfirmDisconnectAsync(int connectedCount) =>
-        DisconnectConfirmation.ConfirmAsync(connectedCount);
+    private static Task<bool> ConfirmDisconnectAsync(IReadOnlyCollection<string> mountedLetters) =>
+        DisconnectConfirmation.ConfirmAsync(mountedLetters);
 
     [RelayCommand]
     private async Task ConnectDrivesAsync()
@@ -457,7 +457,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
 
-        if (!await ConfirmDisconnectAsync(_allDrives.Count(drive => connectedLetters.Contains(drive.Letter))))
+        if (!await ConfirmDisconnectAsync([.. _allDrives.Where(drive => connectedLetters.Contains(drive.Letter)).Select(drive => drive.Letter)]))
         {
             return;
         }

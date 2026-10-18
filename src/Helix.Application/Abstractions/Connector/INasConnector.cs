@@ -26,6 +26,8 @@ public interface INasConnector
 
     bool HasOtherMountsOn(Drive drive);
 
+    int? CountOpenHandles(string letter);
+
     Task<Result<IReadOnlyList<string>>> ListSharesAsync(
         string host,
         string username,

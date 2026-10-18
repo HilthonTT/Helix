@@ -84,6 +84,8 @@ internal sealed class MacNasConnector : INasConnector
 
     public IReadOnlyList<MappedShare> GetMappedShares() => [];
 
+    public int? CountOpenHandles(string letter) => null;
+
     private async Task<Result> WhenReachableAsync(
         Drive drive,
         bool fresh,

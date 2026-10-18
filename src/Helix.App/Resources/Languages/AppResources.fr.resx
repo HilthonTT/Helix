@@ -1049,4 +1049,7 @@
   <data name="ScheduleNotification" xml:space="preserve">
     <value>Planification</value>
   </data>
+  <data name="DisconnectInUse" xml:space="preserve">
+    <value>Des fichiers ou dossiers sont encore ouverts sur {0}. Fermez-les d'abord, sinon les programmes qui les utilisent risquent de perdre le travail non enregistré.</value>
+  </data>
 </root>

@@ -21,7 +21,7 @@ internal static class DriveGroupActions
 
         try
         {
-            if (disconnect && !await DisconnectConfirmation.ConfirmAsync(await CountMountedAsync(group)))
+            if (disconnect && !await DisconnectConfirmation.ConfirmAsync(await MountedLettersAsync(group)))
             {
                 return;
             }
@@ -54,18 +54,22 @@ internal static class DriveGroupActions
         }
     }
 
-    private static async Task<int> CountMountedAsync(DriveGroupDisplay group)
+    private static async Task<IReadOnlyCollection<string>> MountedLettersAsync(DriveGroupDisplay group)
     {
         Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
         if (drives.IsFailure)
         {
-            return group.DriveIds.Count;
+            return [.. group.DriveIds.Select(id => id.ToString())];
         }
 
         INasConnector nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
         HashSet<Guid> members = [.. group.DriveIds];
 
-        return await Task.Run(() => drives.Value.Count(drive =>
-            members.Contains(drive.Id) && nasConnector.IsMountedFrom(drive)));
+        return await Task.Run<IReadOnlyCollection<string>>(() =>
+        [
+            .. drives.Value
+                .Where(drive => members.Contains(drive.Id) && nasConnector.IsMountedFrom(drive))
+                .Select(drive => drive.Letter),
+        ]);
     }
 }

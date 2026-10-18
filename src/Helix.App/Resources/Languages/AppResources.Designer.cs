@@ -3027,5 +3027,14 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("ScheduleNotification", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Files or folders are still open on {0}. Close them first, or the programs using them may lose unsaved work..
+        /// </summary>
+        internal static string DisconnectInUse {
+            get {
+                return ResourceManager.GetString("DisconnectInUse", resourceCulture);
+            }
+        }
     }
 }

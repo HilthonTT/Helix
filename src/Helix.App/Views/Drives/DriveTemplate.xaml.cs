@@ -130,6 +130,11 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
             return;
         }
 
+        if (drive.Connected && !await DisconnectConfirmation.ConfirmAsync([drive.Letter], onlyWhenInUse: true))
+        {
+            return;
+        }
+
         object request = drive.Connected
             ? new DisconnectDrive.Request(drive.Id)
             : new ConnectDrive.Request(drive.Id);
