@@ -445,6 +445,29 @@ internal sealed class WindowsNasConnector(
         return false;
     }
 
+    public HashSet<string> GetLiveLetters()
+    {
+        var letters = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (DriveInfo drive in DriveInfo.GetDrives())
+        {
+            if (drive.Name.Length == 0 || !char.IsLetter(drive.Name[0]))
+            {
+                continue;
+            }
+
+            string letter = drive.Name[0].ToString().ToUpperInvariant();
+
+            if (drive.DriveType == DriveType.Network && RemoteNameOf($"{letter}:", liveOnly: true) is null)
+            {
+                continue;
+            }
+
+            letters.Add(letter);
+        }
+
+        return letters;
+    }
+
     public HashSet<string> GetConnectedLetters()
     {
         var letters = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

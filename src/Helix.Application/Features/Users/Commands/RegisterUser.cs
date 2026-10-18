@@ -3,19 +3,26 @@ using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
+using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using Microsoft.EntityFrameworkCore;
+using SettingsModel = Helix.Domain.Settings.Settings;
 
 namespace Helix.Application.Features.Users.Commands;
 
 public sealed class RegisterUser(
     IUserRepository userRepository,
+    ISettingsRepository settingsRepository,
     IUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher,
     IRecoveryKeyGenerator recoveryKeyGenerator,
     ILoggedInUser loggedInUser) : IHandler
 {
-    public sealed record Request(string Username, string Password, string ConfirmedPassword);
+    public sealed record Request(
+        string Username,
+        string Password,
+        string ConfirmedPassword,
+        Language Language = Language.English);
 
     public sealed record Response(User User, string RecoveryKey);
 
@@ -47,6 +54,11 @@ public sealed class RegisterUser(
         user.SetRecoveryKey(passwordHasher.Hash(recoveryKey));
 
         userRepository.Insert(user);
+
+        // The language picked on the register page is the account's from the start; GetSettings
+        // would otherwise create the row in English on the first sign-in and switch the UI back.
+        settingsRepository.Insert(SettingsModel.Create(
+            user.Id, false, false, false, false, SettingsModel.DefaultTimerCount, request.Language));
 
         try
         {

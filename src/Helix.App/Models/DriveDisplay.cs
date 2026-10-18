@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Helix.App.Resources.Languages;
+using Helix.Application.Abstractions.Connector;
 using Helix.Domain.Drives;
 
 namespace Helix.App.Models;
@@ -18,6 +19,9 @@ internal sealed partial class DriveDisplay : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Subtitle))]
     public partial string Host { get; set; }
+
+    // Not shown; it is what lets IsUp recognise a mount made through the away address.
+    public string? RemoteHost { get; set; }
 
     [ObservableProperty]
     public partial string StorageUsage { get; set; }
@@ -161,6 +165,7 @@ internal sealed partial class DriveDisplay : ObservableObject
         Letter = drive.Letter;
         Name = drive.Name;
         Host = drive.Host;
+        RemoteHost = drive.RemoteHost;
         LastConnectedOnUtc = drive.LastConnectedOnUtc;
         CanWake = drive.MacAddress is not null;
     }
@@ -172,7 +177,30 @@ internal sealed partial class DriveDisplay : ObservableObject
         Letter = updateDrive.Letter;
         Name = updateDrive.Name;
         Host = updateDrive.Host;
+        RemoteHost = string.IsNullOrWhiteSpace(updateDrive.RemoteHost) ? null : updateDrive.RemoteHost.Trim();
         CanWake = MacAddresses.IsValid(updateDrive.MacAddress);
+    }
+
+    /// <summary>
+    /// Whether this drive is up from its own share. A letter that is merely present — a USB stick
+    /// on it, or a remembered mapping whose restore failed — is not the drive being connected.
+    /// </summary>
+    public bool IsUp(INasConnector nasConnector, HashSet<string> liveLetters) =>
+        !string.IsNullOrWhiteSpace(Letter) && liveLetters.Contains(Letter) && nasConnector.IsLiveFrom(Probe());
+
+    /// <summary>
+    /// Whether this drive's letter points at its own share, remembered or live — what a
+    /// disconnect would take down.
+    /// </summary>
+    public bool IsMapped(INasConnector nasConnector, HashSet<string> presentLetters) =>
+        !string.IsNullOrWhiteSpace(Letter) && presentLetters.Contains(Letter) && nasConnector.IsMountedFrom(Probe());
+
+    private Drive Probe()
+    {
+        var probe = Drive.Create(Guid.Empty, Letter, Host, Name, "-", "-");
+        probe.ReachAwayAt(RemoteHost);
+
+        return probe;
     }
 
     public DriveDisplay()

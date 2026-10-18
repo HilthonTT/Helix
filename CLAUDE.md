@@ -836,6 +836,21 @@ excludes it. Deciding which to ask is deciding whether the remembered entry matt
   Cancelling a remembered entry is exactly what a disconnect should do, and a remembered
   mapping of the same share is the restore-after-reinstall case, not a conflict.
 
+The same split applies to the letter sets. `GetConnectedLetters` is every letter present,
+remembered mappings included, and answers "is this letter **taken**" — the letter pickers and
+the letter-in-use checks. `GetLiveLetters` leaves out a network letter whose mapping is only
+remembered, and is what `DriveMonitor` polls: a persistent drive whose server went away keeps
+its letter, and reading presence as "up" meant its drop was never reported and the watchdog
+never brought it back. The dashboard rows, counts, donut and storage total, the sidebar and the
+tray all ask `GetLiveLetters` and then `IsLiveFrom` per drive (`DriveDisplay.IsUp`), so a USB
+stick on a drive's letter is not the drive being connected; "disconnect all" confirms against
+`DriveDisplay.IsMapped`, the letters it will actually take down.
+
+`Drive.Persistent` is fixed when a mapping is made, so `UpdateDrive` re-makes the mapping
+when the switch moves on a mounted drive — but only when `CountOpenHandles` says nothing is
+open on it; with files open, or where the count is unknown (macOS, which ignores the flag
+anyway), it applies at the next connect. A mapping that is only remembered is cancelled.
+
 `HasOtherMountsOn` only counts **live** mappings, since a remembered one holds no session
 to inherit. It also asks `HostSpelling` for the other spelling only once it has found a
 network letter that neither the home nor the away address explains, because that lookup

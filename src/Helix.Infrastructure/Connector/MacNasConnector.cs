@@ -118,6 +118,8 @@ internal sealed class MacNasConnector : INasConnector
         return GetConnectedLetters().Contains(Normalize(letter));
     }
 
+    public HashSet<string> GetLiveLetters() => GetConnectedLetters();
+
     public HashSet<string> GetConnectedLetters()
     {
         var letters = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

@@ -399,4 +399,65 @@ public sealed class UpdateDriveTests
         result.IsSuccess.Should().BeTrue();
         await _nasConnectorMock.DidNotReceive().DisconnectAsync(Arg.Any<Drive>());
     }
+
+    private Drive MountedPersistent(int? openHandles)
+    {
+        Drive drive = Drive.Create(UserId, "Z", "192.168.0.1", "Name", "Username", "Password", persistent: true);
+
+        _loggedInUserMock.UserId.Returns(UserId);
+        _loggedInUserMock.IsLoggedIn.Returns(true);
+
+        _driveRepositoryMock.GetByIdAsync(Request.DriveId).Returns(drive);
+
+        _nasConnectorMock.IsMountedFrom(drive).Returns(true);
+        _nasConnectorMock.IsLiveFrom(drive).Returns(true);
+        _nasConnectorMock.CountOpenHandles("Z").Returns(openHandles);
+        _nasConnectorMock.DisconnectAsync(Arg.Any<Drive>()).Returns(Result.Success());
+        _nasConnectorMock.ConnectAsync(Arg.Any<Drive>()).Returns(Result.Success());
+
+        return drive;
+    }
+
+    [Fact]
+    public async Task Handle_Should_RemountUnderTheNewFlag_WhenPersistenceChangesOnAnIdleMount()
+    {
+        Drive drive = MountedPersistent(openHandles: 0);
+
+        Result result = await _updateDrive.Handle(Request with { Persistent = false });
+
+        result.IsSuccess.Should().BeTrue();
+        drive.Persistent.Should().BeFalse();
+        Received.InOrder(() =>
+        {
+            _nasConnectorMock.DisconnectAsync(drive);
+            _nasConnectorMock.ConnectAsync(drive);
+        });
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(null)]
+    public async Task Handle_Should_LeaveTheMountAlone_WhenPersistenceChangesWhileFilesMayBeOpen(int? openHandles)
+    {
+        Drive drive = MountedPersistent(openHandles);
+
+        Result result = await _updateDrive.Handle(Request with { Persistent = false });
+
+        result.IsSuccess.Should().BeTrue();
+        drive.Persistent.Should().BeFalse();
+        await _nasConnectorMock.DidNotReceive().DisconnectAsync(Arg.Any<Drive>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_DropARememberedMapping_WhenPersistenceIsSwitchedOff()
+    {
+        Drive drive = MountedPersistent(openHandles: null);
+        _nasConnectorMock.IsLiveFrom(drive).Returns(false);
+
+        Result result = await _updateDrive.Handle(Request with { Persistent = false });
+
+        result.IsSuccess.Should().BeTrue();
+        await _nasConnectorMock.Received(1).DisconnectAsync(drive);
+        await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>());
+    }
 }

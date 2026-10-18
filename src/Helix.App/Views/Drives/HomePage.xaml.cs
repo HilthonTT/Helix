@@ -234,8 +234,8 @@ public sealed partial class HomePage : ContentPage
             return BuildEntries(0, 1);
         }
 
-        HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
-        int connected = drives.Count(d => connectedLetters.Contains(d.Letter));
+        HashSet<string> liveLetters = _nasConnector.GetLiveLetters();
+        int connected = drives.Count(d => liveLetters.Contains(d.Letter) && _nasConnector.IsLiveFrom(d));
 
         return BuildEntries(connected, drives.Count - connected);
     }

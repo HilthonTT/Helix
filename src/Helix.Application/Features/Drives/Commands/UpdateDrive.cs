@@ -87,10 +87,14 @@ public sealed class UpdateDrive(
         bool isSameShare = string.Equals(drive.Host, request.Host.Trim(), StringComparison.OrdinalIgnoreCase) &&
                            string.Equals(drive.Name, request.Name.Trim(), StringComparison.OrdinalIgnoreCase);
 
+        bool unmounted = false;
+
         if ((!isSameLetter || !isSameShare || IsMountedThroughAnOldAddressForAway(drive, request)) &&
             nasConnector.IsMountedFrom(drive))
         {
             using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
+
+            unmounted = true;
 
             Result unmount = await nasConnector.DisconnectAsync(drive, cancellationToken);
             if (unmount.IsFailure)
@@ -98,6 +102,8 @@ public sealed class UpdateDrive(
                 return unmount;
             }
         }
+
+        bool persistenceChanged = drive.Persistent != request.Persistent;
 
         drive.Update(
             request.Letter,
@@ -127,7 +133,41 @@ public sealed class UpdateDrive(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success();
+        return persistenceChanged && !unmounted
+            ? await ReapplyPersistenceAsync(drive, cancellationToken)
+            : Result.Success();
+    }
+
+    /// <summary>
+    /// Whether a mapping is remembered is fixed when it is made, so a switch flipped on a mounted
+    /// drive did nothing: Windows went on restoring one the user had made temporary, and never
+    /// restored one made persistent. The mapping is made again under the new flag — but only
+    /// when nothing has a file open on it, since that means pulling the share out for a moment.
+    /// Otherwise, and where the count is unknown, the switch applies at the next connect.
+    /// </summary>
+    private async Task<Result> ReapplyPersistenceAsync(Drive drive, CancellationToken cancellationToken)
+    {
+        if (!nasConnector.IsMountedFrom(drive))
+        {
+            return Result.Success();
+        }
+
+        bool live = nasConnector.IsLiveFrom(drive);
+
+        if (live && nasConnector.CountOpenHandles(drive.Letter) is not 0)
+        {
+            return Result.Success();
+        }
+
+        using IDisposable suppression = driveMonitor.Suppress([drive.Letter]);
+
+        Result unmount = await nasConnector.DisconnectAsync(drive, cancellationToken);
+        if (unmount.IsFailure || !live)
+        {
+            return unmount;
+        }
+
+        return await nasConnector.ConnectAsync(drive, cancellationToken);
     }
 
     private bool IsMountedThroughAnOldAddressForAway(Drive drive, Request request)

@@ -76,7 +76,7 @@ internal sealed partial class RegisterViewModel : BaseViewModel
 
             IsBusy = true;
 
-            var request = new RegisterUser.Request(Username, Password, ConfirmedPassword);
+            var request = new RegisterUser.Request(Username, Password, ConfirmedPassword, CultureSwitcher.GetCurrentLanguage());
 
             Result<RegisterUser.Response> result = await Task.Run(() => ScopedHandler.HandleAsync((RegisterUser h) => h.Handle(request)));
             if (result.IsFailure)

@@ -16,6 +16,9 @@ internal sealed class MacNetworkLocation(
 {
     private const string RoutePath = "/sbin/route";
     private const string ArpPath = "/usr/sbin/arp";
+    private const string NetstatPath = "/usr/sbin/netstat";
+
+    private static readonly string[] TunnelPrefixes = ["utun", "ipsec", "ppp", "tun", "tap", "wg", "gif"];
 
     private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(10);
 
@@ -55,10 +58,22 @@ internal sealed class MacNetworkLocation(
             }
 
             string? gatewayText = ValueOf(route, "gateway");
+            string? networkInterface = ValueOf(route, "interface");
+
+            // A full-tunnel VPN owns the default route, with no gateway or the tunnel's own, and
+            // reading that read a café as home. The network is the physical adapter's, as on Windows.
             if (!IPAddress.TryParse(gatewayText, out IPAddress? gateway) ||
-                gateway.AddressFamily != AddressFamily.InterNetwork)
+                gateway.AddressFamily != AddressFamily.InterNetwork ||
+                IsTunnel(networkInterface))
             {
-                return null;
+                string? table = await RunAsync(NetstatPath, "-rn", "-f", "inet");
+                if (table is null || PhysicalDefaultRouteIn(table) is not (IPAddress physical, string adapter))
+                {
+                    return null;
+                }
+
+                gateway = physical;
+                networkInterface = adapter;
             }
 
             string? arp = await RunAsync(ArpPath, "-n", gateway.ToString());
@@ -66,7 +81,7 @@ internal sealed class MacNetworkLocation(
 
             string id = hardware is null ? $"gateway-ip:{gateway}" : $"gateway:{hardware}";
 
-            return new NetworkLocation(id, ValueOf(route, "interface") ?? gateway.ToString());
+            return new NetworkLocation(id, networkInterface ?? gateway.ToString());
         }
         catch (Exception ex)
         {
@@ -75,6 +90,38 @@ internal sealed class MacNetworkLocation(
             return null;
         }
     }
+
+    internal static (IPAddress Gateway, string Interface)? PhysicalDefaultRouteIn(string netstatOutput)
+    {
+        foreach (string line in netstatOutput.Split('
+'))
+        {
+            string[] columns = line.Split([' ', '	'], StringSplitOptions.RemoveEmptyEntries);
+
+            if (columns.Length < 4 || !columns[0].Equals("default", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            // Older releases print Refs and Use before Netif, so the interface is the first
+            // column after the flags that is not a number.
+            string? adapter = columns.Skip(3).FirstOrDefault(column => char.IsLetter(column[0]));
+
+            if (adapter is not null &&
+                IPAddress.TryParse(columns[1], out IPAddress? gateway) &&
+                gateway.AddressFamily == AddressFamily.InterNetwork &&
+                !IsTunnel(adapter))
+            {
+                return (gateway, adapter);
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsTunnel(string? networkInterface) =>
+        networkInterface is not null &&
+        TunnelPrefixes.Any(prefix => networkInterface.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 
     internal static string? ValueOf(string output, string key)
     {

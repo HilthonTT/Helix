@@ -39,7 +39,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
 
     private void RefreshStatus(DriveDisplay drive)
     {
-        drive.Connected = _nasConnector.IsConnected(drive.Letter);
+        drive.Connected = drive.IsUp(_nasConnector, _nasConnector.GetLiveLetters());
 
         _ = RefreshStorageUsageAsync(drive);
     }

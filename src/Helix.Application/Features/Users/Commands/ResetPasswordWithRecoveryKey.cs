@@ -41,7 +41,14 @@ public sealed class ResetPasswordWithRecoveryKey(
         }
 
         User? user = await userRepository.GetByUsernameAsync(request.Username.Trim(), cancellationToken);
-        if (user?.RecoveryKeyHash is null || !passwordHasher.Verify(recoveryKey, user.RecoveryKeyHash))
+        if (user?.RecoveryKeyHash is null)
+        {
+            passwordHasher.VerifyDecoy(recoveryKey);
+
+            return Result.Failure<Response>(AuthenticationErrors.InvalidUsernameOrRecoveryKey);
+        }
+
+        if (!passwordHasher.Verify(recoveryKey, user.RecoveryKeyHash))
         {
             return Result.Failure<Response>(AuthenticationErrors.InvalidUsernameOrRecoveryKey);
         }

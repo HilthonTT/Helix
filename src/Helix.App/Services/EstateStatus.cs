@@ -116,11 +116,11 @@ public sealed partial class EstateStatus : ObservableObject
 
             List<Drive> drives = result.Value;
 
-            HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+            HashSet<string> liveLetters = _nasConnector.GetLiveLetters();
 
             string[] connected = [.. drives
-                .Select(drive => drive.Letter)
-                .Where(connectedLetters.Contains)];
+                .Where(drive => liveLetters.Contains(drive.Letter) && _nasConnector.IsLiveFrom(drive))
+                .Select(drive => drive.Letter)];
 
             IReadOnlyList<VolumeUsage> volumes = await _storageProbe.ProbeAsync(connected);
 

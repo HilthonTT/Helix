@@ -36,7 +36,7 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 
     public void Watch(IReadOnlyCollection<WatchedDrive> drives)
     {
-        HashSet<string> connected = _nasConnector.GetConnectedLetters();
+        HashSet<string> connected = _nasConnector.GetLiveLetters();
 
         lock (_gate)
         {
@@ -78,7 +78,7 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
 
     private void Release(string[] letters)
     {
-        HashSet<string> connected = _nasConnector.GetConnectedLetters();
+        HashSet<string> connected = _nasConnector.GetLiveLetters();
 
         List<string> takenDown = [];
 
@@ -205,7 +205,7 @@ internal sealed class DriveMonitor : IDriveMonitor, IDisposable
         {
             long snapshotStartedAt = _clock;
 
-            HashSet<string> connected = _nasConnector.GetConnectedLetters();
+            HashSet<string> connected = _nasConnector.GetLiveLetters();
 
             foreach ((string letter, WatchedDrive drive) in _watched)
             {

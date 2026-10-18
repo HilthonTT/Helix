@@ -19,6 +19,7 @@ public class DiagnoseDriveTests
     private readonly ILoggedInUser _loggedInUserMock;
     private readonly INasConnector _nasConnectorMock;
     private readonly IHostDiagnostics _hostDiagnosticsMock;
+    private readonly INetworkLocation _networkLocationMock = Substitute.For<INetworkLocation>();
 
     private readonly Drive _drive;
 
@@ -34,7 +35,7 @@ public class DiagnoseDriveTests
             _loggedInUserMock,
             _nasConnectorMock,
             _hostDiagnosticsMock,
-            Substitute.For<INetworkLocation>());
+            _networkLocationMock);
 
         _drive = Drive.Create(UserId, "Z", "192.168.0.1", "Media Vault", "Username", "Password");
 
@@ -147,6 +148,25 @@ public class DiagnoseDriveTests
         result.Value.Host.Should().Be("nas.tailnet.ts.net");
         StepOf(result.Value, DiagnosticStep.HostReachable).Outcome.Should().Be(DiagnosticOutcome.Passed);
         await _nasConnectorMock.Received(1).TestAsync(_drive, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_NotProbeHome_WhenPinnedAndAwayFromItsNetwork()
+    {
+        _drive.ReachAwayAt("nas.tailnet.ts.net");
+        _drive.PinToNetwork("gateway:aa-bb-cc-dd-ee-ff", "Home");
+
+        _networkLocationMock.GetCurrentAsync(Arg.Any<CancellationToken>())
+            .Returns(new NetworkLocation("gateway:11-22-33-44-55-66", "Café"));
+
+        _hostDiagnosticsMock
+            .ProbeAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new HostProbe(true, 445, null));
+
+        Result<DriveDiagnosis> result = await _diagnoseDrive.Handle(new DiagnoseDrive.Request(_drive.Id));
+
+        result.Value.Host.Should().Be("nas.tailnet.ts.net");
+        await _hostDiagnosticsMock.DidNotReceive().ProbeAsync(_drive.Host, Arg.Any<CancellationToken>());
     }
 
     [Fact]

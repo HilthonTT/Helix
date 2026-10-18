@@ -478,9 +478,17 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
+        // Only what "disconnect all" will actually take down, which is the letters mapped from
+        // each drive's own share (DriveMountBatch.IsMapped), not whatever happens to be on them.
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+        DriveDisplay[] rows = [.. _allDrives];
 
-        if (!await ConfirmDisconnectAsync([.. _allDrives.Where(drive => connectedLetters.Contains(drive.Letter)).Select(drive => drive.Letter)]))
+        string[] mapped = await Task.Run(() => rows
+            .Where(drive => drive.IsMapped(_nasConnector, connectedLetters))
+            .Select(drive => drive.Letter)
+            .ToArray());
+
+        if (!await ConfirmDisconnectAsync(mapped))
         {
             return;
         }
@@ -569,6 +577,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
                 row.Letter = drive.Letter;
                 row.Name = drive.Name;
                 row.Host = drive.Host;
+                row.RemoteHost = drive.RemoteHost;
                 row.LastConnectedOnUtc = drive.LastConnectedOnUtc;
                 row.CanWake = drive.MacAddress is not null;
                 row.RefreshLocalizedText();
@@ -581,7 +590,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
             }
         }
 
-        SyncConnectivity(_nasConnector.GetConnectedLetters());
+        SyncConnectivity(_nasConnector.GetLiveLetters());
 
         ApplyFilterAndSort();
 
@@ -590,11 +599,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
         return drives;
     }
 
-    private void SyncConnectivity(HashSet<string> connectedLetters)
+    private void SyncConnectivity(HashSet<string> liveLetters)
     {
         foreach (DriveDisplay drive in _allDrives)
         {
-            drive.Connected = connectedLetters.Contains(drive.Letter);
+            drive.Connected = drive.IsUp(_nasConnector, liveLetters);
         }
     }
 
@@ -684,10 +693,10 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     private async Task<string?> ValidateTotalStorageAsync()
     {
-        HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+        HashSet<string> liveLetters = _nasConnector.GetLiveLetters();
 
         string[] connected = [.. _allDrives
-            .Where(d => connectedLetters.Contains(d.Letter))
+            .Where(d => d.IsUp(_nasConnector, liveLetters))
             .Select(d => d.Letter)];
 
         IReadOnlyList<VolumeUsage> volumes = await _storageProbe.ProbeAsync(connected);
@@ -704,11 +713,9 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     private string ValidateTotalConnected()
     {
-        HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
+        SyncConnectivity(_nasConnector.GetLiveLetters());
 
-        SyncConnectivity(connectedLetters);
-
-        int count = _allDrives.Count(d => connectedLetters.Contains(d.Letter));
+        int count = _allDrives.Count(d => d.Connected);
 
         ConnectedCount = count;
         DisconnectedCount = _allDrives.Count - count;
@@ -765,9 +772,10 @@ internal sealed partial class HomeViewModel : BaseViewModel
             existingDrive.Letter = m.UpdatedDrive.Letter;
             existingDrive.Name = m.UpdatedDrive.Name;
             existingDrive.Host = m.UpdatedDrive.Host;
+            existingDrive.RemoteHost = m.UpdatedDrive.RemoteHost;
             existingDrive.CanWake = m.UpdatedDrive.CanWake;
 
-            SyncConnectivity(_nasConnector.GetConnectedLetters());
+            SyncConnectivity(_nasConnector.GetLiveLetters());
 
             ApplyFilterAndSort();
 

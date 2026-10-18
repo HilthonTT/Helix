@@ -3,6 +3,7 @@ using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Features.Users.Commands;
+using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using NSubstitute;
 
@@ -24,6 +25,7 @@ public sealed class RegisterUserTests
     private readonly IPasswordHasher _passwordHasherMock;
     private readonly IRecoveryKeyGenerator _recoveryKeyGeneratorMock;
     private readonly ILoggedInUser _loggedInUserMock;
+    private readonly ISettingsRepository _settingsRepositoryMock = Substitute.For<ISettingsRepository>();
 
     public RegisterUserTests()
     {
@@ -36,7 +38,7 @@ public sealed class RegisterUserTests
         _recoveryKeyGeneratorMock.Generate().Returns(RecoveryKey);
         _passwordHasherMock.Hash(RecoveryKey).Returns("RecoveryKeyHash");
 
-        _registerUser = new(_userRepositoryMock, _unitOfWorkMock, _passwordHasherMock, _recoveryKeyGeneratorMock, _loggedInUserMock);
+        _registerUser = new(_userRepositoryMock, _settingsRepositoryMock, _unitOfWorkMock, _passwordHasherMock, _recoveryKeyGeneratorMock, _loggedInUserMock);
     }
 
     [Fact]
@@ -48,6 +50,19 @@ public sealed class RegisterUserTests
         Result<RegisterUser.Response> result = await _registerUser.Handle(Request);
 
         result.Error.Should().Be(AuthenticationErrors.UsernameNotUnique);
+    }
+
+    [Fact]
+    public async Task Handle_Should_KeepTheLanguagePickedOnTheRegisterPage()
+    {
+        _passwordHasherMock.Hash(Request.Password).Returns("SomeHashAbc123");
+        _userRepositoryMock.IsUsernameUniqueAsync(Arg.Any<string>()).Returns(true);
+
+        Result<RegisterUser.Response> result = await _registerUser.Handle(Request with { Language = Language.Dutch });
+
+        result.IsSuccess.Should().BeTrue();
+        _settingsRepositoryMock.Received(1).Insert(Arg.Is<Helix.Domain.Settings.Settings>(s =>
+            s.Language == Language.Dutch && s.UserId == result.Value.User.Id));
     }
 
     [Fact]

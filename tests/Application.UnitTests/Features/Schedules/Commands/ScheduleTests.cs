@@ -160,6 +160,40 @@ public class ScheduleTests
         schedule.DueOccurrence(MondayMorning.AddMinutes(1), Brussels, Grace).Should().BeNull();
     }
 
+    private static readonly TimeZoneInfo CentralEurope = TimeZoneInfo.CreateCustomTimeZone(
+        "Test/CET",
+        TimeSpan.FromHours(1),
+        "CET",
+        "CET",
+        "CEST",
+        [
+            TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(
+                DateTime.MinValue.Date,
+                DateTime.MaxValue.Date,
+                TimeSpan.FromHours(1),
+                TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 3, 5, DayOfWeek.Sunday),
+                TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 3, 0, 0), 10, 5, DayOfWeek.Sunday)),
+        ]);
+
+    // 02:30 happens twice on 25 October 2026 in Central Europe: 00:30Z in summer time, 01:30Z after.
+    private static readonly DateTime FirstHalfPastTwo = new(2026, 10, 25, 0, 30, 0, DateTimeKind.Utc);
+
+    [Fact]
+    public void DueOccurrence_Should_BeTheFirstPass_OfATimeTheClocksRepeat()
+    {
+        Schedule schedule = GivenSchedule("02:30", ScheduleDays.Sunday);
+
+        schedule.DueOccurrence(FirstHalfPastTwo.AddMinutes(1), CentralEurope, Grace).Should().Be(FirstHalfPastTwo);
+    }
+
+    [Fact]
+    public void DueOccurrence_Should_BeNothing_WhenSavedAfterTheFirstPass_OfATimeTheClocksRepeat()
+    {
+        Schedule schedule = GivenSchedule("02:30", ScheduleDays.Sunday, createdOnUtc: FirstHalfPastTwo.AddMinutes(10));
+
+        schedule.DueOccurrence(FirstHalfPastTwo.AddMinutes(11), CentralEurope, Grace).Should().BeNull();
+    }
+
     [Fact]
     public void DueOccurrence_Should_FollowTheLocalDate_AcrossMidnight()
     {

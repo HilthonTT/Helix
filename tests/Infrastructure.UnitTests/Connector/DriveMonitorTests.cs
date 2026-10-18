@@ -22,7 +22,7 @@ public sealed class DriveMonitorTests
 
     private void Connected(params string[] letters)
     {
-        _nasConnector.GetConnectedLetters()
+        _nasConnector.GetLiveLetters()
             .Returns(_ => new HashSet<string>(letters, StringComparer.OrdinalIgnoreCase));
     }
 
@@ -308,7 +308,7 @@ public sealed class DriveMonitorTests
         IDisposable suppression = monitor.Suppress(["M"]);
 
         bool released = false;
-        _nasConnector.GetConnectedLetters().Returns(_ =>
+        _nasConnector.GetLiveLetters().Returns(_ =>
         {
             if (!released)
             {

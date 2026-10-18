@@ -3,6 +3,7 @@ using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
+using Helix.Application.Core.Security;
 using Helix.Domain.Users;
 
 using Microsoft.Extensions.Logging;
@@ -29,6 +30,8 @@ public sealed class LoginUser(
         User? user = await userRepository.GetByUsernameAsync(request.Username.Trim(), cancellationToken);
         if (user is null)
         {
+            passwordHasher.VerifyDecoy(request.Password);
+
             return Result.Failure<User>(AuthenticationErrors.InvalidUsernameOrPassword);
         }
 
