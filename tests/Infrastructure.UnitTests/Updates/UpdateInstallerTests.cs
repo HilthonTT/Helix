@@ -90,7 +90,7 @@ public sealed class UpdateInstallerTests : IDisposable
         stillRunning.Should().BeGreaterThan(0);
         stillRunning.Should().BeLessThan(move);
 
-        script.Should().Contain("-WorkingDirectory $install");
+        script.Should().Contain("$start.WorkingDirectory = $install");
     }
 
     public void Dispose()

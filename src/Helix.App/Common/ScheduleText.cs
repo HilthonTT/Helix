@@ -37,11 +37,14 @@ internal static class ScheduleText
 
     public static IEnumerable<DayOfWeek> WeekInCultureOrder()
     {
-        DayOfWeek first = CultureInfo.CurrentUICulture.DateTimeFormat.FirstDayOfWeek;
+        DayOfWeek first = Culture.DateTimeFormat.FirstDayOfWeek;
 
         return Enumerable.Range(0, 7).Select(offset => (DayOfWeek)(((int)first + offset) % 7));
     }
 
     public static string ShortName(DayOfWeek day) =>
-        CultureInfo.CurrentUICulture.DateTimeFormat.GetAbbreviatedDayName(day);
+        Culture.DateTimeFormat.GetAbbreviatedDayName(day);
+
+    // The language Helix is set to, which CultureSwitcher puts on AppResources rather than on the thread.
+    private static CultureInfo Culture => AppResources.Culture ?? CultureInfo.CurrentUICulture;
 }

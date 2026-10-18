@@ -135,6 +135,16 @@ public sealed class Schedule : Entity, IAuditable
             local = local.AddMinutes(30);
         }
 
+        // In the hour a fall-back repeats, ConvertTimeToUtc picks the later instant; the earlier
+        // one is when the wall clock first showed this time, and taking the later let a schedule
+        // saved after its time in that hour fire at once.
+        if (zone.IsAmbiguousTime(local))
+        {
+            TimeSpan offset = zone.GetAmbiguousTimeOffsets(local).Max();
+
+            return DateTime.SpecifyKind(local - offset, DateTimeKind.Utc);
+        }
+
         return TimeZoneInfo.ConvertTimeToUtc(local, zone);
     }
 

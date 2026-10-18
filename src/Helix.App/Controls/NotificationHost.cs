@@ -152,7 +152,9 @@ internal sealed class NotificationHost : ContentView
     {
         foreach (Banner existing in _stack.Children.OfType<Banner>())
         {
-            if (existing.Kind == message.Kind &&
+            // One already fading out is about to be removed, and restarting it would lose this one.
+            if (!existing.IsDismissing &&
+                existing.Kind == message.Kind &&
                 string.Equals(existing.Message, message.Text, StringComparison.Ordinal))
             {
                 existing.RestartLifetime();

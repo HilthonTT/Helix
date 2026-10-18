@@ -90,11 +90,11 @@ internal class WakeOnLan(IDateTimeProvider dateTimeProvider, ILogger<WakeOnLan> 
 
         if (sent)
         {
-            logger.LogInformation("Sent a wake-up packet to {Mac}.", macAddress);
+            logger.LogInformation("Sent a wake-up packet to a NAS ending {MacTail}.", macAddress[^2..]);
         }
         else
         {
-            logger.LogWarning("No wake-up packet could be sent for {Mac}.", macAddress);
+            logger.LogWarning("No wake-up packet could be sent for a NAS ending {MacTail}.", macAddress[^2..]);
         }
 
         return sent;
@@ -212,16 +212,17 @@ internal class WakeOnLan(IDateTimeProvider dateTimeProvider, ILogger<WakeOnLan> 
                 return null;
             }
 
-            byte[] hardware = new byte[6];
+            // SendARP wants room for two ULONGs, not six bytes, and writes into the pinned array.
+            byte[] hardware = new byte[8];
             uint length = (uint)hardware.Length;
 
             if (SendARP(BitConverter.ToUInt32(address.GetAddressBytes(), 0), 0, hardware, ref length) != 0 ||
-                length != hardware.Length)
+                length != 6)
             {
                 return null;
             }
 
-            return MacAddresses.Normalize(string.Join('-', hardware.Select(b => b.ToString("x2"))));
+            return MacAddresses.Normalize(string.Join('-', hardware.Take(6).Select(b => b.ToString("x2"))));
         }
         catch (Exception ex)
         {

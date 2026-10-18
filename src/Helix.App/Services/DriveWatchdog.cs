@@ -390,13 +390,26 @@ internal sealed class DriveWatchdog
         }
 
         List<Task> attempts = [];
+        Dictionary<Guid, Drive>? drives = null;
 
         foreach (PendingReconnect pending in due)
         {
+            // A letter that is merely present is not the drive being up: a remembered persistent
+            // mapping whose restore failed, or a USB stick, holds it too, and forgetting the retry
+            // there left the drive down for the rest of the session.
             if (_nasConnector.IsConnected(pending.Letter))
             {
-                Forget(pending.DriveId);
-                continue;
+                if (drives is null)
+                {
+                    Result<List<Drive>> result = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+                    drives = result.IsSuccess ? result.Value.ToDictionary(d => d.Id) : [];
+                }
+
+                if (!drives.TryGetValue(pending.DriveId, out Drive? drive) || _nasConnector.IsLiveFrom(drive))
+                {
+                    Forget(pending.DriveId);
+                    continue;
+                }
             }
 
             attempts.Add(AttemptAsync(pending.DriveId, pending.Letter, reconnect: true, recordDrop: false));

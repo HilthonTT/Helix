@@ -698,7 +698,24 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             "    try {",
             "        New-Item -ItemType Directory -Path $install -Force | Out-Null",
             "        Get-ChildItem -LiteralPath $staged -Force | Copy-Item -Destination $install -Recurse -Force",
-            "        Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction SilentlyContinue",
+            "        $shipped = @{}",
+            "        Get-ChildItem -LiteralPath $staged -Force | ForEach-Object { $shipped[$_.Name] = $true }",
+            "        $runtime = '.dll', '.pri', '.winmd', '.pdb'",
+            "        $kept = $true",
+            "        Get-ChildItem -LiteralPath $backup -Force | Where-Object {",
+            "            -not $shipped.ContainsKey($_.Name) -and -not (",
+            "                (-not $_.PSIsContainer -and ($runtime -contains $_.Extension -or $_.Name -like '*.deps.json' -or $_.Name -like '*.runtimeconfig.json')) -or",
+            "                ($_.PSIsContainer -and -not (Get-ChildItem -LiteralPath $_.FullName -Recurse -Force -File | Where-Object { $_.Name -notlike '*.resources.dll' -and $_.Name -notlike '*.mui' })))",
+            "        } | ForEach-Object {",
+            "            try {",
+            "                Move-Item -LiteralPath $_.FullName -Destination ([System.IO.Path]::Combine($install, $_.Name)) -Force",
+            "                Write-Log \"Kept $($_.Name), which is not part of Helix, in the install folder.\"",
+            "            } catch {",
+            "                $kept = $false",
+            "                Write-Log \"$($_.Exception.Message) The previous install was left at $backup so nothing in it is lost.\"",
+            "            }",
+            "        }",
+            "        if ($kept) { Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction SilentlyContinue }",
 
             "        if ($release) { Remove-Item -LiteralPath $release -Recurse -Force -ErrorAction SilentlyContinue }",
             "        Write-Log 'The update was applied.'",
@@ -722,7 +739,17 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             "    Write-Log \"The install folder could not be moved aside, so the update was not applied and the previous version is still installed: $reason\"",
             "}",
 
-            "if (Test-Path -LiteralPath $exe) { Start-Process -FilePath $exe -WorkingDirectory $install }",
+            "if (Test-Path -LiteralPath $exe) {",
+            "    try {",
+            "        $start = New-Object System.Diagnostics.ProcessStartInfo",
+            "        $start.FileName = $exe",
+            "        $start.WorkingDirectory = $install",
+            "        $start.UseShellExecute = $true",
+            "        [System.Diagnostics.Process]::Start($start) | Out-Null",
+            "    } catch {",
+            "        Write-Log \"Helix could not be started again: $($_.Exception.Message)\"",
+            "    }",
+            "}",
         ];
 #else
         string scriptPath = Path.Combine(scriptDirectory, "apply-update.sh");
@@ -785,7 +812,11 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
     private static string Escape(string path) =>
 #if WINDOWS
-        path.Replace("'", "''");
+        path.Replace("'", "''")
+            .Replace("‘", "‘‘")
+            .Replace("’", "’’")
+            .Replace("‚", "‚‚")
+            .Replace("‛", "‛‛");
 #else
         path.Replace("'", "'\\''");
 #endif

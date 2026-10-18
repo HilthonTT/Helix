@@ -90,6 +90,14 @@ internal class HostReachability : IHostReachability
                     return true;
                 }
             }
+            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AccessDenied)
+            {
+                // A local firewall refusing this process says nothing about the host, and the
+                // kernel's SMB redirector is not bound by a per-app rule.
+                _logger.LogDebug("A local policy refused the probe on port {Port}; treating the host as reachable.", port);
+
+                return true;
+            }
             catch (Exception ex) when (ex is SocketException or OperationCanceledException)
             {
             }

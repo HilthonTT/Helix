@@ -33,7 +33,8 @@ public class DiagnoseDriveTests
             _driveRepositoryMock,
             _loggedInUserMock,
             _nasConnectorMock,
-            _hostDiagnosticsMock);
+            _hostDiagnosticsMock,
+            Substitute.For<INetworkLocation>());
 
         _drive = Drive.Create(UserId, "Z", "192.168.0.1", "Media Vault", "Username", "Password");
 

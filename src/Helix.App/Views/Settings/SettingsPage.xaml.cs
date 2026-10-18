@@ -48,8 +48,15 @@ public sealed partial class SettingsPage : ContentPage
         WeakReferenceMessenger.Default.Register<UpdateUsernameMessage>(
             this, async (r, m) => await _modals.ToggleAsync(UpdateUsername, m.Value));
 
-        WeakReferenceMessenger.Default.Register<UpdatePasswordMessage>(
-            this, async (r, m) => await _modals.ToggleAsync(UpdatePassword, m.Value));
+        WeakReferenceMessenger.Default.Register<UpdatePasswordMessage>(this, async (r, m) =>
+        {
+            if (m.Value)
+            {
+                UpdatePasswordView.Reset();
+            }
+
+            await _modals.ToggleAsync(UpdatePassword, m.Value);
+        });
 
         WeakReferenceMessenger.Default.Register<CreateRecoveryKeyMessage>(this, async (r, m) =>
         {

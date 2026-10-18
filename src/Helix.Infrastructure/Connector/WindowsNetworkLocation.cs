@@ -101,7 +101,8 @@ internal sealed class WindowsNetworkLocation(
 
     private static string? HardwareAddressOf(IPAddress address)
     {
-        byte[] hardware = new byte[6];
+        // SendARP wants room for two ULONGs, not six bytes, and writes into the pinned array.
+        byte[] hardware = new byte[8];
         uint length = (uint)hardware.Length;
 
         if (SendARP(ToNative(address), 0, hardware, ref length) != 0 || length == 0)

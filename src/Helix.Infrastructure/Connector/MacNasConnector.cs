@@ -261,7 +261,8 @@ internal sealed class MacNasConnector : INasConnector
                       IPAddress.TryParse(candidate, out IPAddress? address) &&
                       address.AddressFamily == AddressFamily.InterNetworkV6;
 
-        return isIpv6 ? $"[{candidate}]" : candidate;
+        // A zone id's '%' has to be written '%25' inside a URL (RFC 6874).
+        return isIpv6 ? $"[{candidate.Replace("%", "%25", StringComparison.Ordinal)}]" : candidate;
     }
 
     private async Task<Result> RunWithTimeoutAsync(

@@ -156,7 +156,14 @@ internal sealed class TrayIconService
             return;
         }
 
-        _showRetry?.Cancel();
+        try
+        {
+            _showRetry?.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            // The retry finished and disposed its source between the read and the cancel.
+        }
 
         _announcedHiding = false;
 
@@ -226,7 +233,7 @@ internal sealed class TrayIconService
 
             _trayIcon.SetMenu(BuildMenu(drives, groups, connected, _nasConnector));
 
-            _running = _trayIcon.Show($"{AppInfo.Current.Name} — {CountConnected(drives, connected)}/{drives.Count}");
+            _running = _trayIcon.Show($"{AppInfo.Current.Name} — {CountConnected(drives, connected, _nasConnector)}/{drives.Count}");
 
             if (_running)
             {
@@ -239,8 +246,8 @@ internal sealed class TrayIconService
         _ = Task.Run(RetryShowAsync);
     }
 
-    private static int CountConnected(List<Drive> drives, HashSet<string> connected) =>
-        drives.Count(drive => connected.Contains(drive.Letter));
+    private static int CountConnected(List<Drive> drives, HashSet<string> connected, INasConnector nasConnector) =>
+        drives.Count(drive => connected.Contains(drive.Letter) && nasConnector.IsLiveFrom(drive));
 
     private static List<TrayMenuItem> BuildMenu(
         List<Drive> drives,
@@ -269,7 +276,7 @@ internal sealed class TrayIconService
 
             foreach (Drive drive in drives.OrderBy(d => d.Letter, StringComparer.OrdinalIgnoreCase))
             {
-                bool isConnected = connected.Contains(drive.Letter);
+                bool isConnected = connected.Contains(drive.Letter) && nasConnector.IsLiveFrom(drive);
 
                 string verb = isConnected ? AppResources.Disconnect : AppResources.Connect;
 
@@ -307,6 +314,14 @@ internal sealed class TrayIconService
     {
         try
         {
+            // The idle lock stops an unattended keyboard, and the tray menu is one: the hotkeys
+            // and the command line already refuse while it is up.
+            if (id != OpenId && App.ServiceProvider.GetRequiredService<IdleLockService>().IsLocked)
+            {
+                MainWindow.Restore();
+                return;
+            }
+
             switch (id)
             {
                 case OpenId:
@@ -421,7 +436,7 @@ internal sealed class TrayIconService
             return;
         }
 
-        if (_nasConnector.IsConnected(drive.Letter))
+        if (_nasConnector.IsLiveFrom(drive))
         {
             Report(await ScopedHandler.HandleAsync((DisconnectDrive h) => h.Handle(new DisconnectDrive.Request(driveId))));
             return;

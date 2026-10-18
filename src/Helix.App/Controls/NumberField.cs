@@ -172,7 +172,17 @@ internal sealed class NumberField : ContentView
         return label;
     }
 
-    private void Nudge(int by) => Value = Clamp(Value + by);
+    private void Nudge(int by)
+    {
+        // A tap on a label takes no focus, so a number typed and not yet committed would
+        // otherwise be overwritten by a step from the old value.
+        if (TryParse(_entry.Text, out int typed))
+        {
+            Value = Clamp(typed);
+        }
+
+        Value = Clamp(Value + by);
+    }
 
     private void Commit()
     {
@@ -181,12 +191,27 @@ internal sealed class NumberField : ContentView
             return;
         }
 
-        if (int.TryParse(_entry.Text, out int typed))
+        if (TryParse(_entry.Text, out int typed))
         {
             Value = Clamp(typed);
         }
 
         Render();
+    }
+
+    private bool TryParse(string? text, out int value)
+    {
+        // Parsed wide so a number past int's range clamps to the maximum rather than being refused.
+        if (long.TryParse(text, out long typed))
+        {
+            value = (int)Math.Clamp(typed, Minimum, Maximum);
+
+            return true;
+        }
+
+        value = 0;
+
+        return false;
     }
 
     private int Clamp(int value) => Math.Clamp(value, Minimum, Maximum);

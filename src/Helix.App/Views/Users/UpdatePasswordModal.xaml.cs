@@ -4,10 +4,14 @@ namespace Helix.App.Views.Users;
 
 public sealed partial class UpdatePasswordModal : ContentView
 {
+	private readonly UpdatePasswordViewModel _viewModel = new();
+
 	public UpdatePasswordModal()
 	{
 		InitializeComponent();
 
-		BindingContext = new UpdatePasswordViewModel();
+		BindingContext = _viewModel;
 	}
+
+	public void Reset() => _viewModel.Reset();
 }

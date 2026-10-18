@@ -11,7 +11,8 @@ public sealed class DiagnoseDrive(
     IDriveRepository driveRepository,
     ILoggedInUser loggedInUser,
     INasConnector nasConnector,
-    IHostDiagnostics hostDiagnostics) : IHandler
+    IHostDiagnostics hostDiagnostics,
+    INetworkLocation networkLocation) : IHandler
 {
     public sealed record Request(Guid DriveId);
 
@@ -36,9 +37,22 @@ public sealed class DiagnoseDrive(
         }
 
         string host = drive.Host;
+
+        // A pinned drive away from home goes straight to its away address, as IDriveRouter does;
+        // probing the home address there reports on whatever answers at it on this network.
+        if (drive.HomeNetworkId is not null && drive.RemoteHost is not null)
+        {
+            NetworkLocation? here = await networkLocation.GetCurrentAsync(cancellationToken);
+
+            if (drive.IsAwayFrom(here?.Id))
+            {
+                host = drive.RemoteHost;
+            }
+        }
+
         HostProbe probe = await hostDiagnostics.ProbeAsync(host, cancellationToken);
 
-        if (!probe.Reachable && drive.RemoteHost is not null)
+        if (!probe.Reachable && host == drive.Host && drive.RemoteHost is not null)
         {
             HostProbe away = await hostDiagnostics.ProbeAsync(drive.RemoteHost, cancellationToken);
 
