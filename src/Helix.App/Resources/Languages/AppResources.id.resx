@@ -1052,4 +1052,16 @@
   <data name="DisconnectInUse" xml:space="preserve">
     <value>Masih ada file atau folder yang terbuka di {0}. Tutup terlebih dahulu, atau program yang menggunakannya dapat kehilangan pekerjaan yang belum disimpan.</value>
   </data>
+  <data name="StorageFullWithinADay" xml:space="preserve">
+    <value>Penuh dalam sehari dengan laju saat ini</value>
+  </data>
+  <data name="StorageFullInDays" xml:space="preserve">
+    <value>Penuh dalam sekitar {0} hari dengan laju saat ini</value>
+  </data>
+  <data name="StorageFullInMonths" xml:space="preserve">
+    <value>Penuh dalam sekitar {0} bulan dengan laju saat ini</value>
+  </data>
+  <data name="StorageForecastDetail" xml:space="preserve">
+    <value>{0}: sekitar {1} GB lebih banyak terpakai setiap hari selama 30 hari terakhir (sekarang {2}).</value>
+  </data>
 </root>

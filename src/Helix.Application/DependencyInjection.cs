@@ -9,6 +9,7 @@ using Helix.Application.Features.Schedules.Commands;
 using Helix.Application.Features.Schedules.Queries;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
+using Helix.Application.Features.Storage.Commands;
 using Helix.Application.Features.Storage.Queries;
 using Helix.Application.Features.Updates.Commands;
 using Helix.Application.Features.Updates.Queries;
@@ -114,6 +115,8 @@ public static class DependencyInjection
     private static IServiceCollection AddStorageHandlers(this IServiceCollection services)
     {
         services.AddScoped<GetStorageAlerts>();
+        services.AddScoped<GetStorageForecasts>();
+        services.AddScoped<RecordStorageSamples>();
 
         return services;
     }

@@ -1052,4 +1052,16 @@
   <data name="DisconnectInUse" xml:space="preserve">
     <value>Er zijn nog bestanden of mappen geopend op {0}. Sluit ze eerst, anders kunnen de programma's die ze gebruiken niet-opgeslagen werk verliezen.</value>
   </data>
+  <data name="StorageFullWithinADay" xml:space="preserve">
+    <value>Binnen een dag vol in het huidige tempo</value>
+  </data>
+  <data name="StorageFullInDays" xml:space="preserve">
+    <value>Over ongeveer {0} dagen vol in het huidige tempo</value>
+  </data>
+  <data name="StorageFullInMonths" xml:space="preserve">
+    <value>Over ongeveer {0} maanden vol in het huidige tempo</value>
+  </data>
+  <data name="StorageForecastDetail" xml:space="preserve">
+    <value>{0}: de afgelopen 30 dagen ongeveer {1} GB per dag meer in gebruik (nu {2}).</value>
+  </data>
 </root>

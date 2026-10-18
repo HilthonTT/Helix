@@ -18,6 +18,8 @@ The dashboard is where Helix opens after you sign in: what your NAS holds, which
 
 The storage total counts each NAS volume **once**, however many of its shares you have mapped, so thirteen shares of one pool read as one pool. Drives that are not connected are not measured.
 
+Helix also keeps a reading of each volume's free space once a day, for about thirteen months. Once it has a week or more of readings, and a volume is filling up, the storage tile adds a line such as **Full in about 4 months at the current rate**, for the volume that will run out first; hover it for which drives that is and how fast it is filling. A volume that is steady, shrinking, or more than a year from full shows no line. The estimate is a straight line through the last 30 days, so a one-off copy of a large folder moves it, and it settles again as the days pass.
+
 The sidebar carries the same essentials on every page: your groups, a connected count and storage total, a low-space warning light, an update badge when a new release exists, and the **Lock** and **Logout** buttons.
 
 ## The drive list

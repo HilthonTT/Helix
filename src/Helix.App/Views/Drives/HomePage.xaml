@@ -143,7 +143,7 @@
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
 
                     <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18">
-                        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                        <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
                             <HorizontalStackLayout Spacing="12">
                                 <Border Style="{StaticResource IconTile}">
                                     <Label Text="{x:Static icons:IconFont.Database}"
@@ -163,6 +163,12 @@
                             <Label Grid.Row="2"
                                    Text="{l10n:Translate TotalStorageOfNas}"
                                    Style="{StaticResource Caption}"/>
+
+                            <Label Grid.Row="3"
+                                   Text="{Binding StorageForecastText}"
+                                   Style="{StaticResource Caption}"
+                                   ToolTipProperties.Text="{Binding StorageForecastDetail}"
+                                   IsVisible="{Binding HasStorageForecast}"/>
                         </Grid>
                     </Border>
 

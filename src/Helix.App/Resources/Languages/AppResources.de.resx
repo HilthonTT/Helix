@@ -1052,4 +1052,16 @@
   <data name="DisconnectInUse" xml:space="preserve">
     <value>Auf {0} sind noch Dateien oder Ordner geöffnet. Schließen Sie sie zuerst, sonst können die Programme, die sie verwenden, ungespeicherte Arbeit verlieren.</value>
   </data>
+  <data name="StorageFullWithinADay" xml:space="preserve">
+    <value>Beim aktuellen Tempo innerhalb eines Tages voll</value>
+  </data>
+  <data name="StorageFullInDays" xml:space="preserve">
+    <value>Beim aktuellen Tempo in etwa {0} Tagen voll</value>
+  </data>
+  <data name="StorageFullInMonths" xml:space="preserve">
+    <value>Beim aktuellen Tempo in etwa {0} Monaten voll</value>
+  </data>
+  <data name="StorageForecastDetail" xml:space="preserve">
+    <value>{0}: in den letzten 30 Tagen etwa {1} GB mehr belegt pro Tag (jetzt {2}).</value>
+  </data>
 </root>

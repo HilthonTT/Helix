@@ -3036,5 +3036,41 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("DisconnectInUse", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Full within a day at the current rate.
+        /// </summary>
+        internal static string StorageFullWithinADay {
+            get {
+                return ResourceManager.GetString("StorageFullWithinADay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Full in about {0} days at the current rate.
+        /// </summary>
+        internal static string StorageFullInDays {
+            get {
+                return ResourceManager.GetString("StorageFullInDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Full in about {0} months at the current rate.
+        /// </summary>
+        internal static string StorageFullInMonths {
+            get {
+                return ResourceManager.GetString("StorageFullInMonths", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}: about {1} GB more used each day over the last 30 days ({2} now)..
+        /// </summary>
+        internal static string StorageForecastDetail {
+            get {
+                return ResourceManager.GetString("StorageForecastDetail", resourceCulture);
+            }
+        }
     }
 }

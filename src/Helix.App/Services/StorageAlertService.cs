@@ -1,6 +1,7 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Storage;
 using Helix.App.Resources.Languages;
+using Helix.Application.Features.Storage.Commands;
 using Helix.Application.Features.Storage.Contracts;
 using Helix.Application.Features.Storage.Queries;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,8 @@ internal sealed class StorageAlertService
 
     private static readonly TimeSpan FirstCheckDelay = TimeSpan.FromMinutes(1);
 
+    private static readonly TimeSpan RecordInterval = TimeSpan.FromHours(6);
+
     private readonly TrayIconService _tray;
     private readonly ILogger<StorageAlertService> _logger;
     private readonly Lock _gate = new();
@@ -22,6 +25,8 @@ internal sealed class StorageAlertService
     private CancellationTokenSource? _cancellation;
 
     private int _generation;
+
+    private DateTime? _lastRecordedOnUtc;
 
     public StorageAlertService(TrayIconService tray, ILogger<StorageAlertService> logger)
     {
@@ -68,6 +73,8 @@ internal sealed class StorageAlertService
             _generation++;
 
             _warned.Clear();
+
+            _lastRecordedOnUtc = null;
         }
     }
 
@@ -160,11 +167,47 @@ internal sealed class StorageAlertService
         }
     }
 
+    private async Task RecordIfDueAsync()
+    {
+        DateTime utcNow = DateTime.UtcNow;
+
+        lock (_gate)
+        {
+            if (utcNow - _lastRecordedOnUtc < RecordInterval)
+            {
+                return;
+            }
+        }
+
+        Result<int> result = await ScopedHandler.HandleAsync((RecordStorageSamples h) => h.Handle());
+        if (result.IsFailure)
+        {
+            _logger.LogDebug("Storage usage could not be recorded: {Reason}", result.Error.Description);
+
+            return;
+        }
+
+        if (result.Value == 0)
+        {
+            return;
+        }
+
+        lock (_gate)
+        {
+            _lastRecordedOnUtc = utcNow;
+        }
+
+        MainThread.BeginInvokeOnMainThread(() =>
+            WeakReferenceMessenger.Default.Send(new StorageSamplesRecordedMessage()));
+    }
+
     private async Task CheckGuardedAsync(CancellationToken cancellationToken)
     {
         try
         {
             await CheckAsync();
+
+            await RecordIfDueAsync();
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

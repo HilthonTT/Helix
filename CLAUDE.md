@@ -609,6 +609,23 @@ whose drives were unmounted for one check, or whose probe ran past the timeout, 
 from the alerts without having recovered, and forgetting it re-fired the warning. It starts a minute
 after the dashboard does, because the drives are still being connected at that moment.
 
+The same service records **storage history**: `RecordStorageSamples`, at most every six hours,
+writes one `StorageSample` per volume per **UTC day** (the unique index is `(UserId, VolumeId,
+Day)`; a later reading the same day updates the row) and prunes anything older than 400 days. It
+probes on its own rather than reusing the alert check's reading, because the alert check returns
+early when the threshold is 0 and history is wanted regardless; four probes a day is nothing.
+A volume is its `VolumeId` — the total size, as the probe already keys it — so a volume that is
+grown starts a new history, which is the honest answer.
+
+`GetStorageForecasts` fits a least-squares line through the last 30 days of each volume
+(`Core/Storage/StorageTrend`) and turns a falling one into days until full. It answers nothing
+from fewer than three samples or less than a week of span, for a volume not measured in three
+days, or past ten years. The dashboard's storage tile shows the **soonest** volume within a year
+as one caption, with the volume's drives and its daily rate in the tooltip, and refreshes on
+`StorageSamplesRecordedMessage`. It is a straight line on purpose: free space on a NAS moves in
+steps (a backup, a deleted folder), and anything cleverer than a trend over a month would be
+claiming a precision the data does not have.
+
 ### Closing the window
 
 `Settings.CloseToTray` decides what the title bar's close button means: hide to the tray,

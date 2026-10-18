@@ -13,6 +13,7 @@ using Helix.Domain.Auditlogs;
 using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Helix.Domain.Schedules;
+using Helix.Domain.Storage;
 using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using Helix.Infrastructure.Authentication;
@@ -95,6 +96,8 @@ public static class DependencyInjection
         services.AddScoped<IDriveGroupRepository, DriveGroupRepository>();
 
         services.AddScoped<IScheduleRepository, ScheduleRepository>();
+
+        services.AddScoped<IStorageSampleRepository, StorageSampleRepository>();
 
         services.AddScoped<ISettingsRepository, SettingsRepository>();
 

@@ -1052,4 +1052,16 @@
   <data name="DisconnectInUse" xml:space="preserve">
     <value>{0} でファイルまたはフォルダーがまだ開かれています。先に閉じてください。閉じないと、それを使用しているプログラムの未保存の作業が失われる可能性があります。</value>
   </data>
+  <data name="StorageFullWithinADay" xml:space="preserve">
+    <value>現在のペースでは1日以内にいっぱいになります</value>
+  </data>
+  <data name="StorageFullInDays" xml:space="preserve">
+    <value>現在のペースでは約{0}日でいっぱいになります</value>
+  </data>
+  <data name="StorageFullInMonths" xml:space="preserve">
+    <value>現在のペースでは約{0}か月でいっぱいになります</value>
+  </data>
+  <data name="StorageForecastDetail" xml:space="preserve">
+    <value>{0}: 過去30日間で1日あたり約{1} GBずつ使用量が増えています(現在 {2})。</value>
+  </data>
 </root>

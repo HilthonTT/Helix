@@ -8,6 +8,8 @@ internal static class TableNames
 
     public const string Schedules = nameof(Schedules);
 
+    public const string StorageSamples = nameof(StorageSamples);
+
     public const string Users = nameof(Users);
 
     public const string Settings = nameof(Settings);

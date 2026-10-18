@@ -104,6 +104,8 @@ public sealed partial class HomePage : ContentPage
 
             await _viewModel.FetchDriveGroupsAsync();
 
+            await _viewModel.FetchStorageForecastsAsync();
+
             await HandleConnectDrivesOnStartupAsync();
 
             if (!App.ServiceProvider.GetRequiredService<ILoggedInUser>().IsLoggedIn)

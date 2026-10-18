@@ -5,6 +5,7 @@ using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
 using Helix.App.Messaging.Navigation;
 using Helix.App.Messaging.Schedules;
+using Helix.App.Messaging.Storage;
 using Helix.App.Icons;
 using Helix.App.Models;
 using Helix.Application.Core.Sorting;
@@ -17,6 +18,8 @@ using Helix.Application.Features.Drives.Contracts;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
+using Helix.Application.Features.Storage.Contracts;
+using Helix.Application.Features.Storage.Queries;
 using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using System.Collections.ObjectModel;
@@ -42,10 +45,13 @@ internal sealed partial class HomeViewModel : BaseViewModel
         SortOrder = SortOrder.Ascending;
         TotalStorage = string.Empty;
         TotalConnected = string.Empty;
+        StorageForecastText = string.Empty;
+        StorageForecastDetail = string.Empty;
 
         RegisterMessages();
         InitializeCountdownEvents();
 
+        LocalizationResourceManager.Instance.PropertyChanged += (_, _) => DescribeStorageForecasts();
     }
 
     private void WatchSelection(ObservableCollection<DriveDisplay> drives)
@@ -125,6 +131,17 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial string TotalStorage { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasStorageForecast))]
+    public partial string StorageForecastText { get; set; }
+
+    [ObservableProperty]
+    public partial string StorageForecastDetail { get; set; }
+
+    public bool HasStorageForecast => StorageForecastText.Length != 0;
+
+    private IReadOnlyList<StorageForecast> _storageForecasts = [];
 
     [ObservableProperty]
     public partial string TotalConnected { get; set; }
@@ -596,6 +613,52 @@ internal sealed partial class HomeViewModel : BaseViewModel
         DriveGroups = [.. result.Value.Select(group => new DriveGroupDisplay(group, existing))];
     }
 
+    public async Task FetchStorageForecastsAsync()
+    {
+        try
+        {
+            Result<List<StorageForecast>> result = await Task.Run(() =>
+                ScopedHandler.HandleAsync((GetStorageForecasts h) => h.Handle()));
+
+            _storageForecasts = result.IsSuccess ? result.Value : [];
+
+            DescribeStorageForecasts();
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<HomeViewModel>().LogError(ex, "Failed to read the storage forecast.");
+        }
+    }
+
+    private void DescribeStorageForecasts()
+    {
+        StorageForecast? soonest = _storageForecasts.FirstOrDefault(forecast =>
+            forecast.DaysUntilFull <= StorageForecastHorizonDays);
+
+        if (soonest is not { DaysUntilFull: int days, BytesPerDay: double bytesPerDay })
+        {
+            StorageForecastText = string.Empty;
+            StorageForecastDetail = string.Empty;
+
+            return;
+        }
+
+        StorageForecastText = days switch
+        {
+            < 1 => AppResources.StorageFullWithinADay,
+            < 60 => string.Format(AppResources.StorageFullInDays, days),
+            _ => string.Format(AppResources.StorageFullInMonths, (int)Math.Round(days / 30.0)),
+        };
+
+        StorageForecastDetail = string.Format(
+            AppResources.StorageForecastDetail,
+            string.Join(", ", soonest.DriveNames),
+            (-bytesPerDay / 1_000_000_000).ToString("F1"),
+            StorageUsageHelper.FormatCombined(soonest.TotalBytes - soonest.FreeBytes, soonest.TotalBytes));
+    }
+
+    private const int StorageForecastHorizonDays = 365;
+
     private int _totalsRequest;
 
     private async Task RefreshTotalsAsync()
@@ -714,6 +777,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(this, (r, m) =>
         {
             _ = FetchDriveGroupsAsync();
+        });
+
+        WeakReferenceMessenger.Default.Register<StorageSamplesRecordedMessage>(this, (r, m) =>
+        {
+            _ = FetchStorageForecastsAsync();
         });
 
         WeakReferenceMessenger.Default.Register<DriveAttemptFailedMessage>(this, (r, m) =>

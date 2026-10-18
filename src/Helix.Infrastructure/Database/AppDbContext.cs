@@ -3,6 +3,7 @@ using Helix.Domain.Auditlogs;
 using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Helix.Domain.Schedules;
+using Helix.Domain.Storage;
 using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using Helix.Infrastructure.Cryptography;
@@ -27,6 +28,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork, IDbContext
     public DbSet<DriveGroup> DriveGroups { get; init; }
 
     public DbSet<Schedule> Schedules { get; init; }
+
+    public DbSet<StorageSample> StorageSamples { get; init; }
 
     public DbSet<Settings> Settings { get; init; }
 

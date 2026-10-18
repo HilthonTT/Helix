@@ -15,7 +15,7 @@ namespace Helix.Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
             modelBuilder.Entity("Helix.Domain.Auditlogs.Auditlog", b =>
                 {
@@ -259,6 +259,45 @@ namespace Helix.Infrastructure.Migrations
                     b.ToTable("Settings", (string)null);
                 });
 
+            modelBuilder.Entity("Helix.Domain.Storage.StorageSample", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("FreeBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Letters")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("RecordedOnUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("TotalBytes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VolumeId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Day");
+
+                    b.HasIndex("UserId", "VolumeId", "Day")
+                        .IsUnique();
+
+                    b.ToTable("StorageSamples", (string)null);
+                });
+
             modelBuilder.Entity("Helix.Domain.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -338,6 +377,15 @@ namespace Helix.Infrastructure.Migrations
                     b.HasOne("Helix.Domain.Users.User", null)
                         .WithOne()
                         .HasForeignKey("Helix.Domain.Settings.Settings", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Helix.Domain.Storage.StorageSample", b =>
+                {
+                    b.HasOne("Helix.Domain.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
