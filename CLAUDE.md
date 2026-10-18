@@ -1837,6 +1837,12 @@ The XAML, viewmodels, converters and behaviours are shared verbatim; only these 
   "reconnect at sign-in" switch is hidden rather than shown-and-ignored on macOS.
 - `Behaviors/Hover` (hand cursor) and `Services/ModalHost` (Escape-to-dismiss) — Windows
   only, no-ops elsewhere.
+- `AppShell` — on Windows it clears the visual-state transitions of the `SplitView` inside
+  Shell's `NavigationView` once the platform view loads. The sign-in pages run with the
+  flyout `Disabled` and the session switches it to `Locked`, which takes the pane from
+  closed to open-inline. WinUI animates that, so the first page after signing in slid the
+  sidebar in and reflowed the page under it. Without the transitions the pane snaps into
+  place.
 
 The `LoginPage`/`RegisterPage` Ctrl+Enter shortcut used to be in that list and no longer
 is. The hook is started once in `MauiProgram` and both pages subscribe to the singleton,

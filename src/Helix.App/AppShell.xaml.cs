@@ -51,6 +51,10 @@ public sealed partial class AppShell : Shell
         Navigated += OnNavigated;
         FlyoutBehavior = FlyoutBehavior.Disabled;
 
+#if WINDOWS
+        HandlerChanged += OnHandlerChanged;
+#endif
+
         InitRoutes();
         RegisterMessages();
     }
@@ -372,6 +376,70 @@ public sealed partial class AppShell : Shell
 
         OnPropertyChanged();
     }
+
+#if WINDOWS
+    private void OnHandlerChanged(object? sender, EventArgs e)
+    {
+        if (Handler?.PlatformView is not Microsoft.UI.Xaml.FrameworkElement view)
+        {
+            return;
+        }
+
+        view.Loaded += OnPlatformViewLoaded;
+    }
+
+    private static void OnPlatformViewLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        var view = (Microsoft.UI.Xaml.FrameworkElement)sender;
+        view.Loaded -= OnPlatformViewLoaded;
+
+        try
+        {
+            Microsoft.UI.Xaml.Controls.SplitView? splitView = FindDescendant<Microsoft.UI.Xaml.Controls.SplitView>(view);
+            if (splitView is null || Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(splitView) == 0)
+            {
+                return;
+            }
+
+            if (Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(splitView, 0) is not Microsoft.UI.Xaml.FrameworkElement root)
+            {
+                return;
+            }
+
+            foreach (Microsoft.UI.Xaml.VisualStateGroup group in Microsoft.UI.Xaml.VisualStateManager.GetVisualStateGroups(root))
+            {
+                group.Transitions.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<AppShell>().LogDebug(ex, "The sidebar's pane transitions could not be removed.");
+        }
+    }
+
+    private static T? FindDescendant<T>(Microsoft.UI.Xaml.DependencyObject parent)
+        where T : Microsoft.UI.Xaml.DependencyObject
+    {
+        int count = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent);
+
+        for (int i = 0; i < count; i++)
+        {
+            Microsoft.UI.Xaml.DependencyObject child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
+
+            if (child is T match)
+            {
+                return match;
+            }
+
+            if (FindDescendant<T>(child) is T nested)
+            {
+                return nested;
+            }
+        }
+
+        return null;
+    }
+#endif
 
     private void SyncSelection(string route)
     {
