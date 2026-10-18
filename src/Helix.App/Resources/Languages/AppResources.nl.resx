@@ -555,10 +555,10 @@
     <value>Er is iets misgegaan.</value>
   </data>
   <data name="DrivesExported" xml:space="preserve">
-    <value>Je schijven zijn geëxporteerd.</value>
+    <value>Je schijven, groepen en schema's zijn geëxporteerd.</value>
   </data>
   <data name="DrivesImported" xml:space="preserve">
-    <value>Je schijven zijn geïmporteerd.</value>
+    <value>Je schijven, groepen en schema's zijn geïmporteerd.</value>
   </data>
   <data name="PasswordUpdated" xml:space="preserve">
     <value>Je wachtwoord is bijgewerkt.</value>

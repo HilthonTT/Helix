@@ -555,10 +555,10 @@
     <value>Terjadi kesalahan.</value>
   </data>
   <data name="DrivesExported" xml:space="preserve">
-    <value>Drive Anda telah diekspor.</value>
+    <value>Drive, grup, dan jadwal Anda telah diekspor.</value>
   </data>
   <data name="DrivesImported" xml:space="preserve">
-    <value>Drive Anda telah diimpor.</value>
+    <value>Drive, grup, dan jadwal Anda telah diimpor.</value>
   </data>
   <data name="PasswordUpdated" xml:space="preserve">
     <value>Kata sandi Anda telah diperbarui.</value>

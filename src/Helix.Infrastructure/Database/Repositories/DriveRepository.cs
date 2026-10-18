@@ -37,22 +37,6 @@ internal sealed class DriveRepository(AppDbContext context) : IDriveRepository
             .FirstOrDefaultAsync(d => d.Id == driveId, cancellationToken);
     }
 
-
-    public Task<List<string>> GetExistingDriveLettersAsync(
-        List<Drive> drives,
-        Guid userId,
-        CancellationToken cancellationToken = default)
-    {
-        IEnumerable<string> distinctLetters = drives
-            .Select(d => d.Letter.ToUpperInvariant())
-            .Distinct();
-
-        return context.Drives
-            .Where(d => distinctLetters.Contains(d.Letter) && d.UserId == userId)
-            .Select(d => d.Letter)
-            .ToListAsync(cancellationToken);
-    }
-
     public async Task<bool> IsLetterUniqueAsync(string letter, Guid userId, CancellationToken cancellationToken = default)
     {
         string driveLetter = letter.ToUpperInvariant();

@@ -13,6 +13,7 @@ using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Storage;
 using Helix.Application.Features.DriveGroups.Queries;
 using Helix.Application.Features.Drives.Commands;
+using Helix.Application.Features.Drives.Contracts;
 using Helix.Application.Features.Drives.Queries;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
@@ -311,7 +312,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private async Task ImportDrivesAsync()
     {
-        Result<List<Drive>> result = await ScopedHandler.HandleAsync((ImportDrives h) => h.Handle());
+        Result<VaultImport> result = await ScopedHandler.HandleAsync((ImportDrives h) => h.Handle());
         if (result.IsFailure)
         {
             await DisplayErrorAsync(result.Error);
@@ -320,7 +321,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         await DisplaySuccessAsync(AppResources.DrivesImported);
 
-        List<Drive> drives = result.Value;
+        if (result.Value.GroupCount != 0)
+        {
+            WeakReferenceMessenger.Default.Send(new DriveGroupsChangedMessage());
+        }
+
+        List<Drive> drives = result.Value.Drives;
 
         if (drives.Count != 0)
         {

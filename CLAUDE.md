@@ -755,8 +755,8 @@ would hide a missing `PRAGMA foreign_keys`.
 
 Each run says what it did, through the tray balloon when the icon is up and the banner
 otherwise — the `HotkeyService` rule. A scheduled disconnect that just happens, with nothing
-said, reads as the NAS falling over. Schedules are not exported with the drives; groups are
-not either.
+said, reads as the NAS falling over. Schedules and groups travel in the vault with the drives
+(see **What the vault carries**).
 
 ### Importing over live mappings
 
@@ -771,6 +771,24 @@ survive an update, so the drives are up before the records that describe them ar
 and treating them as taken meant a vault of thirteen drives imported nothing until every
 share had been disconnected by hand. A vault that ends up importing nothing is reported as
 `JsonErrors.NothingToImport` rather than announced as a success.
+
+#### What the vault carries
+
+A vault is a `VaultContents` — `Version`, the drives, the groups and the schedules — rather than
+the bare drive list it used to be, and `ImportDrives` still reads that list (a JSON array is
+version 1). Groups and schedules could not travel as they are stored, because both are keyed by
+ids that mean nothing on another machine: a group carries its members' **letters**, a schedule
+its group's **name** (`null` for every drive), and import maps them back onto the drives and
+groups that exist after the drives are in. That is what makes a group naming a drive the
+machine already had point at that drive, rather than at nothing.
+
+A group whose name is taken (case-insensitively, as `IsNameUniqueAsync` compares) is skipped,
+not merged; a schedule identical to an existing one, or naming a group that is in neither the
+vault nor the database, is skipped; nothing new at all is still `NothingToImport`. A vault with a
+higher `Version` than the build knows is `VaultUnsupportedVersion` — and an **older** build
+reads a version-2 vault as invalid drive data, which is the price of an object at the top level.
+Schedules keep their switched-off state; their run and edit stamps are not carried, so an
+imported schedule waits for its next occurrence like any newly saved one.
 
 `INasConnector` answers two different questions about a letter, and they must not be
 confused. `IsMountedFrom` is "this letter **points at** this drive's share", and on Windows

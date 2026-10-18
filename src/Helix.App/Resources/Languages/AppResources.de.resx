@@ -555,10 +555,10 @@
     <value>Etwas ist schiefgelaufen.</value>
   </data>
   <data name="DrivesExported" xml:space="preserve">
-    <value>Ihre Laufwerke wurden exportiert.</value>
+    <value>Ihre Laufwerke, Gruppen und Zeitpläne wurden exportiert.</value>
   </data>
   <data name="DrivesImported" xml:space="preserve">
-    <value>Ihre Laufwerke wurden importiert.</value>
+    <value>Ihre Laufwerke, Gruppen und Zeitpläne wurden importiert.</value>
   </data>
   <data name="PasswordUpdated" xml:space="preserve">
     <value>Ihr Passwort wurde aktualisiert.</value>

@@ -555,10 +555,10 @@
     <value>問題が発生しました。</value>
   </data>
   <data name="DrivesExported" xml:space="preserve">
-    <value>ドライブをエクスポートしました。</value>
+    <value>ドライブ、グループ、スケジュールをエクスポートしました。</value>
   </data>
   <data name="DrivesImported" xml:space="preserve">
-    <value>ドライブをインポートしました。</value>
+    <value>ドライブ、グループ、スケジュールをインポートしました。</value>
   </data>
   <data name="PasswordUpdated" xml:space="preserve">
     <value>パスワードを更新しました。</value>

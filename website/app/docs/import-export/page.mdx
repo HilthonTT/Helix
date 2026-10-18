@@ -2,7 +2,7 @@ export const metadata = { title: "Import & export" };
 
 # Import & export
 
-Your drives can be saved to a single encrypted file, a **vault**, and restored from it — on this computer after a reinstall, or on another one, Windows or Mac.
+Your drives, groups and schedules can be saved to a single encrypted file, a **vault**, and restored from it — on this computer after a reinstall, or on another one, Windows or Mac.
 
 ## Exporting
 
@@ -24,6 +24,8 @@ Press **Import Drives**, or <Kbd>Ctrl</Kbd>+<Kbd>I</Kbd>, pick the `.helixvault`
 - A drive whose letter you already have a drive on is skipped.
 - A drive whose letter is in use by something else on this computer — a USB stick, another mapping — is skipped.
 - A drive whose letter is **already mapped to that same share** is imported. That is the usual state after a reinstall: the Windows mappings survived, and the vault brings back the records that describe them.
+- A group whose name you already have is skipped. Its members are matched by letter, so a group naming a drive you already had points at that drive.
+- A schedule you already have — same group, action, time and days — is skipped, as is one whose group is not in the vault or on this computer.
 - If nothing could be imported, Helix says so rather than reporting success.
 - A wrong passphrase or a damaged file imports nothing.
 
@@ -31,16 +33,20 @@ Press **Import Drives**, or <Kbd>Ctrl</Kbd>+<Kbd>I</Kbd>, pick the `.helixvault`
 
 | In the vault | Not in the vault |
 | --- | --- |
-| letter, share name and NAS address | groups |
-| username and password | schedules |
-| **Connect automatically**, **Reconnect at Windows sign-in**, **Connect using the server name** | settings and theme |
-| away address | the audit log |
-| Wake-on-LAN hardware address | your Helix account and recovery key |
+| letter, share name and NAS address | settings and theme |
+| username and password | the audit log and storage history |
+| **Connect automatically**, **Reconnect at Windows sign-in**, **Connect using the server name** | your Helix account and recovery key |
+| away address | |
+| Wake-on-LAN hardware address | |
 | home network pin | |
+| groups, by name and member letters | |
+| schedules, including whether each is switched off | |
 
 The home network pin is the router's hardware address, which is just as valid on another computer on the same network, so pinned drives stay pinned after a restore.
 
 An away address or hardware address that is not valid is dropped on import rather than failing the drive.
+
+Vaults written before groups and schedules travelled still import. A vault written by this version cannot be opened by an older Helix, which reports it as invalid — update first.
 
 ## Moving between Windows and macOS
 
@@ -51,4 +57,4 @@ A vault exported on one platform imports on the other. On a Mac, a drive's lette
 1. Export a vault on the old computer.
 2. [Install](/docs/installation/) Helix on the new one and register an account.
 3. Import the vault.
-4. Recreate your [groups](/docs/groups/) and [schedules](/docs/schedules/), and set your [preferences](/docs/settings/).
+4. Set your [preferences](/docs/settings/). Your [groups](/docs/groups/) and [schedules](/docs/schedules/) came across with the drives.

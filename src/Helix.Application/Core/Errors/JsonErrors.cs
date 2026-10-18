@@ -22,5 +22,5 @@ public static class JsonErrors
 
     public static readonly Error NothingToImport = Error.Problem(
         "Vault.NothingToImport",
-        "Nothing was imported: every drive in this file already exists, or its letter is mapped to something else.");
+        "Nothing was imported: everything in this file already exists, or its drive letters are mapped to something else.");
 }

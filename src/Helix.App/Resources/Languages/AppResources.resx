@@ -555,10 +555,10 @@
     <value>Something went wrong.</value>
   </data>
   <data name="DrivesExported" xml:space="preserve">
-    <value>Your drives have been exported.</value>
+    <value>Your drives, groups and schedules have been exported.</value>
   </data>
   <data name="DrivesImported" xml:space="preserve">
-    <value>Your drives have been imported.</value>
+    <value>Your drives, groups and schedules have been imported.</value>
   </data>
   <data name="PasswordUpdated" xml:space="preserve">
     <value>Your password has been updated.</value>
