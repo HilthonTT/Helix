@@ -1,4 +1,5 @@
 using Helix.App.Resources.Languages;
+using Helix.App.Services;
 using Helix.Application.Abstractions.Connector;
 
 namespace Helix.App.Common;
@@ -29,11 +30,13 @@ internal static class DisconnectConfirmation
                 string.Format(AppResources.DisconnectInUse, string.Join(", ", inUse));
         }
 
-        return await Shell.Current.DisplayAlertAsync(
+        bool confirmed = await Shell.Current.DisplayAlertAsync(
             AppResources.DisconnectConfirmTitle,
             message,
             AppResources.Disconnect,
             AppResources.Cancel);
+
+        return confirmed && !IdleLockService.ScreenLocked;
     }
 
     private static Task<IReadOnlyList<string>> InUseAsync(IReadOnlyCollection<string> letters)

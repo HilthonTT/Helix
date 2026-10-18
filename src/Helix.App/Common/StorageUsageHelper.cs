@@ -1,4 +1,6 @@
-﻿namespace Helix.App.Common;
+﻿using System.Collections.Concurrent;
+
+namespace Helix.App.Common;
 
 public static class StorageUsageHelper
 {
@@ -6,15 +8,36 @@ public static class StorageUsageHelper
 
     private static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(3);
 
-    public static Task<string> GetStorageUsageAsync(
+    // A reading still running for a path is shared rather than started again. DriveInfo on a
+    // share whose NAS has died blocks for the SMB timeout and the cap only abandons it, and a
+    // row refreshes on every connectivity message — so thirteen dead shares and a few presses of
+    // "connect all" used to park a blocked pool thread per row per press.
+    private static readonly ConcurrentDictionary<string, Task<string>> InFlight = new(StringComparer.OrdinalIgnoreCase);
+
+    public static async Task<string> GetStorageUsageAsync(
         string driveLetter,
         string driveNotReadyMessage = "Drive not ready",
         string invalidDriveMessage = "Invalid drive letter",
         string usedOfFormat = DefaultUsedOfFormat)
     {
-        return ProbeAsync(
-            () => GetStorageUsage(driveLetter, driveNotReadyMessage, invalidDriveMessage, usedOfFormat),
-            driveNotReadyMessage);
+        string key = string.Join('|', driveLetter, driveNotReadyMessage, invalidDriveMessage, usedOfFormat);
+
+        Task<string> reading = InFlight.GetOrAdd(key, _ =>
+        {
+            Task<string> started = Task.Run(() => GetStorageUsage(driveLetter, driveNotReadyMessage, invalidDriveMessage, usedOfFormat));
+            started.ContinueWith(_ => InFlight.TryRemove(key, out Task<string>? _), TaskScheduler.Default);
+
+            return started;
+        });
+
+        try
+        {
+            return await reading.WaitAsync(ProbeTimeout);
+        }
+        catch (Exception)
+        {
+            return driveNotReadyMessage;
+        }
     }
 
     private const string DefaultUsedOfFormat = "{0} TB used of {1} TB";

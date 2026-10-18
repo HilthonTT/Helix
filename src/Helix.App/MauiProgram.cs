@@ -89,7 +89,13 @@ public static class MauiProgram
 
                     WindowBounds bounds = WindowSizing.Calculate(displayBounds.Width, displayBounds.Height);
 
-                    appWindow.MoveAndResize(new RectInt32(bounds.X, bounds.Y, bounds.Width, bounds.Height));
+                    // The work area is not at the origin on a secondary monitor, or with the
+                    // taskbar docked at the top or left, and the sizing rule only knows its size.
+                    appWindow.MoveAndResize(new RectInt32(
+                        displayBounds.X + bounds.X,
+                        displayBounds.Y + bounds.Y,
+                        bounds.Width,
+                        bounds.Height));
 
                     appWindow.Closing += OnWindowClosing;
 

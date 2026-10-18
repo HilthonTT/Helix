@@ -194,6 +194,25 @@ public class ScheduleTests
         schedule.DueOccurrence(FirstHalfPastTwo.AddMinutes(11), CentralEurope, Grace).Should().BeNull();
     }
 
+    // 02:00 to 03:00 never happens on 29 March 2026 in Central Europe; the gap ends at 01:00Z.
+    private static readonly DateTime EndOfSpringGap = new(2026, 3, 29, 1, 0, 0, DateTimeKind.Utc);
+
+    [Fact]
+    public void DueOccurrence_Should_BeTheEndOfTheGap_ForATimeTheClocksSkip()
+    {
+        Schedule schedule = GivenSchedule("02:45", ScheduleDays.Sunday, createdOnUtc: EndOfSpringGap.AddDays(-7));
+
+        schedule.DueOccurrence(EndOfSpringGap.AddMinutes(1), CentralEurope, Grace).Should().Be(EndOfSpringGap);
+    }
+
+    [Fact]
+    public void DueOccurrence_Should_BeNothing_WhenSavedAfterTheGap_ThatSkippedIt()
+    {
+        Schedule schedule = GivenSchedule("02:45", ScheduleDays.Sunday, createdOnUtc: EndOfSpringGap.AddMinutes(5));
+
+        schedule.DueOccurrence(EndOfSpringGap.AddMinutes(6), CentralEurope, Grace).Should().BeNull();
+    }
+
     [Fact]
     public void DueOccurrence_Should_FollowTheLocalDate_AcrossMidnight()
     {

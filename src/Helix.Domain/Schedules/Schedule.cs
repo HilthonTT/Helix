@@ -130,9 +130,12 @@ public sealed class Schedule : Entity, IAuditable
 
     private static DateTime ToUtc(DateTime local, TimeZoneInfo zone)
     {
+        // A time the spring-forward skips runs at the end of the gap. Offset changes are
+        // minute-aligned, so a minute step lands on it exactly; a larger one overshot it, and a
+        // schedule saved just after the gap could then come out later than its edit and fire.
         while (zone.IsInvalidTime(local))
         {
-            local = local.AddMinutes(30);
+            local = local.AddMinutes(1);
         }
 
         // In the hour a fall-back repeats, ConvertTimeToUtc picks the later instant; the earlier

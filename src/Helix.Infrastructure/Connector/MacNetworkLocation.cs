@@ -1,5 +1,6 @@
 #if MACCATALYST
 using Helix.Application.Abstractions.Connector;
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Globalization;
@@ -25,6 +26,11 @@ internal sealed class MacNetworkLocation(
     private static readonly TimeSpan CommandTimeout = TimeSpan.FromSeconds(2);
 
     private readonly Lock _gate = new();
+
+    // A gateway's hardware address as last read this session. A reading that misses ARP once —
+    // after a resume, or on a Mac whose ARP cache entry has expired — would otherwise be a
+    // different network id and put every pinned drive "Away" on its own network.
+    private readonly ConcurrentDictionary<string, string> _hardwareByGateway = new();
 
     private Task<NetworkLocation?>? _reading;
     private DateTime _expiresAtUtc;
@@ -79,6 +85,15 @@ internal sealed class MacNetworkLocation(
             string? arp = await RunAsync(ArpPath, "-n", gateway.ToString());
             string? hardware = arp is null ? null : HardwareAddressIn(arp);
 
+            if (hardware is not null)
+            {
+                _hardwareByGateway[gateway.ToString()] = hardware;
+            }
+            else
+            {
+                _hardwareByGateway.TryGetValue(gateway.ToString(), out hardware);
+            }
+
             string id = hardware is null ? $"gateway-ip:{gateway}" : $"gateway:{hardware}";
 
             return new NetworkLocation(id, networkInterface ?? gateway.ToString());
@@ -93,10 +108,9 @@ internal sealed class MacNetworkLocation(
 
     internal static (IPAddress Gateway, string Interface)? PhysicalDefaultRouteIn(string netstatOutput)
     {
-        foreach (string line in netstatOutput.Split('
-'))
+        foreach (string line in netstatOutput.Split('\n'))
         {
-            string[] columns = line.Split([' ', '	'], StringSplitOptions.RemoveEmptyEntries);
+            string[] columns = line.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
 
             if (columns.Length < 4 || !columns[0].Equals("default", StringComparison.Ordinal))
             {

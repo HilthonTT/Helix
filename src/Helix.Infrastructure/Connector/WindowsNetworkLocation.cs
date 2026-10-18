@@ -1,4 +1,5 @@
 using Helix.Application.Abstractions.Connector;
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -18,6 +19,11 @@ internal sealed class WindowsNetworkLocation(
     private static readonly IPAddress RoutingProbe = IPAddress.Parse("8.8.8.8");
 
     private readonly Lock _gate = new();
+
+    // A gateway's hardware address as last read this session. A reading that misses ARP once —
+    // after a resume, or on a Mac whose ARP cache entry has expired — would otherwise be a
+    // different network id and put every pinned drive "Away" on its own network.
+    private readonly ConcurrentDictionary<string, string> _hardwareByGateway = new();
 
     private Task<NetworkLocation?>? _reading;
     private DateTime _expiresAtUtc;
@@ -60,6 +66,15 @@ internal sealed class WindowsNetworkLocation(
             }
 
             string? hardware = HardwareAddressOf(gateway);
+
+            if (hardware is not null)
+            {
+                _hardwareByGateway[gateway.ToString()] = hardware;
+            }
+            else
+            {
+                _hardwareByGateway.TryGetValue(gateway.ToString(), out hardware);
+            }
 
             string id = hardware is null ? $"gateway-ip:{gateway}" : $"gateway:{hardware}";
 

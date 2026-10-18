@@ -50,8 +50,16 @@ internal sealed class ModalHost
             return;
         }
 
-        if (_current is string open)
+        // A loop rather than one hide: another ShowAsync can open its sheet while this one waits
+        // out the close animation, and taking over from it unhidden left that sheet on screen and
+        // the open count one too high for good, which switched off every row shortcut.
+        while (_current is string open)
         {
+            if (open == key)
+            {
+                return;
+            }
+
             await HideAsync(open);
         }
 
@@ -91,9 +99,15 @@ internal sealed class ModalHost
             Interlocked.Decrement(ref _openCount);
         }
 
-        _scrim.InputTransparent = true;
+        // A late hide of a sheet that is no longer the one showing must leave the scrim alone,
+        // or the open sheet is left with clicks passing through to the page under it.
+        if (_current is null)
+        {
+            _scrim.InputTransparent = true;
 
-        _ = _scrim.FadeToAsync(0, CloseMs, Easing.CubicIn);
+            _ = _scrim.FadeToAsync(0, CloseMs, Easing.CubicIn);
+        }
+
         _ = target.Content.ScaleToAsync(0.97, CloseMs, Easing.CubicIn);
         _ = target.Content.TranslateToAsync(0, 10, CloseMs, Easing.CubicIn);
 

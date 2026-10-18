@@ -245,7 +245,7 @@ internal sealed partial class SettingsViewModel : BaseViewModel
                 return;
             }
 
-            if (choice == AppResources.UpdateInstall)
+            if (choice == AppResources.UpdateInstall && !IdleLockService.ScreenLocked)
             {
                 await InstallAsync(check);
             }
@@ -283,7 +283,7 @@ internal sealed partial class SettingsViewModel : BaseViewModel
             AppResources.UpdateInstallNow,
             AppResources.Cancel);
 
-        if (!install)
+        if (!install || IdleLockService.ScreenLocked)
         {
             return;
         }

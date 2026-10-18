@@ -27,6 +27,14 @@ internal sealed class IdleLockService
 
     public bool IsLocked { get; private set; }
 
+    /// <summary>
+    /// Whether the lock is up right now. Locking navigates to the lock page but cannot close a
+    /// native dialog already on screen, so an answer to one — a passphrase, a disconnect, an
+    /// install — is only acted on when this is false once it comes back; otherwise anyone at
+    /// the unattended keyboard could answer it from behind the lock.
+    /// </summary>
+    public static bool ScreenLocked => App.ServiceProvider?.GetService<IdleLockService>()?.IsLocked == true;
+
     public void Start()
     {
         if (_cancellation is not null || !_idleTime.IsSupported)

@@ -147,9 +147,13 @@ public sealed class ImportDrives(
 
         List<DriveGroup> newGroups = ComposeGroups(contents.Groups ?? [], existingGroups, driveIdsByLetter);
 
-        Dictionary<string, Guid> groupIdsByName = existingGroups
-            .Concat(newGroups)
-            .ToDictionary(g => g.Name, g => g.Id, StringComparer.OrdinalIgnoreCase);
+        // The database only folds ASCII case when it keeps names unique, so "Büro" and "BÜRO"
+        // can both exist; ToDictionary threw on them and failed every import.
+        Dictionary<string, Guid> groupIdsByName = new(StringComparer.OrdinalIgnoreCase);
+        foreach (DriveGroup group in existingGroups.Concat(newGroups))
+        {
+            groupIdsByName.TryAdd(group.Name, group.Id);
+        }
 
         List<Schedule> existingSchedules = await scheduleRepository.GetAsNoTrackingAsync(
             loggedInUser.UserId,

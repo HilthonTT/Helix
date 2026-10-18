@@ -5,6 +5,7 @@ using Helix.App.Messaging.Navigation;
 using Helix.App.Messaging.Updates;
 using Helix.App.Messaging.Users;
 using Helix.App.Models;
+using Helix.App.Resources.Languages;
 using Helix.App.Services;
 using Helix.App.ViewModels;
 using Helix.App.Views.Auditlogs;
@@ -273,10 +274,33 @@ public sealed partial class AppShell : Shell
             return;
         }
 
-        await shell.GoToAsync($"//{_selectedRoute}");
+        try
+        {
+            await shell.GoToAsync($"//{_selectedRoute}");
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<AppShell>().LogError(ex, "The sidebar could not navigate to {Route}.", _selectedRoute);
+
+            Notifier.Error(AppResources.UnexpectedError);
+        }
     }
 
     private async void OnLogout(object? sender, TappedEventArgs e)
+    {
+        try
+        {
+            await LogoutAsync();
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<AppShell>().LogError(ex, "Signing out failed.");
+
+            Notifier.Error(AppResources.UnexpectedError);
+        }
+    }
+
+    private static async Task LogoutAsync()
     {
         Result result = await ScopedHandler.HandleAsync((LogoutUser h) => h.Handle());
         if (result.IsFailure)

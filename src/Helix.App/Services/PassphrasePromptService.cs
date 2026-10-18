@@ -24,7 +24,7 @@ internal sealed class PassphrasePromptService : IPassphrasePrompt
             maxLength: MaxLength,
             keyboard: Keyboard.Text);
 
-        if (string.IsNullOrWhiteSpace(first))
+        if (string.IsNullOrWhiteSpace(first) || IdleLockService.ScreenLocked)
         {
             return null;
         }
@@ -38,7 +38,7 @@ internal sealed class PassphrasePromptService : IPassphrasePrompt
             maxLength: MaxLength,
             keyboard: Keyboard.Text);
 
-        if (string.IsNullOrWhiteSpace(second))
+        if (string.IsNullOrWhiteSpace(second) || IdleLockService.ScreenLocked)
         {
             return null;
         }
@@ -72,6 +72,6 @@ internal sealed class PassphrasePromptService : IPassphrasePrompt
             maxLength: MaxLength,
             keyboard: Keyboard.Text);
 
-        return string.IsNullOrWhiteSpace(passphrase) ? null : passphrase;
+        return string.IsNullOrWhiteSpace(passphrase) || IdleLockService.ScreenLocked ? null : passphrase;
     }
 }

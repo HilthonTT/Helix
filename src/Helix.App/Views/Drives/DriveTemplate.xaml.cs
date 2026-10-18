@@ -41,6 +41,15 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
     {
         drive.Connected = drive.IsUp(_nasConnector, _nasConnector.GetLiveLetters());
 
+        // A drive that is down has nothing to measure, and asking DriveInfo about a remembered
+        // mapping blocks a pool thread for the SMB timeout.
+        if (!drive.Connected)
+        {
+            drive.StorageUsage = AppResources.DriveNotReady;
+
+            return;
+        }
+
         _ = RefreshStorageUsageAsync(drive);
     }
 
