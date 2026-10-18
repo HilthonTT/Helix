@@ -186,18 +186,25 @@ internal sealed partial class DriveDisplay : ObservableObject
     /// on it, or a remembered mapping whose restore failed — is not the drive being connected.
     /// </summary>
     public bool IsUp(INasConnector nasConnector, HashSet<string> liveLetters) =>
-        !string.IsNullOrWhiteSpace(Letter) && liveLetters.Contains(Letter) && nasConnector.IsLiveFrom(Probe());
+        CanProbe && liveLetters.Contains(Letter) && nasConnector.IsLiveFrom(Probe());
 
     /// <summary>
     /// Whether this drive's letter points at its own share, remembered or live — what a
     /// disconnect would take down.
     /// </summary>
     public bool IsMapped(INasConnector nasConnector, HashSet<string> presentLetters) =>
-        !string.IsNullOrWhiteSpace(Letter) && presentLetters.Contains(Letter) && nasConnector.IsMountedFrom(Probe());
+        CanProbe && presentLetters.Contains(Letter) && nasConnector.IsMountedFrom(Probe());
+
+    // What Drive's constructor insists on; a row missing any of it cannot be anybody's share.
+    private bool CanProbe =>
+        Letter?.Trim().Length == 1 && !string.IsNullOrWhiteSpace(Host) && !string.IsNullOrWhiteSpace(Name);
+
+    // A Drive refuses an empty user id; the probe is never saved, so any id will do.
+    private static readonly Guid ProbeOwner = Guid.NewGuid();
 
     private Drive Probe()
     {
-        var probe = Drive.Create(Guid.Empty, Letter, Host, Name, "-", "-");
+        var probe = Drive.Create(ProbeOwner, Letter, Host, Name, "-", "-");
         probe.ReachAwayAt(RemoteHost);
 
         return probe;
