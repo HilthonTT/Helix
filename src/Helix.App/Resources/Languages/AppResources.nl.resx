@@ -1094,4 +1094,55 @@
   <data name="DurationHours" xml:space="preserve">
     <value>{0} u</value>
   </data>
+  <data name="LinkConfirmTitle" xml:space="preserve">
+    <value>Een link vroeg Helix dit te doen</value>
+  </data>
+  <data name="LinkConfirmDisconnectAll" xml:space="preserve">
+    <value>Alle schijven loskoppelen? Wat je erop open hebt, kan mogelijk niet worden opgeslagen.</value>
+  </data>
+  <data name="LinkConfirmDisconnect" xml:space="preserve">
+    <value>{0} loskoppelen? Wat je erop open hebt, kan mogelijk niet worden opgeslagen.</value>
+  </data>
+  <data name="LinkConfirmDisconnectGroup" xml:space="preserve">
+    <value>De groep {0} loskoppelen? Wat je op de schijven ervan open hebt, kan mogelijk niet worden opgeslagen.</value>
+  </data>
+  <data name="LinkConfirmQuit" xml:space="preserve">
+    <value>Helix sluiten? Zolang het gesloten is, worden schijven niet meer opnieuw verbonden.</value>
+  </data>
+  <data name="LinkConnected" xml:space="preserve">
+    <value>{0} is verbonden.</value>
+  </data>
+  <data name="LinkDisconnected" xml:space="preserve">
+    <value>{0} is losgekoppeld.</value>
+  </data>
+  <data name="LinkStatus" xml:space="preserve">
+    <value>{0} van de {1} schijven zijn verbonden.</value>
+  </data>
+  <data name="LinkNoDrives" xml:space="preserve">
+    <value>Er zijn nog geen schijven.</value>
+  </data>
+  <data name="LinkNoDrive" xml:space="preserve">
+    <value>Geen schijf heet {0}. Gebruik een letter zoals Z, of de naam van de schijf.</value>
+  </data>
+  <data name="LinkAmbiguousDrive" xml:space="preserve">
+    <value>Meer dan één schijf heet {0} ({1}). Gebruik in plaats daarvan de letter.</value>
+  </data>
+  <data name="LinkNoGroup" xml:space="preserve">
+    <value>Geen schijvengroep heet {0}.</value>
+  </data>
+  <data name="LinkNeedsTarget" xml:space="preserve">
+    <value>De link zegt niet welke schijf of groep, bijvoorbeeld helix://connect/Z.</value>
+  </data>
+  <data name="LinkNotSignedIn" xml:space="preserve">
+    <value>Een link vroeg Helix iets te doen, maar niemand is aangemeld.</value>
+  </data>
+  <data name="LinkLocked" xml:space="preserve">
+    <value>Een link vroeg Helix iets te doen terwijl het vergrendeld is. Ontgrendel het en probeer het opnieuw.</value>
+  </data>
+  <data name="LinkUnknown" xml:space="preserve">
+    <value>Helix begrijpt de link {0} niet.</value>
+  </data>
+  <data name="LinkFailed" xml:space="preserve">
+    <value>Helix kon niet doen wat de link vroeg. De details staan in het logboek.</value>
+  </data>
 </root>

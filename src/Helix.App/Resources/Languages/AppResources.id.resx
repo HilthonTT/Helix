@@ -1094,4 +1094,55 @@
   <data name="DurationHours" xml:space="preserve">
     <value>{0} jam</value>
   </data>
+  <data name="LinkConfirmTitle" xml:space="preserve">
+    <value>Sebuah tautan meminta Helix melakukan ini</value>
+  </data>
+  <data name="LinkConfirmDisconnectAll" xml:space="preserve">
+    <value>Putuskan semua drive? File yang Anda buka di drive tersebut mungkin gagal disimpan.</value>
+  </data>
+  <data name="LinkConfirmDisconnect" xml:space="preserve">
+    <value>Putuskan {0}? File yang Anda buka di sana mungkin gagal disimpan.</value>
+  </data>
+  <data name="LinkConfirmDisconnectGroup" xml:space="preserve">
+    <value>Putuskan grup {0}? File yang Anda buka di drive-nya mungkin gagal disimpan.</value>
+  </data>
+  <data name="LinkConfirmQuit" xml:space="preserve">
+    <value>Tutup Helix? Drive tidak akan disambungkan ulang selama Helix ditutup.</value>
+  </data>
+  <data name="LinkConnected" xml:space="preserve">
+    <value>{0} tersambung.</value>
+  </data>
+  <data name="LinkDisconnected" xml:space="preserve">
+    <value>{0} terputus.</value>
+  </data>
+  <data name="LinkStatus" xml:space="preserve">
+    <value>{0} dari {1} drive tersambung.</value>
+  </data>
+  <data name="LinkNoDrives" xml:space="preserve">
+    <value>Belum ada drive.</value>
+  </data>
+  <data name="LinkNoDrive" xml:space="preserve">
+    <value>Tidak ada drive bernama {0}. Gunakan huruf seperti Z, atau nama drive.</value>
+  </data>
+  <data name="LinkAmbiguousDrive" xml:space="preserve">
+    <value>Lebih dari satu drive bernama {0} ({1}). Gunakan hurufnya.</value>
+  </data>
+  <data name="LinkNoGroup" xml:space="preserve">
+    <value>Tidak ada grup drive bernama {0}.</value>
+  </data>
+  <data name="LinkNeedsTarget" xml:space="preserve">
+    <value>Tautan tidak menyebutkan drive atau grup, misalnya helix://connect/Z.</value>
+  </data>
+  <data name="LinkNotSignedIn" xml:space="preserve">
+    <value>Sebuah tautan meminta Helix melakukan sesuatu, tetapi belum ada yang masuk.</value>
+  </data>
+  <data name="LinkLocked" xml:space="preserve">
+    <value>Sebuah tautan meminta Helix melakukan sesuatu saat terkunci. Buka kuncinya, lalu coba lagi.</value>
+  </data>
+  <data name="LinkUnknown" xml:space="preserve">
+    <value>Helix tidak memahami tautan {0}.</value>
+  </data>
+  <data name="LinkFailed" xml:space="preserve">
+    <value>Helix tidak dapat melakukan permintaan tautan. Detailnya ada di log.</value>
+  </data>
 </root>

@@ -1094,4 +1094,55 @@
   <data name="DurationHours" xml:space="preserve">
     <value>{0}時間</value>
   </data>
+  <data name="LinkConfirmTitle" xml:space="preserve">
+    <value>リンクから Helix に次の操作が要求されました</value>
+  </data>
+  <data name="LinkConfirmDisconnectAll" xml:space="preserve">
+    <value>すべてのドライブを切断しますか?開いているファイルは保存できなくなる可能性があります。</value>
+  </data>
+  <data name="LinkConfirmDisconnect" xml:space="preserve">
+    <value>{0} を切断しますか?開いているファイルは保存できなくなる可能性があります。</value>
+  </data>
+  <data name="LinkConfirmDisconnectGroup" xml:space="preserve">
+    <value>グループ {0} を切断しますか?そのドライブで開いているファイルは保存できなくなる可能性があります。</value>
+  </data>
+  <data name="LinkConfirmQuit" xml:space="preserve">
+    <value>Helix を終了しますか?終了中はドライブが再接続されません。</value>
+  </data>
+  <data name="LinkConnected" xml:space="preserve">
+    <value>{0} を接続しました。</value>
+  </data>
+  <data name="LinkDisconnected" xml:space="preserve">
+    <value>{0} を切断しました。</value>
+  </data>
+  <data name="LinkStatus" xml:space="preserve">
+    <value>{1} 台中 {0} 台のドライブが接続されています。</value>
+  </data>
+  <data name="LinkNoDrives" xml:space="preserve">
+    <value>ドライブはまだありません。</value>
+  </data>
+  <data name="LinkNoDrive" xml:space="preserve">
+    <value>{0} という名前のドライブはありません。Z などの文字か、ドライブ名を使用してください。</value>
+  </data>
+  <data name="LinkAmbiguousDrive" xml:space="preserve">
+    <value>{0} という名前のドライブが複数あります({1})。代わりに文字を使用してください。</value>
+  </data>
+  <data name="LinkNoGroup" xml:space="preserve">
+    <value>{0} という名前のドライブグループはありません。</value>
+  </data>
+  <data name="LinkNeedsTarget" xml:space="preserve">
+    <value>リンクにドライブまたはグループが指定されていません(例: helix://connect/Z)。</value>
+  </data>
+  <data name="LinkNotSignedIn" xml:space="preserve">
+    <value>リンクから Helix に操作が要求されましたが、サインインしていません。</value>
+  </data>
+  <data name="LinkLocked" xml:space="preserve">
+    <value>ロック中に、リンクから Helix に操作が要求されました。ロックを解除してからもう一度お試しください。</value>
+  </data>
+  <data name="LinkUnknown" xml:space="preserve">
+    <value>Helix はリンク {0} を認識できません。</value>
+  </data>
+  <data name="LinkFailed" xml:space="preserve">
+    <value>Helix はリンクの要求を実行できませんでした。詳細はログに記録されています。</value>
+  </data>
 </root>

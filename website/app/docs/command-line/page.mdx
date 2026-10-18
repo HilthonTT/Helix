@@ -5,7 +5,7 @@ export const metadata = { title: "Command line" };
 `Helix.App.exe` accepts commands that drive the copy of Helix already running. It is meant for Task Scheduler, a backup job's pre- and post-scripts, or a Stream Deck button.
 
 <Callout>
-Windows only. On macOS, a second launch of a running app does not pass its arguments on.
+The flags are Windows only: on macOS, a second launch of a running app does not pass its arguments on. [Links](#links) work on both.
 </Callout>
 
 ## Commands
@@ -82,3 +82,27 @@ echo %ERRORLEVEL%
 ```
 
 A connect can take up to about thirty seconds per drive when a NAS is slow to answer, so allow for that in scripts with a time limit.
+
+## Links
+
+Every command is also a `helix://` link, which is what a Stream Deck button, a browser bookmark or a macOS Shortcut can open:
+
+```text
+helix://status
+helix://connect-all
+helix://disconnect-all
+helix://connect/Z
+helix://disconnect/Photos
+helix://connect-group/Office
+helix://disconnect-group/Home%20Lab
+helix://wake/Z
+helix://show
+```
+
+Spaces in a name are written `%20`. Helix registers the scheme for your Windows account each time it starts, so it keeps pointing at the right copy after an update; on macOS it comes with the app.
+
+A link is answered in the window rather than in a console: the outcome appears as a notification from the tray, or as a banner when the tray icon is off. The same rules apply as for the flags — Helix has to be running, signed in and unlocked. A link opened while Helix is closed just starts it.
+
+<Callout type="warn">
+Any web page can ask your browser to open a link, so a link that **disconnects or quits** does not act straight away: Helix brings its window forward and asks first. Use the flags from a script when you want a disconnect without the question.
+</Callout>

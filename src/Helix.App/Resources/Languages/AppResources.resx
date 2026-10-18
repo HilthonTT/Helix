@@ -1094,4 +1094,55 @@
   <data name="DurationHours" xml:space="preserve">
     <value>{0} h</value>
   </data>
+  <data name="LinkConfirmTitle" xml:space="preserve">
+    <value>A link asked Helix to do this</value>
+  </data>
+  <data name="LinkConfirmDisconnectAll" xml:space="preserve">
+    <value>Disconnect every drive? Anything you have open on them may fail to save.</value>
+  </data>
+  <data name="LinkConfirmDisconnect" xml:space="preserve">
+    <value>Disconnect {0}? Anything you have open on it may fail to save.</value>
+  </data>
+  <data name="LinkConfirmDisconnectGroup" xml:space="preserve">
+    <value>Disconnect the group {0}? Anything you have open on its drives may fail to save.</value>
+  </data>
+  <data name="LinkConfirmQuit" xml:space="preserve">
+    <value>Close Helix? Drives will no longer be reconnected while it is closed.</value>
+  </data>
+  <data name="LinkConnected" xml:space="preserve">
+    <value>{0} is connected.</value>
+  </data>
+  <data name="LinkDisconnected" xml:space="preserve">
+    <value>{0} is disconnected.</value>
+  </data>
+  <data name="LinkStatus" xml:space="preserve">
+    <value>{0} of {1} drives are connected.</value>
+  </data>
+  <data name="LinkNoDrives" xml:space="preserve">
+    <value>There are no drives yet.</value>
+  </data>
+  <data name="LinkNoDrive" xml:space="preserve">
+    <value>No drive is called {0}. Use a letter such as Z, or the drive’s name.</value>
+  </data>
+  <data name="LinkAmbiguousDrive" xml:space="preserve">
+    <value>More than one drive is called {0} ({1}). Use its letter instead.</value>
+  </data>
+  <data name="LinkNoGroup" xml:space="preserve">
+    <value>No drive group is called {0}.</value>
+  </data>
+  <data name="LinkNeedsTarget" xml:space="preserve">
+    <value>The link does not say which drive or group, for example helix://connect/Z.</value>
+  </data>
+  <data name="LinkNotSignedIn" xml:space="preserve">
+    <value>A link asked Helix to do something, but nobody is signed in.</value>
+  </data>
+  <data name="LinkLocked" xml:space="preserve">
+    <value>A link asked Helix to do something while it is locked. Unlock it, then try again.</value>
+  </data>
+  <data name="LinkUnknown" xml:space="preserve">
+    <value>Helix does not understand the link {0}.</value>
+  </data>
+  <data name="LinkFailed" xml:space="preserve">
+    <value>Helix could not do what the link asked. The details are in its log.</value>
+  </data>
 </root>

@@ -1094,4 +1094,55 @@
   <data name="DurationHours" xml:space="preserve">
     <value>{0} Std.</value>
   </data>
+  <data name="LinkConfirmTitle" xml:space="preserve">
+    <value>Ein Link hat Helix darum gebeten</value>
+  </data>
+  <data name="LinkConfirmDisconnectAll" xml:space="preserve">
+    <value>Alle Laufwerke trennen? Was Sie darauf geöffnet haben, lässt sich eventuell nicht speichern.</value>
+  </data>
+  <data name="LinkConfirmDisconnect" xml:space="preserve">
+    <value>{0} trennen? Was Sie darauf geöffnet haben, lässt sich eventuell nicht speichern.</value>
+  </data>
+  <data name="LinkConfirmDisconnectGroup" xml:space="preserve">
+    <value>Die Gruppe {0} trennen? Was Sie auf ihren Laufwerken geöffnet haben, lässt sich eventuell nicht speichern.</value>
+  </data>
+  <data name="LinkConfirmQuit" xml:space="preserve">
+    <value>Helix beenden? Solange es beendet ist, werden Laufwerke nicht mehr neu verbunden.</value>
+  </data>
+  <data name="LinkConnected" xml:space="preserve">
+    <value>{0} ist verbunden.</value>
+  </data>
+  <data name="LinkDisconnected" xml:space="preserve">
+    <value>{0} ist getrennt.</value>
+  </data>
+  <data name="LinkStatus" xml:space="preserve">
+    <value>{0} von {1} Laufwerken sind verbunden.</value>
+  </data>
+  <data name="LinkNoDrives" xml:space="preserve">
+    <value>Es gibt noch keine Laufwerke.</value>
+  </data>
+  <data name="LinkNoDrive" xml:space="preserve">
+    <value>Kein Laufwerk heißt {0}. Verwenden Sie einen Buchstaben wie Z oder den Namen des Laufwerks.</value>
+  </data>
+  <data name="LinkAmbiguousDrive" xml:space="preserve">
+    <value>Mehrere Laufwerke heißen {0} ({1}). Verwenden Sie stattdessen den Buchstaben.</value>
+  </data>
+  <data name="LinkNoGroup" xml:space="preserve">
+    <value>Keine Laufwerksgruppe heißt {0}.</value>
+  </data>
+  <data name="LinkNeedsTarget" xml:space="preserve">
+    <value>Der Link nennt kein Laufwerk und keine Gruppe, zum Beispiel helix://connect/Z.</value>
+  </data>
+  <data name="LinkNotSignedIn" xml:space="preserve">
+    <value>Ein Link hat Helix um etwas gebeten, aber niemand ist angemeldet.</value>
+  </data>
+  <data name="LinkLocked" xml:space="preserve">
+    <value>Ein Link hat Helix um etwas gebeten, während es gesperrt ist. Entsperren Sie es und versuchen Sie es erneut.</value>
+  </data>
+  <data name="LinkUnknown" xml:space="preserve">
+    <value>Helix versteht den Link {0} nicht.</value>
+  </data>
+  <data name="LinkFailed" xml:space="preserve">
+    <value>Helix konnte nicht ausführen, worum der Link gebeten hat. Details stehen im Protokoll.</value>
+  </data>
 </root>

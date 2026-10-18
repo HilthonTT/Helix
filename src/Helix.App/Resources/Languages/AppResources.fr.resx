@@ -1094,4 +1094,55 @@
   <data name="DurationHours" xml:space="preserve">
     <value>{0} h</value>
   </data>
+  <data name="LinkConfirmTitle" xml:space="preserve">
+    <value>Un lien a demandé ceci à Helix</value>
+  </data>
+  <data name="LinkConfirmDisconnectAll" xml:space="preserve">
+    <value>Déconnecter tous les lecteurs ? Ce que vous avez ouvert dessus risque de ne pas pouvoir être enregistré.</value>
+  </data>
+  <data name="LinkConfirmDisconnect" xml:space="preserve">
+    <value>Déconnecter {0} ? Ce que vous avez ouvert dessus risque de ne pas pouvoir être enregistré.</value>
+  </data>
+  <data name="LinkConfirmDisconnectGroup" xml:space="preserve">
+    <value>Déconnecter le groupe {0} ? Ce que vous avez ouvert sur ses lecteurs risque de ne pas pouvoir être enregistré.</value>
+  </data>
+  <data name="LinkConfirmQuit" xml:space="preserve">
+    <value>Fermer Helix ? Les lecteurs ne seront plus reconnectés tant qu’il est fermé.</value>
+  </data>
+  <data name="LinkConnected" xml:space="preserve">
+    <value>{0} est connecté.</value>
+  </data>
+  <data name="LinkDisconnected" xml:space="preserve">
+    <value>{0} est déconnecté.</value>
+  </data>
+  <data name="LinkStatus" xml:space="preserve">
+    <value>{0} lecteurs sur {1} sont connectés.</value>
+  </data>
+  <data name="LinkNoDrives" xml:space="preserve">
+    <value>Il n’y a encore aucun lecteur.</value>
+  </data>
+  <data name="LinkNoDrive" xml:space="preserve">
+    <value>Aucun lecteur ne s’appelle {0}. Utilisez une lettre comme Z, ou le nom du lecteur.</value>
+  </data>
+  <data name="LinkAmbiguousDrive" xml:space="preserve">
+    <value>Plusieurs lecteurs s’appellent {0} ({1}). Utilisez plutôt sa lettre.</value>
+  </data>
+  <data name="LinkNoGroup" xml:space="preserve">
+    <value>Aucun groupe de lecteurs ne s’appelle {0}.</value>
+  </data>
+  <data name="LinkNeedsTarget" xml:space="preserve">
+    <value>Le lien n’indique ni lecteur ni groupe, par exemple helix://connect/Z.</value>
+  </data>
+  <data name="LinkNotSignedIn" xml:space="preserve">
+    <value>Un lien a demandé quelque chose à Helix, mais personne n’est connecté.</value>
+  </data>
+  <data name="LinkLocked" xml:space="preserve">
+    <value>Un lien a demandé quelque chose à Helix pendant qu’il est verrouillé. Déverrouillez-le, puis réessayez.</value>
+  </data>
+  <data name="LinkUnknown" xml:space="preserve">
+    <value>Helix ne comprend pas le lien {0}.</value>
+  </data>
+  <data name="LinkFailed" xml:space="preserve">
+    <value>Helix n’a pas pu faire ce que demandait le lien. Les détails sont dans son journal.</value>
+  </data>
 </root>

@@ -19,6 +19,8 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using System.Text;
 using Windows.Graphics;
+#elif MACCATALYST
+using Microsoft.Maui.LifecycleEvents;
 #endif
 
 namespace Helix.App;
@@ -98,6 +100,25 @@ public static class MauiProgram
         });
 #endif
 
+#if MACCATALYST
+        builder.ConfigureLifecycleEvents(events =>
+        {
+            events.AddiOS(ios => ios.OpenUrl((_, url, _) =>
+            {
+                if (url?.AbsoluteString is not string link || !CommandRequest.IsLink(link))
+                {
+                    return false;
+                }
+
+                _ = App.ServiceProvider
+                    .GetRequiredService<Helix.App.Services.CommandListener>()
+                    .RunLinkAsync(CommandRequest.FromUri(link));
+
+                return true;
+            }));
+        });
+#endif
+
         MauiApp app = builder.Build();
 
         ILogger startupLogger = app.Services
@@ -115,6 +136,8 @@ public static class MauiProgram
 
 #if WINDOWS
         app.Services.GetRequiredService<CommandListener>().Start();
+
+        UrlScheme.Register(startupLogger);
 #endif
 
         var hook = app.Services.GetRequiredService<IGlobalHook>();
@@ -140,12 +163,12 @@ public static class MauiProgram
     {
         CommandRequest request = CommandRequest.Parse([.. Environment.GetCommandLineArgs().Skip(1)]);
 
-        if (request.Verb == CommandVerb.Help)
+        if (request.Verb == CommandVerb.Help && !request.FromLink)
         {
             ExitWith(CommandListener.Success + CommandRequest.Usage);
         }
 
-        if (request.Verb == CommandVerb.Unknown)
+        if (request.Verb == CommandVerb.Unknown && !request.FromLink)
         {
             ExitWith($"{CommandListener.Failure}'{request.Target}' is not something Helix understands.{CommandRequest.LineBreak}{CommandRequest.LineBreak}{CommandRequest.Usage}");
         }
@@ -154,7 +177,9 @@ public static class MauiProgram
 
         if (createdNew)
         {
-            if (request.Verb != CommandVerb.None)
+            // A link clicked with nothing running starts Helix; what it asked for needs a
+            // signed-in session that does not exist yet, so it is dropped rather than queued.
+            if (request.Verb != CommandVerb.None && !request.FromLink)
             {
                 ExitWith(CommandListener.Failure + "Helix is not running. Start it and sign in, then try again.");
             }
@@ -162,14 +187,14 @@ public static class MauiProgram
             return;
         }
 
-        if (request.Verb is CommandVerb.None or CommandVerb.Show)
+        if (request.Verb is CommandVerb.None or CommandVerb.Show || request.NeedsConfirmation)
         {
             BringOtherInstanceForward();
         }
 
         string? reply = Send(request);
 
-        if (request.Verb == CommandVerb.None)
+        if (request.Verb == CommandVerb.None || request.FromLink)
         {
             Environment.Exit(0);
         }

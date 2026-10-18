@@ -1758,6 +1758,24 @@ The client still calls `ShowWindow`/`SetForegroundWindow` on the other's visible
 and grants it `AllowSetForegroundWindow` first — the freshly launched process is the one
 Windows lets take the foreground, not the one sitting in the tray.
 
+Every command is also a **`helix://` link** (`helix://connect/Z`, `helix://connect-group/Office`,
+`helix://disconnect-all`), parsed by `CommandRequest.FromUri` into the same request with
+`FromLink` set, and that flag rides the pipe as a third field. On Windows `Common/UrlScheme`
+writes `HKCU\Software\Classes\helix` at every start, so the scheme follows the install across
+an update's folder swap; a link then launches a second process like any other command and is
+forwarded. On macOS the scheme is in `Info.plist` and the link arrives in the running process
+through the `OpenUrl` lifecycle event, straight to `CommandListener.RunLinkAsync` — which is how
+links give the Mac the command line it otherwise cannot have.
+
+A link is not a command typed at a console, and three things follow. It is answered through the
+**tray balloon or the banner**, in the user's language, since there is nobody reading stdout. A
+link opened with Helix closed **starts Helix** and drops the request, rather than failing at a
+user who just clicked something. And because any web page can ask a browser to open one, a link
+that **disconnects or quits** brings the window forward and asks first (`NeedsConfirmation`);
+the flags never ask, since a local script already runs as the user. Connecting, waking and the
+status are harmless enough to run unasked. Control characters are stripped from a link's target
+so a crafted one cannot forge the pipe's field separators.
+
 The answer goes to the parent console through `AttachConsole`, success on stdout and failure
 on stderr, and the exit code is 0 or 1. Helix is a GUI executable, so **PowerShell and cmd do
 not wait for it** unless asked: `Start-Process -Wait -PassThru`, `start /wait`, or piping the
@@ -1777,8 +1795,9 @@ item id. Only mounted drives are listed — a folder that is not there is not a 
 The XAML, viewmodels, converters and behaviours are shared verbatim; only these carry an
 `#if`, and each has a working macOS path or a deliberate no-op:
 
-- `MauiProgram` — the WinUI lifecycle hook and the `EntryHandler` chrome tweak are
-  `#if WINDOWS`. The SharpHook startup is not: as of SharpHook 8 the package ships a Mac
+- `MauiProgram` — the WinUI lifecycle hook, the `EntryHandler` chrome tweak and the link
+  scheme registration are `#if WINDOWS`; the `OpenUrl` hook that delivers a link is
+  `#if MACCATALYST`. The SharpHook startup is not: as of SharpHook 8 the package ships a Mac
   Catalyst assembly and the libuiohook natives for it, so the global hook runs on both
   heads.
 - `App.CreateWindow` — Catalyst sizes its window here from `Common/WindowSizing`, the

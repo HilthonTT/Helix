@@ -3162,5 +3162,158 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("DurationHours", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A link asked Helix to do this.
+        /// </summary>
+        internal static string LinkConfirmTitle {
+            get {
+                return ResourceManager.GetString("LinkConfirmTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect every drive? Anything you have open on them may fail to save..
+        /// </summary>
+        internal static string LinkConfirmDisconnectAll {
+            get {
+                return ResourceManager.GetString("LinkConfirmDisconnectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect {0}? Anything you have open on it may fail to save..
+        /// </summary>
+        internal static string LinkConfirmDisconnect {
+            get {
+                return ResourceManager.GetString("LinkConfirmDisconnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect the group {0}? Anything you have open on its drives may fail to save..
+        /// </summary>
+        internal static string LinkConfirmDisconnectGroup {
+            get {
+                return ResourceManager.GetString("LinkConfirmDisconnectGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Close Helix? Drives will no longer be reconnected while it is closed..
+        /// </summary>
+        internal static string LinkConfirmQuit {
+            get {
+                return ResourceManager.GetString("LinkConfirmQuit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is connected..
+        /// </summary>
+        internal static string LinkConnected {
+            get {
+                return ResourceManager.GetString("LinkConnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is disconnected..
+        /// </summary>
+        internal static string LinkDisconnected {
+            get {
+                return ResourceManager.GetString("LinkDisconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} of {1} drives are connected..
+        /// </summary>
+        internal static string LinkStatus {
+            get {
+                return ResourceManager.GetString("LinkStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no drives yet..
+        /// </summary>
+        internal static string LinkNoDrives {
+            get {
+                return ResourceManager.GetString("LinkNoDrives", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No drive is called {0}. Use a letter such as Z, or the drive’s name..
+        /// </summary>
+        internal static string LinkNoDrive {
+            get {
+                return ResourceManager.GetString("LinkNoDrive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More than one drive is called {0} ({1}). Use its letter instead..
+        /// </summary>
+        internal static string LinkAmbiguousDrive {
+            get {
+                return ResourceManager.GetString("LinkAmbiguousDrive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No drive group is called {0}..
+        /// </summary>
+        internal static string LinkNoGroup {
+            get {
+                return ResourceManager.GetString("LinkNoGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The link does not say which drive or group, for example helix://connect/Z..
+        /// </summary>
+        internal static string LinkNeedsTarget {
+            get {
+                return ResourceManager.GetString("LinkNeedsTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A link asked Helix to do something, but nobody is signed in..
+        /// </summary>
+        internal static string LinkNotSignedIn {
+            get {
+                return ResourceManager.GetString("LinkNotSignedIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A link asked Helix to do something while it is locked. Unlock it, then try again..
+        /// </summary>
+        internal static string LinkLocked {
+            get {
+                return ResourceManager.GetString("LinkLocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Helix does not understand the link {0}..
+        /// </summary>
+        internal static string LinkUnknown {
+            get {
+                return ResourceManager.GetString("LinkUnknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Helix could not do what the link asked. The details are in its log..
+        /// </summary>
+        internal static string LinkFailed {
+            get {
+                return ResourceManager.GetString("LinkFailed", resourceCulture);
+            }
+        }
     }
 }

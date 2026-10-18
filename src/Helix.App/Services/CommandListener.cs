@@ -1,5 +1,6 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
+using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Features.DriveGroups.Commands;
@@ -105,9 +106,47 @@ internal sealed class CommandListener
         }
     }
 
+    public async Task RunLinkAsync(CommandRequest request)
+    {
+        (bool ok, string message) = await ExecuteSafelyAsync(request);
+
+        TellLinkOutcome(ok, message);
+
+        if (request.Verb == CommandVerb.Quit && ok)
+        {
+            Quit();
+        }
+    }
+
+    private void TellLinkOutcome(bool ok, string message)
+    {
+        if (message.Length == 0)
+        {
+            return;
+        }
+
+        TrayIconService tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
+
+        if (tray.IsRunning)
+        {
+            tray.Notify(AppInfo.Current.Name, message);
+            return;
+        }
+
+        if (ok)
+        {
+            Notifier.Success(message);
+        }
+        else
+        {
+            Notifier.Error(message);
+        }
+    }
+
     private async Task AnswerAsync(NamedPipeServerStream server, CancellationToken cancellationToken)
     {
         CommandRequest? request = null;
+        bool succeeded = false;
 
         try
         {
@@ -121,6 +160,13 @@ internal sealed class CommandListener
                 request = CommandRequest.Decode(payload ?? string.Empty);
 
                 (bool ok, string message) = await ExecuteSafelyAsync(request);
+
+                succeeded = ok;
+
+                if (request.FromLink)
+                {
+                    TellLinkOutcome(ok, message);
+                }
 
                 await writer.WriteLineAsync((ok ? Success : Failure) + message);
             }
@@ -137,7 +183,7 @@ internal sealed class CommandListener
             _logger.LogError(ex, "A command-line request could not be answered.");
         }
 
-        if (request?.Verb == CommandVerb.Quit)
+        if (request?.Verb == CommandVerb.Quit && succeeded)
         {
             Quit();
         }
@@ -153,7 +199,7 @@ internal sealed class CommandListener
         {
             _logger.LogError(ex, "The command-line request {Verb} failed.", request.Verb);
 
-            return (false, "Helix could not do that. The details are in its log.");
+            return (false, Say(request.FromLink, "Helix could not do that. The details are in its log.", AppResources.LinkFailed));
         }
     }
 
@@ -173,7 +219,12 @@ internal sealed class CommandListener
 
     private async Task<(bool Ok, string Message)> ExecuteAsync(CommandRequest request)
     {
-        _logger.LogInformation("Received the command-line request {Verb}.", request.Verb);
+        _logger.LogInformation(
+            "Received the {Source} request {Verb}.",
+            request.FromLink ? "link" : "command-line",
+            request.Verb);
+
+        bool link = request.FromLink;
 
         switch (request.Verb)
         {
@@ -183,44 +234,57 @@ internal sealed class CommandListener
                 return (true, string.Empty);
 
             case CommandVerb.Help:
-                return (true, CommandRequest.Usage);
+                return (true, link ? string.Empty : CommandRequest.Usage);
 
             case CommandVerb.Unknown:
-                return (false, $"'{request.Target}' is not something Helix understands.{CommandRequest.LineBreak}{CommandRequest.LineBreak}{CommandRequest.Usage}");
+                return (false, Say(
+                    link,
+                    $"'{request.Target}' is not something Helix understands.{CommandRequest.LineBreak}{CommandRequest.LineBreak}{CommandRequest.Usage}",
+                    string.Format(AppResources.LinkUnknown, request.Target)));
 
             case CommandVerb.Quit:
-                return (true, "Helix is closing.");
+                if (request.NeedsConfirmation && !await ConfirmLinkAsync(request))
+                {
+                    return (false, string.Empty);
+                }
+
+                return (true, Say(link, "Helix is closing.", string.Empty));
         }
 
         if (!_loggedInUser.IsLoggedIn)
         {
-            return (false, "Helix is not signed in. Sign in, then try again.");
+            return (false, Say(link, "Helix is not signed in. Sign in, then try again.", AppResources.LinkNotSignedIn));
         }
 
         if (App.ServiceProvider.GetRequiredService<IdleLockService>().IsLocked)
         {
-            return (false, "Helix is locked. Unlock it, then try again.");
+            return (false, Say(link, "Helix is locked. Unlock it, then try again.", AppResources.LinkLocked));
         }
 
         if (request.NeedsTarget && string.IsNullOrWhiteSpace(request.Target))
         {
-            return (false, "Say which one, for example: --connect Z");
+            return (false, Say(link, "Say which one, for example: --connect Z", AppResources.LinkNeedsTarget));
+        }
+
+        if (request.NeedsConfirmation && !await ConfirmLinkAsync(request))
+        {
+            return (false, string.Empty);
         }
 
         (bool Ok, string Message) outcome = request.Verb switch
         {
-            CommandVerb.Status => await StatusAsync(),
+            CommandVerb.Status => await StatusAsync(link),
             CommandVerb.ConnectAll => Report(
                 await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle()),
-                "Every drive is connected."),
+                Say(link, "Every drive is connected.", AppResources.HotkeyConnectedAll)),
             CommandVerb.DisconnectAll => Report(
                 await ScopedHandler.HandleAsync((DisconnectAllDrives h) => h.Handle()),
-                "Every drive is disconnected."),
-            CommandVerb.Connect => await OnDriveAsync(request.Target, ConnectAsync),
-            CommandVerb.Disconnect => await OnDriveAsync(request.Target, DisconnectAsync),
-            CommandVerb.Wake => await OnDriveAsync(request.Target, WakeAsync),
-            CommandVerb.ConnectGroup => await OnGroupAsync(request.Target, disconnect: false),
-            CommandVerb.DisconnectGroup => await OnGroupAsync(request.Target, disconnect: true),
+                Say(link, "Every drive is disconnected.", AppResources.HotkeyDisconnectedAll)),
+            CommandVerb.Connect => await OnDriveAsync(request.Target, link, ConnectAsync),
+            CommandVerb.Disconnect => await OnDriveAsync(request.Target, link, DisconnectAsync),
+            CommandVerb.Wake => await OnDriveAsync(request.Target, link, WakeAsync),
+            CommandVerb.ConnectGroup => await OnGroupAsync(request.Target, link, disconnect: false),
+            CommandVerb.DisconnectGroup => await OnGroupAsync(request.Target, link, disconnect: true),
             _ => (false, CommandRequest.Usage),
         };
 
@@ -232,7 +296,34 @@ internal sealed class CommandListener
         return outcome;
     }
 
-    private async Task<(bool, string)> StatusAsync()
+    private static string Say(bool link, string english, string localized) => link ? localized : english;
+
+    private static async Task<bool> ConfirmLinkAsync(CommandRequest request) =>
+        await MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            if (Shell.Current is null)
+            {
+                return false;
+            }
+
+            MainWindow.Restore();
+
+            string question = request.Verb switch
+            {
+                CommandVerb.DisconnectAll => AppResources.LinkConfirmDisconnectAll,
+                CommandVerb.Disconnect => string.Format(AppResources.LinkConfirmDisconnect, request.Target),
+                CommandVerb.DisconnectGroup => string.Format(AppResources.LinkConfirmDisconnectGroup, request.Target),
+                _ => AppResources.LinkConfirmQuit,
+            };
+
+            return await Shell.Current.DisplayAlertAsync(
+                AppResources.LinkConfirmTitle,
+                question,
+                request.Verb == CommandVerb.Quit ? AppResources.TrayExit : AppResources.Disconnect,
+                AppResources.Cancel);
+        });
+
+    private async Task<(bool, string)> StatusAsync(bool link)
     {
         Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
         if (drives.IsFailure)
@@ -242,7 +333,14 @@ internal sealed class CommandListener
 
         if (drives.Value.Count == 0)
         {
-            return (true, "There are no drives.");
+            return (true, Say(link, "There are no drives.", AppResources.LinkNoDrives));
+        }
+
+        if (link)
+        {
+            int up = drives.Value.Count(_nasConnector.IsLiveFrom);
+
+            return (true, string.Format(AppResources.LinkStatus, up, drives.Value.Count));
         }
 
         int width = drives.Value.Max(drive => drive.Name.Length);
@@ -254,7 +352,10 @@ internal sealed class CommandListener
         return (true, string.Join(CommandRequest.LineBreak, lines));
     }
 
-    private static async Task<(bool, string)> OnDriveAsync(string target, Func<Drive, Task<(bool, string)>> action)
+    private static async Task<(bool, string)> OnDriveAsync(
+        string target,
+        bool link,
+        Func<Drive, bool, Task<(bool, string)>> action)
     {
         Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
         if (drives.IsFailure)
@@ -273,40 +374,48 @@ internal sealed class CommandListener
             matches = [.. drives.Value.Where(drive => string.Equals(drive.Name, wanted, StringComparison.OrdinalIgnoreCase))];
         }
 
+        string letters = string.Join(", ", matches.Select(d => d.Letter + ":"));
+
         return matches.Count switch
         {
-            0 => (false, $"No drive is called '{target}'. Use a letter such as Z, or the drive's name."),
-            1 => await action(matches[0]),
-            _ => (false, $"More than one drive is called '{target}' ({string.Join(", ", matches.Select(d => d.Letter + ":"))}). Use its letter instead."),
+            0 => (false, Say(
+                link,
+                $"No drive is called '{target}'. Use a letter such as Z, or the drive's name.",
+                string.Format(AppResources.LinkNoDrive, target))),
+            1 => await action(matches[0], link),
+            _ => (false, Say(
+                link,
+                $"More than one drive is called '{target}' ({letters}). Use its letter instead.",
+                string.Format(AppResources.LinkAmbiguousDrive, target, letters))),
         };
     }
 
-    private static async Task<(bool, string)> ConnectAsync(Drive drive)
+    private static async Task<(bool, string)> ConnectAsync(Drive drive, bool link)
     {
         Result result = await ScopedHandler.HandleAsync((ConnectDrive h) => h.Handle(new ConnectDrive.Request(drive.Id)));
 
         Announce(drive.Id);
 
-        return Report(result, $"{drive.Letter}: is connected.");
+        return Report(result, Say(link, $"{drive.Letter}: is connected.", string.Format(AppResources.LinkConnected, $"{drive.Letter}:")));
     }
 
-    private static async Task<(bool, string)> DisconnectAsync(Drive drive)
+    private static async Task<(bool, string)> DisconnectAsync(Drive drive, bool link)
     {
         Result result = await ScopedHandler.HandleAsync((DisconnectDrive h) => h.Handle(new DisconnectDrive.Request(drive.Id)));
 
         Announce(drive.Id);
 
-        return Report(result, $"{drive.Letter}: is disconnected.");
+        return Report(result, Say(link, $"{drive.Letter}: is disconnected.", string.Format(AppResources.LinkDisconnected, $"{drive.Letter}:")));
     }
 
-    private static async Task<(bool, string)> WakeAsync(Drive drive)
+    private static async Task<(bool, string)> WakeAsync(Drive drive, bool link)
     {
         Result result = await ScopedHandler.HandleAsync((WakeDrive h) => h.Handle(new WakeDrive.Request(drive.Id)));
 
-        return Report(result, $"A wake-up packet was sent for {drive.Letter}:.");
+        return Report(result, Say(link, $"A wake-up packet was sent for {drive.Letter}:.", string.Format(AppResources.WakeSent, drive.Name)));
     }
 
-    private static async Task<(bool, string)> OnGroupAsync(string target, bool disconnect)
+    private static async Task<(bool, string)> OnGroupAsync(string target, bool link, bool disconnect)
     {
         Result<List<DriveGroup>> groups = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
         if (groups.IsFailure)
@@ -317,13 +426,17 @@ internal sealed class CommandListener
         DriveGroup? group = groups.Value.FirstOrDefault(g => string.Equals(g.Name, target.Trim(), StringComparison.OrdinalIgnoreCase));
         if (group is null)
         {
-            return (false, $"No drive group is called '{target}'.");
+            return (false, Say(link, $"No drive group is called '{target}'.", string.Format(AppResources.LinkNoGroup, target)));
         }
 
         Result result = await ScopedHandler.HandleAsync(
             (ConnectDriveGroup h) => h.Handle(new ConnectDriveGroup.Request(group.Id, disconnect)));
 
-        return Report(result, disconnect ? $"'{group.Name}' is disconnected." : $"'{group.Name}' is connected.");
+        string success = disconnect
+            ? Say(link, $"'{group.Name}' is disconnected.", string.Format(AppResources.LinkDisconnected, group.Name))
+            : Say(link, $"'{group.Name}' is connected.", string.Format(AppResources.LinkConnected, group.Name));
+
+        return Report(result, success);
     }
 
     private static (bool, string) Report(Result result, string success) =>

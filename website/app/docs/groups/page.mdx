@@ -53,7 +53,7 @@ Unmounting pulls a share out from under whatever has a file open on it, so disco
 
 On Windows the question also names the drives that still have **files or folders open** — an Explorer window, a document, a backup in progress — counted the way `net use` counts them. Disconnecting a single row asks only in that case; a row nothing is using comes down at once, as before. Helix can say *that* something is open, not *which program* has it. macOS does not report it, so the question there is the plain one.
 
-The question is skipped when nothing would actually come down. The tray's **Disconnect all drives**, the global shortcut and the command line do not ask either — they are used when there is no window to ask in.
+The question is skipped when nothing would actually come down. The tray's **Disconnect all drives**, the global shortcut and the command line do not ask either — they are used when there is no window to ask in. A [link](/docs/command-line/#links) that disconnects always asks.
 
 ## What happens on failure
 
