@@ -1,4 +1,4 @@
-using Helix.Domain.Auditlogs;
+﻿using Helix.Domain.Auditlogs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Helix.Infrastructure.Database.Repositories;
@@ -35,6 +35,21 @@ internal sealed class AuditlogRepository(AppDbContext context) : IAuditlogReposi
             .AuditLogs
             .AsNoTracking()
             .CountAsync(a => a.UserId == userId, cancellationToken);
+    }
+
+    public Task<List<Auditlog>> GetForEntitySinceAsNoTrackingAsync(
+        Guid userId,
+        Guid entityId,
+        DateTime sinceUtc,
+        CancellationToken cancellationToken = default)
+    {
+        return context
+            .AuditLogs
+            .AsNoTracking()
+            .Where(a => a.UserId == userId && a.EntityId == entityId && a.CreatedOnUtc >= sinceUtc)
+            .OrderBy(a => a.CreatedOnUtc)
+            .ThenBy(a => a.Id)
+            .ToListAsync(cancellationToken);
     }
 
     public void Insert(Auditlog auditlog)

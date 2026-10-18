@@ -3072,5 +3072,95 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("StorageForecastDetail", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last {0} days.
+        /// </summary>
+        internal static string ReliabilityTitle {
+            get {
+                return ResourceManager.GetString("ReliabilityTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No dropped connections recorded..
+        /// </summary>
+        internal static string ReliabilityNoDrops {
+            get {
+                return ResourceManager.GetString("ReliabilityNoDrops", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lost its connection once, on {0}..
+        /// </summary>
+        internal static string ReliabilityDropsOne {
+            get {
+                return ResourceManager.GetString("ReliabilityDropsOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lost its connection {0} times, {1} of them in the last week. The last was on {2}..
+        /// </summary>
+        internal static string ReliabilityDropsMany {
+            get {
+                return ResourceManager.GetString("ReliabilityDropsMany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Came back on its own after {0} of {1}, typically within {2}..
+        /// </summary>
+        internal static string ReliabilityRecovered {
+            get {
+                return ResourceManager.GetString("ReliabilityRecovered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It did not come back on its own after any of them..
+        /// </summary>
+        internal static string ReliabilityNeverRecovered {
+            get {
+                return ResourceManager.GetString("ReliabilityNeverRecovered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Read from the audit log; drops are only noticed while Helix is running..
+        /// </summary>
+        internal static string ReliabilityHint {
+            get {
+                return ResourceManager.GetString("ReliabilityHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} s.
+        /// </summary>
+        internal static string DurationSeconds {
+            get {
+                return ResourceManager.GetString("DurationSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} min.
+        /// </summary>
+        internal static string DurationMinutes {
+            get {
+                return ResourceManager.GetString("DurationMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} h.
+        /// </summary>
+        internal static string DurationHours {
+            get {
+                return ResourceManager.GetString("DurationHours", resourceCulture);
+            }
+        }
     }
 }

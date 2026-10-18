@@ -60,4 +60,10 @@ The heading says either **Nothing is standing in this drive's way** or **This is
 
 <Media src="diagnose.png" alt="The connection check sheet with the server not answering and the share step skipped" />
 
+## The last 30 days
+
+Below the steps, the report reads the drive's history from the [audit log](/docs/settings/): how often it lost its connection, how many of those were in the last week, and how many times it came back on its own and how quickly. A drive that dropped three or more times in a week is marked with a warning — a share that comes and goes is usually a NAS going to sleep, a flaky Wi-Fi link or a power-saving network adapter rather than anything the check above can see.
+
+Drops are only noticed while Helix is running, and the history only reaches back as far as the audit log is kept.
+
 On macOS each drive signs in on its own, so the "password was not checked" warning never appears there. If the check does not explain the problem, see [Troubleshooting](/docs/troubleshooting/).

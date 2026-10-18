@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
@@ -7,6 +7,7 @@ using Helix.App.Resources.Languages;
 using Helix.App.ViewModels;
 using Helix.Application.Features.Drives.Commands;
 using Helix.Application.Features.Drives.Contracts;
+using Helix.Application.Features.Drives.Queries;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 
@@ -30,6 +31,12 @@ internal sealed partial class DiagnoseDriveViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(Summary))]
     [NotifyPropertyChangedFor(nameof(ShowSummary))]
     public partial bool HasRun { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowReliability))]
+    public partial DriveReliabilityDisplay? Reliability { get; set; }
+
+    public bool ShowReliability => Reliability is not null;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Summary))]
@@ -67,6 +74,9 @@ internal sealed partial class DiagnoseDriveViewModel : BaseViewModel
 
             HasRun = false;
             Steps = [];
+            Reliability = null;
+
+            _ = LoadReliabilityAsync(Drive.Id, run);
 
             var request = new DiagnoseDrive.Request(Drive.Id);
 
@@ -94,6 +104,26 @@ internal sealed partial class DiagnoseDriveViewModel : BaseViewModel
             {
                 IsBusy = false;
             }
+        }
+    }
+
+    private async Task LoadReliabilityAsync(Guid driveId, int run)
+    {
+        try
+        {
+            var request = new GetDriveReliability.Request(driveId);
+
+            Result<DriveReliability> result = await Task.Run(() =>
+                ScopedHandler.HandleAsync((GetDriveReliability h) => h.Handle(request)));
+
+            if (run == _run && result.IsSuccess)
+            {
+                Reliability = new DriveReliabilityDisplay(result.Value);
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<DiagnoseDriveViewModel>().LogWarning(ex, "Reading the drive's connection history failed.");
         }
     }
 

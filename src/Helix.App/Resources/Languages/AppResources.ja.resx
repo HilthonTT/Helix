@@ -1064,4 +1064,34 @@
   <data name="StorageForecastDetail" xml:space="preserve">
     <value>{0}: 過去30日間で1日あたり約{1} GBずつ使用量が増えています(現在 {2})。</value>
   </data>
+  <data name="ReliabilityTitle" xml:space="preserve">
+    <value>過去{0}日間</value>
+  </data>
+  <data name="ReliabilityNoDrops" xml:space="preserve">
+    <value>接続の切断は記録されていません。</value>
+  </data>
+  <data name="ReliabilityDropsOne" xml:space="preserve">
+    <value>{0} に1回接続が切れました。</value>
+  </data>
+  <data name="ReliabilityDropsMany" xml:space="preserve">
+    <value>接続が{0}回切れ、そのうち{1}回は直近1週間でした。最後は {2} です。</value>
+  </data>
+  <data name="ReliabilityRecovered" xml:space="preserve">
+    <value>{1}回中{0}回は自動的に復帰しました。通常は{2}以内です。</value>
+  </data>
+  <data name="ReliabilityNeverRecovered" xml:space="preserve">
+    <value>いずれの場合も自動的には復帰しませんでした。</value>
+  </data>
+  <data name="ReliabilityHint" xml:space="preserve">
+    <value>監査ログから読み取っています。切断は Helix の実行中にのみ検出されます。</value>
+  </data>
+  <data name="DurationSeconds" xml:space="preserve">
+    <value>{0}秒</value>
+  </data>
+  <data name="DurationMinutes" xml:space="preserve">
+    <value>{0}分</value>
+  </data>
+  <data name="DurationHours" xml:space="preserve">
+    <value>{0}時間</value>
+  </data>
 </root>

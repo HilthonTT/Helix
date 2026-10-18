@@ -548,6 +548,16 @@ The report is a modal sheet, which is not a contradiction of the no-alerts rule:
 is about announcing the *outcome of work the user asked for and watched happen*. This is a
 document the user opened, reads, and closes — and it is too long to be a banner.
 
+Below the steps the sheet shows the drive's **last 30 days** from `GetDriveReliability`, which
+reads the audit rows `ReconnectDrive` already writes: each `DriveDisconnected` is a drop, a
+`DriveReconnected` that follows one is a recovery (one with no drop before it — a network
+arrival, a resume nudge — is not counted), and the typical recovery is the **median**, because
+an app closed overnight turns one drop into a ten-hour outage. There is no uptime percentage:
+`ConnectDrive` writes no row, so a drive the user brought back by hand would read as down until
+the next unattended reconnect, and the figure would be fiction. Three drops in a week marks the
+drive with a warning. It is loaded beside the check, not after it, and a failure to read it
+leaves the section out rather than failing the report.
+
 ### Telling a deliberate disconnect from a drop
 
 `IDriveMonitor.Suppress` hands back a handle; while it is held, the letters it names are

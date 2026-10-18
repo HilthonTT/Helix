@@ -1064,4 +1064,34 @@
   <data name="StorageForecastDetail" xml:space="preserve">
     <value>{0}: sekitar {1} GB lebih banyak terpakai setiap hari selama 30 hari terakhir (sekarang {2}).</value>
   </data>
+  <data name="ReliabilityTitle" xml:space="preserve">
+    <value>{0} hari terakhir</value>
+  </data>
+  <data name="ReliabilityNoDrops" xml:space="preserve">
+    <value>Tidak ada koneksi terputus yang tercatat.</value>
+  </data>
+  <data name="ReliabilityDropsOne" xml:space="preserve">
+    <value>Kehilangan koneksi sekali, pada {0}.</value>
+  </data>
+  <data name="ReliabilityDropsMany" xml:space="preserve">
+    <value>Kehilangan koneksi {0} kali, {1} di antaranya dalam seminggu terakhir. Terakhir pada {2}.</value>
+  </data>
+  <data name="ReliabilityRecovered" xml:space="preserve">
+    <value>Tersambung kembali sendiri setelah {0} dari {1}, biasanya dalam {2}.</value>
+  </data>
+  <data name="ReliabilityNeverRecovered" xml:space="preserve">
+    <value>Tidak pernah tersambung kembali dengan sendirinya.</value>
+  </data>
+  <data name="ReliabilityHint" xml:space="preserve">
+    <value>Dibaca dari log audit; koneksi terputus hanya terdeteksi saat Helix berjalan.</value>
+  </data>
+  <data name="DurationSeconds" xml:space="preserve">
+    <value>{0} dtk</value>
+  </data>
+  <data name="DurationMinutes" xml:space="preserve">
+    <value>{0} mnt</value>
+  </data>
+  <data name="DurationHours" xml:space="preserve">
+    <value>{0} jam</value>
+  </data>
 </root>

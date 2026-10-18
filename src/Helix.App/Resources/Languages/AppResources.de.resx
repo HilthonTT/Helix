@@ -1064,4 +1064,34 @@
   <data name="StorageForecastDetail" xml:space="preserve">
     <value>{0}: in den letzten 30 Tagen etwa {1} GB mehr belegt pro Tag (jetzt {2}).</value>
   </data>
+  <data name="ReliabilityTitle" xml:space="preserve">
+    <value>Letzte {0} Tage</value>
+  </data>
+  <data name="ReliabilityNoDrops" xml:space="preserve">
+    <value>Keine Verbindungsabbrüche aufgezeichnet.</value>
+  </data>
+  <data name="ReliabilityDropsOne" xml:space="preserve">
+    <value>Hat die Verbindung einmal verloren, am {0}.</value>
+  </data>
+  <data name="ReliabilityDropsMany" xml:space="preserve">
+    <value>Hat die Verbindung {0}-mal verloren, davon {1}-mal in der letzten Woche. Zuletzt am {2}.</value>
+  </data>
+  <data name="ReliabilityRecovered" xml:space="preserve">
+    <value>Kam nach {0} von {1} von selbst zurück, meist innerhalb von {2}.</value>
+  </data>
+  <data name="ReliabilityNeverRecovered" xml:space="preserve">
+    <value>Sie kam danach kein einziges Mal von selbst zurück.</value>
+  </data>
+  <data name="ReliabilityHint" xml:space="preserve">
+    <value>Aus dem Protokoll gelesen; Abbrüche werden nur bemerkt, während Helix läuft.</value>
+  </data>
+  <data name="DurationSeconds" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="DurationMinutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="DurationHours" xml:space="preserve">
+    <value>{0} Std.</value>
+  </data>
 </root>

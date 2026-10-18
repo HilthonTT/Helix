@@ -1064,4 +1064,34 @@
   <data name="StorageForecastDetail" xml:space="preserve">
     <value>{0}: de afgelopen 30 dagen ongeveer {1} GB per dag meer in gebruik (nu {2}).</value>
   </data>
+  <data name="ReliabilityTitle" xml:space="preserve">
+    <value>Afgelopen {0} dagen</value>
+  </data>
+  <data name="ReliabilityNoDrops" xml:space="preserve">
+    <value>Geen verbroken verbindingen vastgelegd.</value>
+  </data>
+  <data name="ReliabilityDropsOne" xml:space="preserve">
+    <value>Verloor één keer de verbinding, op {0}.</value>
+  </data>
+  <data name="ReliabilityDropsMany" xml:space="preserve">
+    <value>Verloor {0} keer de verbinding, waarvan {1} keer in de afgelopen week. De laatste keer op {2}.</value>
+  </data>
+  <data name="ReliabilityRecovered" xml:space="preserve">
+    <value>Kwam na {0} van de {1} vanzelf terug, meestal binnen {2}.</value>
+  </data>
+  <data name="ReliabilityNeverRecovered" xml:space="preserve">
+    <value>Hij kwam daarna geen enkele keer vanzelf terug.</value>
+  </data>
+  <data name="ReliabilityHint" xml:space="preserve">
+    <value>Gelezen uit het auditlogboek; verbroken verbindingen worden alleen opgemerkt terwijl Helix draait.</value>
+  </data>
+  <data name="DurationSeconds" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="DurationMinutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="DurationHours" xml:space="preserve">
+    <value>{0} u</value>
+  </data>
 </root>

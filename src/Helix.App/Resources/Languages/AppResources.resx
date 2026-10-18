@@ -1064,4 +1064,34 @@
   <data name="StorageForecastDetail" xml:space="preserve">
     <value>{0}: about {1} GB more used each day over the last 30 days ({2} now).</value>
   </data>
+  <data name="ReliabilityTitle" xml:space="preserve">
+    <value>Last {0} days</value>
+  </data>
+  <data name="ReliabilityNoDrops" xml:space="preserve">
+    <value>No dropped connections recorded.</value>
+  </data>
+  <data name="ReliabilityDropsOne" xml:space="preserve">
+    <value>Lost its connection once, on {0}.</value>
+  </data>
+  <data name="ReliabilityDropsMany" xml:space="preserve">
+    <value>Lost its connection {0} times, {1} of them in the last week. The last was on {2}.</value>
+  </data>
+  <data name="ReliabilityRecovered" xml:space="preserve">
+    <value>Came back on its own after {0} of {1}, typically within {2}.</value>
+  </data>
+  <data name="ReliabilityNeverRecovered" xml:space="preserve">
+    <value>It did not come back on its own after any of them.</value>
+  </data>
+  <data name="ReliabilityHint" xml:space="preserve">
+    <value>Read from the audit log; drops are only noticed while Helix is running.</value>
+  </data>
+  <data name="DurationSeconds" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="DurationMinutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="DurationHours" xml:space="preserve">
+    <value>{0} h</value>
+  </data>
 </root>

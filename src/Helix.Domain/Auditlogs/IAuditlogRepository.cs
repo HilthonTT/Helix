@@ -1,4 +1,4 @@
-namespace Helix.Domain.Auditlogs;
+﻿namespace Helix.Domain.Auditlogs;
 
 public interface IAuditlogRepository
 {
@@ -10,6 +10,12 @@ public interface IAuditlogRepository
         CancellationToken cancellationToken = default);
 
     Task<int> CountAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    Task<List<Auditlog>> GetForEntitySinceAsNoTrackingAsync(
+        Guid userId,
+        Guid entityId,
+        DateTime sinceUtc,
+        CancellationToken cancellationToken = default);
 
     void Insert(Auditlog auditlog);
 
