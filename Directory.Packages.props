@@ -3,8 +3,8 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup Label="MAUI">
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.110" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.110" />
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.120" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.120" />
     <PackageVersion Include="CommunityToolkit.Maui" Version="15.0.1" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
   </ItemGroup>
@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup Label="Platform">
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.13" />
-    <PackageVersion Include="SharpHook" Version="8.0.0" />
+    <PackageVersion Include="SharpHook" Version="8.0.1" />
   </ItemGroup>
   <ItemGroup Label="Testing">
     <PackageVersion Include="coverlet.collector" Version="10.1.0" />
