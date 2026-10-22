@@ -110,8 +110,52 @@ public sealed partial class AppShell : Shell
 
             _updateAvailable = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ShowUpdateBadge));
         }
     }
+
+    private string _updateProgressStatus = string.Empty;
+
+    public string UpdateProgressStatus
+    {
+        get { return _updateProgressStatus; }
+        private set
+        {
+            if (_updateProgressStatus == value)
+            {
+                return;
+            }
+
+            _updateProgressStatus = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsUpdating));
+            OnPropertyChanged(nameof(IsNotUpdating));
+            OnPropertyChanged(nameof(ShowUpdateBadge));
+        }
+    }
+
+    private double _updateProgress;
+
+    public double UpdateProgress
+    {
+        get { return _updateProgress; }
+        private set
+        {
+            if (_updateProgress == value)
+            {
+                return;
+            }
+
+            _updateProgress = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsUpdating => !string.IsNullOrEmpty(UpdateProgressStatus);
+
+    public bool IsNotUpdating => !IsUpdating;
+
+    public bool ShowUpdateBadge => UpdateAvailable || IsUpdating;
 
     private string _updateVersion = string.Empty;
 
@@ -161,6 +205,8 @@ public sealed partial class AppShell : Shell
 
         UpdateAvailable = false;
         UpdateVersion = string.Empty;
+        UpdateProgressStatus = string.Empty;
+        UpdateProgress = 0;
     }
 
     private async Task RefreshGroupsAsync()
@@ -230,6 +276,15 @@ public sealed partial class AppShell : Shell
         {
             UpdateVersion = isAvailable ? $"v{latestVersion}" : string.Empty;
             UpdateAvailable = isAvailable;
+        });
+    }
+
+    private void ApplyUpdateProgress(string status, double fraction)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            UpdateProgress = Math.Clamp(fraction, 0, 1);
+            UpdateProgressStatus = status;
         });
     }
 
@@ -493,5 +548,8 @@ public sealed partial class AppShell : Shell
 
         WeakReferenceMessenger.Default.Register<UpdateCheckedMessage>(
             this, (r, m) => ApplyUpdateCheck(m.IsUpdateAvailable, m.LatestVersion));
+
+        WeakReferenceMessenger.Default.Register<UpdateProgressMessage>(
+            this, (r, m) => ApplyUpdateProgress(m.Status, m.Fraction));
     }
 }

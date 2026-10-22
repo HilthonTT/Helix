@@ -20,7 +20,7 @@
 		<PackageReference Include="Microsoft.Maui.Controls" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" />
-		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" />
+		<PackageReference Include="SQLite3MC.PCLRaw.bundle" />
 	</ItemGroup>
 
 	<ItemGroup>

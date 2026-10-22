@@ -7,4 +7,6 @@ internal static class DatabaseConfiguration
     public const string TemporaryDatabaseName = "helix-design-time.db";
 
     public const string DesignTimePassword = "design-time-password";
+
+    public const string CipherParameters = "cipher=sqlcipher&legacy=4";
 }

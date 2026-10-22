@@ -28,6 +28,8 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
     private readonly ILoggedInUser _loggedInUser;
 
+    private double _updateFraction;
+
     public SettingsViewModel()
     {
         _loggedInUser = App.ServiceProvider.GetRequiredService<ILoggedInUser>();
@@ -87,6 +89,11 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     public partial string UpdateStatus { get; set; }
 
     public bool HasUpdateStatus => !string.IsNullOrEmpty(UpdateStatus);
+
+    partial void OnUpdateStatusChanged(string value)
+    {
+        WeakReferenceMessenger.Default.Send(new UpdateProgressMessage(value, _updateFraction));
+    }
 
     [ObservableProperty]
     public partial ObservableCollection<string> Languages { get; set; }
@@ -260,8 +267,12 @@ internal sealed partial class SettingsViewModel : BaseViewModel
     private async Task InstallAsync(UpdateCheck check)
     {
         var progress = new Progress<double>(fraction =>
-            UpdateStatus = string.Format(AppResources.UpdateDownloading, (int)(fraction * 100)));
+        {
+            _updateFraction = fraction;
+            UpdateStatus = string.Format(AppResources.UpdateDownloading, (int)(fraction * 100));
+        });
 
+        _updateFraction = 0;
         UpdateStatus = string.Format(AppResources.UpdateDownloading, 0);
 
         Result<string> staged = await ScopedHandler.HandleAsync(
@@ -275,6 +286,7 @@ internal sealed partial class SettingsViewModel : BaseViewModel
             return;
         }
 
+        _updateFraction = 1;
         UpdateStatus = AppResources.UpdateReady;
 
         bool install = await Shell.Current.DisplayAlertAsync(

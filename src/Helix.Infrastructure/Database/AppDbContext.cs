@@ -49,7 +49,7 @@ public sealed class AppDbContext : DbContext, IUnitOfWork, IDbContext
 
         string connectionString = new SqliteConnectionStringBuilder
         {
-            DataSource = DatabaseLocation.Path,
+            DataSource = DatabaseLocation.DataSource,
             Mode = SqliteOpenMode.ReadWriteCreate,
             Password = PasswordGenerator.GetOrCreatePassword(),
         }.ToString();

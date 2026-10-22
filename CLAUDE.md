@@ -62,6 +62,13 @@ dotnet build src/Helix.App/Helix.App.csproj
 dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
 ```
 
+The test projects use **`xunit.v3.mtp-off`**, xunit v3 without Microsoft Testing Platform,
+so `dotnet test` keeps running them through VSTest and `--filter "FullyQualifiedName~…"` and
+`--logger trx` (which `test.ps1` and CI pass) keep working. Plain `xunit.v3` turns MTP on,
+and the .NET 10 SDK then refuses the VSTest path outright. `xUnit1051` (pass
+`TestContext.Current.CancellationToken`) is suppressed: the handlers under test run against
+substitutes and have nothing to cancel.
+
 CI covers both: a Windows job builds and runs all three suites, a macOS job compile-verifies the
 Catalyst head and runs the Application suite.
 
@@ -1633,7 +1640,10 @@ exists to avoid.
 and sends `ShowUpdatesMessage`, which runs the check-download-install flow that page already
 owns, rather than carrying a second copy of it. `SettingsViewModel` sends
 `UpdateCheckedMessage` back after any check it runs, so a badge cannot outlive a check the
-user ran themselves. A check that cannot reach GitHub is logged and nothing is shown — the
+user ran themselves. While an install is downloading, the badge shows the same status line the settings page
+does, with a progress bar under it: `SettingsViewModel` sends `UpdateProgressMessage` whenever
+`UpdateStatus` changes, so the progress stays in view after the user navigates away from the
+page that started it. An empty status puts the badge back to "Update available". A check that cannot reach GitHub is logged and nothing is shown — the
 user did not ask for it.
 
 **Lock** sits beside Logout. `IdleLockService.LockNowAsync` is deliberately independent of
@@ -1925,6 +1935,17 @@ lookups queued behind them started timing out as well.
 ### Persistence
 
 `AppDbContext` (`src/Helix.Infrastructure/Database/AppDbContext.cs`) implements both `IDbContext` and `IUnitOfWork` (abstractions in `Helix.Application/Abstractions/Data/`). The SQLite database is encrypted: the connection string is built with a password from `PasswordGenerator.GetOrCreatePassword()`, and `IRelationalCommandBuilderFactory` is replaced with a custom builder (`Database/Sqlite/CustomRelationalCommandBuilderFactory`) to support the cipher. `InsertAuditLogsInterceptor` is registered as a singleton and attached to the context to write audit logs automatically on save. Entity configurations are picked up via `ApplyConfigurationsFromAssembly` from `Database/Configurations/`.
+
+The cipher is **SQLite3 Multiple Ciphers** (`SQLite3MC.PCLRaw.bundle`), not SQLCipher itself.
+`SQLitePCLRaw.bundle_e_sqlcipher` is deprecated — SQLitePCLRaw 3.0 stopped shipping free
+encrypted builds — and SQLite3MC is the open-source library that reads the SQLCipher format.
+Its default cipher is ChaCha20, though, so `DatabaseLocation.DataSource` is a `file:` URI
+carrying `cipher=sqlcipher&legacy=4` (`DatabaseConfiguration.CipherParameters`): every
+install's `helix.db` was written by SQLCipher 4, and without those parameters it reads as
+"file is not a database". New databases are written in the same format, so a build that an
+update rolls back to can still open them. **Do not drop the parameters or change the cipher**
+without a migration that rekeys existing files. `SqlCipherCompatibilityTests` opens
+`Database/Fixtures/sqlcipher-v4.db`, written by the old bundle, to hold that.
 
 The `DbContext` lifetime and threading were a recurring issue historically; the fix is the per-operation scope pattern above (`ScopedHandler`). Do not resolve `AppDbContext` (or anything scoped) from the root provider, and do not share a context instance across concurrent operations.
 

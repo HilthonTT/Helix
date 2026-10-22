@@ -169,11 +169,11 @@
                                     Background="{DynamicResource AccentWashBrush}"
                                     behaviors:Hover.Cursor="True"
                                     ToolTipProperties.Text="{l10n:Translate CheckForUpdates}"
-                                    IsVisible="{Binding UpdateAvailable}">
+                                    IsVisible="{Binding ShowUpdateBadge}">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="OnShowUpdates"/>
                                 </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" InputTransparent="True">
+                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" InputTransparent="True">
                                     <Label Text="{x:Static icons:IconFont.CloudDownloadAlt}"
                                            Style="{StaticResource IconSm}"
                                            FontSize="12"
@@ -185,13 +185,30 @@
                                            FontSize="12"
                                            VerticalOptions="Center"
                                            LineBreakMode="TailTruncation"
-                                           MaxLines="1"/>
+                                           MaxLines="1"
+                                           IsVisible="{Binding IsNotUpdating}"/>
+                                    <Label Grid.Column="1"
+                                           Grid.ColumnSpan="2"
+                                           Text="{Binding UpdateProgressStatus}"
+                                           Style="{StaticResource BrandText}"
+                                           FontSize="12"
+                                           VerticalOptions="Center"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="1"
+                                           IsVisible="{Binding IsUpdating}"/>
                                     <Label Grid.Column="2"
                                            Text="{Binding UpdateVersion}"
                                            Style="{StaticResource Mono}"
                                            FontSize="11"
                                            VerticalOptions="Center"
-                                           TextColor="{DynamicResource Accent}"/>
+                                           TextColor="{DynamicResource Accent}"
+                                           IsVisible="{Binding IsNotUpdating}"/>
+                                    <ProgressBar Grid.Row="1"
+                                                 Grid.ColumnSpan="3"
+                                                 Margin="0,8,0,0"
+                                                 Progress="{Binding UpdateProgress}"
+                                                 ProgressColor="{DynamicResource Accent}"
+                                                 IsVisible="{Binding IsUpdating}"/>
                                 </Grid>
                             </Border>
 
