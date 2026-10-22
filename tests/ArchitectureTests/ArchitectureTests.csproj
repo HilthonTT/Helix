@@ -9,6 +9,7 @@
     <IsTestProject>true</IsTestProject>
     <OutputType>Exe</OutputType>
     <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+    <WindowsAppSdkBootstrapInitialize>false</WindowsAppSdkBootstrapInitialize>
   </PropertyGroup>
 
   <ItemGroup>

@@ -69,6 +69,14 @@ and the .NET 10 SDK then refuses the VSTest path outright. `xUnit1051` (pass
 `TestContext.Current.CancellationToken`) is suppressed: the handlers under test run against
 substitutes and have nothing to cancel.
 
+xunit v3 runs each test project as its own **executable**, and an executable that references
+the Windows App SDK (through MAUI) gets the SDK's bootstrapper, which goes looking for an
+installed Windows App Runtime at startup. CI runners have none, so the process hung before
+xunit could talk to it ("Test process did not respond within 60 seconds") while every
+developer machine passed. `Infrastructure.UnitTests` and `ArchitectureTests` therefore set
+`WindowsAppSdkBootstrapInitialize` to false; under xunit 2 they were loaded into the test
+host as libraries and the bootstrapper never ran.
+
 CI covers both: a Windows job builds and runs all three suites, a macOS job compile-verifies the
 Catalyst head and runs the Application suite.
 
