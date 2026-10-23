@@ -57,6 +57,24 @@ public sealed class SqlCipherCompatibilityTests : IDisposable
         ReadFirstValue(connection).Should().Be(FixtureValue);
     }
 
+    [Theory]
+    [InlineData("Tim 100%41")]
+    [InlineData("100%")]
+    [InlineData("a#b")]
+    [InlineData("Jürgen")]
+    public void ADatabaseUnderAPathWithUriCharacters_Should_OpenThroughTheConfiguredDataSource(string folder)
+    {
+        string directory = Path.Combine(_directory, folder);
+        Directory.CreateDirectory(directory);
+
+        string path = Path.Combine(directory, "helix.db");
+        File.Copy(_path, path);
+
+        using SqliteConnection connection = Open(DatabaseLocation.DataSourceFor(path), FixtureKey);
+
+        ReadFirstValue(connection).Should().Be(FixtureValue);
+    }
+
     [Fact]
     public void ADatabaseWrittenBySqlCipher_Should_StayWritableAndReadable()
     {

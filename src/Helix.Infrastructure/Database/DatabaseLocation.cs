@@ -10,6 +10,16 @@ internal static class DatabaseLocation
 
     public static string DataSource => DataSourceFor(Path);
 
-    public static string DataSourceFor(string path) =>
-        $"{new Uri(path).AbsoluteUri}?{DatabaseConfiguration.CipherParameters}";
+    public static string DataSourceFor(string path)
+    {
+        string escaped = path
+            .Replace('\\', '/')
+            .Replace("%", "%25")
+            .Replace("?", "%3F")
+            .Replace("#", "%23");
+
+        string root = escaped.StartsWith('/') ? "file://" : "file:///";
+
+        return $"{root}{escaped}?{DatabaseConfiguration.CipherParameters}";
+    }
 }

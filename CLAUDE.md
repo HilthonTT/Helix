@@ -1950,7 +1950,10 @@ encrypted builds — and SQLite3MC is the open-source library that reads the SQL
 Its default cipher is ChaCha20, though, so `DatabaseLocation.DataSource` is a `file:` URI
 carrying `cipher=sqlcipher&legacy=4` (`DatabaseConfiguration.CipherParameters`): every
 install's `helix.db` was written by SQLCipher 4, and without those parameters it reads as
-"file is not a database". New databases are written in the same format, so a build that an
+"file is not a database". The URI is built by hand, escaping only `%`, `?` and `#`, never
+through `new Uri(path).AbsoluteUri`: that leaves a `%41` already in the path unescaped, SQLite
+decodes it, and a profile folder with one in it opened an empty database somewhere else.
+New databases are written in the same format, so a build that an
 update rolls back to can still open them. **Do not drop the parameters or change the cipher**
 without a migration that rekeys existing files. `SqlCipherCompatibilityTests` opens
 `Database/Fixtures/sqlcipher-v4.db`, written by the old bundle, to hold that.

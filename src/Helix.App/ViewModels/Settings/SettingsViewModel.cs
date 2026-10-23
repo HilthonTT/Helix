@@ -90,9 +90,14 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
     public bool HasUpdateStatus => !string.IsNullOrEmpty(UpdateStatus);
 
-    partial void OnUpdateStatusChanged(string value)
+    partial void OnUpdateStatusChanged(string? oldValue, string newValue)
     {
-        WeakReferenceMessenger.Default.Send(new UpdateProgressMessage(value, _updateFraction));
+        if (string.IsNullOrEmpty(oldValue) && string.IsNullOrEmpty(newValue))
+        {
+            return;
+        }
+
+        WeakReferenceMessenger.Default.Send(new UpdateProgressMessage(newValue, _updateFraction));
     }
 
     [ObservableProperty]
