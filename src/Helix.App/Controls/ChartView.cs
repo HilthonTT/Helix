@@ -29,15 +29,8 @@ internal sealed class ChartView : SKCanvasView
 
     public ChartView()
     {
-        try
-        {
-            Background = Colors.Transparent;
-            PaintSurface += OnPaintCanvas;
-        }
-        catch (Exception ex)
-        {
-            Console.Write(ex);
-        }
+        Background = Colors.Transparent;
+        PaintSurface += OnPaintCanvas;
     }
 
     private static void OnChartChanged(BindableObject d, object oldValue, object value)

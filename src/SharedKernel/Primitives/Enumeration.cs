@@ -82,7 +82,7 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
 
     public override int GetHashCode()
     {
-        return Id.GetHashCode() * 37;
+        return Id;
     }
 
     private static Dictionary<int, TEnum> CreateEnumerationDictionary(Type enumType)

@@ -76,7 +76,7 @@ public class GetStorageAlertsTests
 
     private static VolumeUsage Volume(long total, int freePercent, params string[] letters)
     {
-        long free = (long)Math.Ceiling(total * freePercent / 100.0);
+        long free = (long)Math.Ceiling((double)total * freePercent / 100.0);
 
         return new($"capacity:{total}", total, total - free, letters);
     }
