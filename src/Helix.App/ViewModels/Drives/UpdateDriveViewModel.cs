@@ -63,7 +63,7 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool ApplyCredentialsToServer { get; set; }
 
-    public int SameServerCount => _otherDrives.Count(d => d.IsOnSameServerAs(Drive.Host ?? string.Empty));
+    public int SameServerCount => _otherDrives.Count(d => d.Protocol.UsesCredentials() && d.IsOnSameServerAs(Drive.Host ?? string.Empty));
 
     public bool ShowApplyCredentials =>
         Drive.UsesCredentials &&

@@ -50,7 +50,7 @@ public sealed class ListShares(
 
         Dictionary<string, string> existing = new(StringComparer.OrdinalIgnoreCase);
 
-        foreach (Drive drive in drives.Where(d => d.IsOnSameServerAs(request.Host)))
+        foreach (Drive drive in drives.Where(d => d.Protocol == DriveProtocol.Smb && d.IsOnSameServerAs(request.Host)))
         {
             existing.TryAdd(drive.Name, drive.Letter);
         }

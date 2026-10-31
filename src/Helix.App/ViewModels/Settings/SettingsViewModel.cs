@@ -90,7 +90,7 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
     public bool HasUpdateStatus => !string.IsNullOrEmpty(UpdateStatus);
 
-    partial void OnUpdateStatusChanged(string? oldValue, string newValue)
+    partial void OnUpdateStatusChanged(string oldValue, string newValue)
     {
         if (string.IsNullOrEmpty(oldValue) && string.IsNullOrEmpty(newValue))
         {

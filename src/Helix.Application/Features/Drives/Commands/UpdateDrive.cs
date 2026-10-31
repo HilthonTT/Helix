@@ -129,7 +129,7 @@ public sealed class UpdateDrive(
 
         drive.ReachAwayAt(request.RemoteHost);
 
-        if (request.ApplyCredentialsToServer)
+        if (request.ApplyCredentialsToServer && drive.Protocol.UsesCredentials())
         {
             List<Drive> drives = await driveRepository.GetAsync(loggedInUser.UserId, cancellationToken);
 

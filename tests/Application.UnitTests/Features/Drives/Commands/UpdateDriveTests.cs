@@ -88,6 +88,29 @@ public sealed class UpdateDriveTests
     }
 
     [Fact]
+    public async Task Handle_Should_LeaveTheOtherDrivesAlone_WhenTheEditedDriveIsNfs()
+    {
+        Drive sibling = Drive.Create(UserId, "M", "192.168.0.1", "Media", "Username", "Password");
+        Drive drive = Editing(
+            Drive.Create(UserId, "L", "192.168.0.1", "/volume1/media", "", "", protocol: DriveProtocol.Nfs),
+            sibling);
+
+        Result result = await _updateDrive.Handle(new UpdateDrive.Request(
+            drive.Id,
+            drive.Letter,
+            drive.Host,
+            drive.Name,
+            "",
+            "",
+            ApplyCredentialsToServer: true,
+            Protocol: DriveProtocol.Nfs));
+
+        result.IsSuccess.Should().BeTrue();
+        sibling.Username.Should().Be("Username");
+        sibling.Password.Should().Be("Password");
+    }
+
+    [Fact]
     public async Task Handle_Should_LeaveTheOtherDrivesOnTheServerAlone_WhenNotAsked()
     {
         Drive sibling = Drive.Create(UserId, "M", "192.168.0.1", "Media", "Username", "Password");
