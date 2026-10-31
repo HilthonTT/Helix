@@ -150,7 +150,7 @@ public sealed class GitHubUpdateCheckerTests
 
         result.IsSuccess.Should().BeTrue();
         result.Value.IsUpdateAvailable.Should().BeTrue();
-        result.Value.LatestVersion.Should().Be("v2.1.0");
+        result.Value.LatestVersion.Should().Be("2.1.0");
         result.Value.CurrentVersion.Should().Be(CurrentVersionDisplayed);
         result.Value.ReleaseUrl.Should().Be("https://github.com/HilthonTT/Helix/releases/tag/v2.1.0");
     }

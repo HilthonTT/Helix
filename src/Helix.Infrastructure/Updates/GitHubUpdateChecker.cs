@@ -124,7 +124,7 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
             return new UpdateCheck(
                 isNewer,
                 ReleaseVersion.ToDisplayString(current),
-                release.TagName,
+                ReleaseVersion.ToDisplayString(release.TagName),
                 url,
                 asset?.BrowserDownloadUrl,
                 asset?.Name,
