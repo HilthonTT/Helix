@@ -677,6 +677,11 @@ hiding the window, and Catalyst has no public way to hide one — the rows would
 and ignored. `BaseViewModel.MinimizeApp` carries the same guard, or the countdown would
 announce "still running in the tray" over a window that never moved.
 
+The menu also rebuilds on `CheckDrivesStatusMessage`. A connect from the window holds a
+suppression, so the monitor never reports it, and the tray kept offering "Connect Z:" for a
+drive the row had just mounted — and `ToggleDriveAsync`, which reads the live state, then
+*disconnected* it under that label.
+
 Every tray-menu action reports its failure through the balloon (`TrayIconService.Report`)
 and a warning in the log; the tray is used while the window is away, so there is no banner
 to land on, and a "connect all" with a wrong password used to produce nothing at all. The
@@ -918,7 +923,11 @@ pinned drives.
 
 A network that **cannot be identified reads as home**, never as away. A false "away" would
 stop a drive reconnecting that would have come back — the same asymmetry
-`HostReachability` is built on.
+`HostReachability` is built on. That includes a reading that fell back to `gateway-ip:`
+for a drive pinned by `gateway:<mac>`: ARP missing its first answer just after the adapter
+comes up is ordinary, and comparing the two kinds as strings read every pinned drive as
+"Away" on its own network until a later reading got the hardware address.
+`Drive.IsAwayFrom` treats that pair as unknown.
 
 On macOS (`MacNetworkLocation`) the same identity is read by running `/sbin/route -n get
 default` and `/usr/sbin/arp -n <gateway>` — no shell, `ArgumentList`, a two-second timeout
@@ -1282,6 +1291,11 @@ violation every time, the script's `catch` swallowed it, and the last line start
 build again: 2.2.0 "updated" to 2.2.1, restarted, and was still 2.2.0. PowerShell's
 `Set-Location` inside the script does not fix this — it moves the shell's location, not the
 process's current directory, and it is the process handle that holds the folder.
+
+`IsSupported` checks the install folder's **parent** as well as the folder: the helper
+renames the install and creates `<install>.old` beside it, so Modify rights on
+`C:\Program Files\Helix` without them on `Program Files` downloaded every release, failed
+every move and restarted the old build.
 
 The move is retried for `MoveAttempts` seconds, because an indexer or a virus scanner
 holding the folder for a moment should not cost the release.
@@ -1761,7 +1775,9 @@ off — or its timer changed — while the user was away is honoured the moment 
 off clears the countdown outright, a changed `TimerCount` restarts rather than resuming a
 stale count. A countdown the user **cancelled**, or one that already fired and minimized,
 is not auto-resumed; it comes back showing its "Continue" affordance, which is what
-cancelling meant.
+cancelling meant. A return to the dashboard while the first `OnAppearing` is still starting
+the session's services is remembered and the countdown resumed once that finishes, since the
+re-entrant call returns early and the pause from leaving would otherwise stand.
 
 `System.Timers.Timer` can raise an `Elapsed` that was already queued when `Stop` was called.
 `CountdownService` ignores a tick that arrives while the timer is off: without that, leaving
@@ -1820,6 +1836,12 @@ still inside its debounce used to ride along on whichever switch was flipped nex
 without its own confirmation or its `_persisted` baseline moving, and if it was the one the
 handler refused, the switch rolled back with an error about a field the user had not finished
 typing in.
+
+The settings page builds a fresh `SettingsDisplay` every time it appears, so
+`LoadSettingsAsync` first **flushes** the old one (`FlushAsync`): a debounce still running
+is saved at once and any save already queued is awaited. Without it a value committed just
+before leaving the page was read back stale, saved a moment later by the discarded
+instance, and then overwritten by the next switch the user flipped.
 
 Only these four confirm themselves, through `Notifier`. A switch is its own confirmation —
 it is sitting there in its new position — but a number typed into a box looks identical

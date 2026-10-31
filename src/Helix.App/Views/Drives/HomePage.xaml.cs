@@ -84,16 +84,20 @@ public sealed partial class HomePage : ContentPage
 
     private int _chartRequest;
 
+    private bool _reappearedWhileInitializing;
+
     protected async override void OnAppearing()
     {
         _isVisible = true;
 
         if (_isInitializing)
         {
+            _reappearedWhileInitializing = true;
             return;
         }
 
         _isInitializing = true;
+        _reappearedWhileInitializing = false;
         try
         {
             _mountReconciler.Start();
@@ -133,6 +137,11 @@ public sealed partial class HomePage : ContentPage
             _idleLock.Start();
 
             await PruneAuditlogsAsync();
+
+            if (_reappearedWhileInitializing && _isVisible)
+            {
+                await _viewModel.InitializeCountdownAsync();
+            }
         }
         catch (Exception ex)
         {

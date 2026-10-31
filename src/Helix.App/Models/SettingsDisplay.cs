@@ -29,6 +29,8 @@ internal sealed partial class SettingsDisplay : ObservableObject
     private int _persistedIdleLockMinutes;
     private Language _persistedLanguage;
 
+    private readonly List<Task> _pendingSaves = [];
+
     [ObservableProperty]
     public partial Guid Id { get; set; }
 
@@ -224,32 +226,28 @@ internal sealed partial class SettingsDisplay : ObservableObject
             AutoReset = false
         };
 
-        _debounceTimer.Elapsed += (_, _) =>
-            MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateTimerCount());
+        _debounceTimer.Elapsed += (_, _) => QueueSave(DebouncedUpdateTimerCount);
 
         _retentionDebounceTimer = new(500)
         {
             AutoReset = false
         };
 
-        _retentionDebounceTimer.Elapsed += (_, _) =>
-            MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateRetentionDays());
+        _retentionDebounceTimer.Elapsed += (_, _) => QueueSave(DebouncedUpdateRetentionDays);
 
         _storageAlertDebounceTimer = new(500)
         {
             AutoReset = false
         };
 
-        _storageAlertDebounceTimer.Elapsed += (_, _) =>
-            MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateStorageAlertThreshold());
+        _storageAlertDebounceTimer.Elapsed += (_, _) => QueueSave(DebouncedUpdateStorageAlertThreshold);
 
         _idleLockDebounceTimer = new(500)
         {
             AutoReset = false
         };
 
-        _idleLockDebounceTimer.Elapsed += (_, _) =>
-            MainThread.BeginInvokeOnMainThread(async () => await DebouncedUpdateIdleLockMinutes());
+        _idleLockDebounceTimer.Elapsed += (_, _) => QueueSave(DebouncedUpdateIdleLockMinutes);
 
         Id = settings.Id;
         UserId = settings.UserId;
@@ -272,6 +270,60 @@ internal sealed partial class SettingsDisplay : ObservableObject
         GlobalHotkeys = settings.GlobalHotkeys;
 
         _initialized = true;
+    }
+
+    public async Task FlushAsync()
+    {
+        FlushTimer(_debounceTimer, DebouncedUpdateTimerCount);
+        FlushTimer(_retentionDebounceTimer, DebouncedUpdateRetentionDays);
+        FlushTimer(_storageAlertDebounceTimer, DebouncedUpdateStorageAlertThreshold);
+        FlushTimer(_idleLockDebounceTimer, DebouncedUpdateIdleLockMinutes);
+
+        Task[] pending;
+        lock (_pendingSaves)
+        {
+            pending = [.. _pendingSaves];
+        }
+
+        await Task.WhenAll(pending);
+    }
+
+    private void FlushTimer(System.Timers.Timer timer, Func<Task> save)
+    {
+        if (!timer.Enabled)
+        {
+            return;
+        }
+
+        timer.Stop();
+        QueueSave(save);
+    }
+
+    private void QueueSave(Func<Task> save)
+    {
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        lock (_pendingSaves)
+        {
+            _pendingSaves.Add(completion.Task);
+        }
+
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                await save();
+            }
+            finally
+            {
+                lock (_pendingSaves)
+                {
+                    _pendingSaves.Remove(completion.Task);
+                }
+
+                completion.TrySetResult();
+            }
+        });
     }
 
     private async Task<bool> UpdatePropertyAsync(Action<UpdateSettings.Request.Builder> updateAction)

@@ -99,7 +99,13 @@ public sealed class Drive : Entity, IAuditable
     public bool IsAwayFrom(string? currentNetworkId) =>
         HomeNetworkId is not null &&
         currentNetworkId is not null &&
+        !(currentNetworkId.StartsWith(GatewayIpPrefix, StringComparison.OrdinalIgnoreCase) &&
+          HomeNetworkId.StartsWith(GatewayHardwarePrefix, StringComparison.OrdinalIgnoreCase)) &&
         !string.Equals(HomeNetworkId, currentNetworkId, StringComparison.OrdinalIgnoreCase);
+
+    private const string GatewayIpPrefix = "gateway-ip:";
+
+    private const string GatewayHardwarePrefix = "gateway:";
 
     public void PinToNetwork(string? networkId, string? networkName)
     {

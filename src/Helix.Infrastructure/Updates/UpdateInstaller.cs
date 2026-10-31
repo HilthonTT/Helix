@@ -73,7 +73,9 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         {
             try
             {
-                return CanWriteTo(_installDirectory());
+                string install = _installDirectory();
+
+                return CanWriteTo(install) && CanCreateFolderIn(Path.GetDirectoryName(install.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)));
             }
             catch (Exception ex)
             {
@@ -600,6 +602,28 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             {
                 return true;
             }
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            return false;
+        }
+    }
+
+    private static bool CanCreateFolderIn(string? parent)
+    {
+        if (string.IsNullOrEmpty(parent) || !Directory.Exists(parent))
+        {
+            return false;
+        }
+
+        string probe = Path.Combine(parent, $".helix-write-probe-{Guid.NewGuid():N}");
+
+        try
+        {
+            Directory.CreateDirectory(probe);
+            Directory.Delete(probe);
+
+            return true;
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {

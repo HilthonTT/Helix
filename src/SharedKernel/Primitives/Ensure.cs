@@ -54,7 +54,7 @@ public static class Ensure
         int value,
         [CallerArgumentExpression(nameof(value))] string? paramName = default)
     {
-        if (!int.IsPositive(value))
+        if (value <= 0)
         {
             throw new InvalidOperationException(paramName);
         }

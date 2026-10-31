@@ -39,7 +39,8 @@ internal sealed partial class SchedulesViewModel : BaseViewModel
     [ObservableProperty]
     public partial ScheduleTargetOption? SelectedTarget { get; set; }
 
-    public List<string> Actions { get; }
+    [ObservableProperty]
+    public partial List<string> Actions { get; set; }
 
     [ObservableProperty]
     public partial int SelectedActionIndex { get; set; }
@@ -72,6 +73,10 @@ internal sealed partial class SchedulesViewModel : BaseViewModel
         try
         {
             IsBusy = true;
+
+            int selectedAction = SelectedActionIndex;
+            Actions = [AppResources.ScheduleActionConnect, AppResources.ScheduleActionDisconnect];
+            SelectedActionIndex = selectedAction;
 
             Result<List<DriveGroup>> groups = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
             if (groups.IsFailure)

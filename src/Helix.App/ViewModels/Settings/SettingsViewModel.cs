@@ -343,6 +343,11 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         {
             Username = _loggedInUser.Username;
 
+            if (Settings is not null)
+            {
+                await Settings.FlushAsync();
+            }
+
             Result<SettingsModel> result = await ScopedHandler.HandleAsync(
                 (GetSettings h) => h.Handle(cancellationToken));
             if (result.IsFailure)

@@ -23,12 +23,11 @@ public static class StorageUsageHelper
         string key = string.Join('|', driveLetter, driveNotReadyMessage, invalidDriveMessage, usedOfFormat);
 
         Task<string> reading = InFlight.GetOrAdd(key, _ =>
-        {
-            Task<string> started = Task.Run(() => GetStorageUsage(driveLetter, driveNotReadyMessage, invalidDriveMessage, usedOfFormat));
-            started.ContinueWith(_ => InFlight.TryRemove(key, out Task<string>? _), TaskScheduler.Default);
+            Task.Run(() => GetStorageUsage(driveLetter, driveNotReadyMessage, invalidDriveMessage, usedOfFormat)));
 
-            return started;
-        });
+        _ = reading.ContinueWith(
+            finished => InFlight.TryRemove(new KeyValuePair<string, Task<string>>(key, finished)),
+            TaskScheduler.Default);
 
         try
         {
