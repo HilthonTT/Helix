@@ -108,7 +108,9 @@ public sealed class ExportDrives(
                 d.MacAddress,
                 d.RemoteHost,
                 d.HomeNetworkId,
-                d.HomeNetworkName))
+                d.HomeNetworkName,
+                d.Protocol,
+                d.Port))
             .ToList();
 
         List<DriveGroupImportDto> exportedGroups = groups

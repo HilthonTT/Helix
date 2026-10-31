@@ -15,7 +15,7 @@ namespace Helix.Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
             modelBuilder.Entity("Helix.Domain.Auditlogs.Auditlog", b =>
                 {
@@ -137,6 +137,12 @@ namespace Helix.Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Persistent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Port")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Protocol")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("RemoteHost")

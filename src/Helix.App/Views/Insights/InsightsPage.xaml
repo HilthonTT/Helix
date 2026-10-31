@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Helix.App.Models"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Insights"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             xmlns:controls="clr-namespace:Helix.App.Controls"
+             x:Class="Helix.App.Views.Insights.InsightsPage"
+             x:DataType="vm:InsightsViewModel"
+             Title="">
+
+    <ContentPage.Resources>
+        <Style x:Key="RangeButton" TargetType="Button" BasedOn="{StaticResource ButtonSecondary}">
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="MinimumHeightRequest" Value="32"/>
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid>
+
+        <ScrollView>
+            <VerticalStackLayout Spacing="20" Padding="28,24">
+
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{l10n:Translate Insights}" Style="{StaticResource Display}"/>
+                    <Label Style="{StaticResource Muted}"
+                           Text="{Binding Source={x:Static l10n:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=l10n:LocalizationResourceManager}"/>
+                </VerticalStackLayout>
+
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="16" Padding="20">
+
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                                <Label Text="{l10n:Translate StorageHistoryTitle}" Style="{StaticResource Title1}"/>
+                                <Label Text="{Binding RangeText}" Style="{StaticResource Caption}"/>
+                            </VerticalStackLayout>
+
+                            <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                                <Button Style="{StaticResource RangeButton}"
+                                        Text="{l10n:Translate Range30Days}"
+                                        Command="{Binding SetRangeCommand}"
+                                        CommandParameter="30">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding Is30Days}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource Accent}"/>
+                                            <Setter Property="TextColor" Value="{StaticResource OnAccent}"/>
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button Style="{StaticResource RangeButton}"
+                                        Text="{l10n:Translate Range90Days}"
+                                        Command="{Binding SetRangeCommand}"
+                                        CommandParameter="90">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding Is90Days}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource Accent}"/>
+                                            <Setter Property="TextColor" Value="{StaticResource OnAccent}"/>
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button Style="{StaticResource RangeButton}"
+                                        Text="{l10n:Translate Range365Days}"
+                                        Command="{Binding SetRangeCommand}"
+                                        CommandParameter="365">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding Is365Days}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource Accent}"/>
+                                            <Setter Property="TextColor" Value="{StaticResource OnAccent}"/>
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                            </HorizontalStackLayout>
+                        </Grid>
+
+                        <VerticalStackLayout Spacing="14"
+                                             IsVisible="{Binding HasVolumes}"
+                                             BindableLayout.ItemsSource="{Binding Volumes}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:VolumeHistoryDisplay">
+                                    <Border Style="{StaticResource Card}" Padding="16">
+                                        <Grid RowDefinitions="Auto,Auto,140,Auto" RowSpacing="6">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                <Label Text="{Binding Title}"
+                                                       Style="{StaticResource BodyStrong}"
+                                                       LineBreakMode="TailTruncation"/>
+                                                <Label Grid.Column="1"
+                                                       Text="{Binding Usage}"
+                                                       Style="{StaticResource Caption}"
+                                                       FontFamily="{StaticResource FontMonoBold}"/>
+                                            </Grid>
+
+                                            <HorizontalStackLayout Grid.Row="1" Spacing="8">
+                                                <Label Text="{x:Static icons:IconFont.ExclamationCircle}"
+                                                       Style="{StaticResource IconSm}"
+                                                       VerticalOptions="Center"
+                                                       IsVisible="{Binding IsFillingUp}"
+                                                       TextColor="{DynamicResource Warning}"/>
+                                                <Label Text="{Binding Trend}"
+                                                       Style="{StaticResource Caption}"
+                                                       VerticalOptions="Center"/>
+                                                <Label Text="{Binding UsedPercent}"
+                                                       Style="{StaticResource Caption}"
+                                                       TextColor="{DynamicResource TextFaint}"
+                                                       VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+
+                                            <controls:ChartView Grid.Row="2" Chart="{Binding Chart}"/>
+
+                                            <Label Grid.Row="3"
+                                                   Text="{Binding Span}"
+                                                   Style="{StaticResource Caption}"
+                                                   TextColor="{DynamicResource TextFaint}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6"
+                                             Padding="0,12"
+                                             IsVisible="{Binding ShowNoHistory}"
+                                             HorizontalOptions="Center">
+                            <Label Text="{x:Static icons:IconFont.ChartArea}"
+                                   Style="{StaticResource IconLg}"
+                                   HorizontalOptions="Center"
+                                   TextColor="{DynamicResource Accent}"/>
+                            <Label Text="{l10n:Translate StorageHistoryEmpty}"
+                                   Style="{StaticResource Caption}"
+                                   HorizontalTextAlignment="Center"
+                                   MaximumWidthRequest="420"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="14" Padding="20">
+
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding ReliabilitySummary}" Style="{StaticResource Title1}"/>
+                            <Label Text="{l10n:Translate ReliabilityHint}" Style="{StaticResource Caption}"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="10"
+                                             IsVisible="{Binding HasReliability}"
+                                             BindableLayout.ItemsSource="{Binding Reliability}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:ReliabilityRowDisplay">
+                                    <Grid ColumnDefinitions="20,44,*" ColumnSpacing="10">
+                                        <Label Text="{x:Static icons:IconFont.ExclamationCircle}"
+                                               Style="{StaticResource IconSm}"
+                                               VerticalOptions="Start"
+                                               Margin="0,2,0,0"
+                                               IsVisible="{Binding IsFlaky}"
+                                               TextColor="{DynamicResource Warning}"/>
+
+                                        <Label Grid.Column="1"
+                                               Text="{Binding Letter}"
+                                               Style="{StaticResource BodyStrong}"
+                                               FontFamily="{StaticResource FontMonoBold}"
+                                               VerticalOptions="Start"/>
+
+                                        <VerticalStackLayout Grid.Column="2" Spacing="2">
+                                            <Label Text="{Binding Name}" Style="{StaticResource BodyStrong}"/>
+                                            <Label Text="{Binding Drops}"
+                                                   Style="{StaticResource Caption}"
+                                                   LineBreakMode="WordWrap"/>
+                                            <Label Text="{Binding Recovery}"
+                                                   Style="{StaticResource Caption}"
+                                                   LineBreakMode="WordWrap"
+                                                   IsVisible="{Binding HasRecovery}"/>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding ShowNoDrops}">
+                            <Label Text="{x:Static icons:IconFont.Plug}"
+                                   Style="{StaticResource IconSm}"
+                                   VerticalOptions="Center"
+                                   TextColor="{DynamicResource Success}"/>
+                            <Label Text="{l10n:Translate ReliabilityEstateNoDrops}"
+                                   Style="{StaticResource Caption}"
+                                   VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <controls:NotificationHost/>
+
+    </Grid>
+
+</ContentPage>

@@ -578,6 +578,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
                 row.Name = drive.Name;
                 row.Host = drive.Host;
                 row.RemoteHost = drive.RemoteHost;
+                row.Protocol = drive.Protocol;
+                row.Port = drive.Port;
                 row.LastConnectedOnUtc = drive.LastConnectedOnUtc;
                 row.CanWake = drive.MacAddress is not null;
                 row.RefreshLocalizedText();
@@ -773,6 +775,8 @@ internal sealed partial class HomeViewModel : BaseViewModel
             existingDrive.Name = m.UpdatedDrive.Name;
             existingDrive.Host = m.UpdatedDrive.Host;
             existingDrive.RemoteHost = m.UpdatedDrive.RemoteHost;
+            existingDrive.Protocol = m.UpdatedDrive.Protocol;
+            existingDrive.Port = m.UpdatedDrive.Port;
             existingDrive.CanWake = m.UpdatedDrive.CanWake;
 
             SyncConnectivity(_nasConnector.GetLiveLetters());

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Helix.Domain.Drives;
+using System.Globalization;
 
 namespace Helix.App.Models;
 
@@ -18,6 +19,7 @@ internal sealed partial class CreateDriveModel : ObservableObject
         ConnectByHostname = false;
         MacAddress = string.Empty;
         RemoteHost = string.Empty;
+        Port = string.Empty;
     }
 
     public static CreateDriveModel CopyOf(Drive drive) => new()
@@ -30,6 +32,8 @@ internal sealed partial class CreateDriveModel : ObservableObject
         ConnectByHostname = drive.ConnectByHostname,
         MacAddress = drive.MacAddress ?? string.Empty,
         RemoteHost = drive.RemoteHost ?? string.Empty,
+        ProtocolIndex = (int)drive.Protocol,
+        Port = drive.Port?.ToString(CultureInfo.InvariantCulture) ?? string.Empty,
     };
 
     [ObservableProperty]
@@ -61,4 +65,27 @@ internal sealed partial class CreateDriveModel : ObservableObject
 
     [ObservableProperty]
     public partial string RemoteHost { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Protocol))]
+    [NotifyPropertyChangedFor(nameof(IsSmb))]
+    [NotifyPropertyChangedFor(nameof(IsWebDav))]
+    [NotifyPropertyChangedFor(nameof(UsesCredentials))]
+    [NotifyPropertyChangedFor(nameof(PathHint))]
+    public partial int ProtocolIndex { get; set; }
+
+    [ObservableProperty]
+    public partial string Port { get; set; }
+
+    public DriveProtocol Protocol => DriveProtocolText.FromIndex(ProtocolIndex);
+
+    public bool IsSmb => Protocol == DriveProtocol.Smb;
+
+    public bool IsWebDav => Protocol == DriveProtocol.WebDav;
+
+    public bool UsesCredentials => Protocol.UsesCredentials();
+
+    public string PathHint => DriveProtocolText.PathHintFor(Protocol);
+
+    public int? PortNumber => DriveProtocolText.ParsePort(Port);
 }

@@ -24,6 +24,16 @@ internal sealed partial class DriveDisplay : ObservableObject
     public string? RemoteHost { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Subtitle))]
+    public partial DriveProtocol Protocol { get; set; }
+
+    public int? Port { get; set; }
+
+    private string HostLabel => Protocol == DriveProtocol.Smb
+        ? Host
+        : $"{Host} · {DriveProtocolText.ShortName(Protocol)}";
+
+    [ObservableProperty]
     public partial string StorageUsage { get; set; }
 
     [ObservableProperty]
@@ -39,7 +49,7 @@ internal sealed partial class DriveDisplay : ObservableObject
 
     public string Subtitle => string.IsNullOrWhiteSpace(Host)
         ? LastConnected
-        : $"{Host} · {LastConnected}";
+        : $"{HostLabel} · {LastConnected}";
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; }
@@ -166,6 +176,8 @@ internal sealed partial class DriveDisplay : ObservableObject
         Name = drive.Name;
         Host = drive.Host;
         RemoteHost = drive.RemoteHost;
+        Protocol = drive.Protocol;
+        Port = drive.Port;
         LastConnectedOnUtc = drive.LastConnectedOnUtc;
         CanWake = drive.MacAddress is not null;
     }
@@ -178,6 +190,8 @@ internal sealed partial class DriveDisplay : ObservableObject
         Name = updateDrive.Name;
         Host = updateDrive.Host;
         RemoteHost = string.IsNullOrWhiteSpace(updateDrive.RemoteHost) ? null : updateDrive.RemoteHost.Trim();
+        Protocol = updateDrive.Protocol;
+        Port = DriveProtocols.PortFor(updateDrive.Protocol, updateDrive.PortNumber);
         CanWake = MacAddresses.IsValid(updateDrive.MacAddress);
     }
 
@@ -204,7 +218,7 @@ internal sealed partial class DriveDisplay : ObservableObject
 
     private Drive Probe()
     {
-        var probe = Drive.Create(ProbeOwner, Letter, Host, Name, "-", "-");
+        var probe = Drive.Create(ProbeOwner, Letter, Host, Name, "-", "-", protocol: Protocol, port: Port);
         probe.ReachAwayAt(RemoteHost);
 
         return probe;

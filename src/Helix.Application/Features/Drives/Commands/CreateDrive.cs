@@ -27,7 +27,9 @@ public sealed class CreateDrive(
         string? HomeNetworkId = null,
         string? HomeNetworkName = null,
         string? MacAddress = null,
-        string? RemoteHost = null);
+        string? RemoteHost = null,
+        DriveProtocol Protocol = DriveProtocol.Smb,
+        int? Port = null);
 
     public async Task<Result<Drive>> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -56,7 +58,9 @@ public sealed class CreateDrive(
             request.Password,
             request.AutoConnect,
             request.Persistent,
-            request.ConnectByHostname);
+            request.ConnectByHostname,
+            request.Protocol,
+            request.Port);
 
         drive.PinToNetwork(request.HomeNetworkId, request.HomeNetworkName);
 
@@ -98,10 +102,13 @@ public sealed class CreateDrive(
             return Result.Failure(DriveErrors.InvalidRemoteHost);
         }
 
-        string[] properties = [request.Letter, request.Host, request.Name, request.Username, request.Password];
-
-        return properties.Any(string.IsNullOrWhiteSpace)
-            ? Result.Failure(ValidationErrors.MissingFields)
-            : Result.Success();
+        return ProtocolValidation.Validate(
+            request.Protocol,
+            request.Port,
+            request.Letter,
+            request.Host,
+            request.Name,
+            request.Username,
+            request.Password);
     }
 }

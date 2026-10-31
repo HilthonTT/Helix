@@ -3315,5 +3315,230 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("LinkFailed", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Protocol.
+        /// </summary>
+        internal static string Protocol {
+            get {
+                return ResourceManager.GetString("Protocol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        internal static string Port {
+            get {
+                return ResourceManager.GetString("Port", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SMB (Windows file sharing).
+        /// </summary>
+        internal static string ProtocolSmb {
+            get {
+                return ResourceManager.GetString("ProtocolSmb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WebDAV (HTTPS).
+        /// </summary>
+        internal static string ProtocolWebDav {
+            get {
+                return ResourceManager.GetString("ProtocolWebDav", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NFS.
+        /// </summary>
+        internal static string ProtocolNfs {
+            get {
+                return ResourceManager.GetString("ProtocolNfs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Put the folder path in the name, such as home or remote.php/dav/files/me. Leave the port empty for 443..
+        /// </summary>
+        internal static string ProtocolWebDavHint {
+            get {
+                return ResourceManager.GetString("ProtocolWebDavHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Put the export path in the name, such as /volume1/media. NFS takes no username or password; on Windows it needs the Client for NFS feature..
+        /// </summary>
+        internal static string ProtocolNfsHint {
+            get {
+                return ResourceManager.GetString("ProtocolNfsHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export as CSV.
+        /// </summary>
+        internal static string ExportHistory {
+            get {
+                return ResourceManager.GetString("ExportHistory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Time (UTC).
+        /// </summary>
+        internal static string ExportColumnTime {
+            get {
+                return ResourceManager.GetString("ExportColumnTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Action.
+        /// </summary>
+        internal static string ExportColumnAction {
+            get {
+                return ResourceManager.GetString("ExportColumnAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Description.
+        /// </summary>
+        internal static string ExportColumnDescription {
+            get {
+                return ResourceManager.GetString("ExportColumnDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to History exported to {0}..
+        /// </summary>
+        internal static string HistoryExported {
+            get {
+                return ResourceManager.GetString("HistoryExported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Insights.
+        /// </summary>
+        internal static string Insights {
+            get {
+                return ResourceManager.GetString("Insights", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Storage over time.
+        /// </summary>
+        internal static string StorageHistoryTitle {
+            get {
+                return ResourceManager.GetString("StorageHistoryTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 30 days.
+        /// </summary>
+        internal static string Range30Days {
+            get {
+                return ResourceManager.GetString("Range30Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 90 days.
+        /// </summary>
+        internal static string Range90Days {
+            get {
+                return ResourceManager.GetString("Range90Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1 year.
+        /// </summary>
+        internal static string Range365Days {
+            get {
+                return ResourceManager.GetString("Range365Days", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing recorded yet. Helix measures each connected volume up to four times a day while it runs, and the chart fills in from there..
+        /// </summary>
+        internal static string StorageHistoryEmpty {
+            get {
+                return ResourceManager.GetString("StorageHistoryEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}% used.
+        /// </summary>
+        internal static string StorageUsedPercent {
+            get {
+                return ResourceManager.GetString("StorageUsedPercent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not enough history for a trend yet.
+        /// </summary>
+        internal static string StorageTrendNotEnoughHistory {
+            get {
+                return ResourceManager.GetString("StorageTrendNotEnoughHistory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Free space falling by {0} GB a day.
+        /// </summary>
+        internal static string StorageTrendShrinking {
+            get {
+                return ResourceManager.GetString("StorageTrendShrinking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Free space is steady or growing.
+        /// </summary>
+        internal static string StorageTrendSteady {
+            get {
+                return ResourceManager.GetString("StorageTrendSteady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} to {1} · {2} readings.
+        /// </summary>
+        internal static string StorageHistorySpan {
+            get {
+                return ResourceManager.GetString("StorageHistorySpan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drive reliability, last {0} days.
+        /// </summary>
+        internal static string ReliabilityEstateTitle {
+            get {
+                return ResourceManager.GetString("ReliabilityEstateTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No drive dropped in this period..
+        /// </summary>
+        internal static string ReliabilityEstateNoDrops {
+            get {
+                return ResourceManager.GetString("ReliabilityEstateNoDrops", resourceCulture);
+            }
+        }
     }
 }

@@ -45,6 +45,20 @@
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="6">
+                        <Label Text="{l10n:Translate Protocol}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Picker Margin="8,0"
+                                    BackgroundColor="Transparent"
+                                    ItemsSource="{Binding ProtocolNames}"
+                                    SelectedIndex="{Binding Drive.ProtocolIndex}"
+                                    IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                        <Label Text="{Binding Drive.PathHint}"
+                               Style="{StaticResource Caption}"
+                               IsVisible="{Binding Drive.IsSmb, Converter={StaticResource InvertedBoolConverter}}"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate DriveName}" Style="{StaticResource FieldLabel}"/>
                         <Border Style="{StaticResource Field}">
                             <Entry Placeholder="{l10n:Translate AddDriveNamePlaceholder}"
@@ -62,7 +76,17 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <VerticalStackLayout Spacing="6">
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding Drive.IsWebDav}">
+                        <Label Text="{l10n:Translate Port}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource Field}">
+                            <Entry Placeholder="443"
+                                   Keyboard="Numeric"
+                                   Text="{Binding Drive.Port}"
+                                   IsEnabled="{Binding IsNotBusy}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding Drive.UsesCredentials}">
                         <Label Text="{l10n:Translate NasUsername}" Style="{StaticResource FieldLabel}"/>
                         <Border Style="{StaticResource Field}">
                             <Entry Placeholder="{l10n:Translate AddNasUsernamePlaceholder}"
@@ -72,7 +96,7 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <VerticalStackLayout Spacing="6">
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding Drive.UsesCredentials}">
                         <Label Text="{l10n:Translate NasPassword}" Style="{StaticResource FieldLabel}"/>
                         <Border Style="{StaticResource Field}">
                             <Entry Placeholder="{l10n:Translate AddNasPasswordPlaceholder}"
@@ -139,17 +163,19 @@
                                 IsToggled="{Binding NetworkPin.IsPinned, Mode=TwoWay}"/>
                     </Grid>
 
-                    <Grid ColumnDefinitions="*,Auto"
-                          Margin="0,2,0,0"
-                          IsVisible="{Binding SupportsHostnameConnect}">
-                        <Label Text="{l10n:Translate ConnectByHostname}"
-                               Style="{StaticResource Caption}"
-                               VerticalOptions="Center"/>
-                        <Switch Grid.Column="1"
-                                Scale="0.85"
-                                HorizontalOptions="End"
-                                IsToggled="{Binding Drive.ConnectByHostname, Mode=TwoWay}"/>
-                    </Grid>
+                    <ContentView IsVisible="{Binding SupportsHostnameConnect}">
+                        <Grid ColumnDefinitions="*,Auto"
+                              Margin="0,2,0,0"
+                              IsVisible="{Binding Drive.IsSmb}">
+                            <Label Text="{l10n:Translate ConnectByHostname}"
+                                   Style="{StaticResource Caption}"
+                                   VerticalOptions="Center"/>
+                            <Switch Grid.Column="1"
+                                    Scale="0.85"
+                                    HorizontalOptions="End"
+                                    IsToggled="{Binding Drive.ConnectByHostname, Mode=TwoWay}"/>
+                        </Grid>
+                    </ContentView>
 
                     <VerticalStackLayout Spacing="6" Margin="0,8,0,0">
                         <Label Text="{l10n:Translate RemoteHost}" Style="{StaticResource FieldLabel}"/>

@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Features.Drives.Contracts;
@@ -50,11 +50,15 @@ public sealed class DiagnoseDrive(
             }
         }
 
-        HostProbe probe = await hostDiagnostics.ProbeAsync(host, cancellationToken);
+        IReadOnlyList<int>? ports = drive.Protocol == DriveProtocol.Smb
+            ? null
+            : DriveProtocols.ProbePortsFor(drive.Protocol, drive.Port);
+
+        HostProbe probe = await hostDiagnostics.ProbeAsync(host, cancellationToken, ports);
 
         if (!probe.Reachable && host == drive.Host && drive.RemoteHost is not null)
         {
-            HostProbe away = await hostDiagnostics.ProbeAsync(drive.RemoteHost, cancellationToken);
+            HostProbe away = await hostDiagnostics.ProbeAsync(drive.RemoteHost, cancellationToken, ports);
 
             if (away.Reachable)
             {

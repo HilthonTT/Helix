@@ -50,6 +50,7 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
     private void OnDrivePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(UpdateDriveModel.Host) or
+            nameof(UpdateDriveModel.ProtocolIndex) or
             nameof(UpdateDriveModel.Username) or
             nameof(UpdateDriveModel.Password))
         {
@@ -65,6 +66,7 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
     public int SameServerCount => _otherDrives.Count(d => d.IsOnSameServerAs(Drive.Host ?? string.Empty));
 
     public bool ShowApplyCredentials =>
+        Drive.UsesCredentials &&
         SameServerCount > 0 &&
         (!string.Equals(Drive.Username, _originalUsername, StringComparison.Ordinal) ||
          !string.Equals(Drive.Password, _originalPassword, StringComparison.Ordinal));
@@ -85,6 +87,8 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
 
     [ObservableProperty]
     public partial bool HideSecrets { get; set; }
+
+    public IReadOnlyList<string> ProtocolNames => DriveProtocolText.Names;
 
     public bool SupportsPersistentMappings => DrivePlatform.SupportsPersistentMappings;
 
@@ -120,7 +124,9 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 NetworkPin.NetworkName,
                 edited.MacAddress,
                 ApplyCredentialsToServer && ShowApplyCredentials,
-                edited.RemoteHost);
+                edited.RemoteHost,
+                edited.Protocol,
+                edited.PortNumber);
 
             Result result = await Task.Run(() => ScopedHandler.HandleAsync((UpdateDrive h) => h.Handle(request)));
             if (result.IsFailure)
@@ -165,7 +171,9 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 Drive.Username,
                 Drive.Password,
                 Drive.ConnectByHostname,
-                Drive.RemoteHost);
+                Drive.RemoteHost,
+                Drive.Protocol,
+                Drive.PortNumber);
 
             Result result = await ScopedHandler.HandleAsync((TestDriveConnection h) => h.Handle(request));
             if (result.IsFailure)

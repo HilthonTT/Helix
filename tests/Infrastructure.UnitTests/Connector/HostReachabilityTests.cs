@@ -165,4 +165,26 @@ public sealed class HostReachabilityTests
 
         (await probe.IsReachableAsync("nas.local")).Should().BeTrue();
     }
+
+    [Fact]
+    public async Task IsReachableAsync_Should_ProbeThePortsItIsGiven()
+    {
+        var probe = new FakeReachability(ClockAt(Now), (_, port) => port == 2049);
+
+        bool reachable = await probe.IsReachableAsync("nas.local", ports: [2049]);
+
+        reachable.Should().BeTrue();
+        probe.Attempts.Should().ContainSingle().Which.Port.Should().Be(2049);
+    }
+
+    [Fact]
+    public async Task IsReachableAsync_Should_CacheEachSetOfPortsApart()
+    {
+        var probe = new FakeReachability(ClockAt(Now), (_, port) => port == 445);
+
+        (await probe.IsReachableAsync("nas.local")).Should().BeTrue();
+        (await probe.IsReachableAsync("nas.local", ports: [5006])).Should().BeFalse();
+
+        probe.Attempts.Select(a => a.Port).Should().Equal(445, 5006);
+    }
 }

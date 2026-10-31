@@ -10,6 +10,7 @@ using Helix.App.Services;
 using Helix.App.ViewModels;
 using Helix.App.Views.Auditlogs;
 using Helix.App.Views.Drives;
+using Helix.App.Views.Insights;
 using Helix.App.Views.Settings;
 using Helix.App.Views.Users;
 using Helix.Application.Abstractions.Authentication;
@@ -523,6 +524,7 @@ public sealed partial class AppShell : Shell
         Routing.RegisterRoute(PageNames.HomePage, typeof(HomePage));
         Routing.RegisterRoute(PageNames.SettingsPage, typeof(SettingsPage));
         Routing.RegisterRoute(PageNames.AuditlogsPage, typeof(AuditlogsPage));
+        Routing.RegisterRoute(PageNames.InsightsPage, typeof(InsightsPage));
     }
 
     private void RegisterMessages()

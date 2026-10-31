@@ -13,4 +13,6 @@ public static class PageNames
     public const string SettingsPage = "settings";
 
     public const string AuditlogsPage = "auditlogs";
+
+    public const string InsightsPage = "insights";
 }

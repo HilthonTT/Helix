@@ -8,6 +8,7 @@
     xmlns:home="clr-namespace:Helix.App.Views.Drives"
     xmlns:settings="clr-namespace:Helix.App.Views.Settings"
     xmlns:auditlogs="clr-namespace:Helix.App.Views.Auditlogs"
+    xmlns:insights="clr-namespace:Helix.App.Views.Insights"
     xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
     xmlns:controls="clr-namespace:Helix.App.Controls"
     xmlns:icons="clr-namespace:Helix.App.Icons"
@@ -67,6 +68,11 @@
                         <controls:NavItem Value="auditlogs"
                                           Glyph="{x:Static icons:IconFont.History}"
                                           Content="{l10n:Translate Auditlogs}"
+                                          CheckedChanged="OnMenuItemChanged"/>
+
+                        <controls:NavItem Value="insights"
+                                          Glyph="{x:Static icons:IconFont.ChartLine}"
+                                          Content="{l10n:Translate Insights}"
                                           CheckedChanged="OnMenuItemChanged"/>
 
                         <controls:NavItem Value="settings"
@@ -335,6 +341,10 @@
 
     <FlyoutItem Title="Auditlogs" Route="auditlogs">
         <ShellContent ContentTemplate="{DataTemplate auditlogs:AuditlogsPage}"/>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Insights" Route="insights">
+        <ShellContent ContentTemplate="{DataTemplate insights:InsightsPage}"/>
     </FlyoutItem>
 
     <FlyoutItem Title="Settings" Route="settings">

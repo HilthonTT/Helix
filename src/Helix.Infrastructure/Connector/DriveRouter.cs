@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Connector;
+﻿using Helix.Application.Abstractions.Connector;
 using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 
@@ -21,11 +21,11 @@ internal sealed class DriveRouter(
 
         if (drive.RemoteHost is null || !away)
         {
-            Task<bool> home = IsReachableAsync(drive.Host, fresh, cancellationToken);
+            Task<bool> home = IsReachableAsync(drive, drive.Host, fresh, cancellationToken);
 
             if (drive.RemoteHost is not null)
             {
-                remote = IsReachableAsync(drive.RemoteHost, fresh, cancellationToken);
+                remote = IsReachableAsync(drive, drive.RemoteHost, fresh, cancellationToken);
             }
 
             if (await home)
@@ -44,7 +44,7 @@ internal sealed class DriveRouter(
             }
         }
 
-        if (await (remote ?? IsReachableAsync(drive.RemoteHost, fresh, cancellationToken)))
+        if (await (remote ?? IsReachableAsync(drive, drive.RemoteHost, fresh, cancellationToken)))
         {
             logger.LogDebug("Drive {Letter}: using its address for away from home.", drive.Letter);
 
@@ -66,8 +66,14 @@ internal sealed class DriveRouter(
         return drive.IsAwayFrom(here?.Id);
     }
 
-    private Task<bool> IsReachableAsync(string host, bool fresh, CancellationToken cancellationToken) =>
-        fresh
-            ? hostReachability.ProbeNowAsync(host, cancellationToken)
-            : hostReachability.IsReachableAsync(host, cancellationToken);
+    private Task<bool> IsReachableAsync(Drive drive, string host, bool fresh, CancellationToken cancellationToken)
+    {
+        IReadOnlyList<int>? ports = drive.Protocol == DriveProtocol.Smb
+            ? null
+            : DriveProtocols.ProbePortsFor(drive.Protocol, drive.Port);
+
+        return fresh
+            ? hostReachability.ProbeNowAsync(host, cancellationToken, ports)
+            : hostReachability.IsReachableAsync(host, cancellationToken, ports);
+    }
 }

@@ -1,3 +1,4 @@
+﻿using Helix.Domain.Drives;
 using System.Text.Json.Serialization;
 
 namespace Helix.Application.Features.Drives.Contracts;
@@ -14,7 +15,9 @@ public sealed record DriveImportDto(
     string? MacAddress = null,
     string? RemoteHost = null,
     string? HomeNetworkId = null,
-    string? HomeNetworkName = null)
+    string? HomeNetworkName = null,
+    DriveProtocol Protocol = DriveProtocol.Smb,
+    int? Port = null)
 {
     [JsonPropertyName("IpAddress")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

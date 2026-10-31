@@ -1145,4 +1145,79 @@
   <data name="LinkFailed" xml:space="preserve">
     <value>Helix はリンクの要求を実行できませんでした。詳細はログに記録されています。</value>
   </data>
+  <data name="Protocol" xml:space="preserve">
+    <value>プロトコル</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>ポート</value>
+  </data>
+  <data name="ProtocolSmb" xml:space="preserve">
+    <value>SMB（Windows ファイル共有）</value>
+  </data>
+  <data name="ProtocolWebDav" xml:space="preserve">
+    <value>WebDAV（HTTPS）</value>
+  </data>
+  <data name="ProtocolNfs" xml:space="preserve">
+    <value>NFS</value>
+  </data>
+  <data name="ProtocolWebDavHint" xml:space="preserve">
+    <value>名前にはフォルダーのパスを入力します（例: home、remote.php/dav/files/me）。443 の場合はポートを空欄にします。</value>
+  </data>
+  <data name="ProtocolNfsHint" xml:space="preserve">
+    <value>名前にはエクスポートのパスを入力します（例: /volume1/media）。NFS ではユーザー名とパスワードは使いません。Windows では「NFS 用クライアント」機能が必要です。</value>
+  </data>
+  <data name="ExportHistory" xml:space="preserve">
+    <value>CSV としてエクスポート</value>
+  </data>
+  <data name="ExportColumnTime" xml:space="preserve">
+    <value>日時（UTC）</value>
+  </data>
+  <data name="ExportColumnAction" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="ExportColumnDescription" xml:space="preserve">
+    <value>説明</value>
+  </data>
+  <data name="HistoryExported" xml:space="preserve">
+    <value>履歴を {0} にエクスポートしました。</value>
+  </data>
+  <data name="Insights" xml:space="preserve">
+    <value>インサイト</value>
+  </data>
+  <data name="StorageHistoryTitle" xml:space="preserve">
+    <value>ストレージの推移</value>
+  </data>
+  <data name="Range30Days" xml:space="preserve">
+    <value>30日</value>
+  </data>
+  <data name="Range90Days" xml:space="preserve">
+    <value>90日</value>
+  </data>
+  <data name="Range365Days" xml:space="preserve">
+    <value>1年</value>
+  </data>
+  <data name="StorageHistoryEmpty" xml:space="preserve">
+    <value>まだ記録がありません。Helix は起動中、接続されたボリュームを 1 日最大 4 回計測し、そこからグラフが埋まっていきます。</value>
+  </data>
+  <data name="StorageUsedPercent" xml:space="preserve">
+    <value>{0}% 使用</value>
+  </data>
+  <data name="StorageTrendNotEnoughHistory" xml:space="preserve">
+    <value>傾向を出すにはまだ履歴が足りません</value>
+  </data>
+  <data name="StorageTrendShrinking" xml:space="preserve">
+    <value>空き容量が 1 日あたり {0} GB 減少</value>
+  </data>
+  <data name="StorageTrendSteady" xml:space="preserve">
+    <value>空き容量は横ばいか増加中</value>
+  </data>
+  <data name="StorageHistorySpan" xml:space="preserve">
+    <value>{0} ～ {1} · {2} 件の計測</value>
+  </data>
+  <data name="ReliabilityEstateTitle" xml:space="preserve">
+    <value>ドライブの安定性（過去{0}日間）</value>
+  </data>
+  <data name="ReliabilityEstateNoDrops" xml:space="preserve">
+    <value>この期間に切断されたドライブはありません。</value>
+  </data>
 </root>

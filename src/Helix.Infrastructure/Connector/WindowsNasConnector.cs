@@ -111,17 +111,46 @@ internal sealed class WindowsNasConnector(
             return false;
         }
 
-        if (!string.Equals(ShareOf(remote), drive.Name.Trim(), StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(ShareOf(remote), SharePathFor(drive), StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
 
         string host = ToUncHost(drive.Host);
 
-        return RemoteIs(remote, host, drive.Name) ||
-               (drive.RemoteHost is not null && RemoteIs(remote, ToUncHost(drive.RemoteHost), drive.Name)) ||
-               (HostSpelling.AlternateOf(host) is string alternate && RemoteIs(remote, alternate, drive.Name));
+        return RemoteIs(remote, RemoteFor(drive, host)) ||
+               (drive.RemoteHost is not null && RemoteIs(remote, RemoteFor(drive, ToUncHost(drive.RemoteHost)))) ||
+               (drive.Protocol == DriveProtocol.Smb &&
+                HostSpelling.AlternateOf(host) is string alternate &&
+                RemoteIs(remote, RemoteFor(drive, alternate)));
     }
+
+    internal static string RemoteFor(Drive drive, string uncHost) =>
+        $@"\\{ServerFor(drive, uncHost)}\{SharePathFor(drive)}";
+
+    private static string ServerFor(Drive drive, string uncHost) =>
+        drive.Protocol == DriveProtocol.WebDav
+            ? drive.Port is int port ? $"{uncHost}@SSL@{port}" : $"{uncHost}@SSL"
+            : uncHost;
+
+    internal static string SharePathFor(Drive drive)
+    {
+        if (drive.Protocol == DriveProtocol.Smb)
+        {
+            return drive.Name.Trim();
+        }
+
+        string path = DriveProtocols.NormalizePath(drive.Name).Replace('/', '\\');
+
+        return drive.Protocol == DriveProtocol.WebDav && path.Length == 0 ? WebDavRoot : path;
+    }
+
+    private static string? ProviderFor(Drive drive) => drive.Protocol switch
+    {
+        DriveProtocol.WebDav => WebDavProvider,
+        DriveProtocol.Nfs => NfsProvider,
+        _ => null,
+    };
 
     private static string? ShareOf(string remote)
     {
@@ -139,6 +168,11 @@ internal sealed class WindowsNasConnector(
 
     public bool HasOtherMountsOn(Drive drive)
     {
+        if (drive.Protocol != DriveProtocol.Smb)
+        {
+            return false;
+        }
+
         string host = ToUncHost(drive.Host);
         string? away = drive.RemoteHost is null ? null : ToUncHost(drive.RemoteHost);
         string ownLetter = drive.Letter.Trim().ToUpperInvariant();
@@ -398,11 +432,8 @@ internal sealed class WindowsNasConnector(
     private static bool RemoteHostIs(string remote, string uncHost) =>
         remote.StartsWith($@"\\{uncHost}\", StringComparison.OrdinalIgnoreCase);
 
-    private static bool RemoteIs(string remote, string uncHost, string share) =>
-        string.Equals(
-            remote.TrimEnd('\\'),
-            ShareOn(uncHost, share),
-            StringComparison.OrdinalIgnoreCase);
+    private static bool RemoteIs(string remote, string expected) =>
+        string.Equals(remote.TrimEnd('\\'), expected, StringComparison.OrdinalIgnoreCase);
 
     private async Task<Result> WhenReachableAsync(
         Drive drive,
@@ -486,11 +517,14 @@ internal sealed class WindowsNasConnector(
     {
         string local = $"{drive.Letter.ToUpperInvariant()}:";
         string host = EffectiveHostFor(drive, route);
-        string remote = ShareOn(host, drive.Name);
+        string remote = RemoteFor(drive, host);
+        string? provider = ProviderFor(drive);
+        string? username = CredentialOrNull(drive, drive.Username);
+        string? password = CredentialOrNull(drive, drive.Password);
 
         uint flags = drive.Persistent ? CONNECT_UPDATE_PROFILE : CONNECT_TEMPORARY;
 
-        int code = AddConnection(local, remote, drive.Username, drive.Password, flags);
+        int code = AddConnection(local, remote, username, password, flags, provider);
 
         if (code == ERROR_ALREADY_ASSIGNED && MountedFrom(drive, liveOnly: true))
         {
@@ -500,7 +534,7 @@ internal sealed class WindowsNasConnector(
         if ((code == ERROR_ALREADY_ASSIGNED || code == ERROR_DEVICE_ALREADY_REMEMBERED) &&
             ForgetStaleMapping(drive, local))
         {
-            code = AddConnection(local, remote, drive.Username, drive.Password, flags);
+            code = AddConnection(local, remote, username, password, flags, provider);
         }
 
         if (code == NO_ERROR)
@@ -508,9 +542,9 @@ internal sealed class WindowsNasConnector(
             return Result.Success();
         }
 
-        if (code != ERROR_SESSION_CREDENTIAL_CONFLICT)
+        if (code != ERROR_SESSION_CREDENTIAL_CONFLICT || drive.Protocol != DriveProtocol.Smb)
         {
-            return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code)));
+            return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(code, drive.Protocol)));
         }
 
         if (!HasLiveConnectionTo(host))
@@ -605,7 +639,7 @@ internal sealed class WindowsNasConnector(
             return null;
         }
 
-        int code = AddConnection(local, ShareOn(alternate, drive.Name), drive.Username, drive.Password, flags);
+        int code = AddConnection(local, RemoteFor(drive, alternate), drive.Username, drive.Password, flags);
         if (code != NO_ERROR)
         {
             return null;
@@ -622,7 +656,10 @@ internal sealed class WindowsNasConnector(
     {
         string host = ToUncHost(route.Host);
 
-        if (route.IsRemote || !drive.ConnectByHostname || !HostSpelling.IsAddress(host))
+        if (route.IsRemote ||
+            drive.Protocol != DriveProtocol.Smb ||
+            !drive.ConnectByHostname ||
+            !HostSpelling.IsAddress(host))
         {
             return host;
         }
@@ -679,14 +716,23 @@ internal sealed class WindowsNasConnector(
     private static void DropIdleServerSession(string uncHost) =>
         WNetCancelConnection2W($@"\\{uncHost}", 0, fForce: false);
 
-    private static int AddConnection(string? local, string remote, string? username, string? password, uint flags)
+    private static string? CredentialOrNull(Drive drive, string value) =>
+        drive.Protocol.UsesCredentials() && !string.IsNullOrEmpty(value) ? value : null;
+
+    private static int AddConnection(
+        string? local,
+        string remote,
+        string? username,
+        string? password,
+        uint flags,
+        string? provider = null)
     {
         var resource = new NETRESOURCE
         {
             dwType = RESOURCETYPE_DISK,
             lpLocalName = local,
             lpRemoteName = remote,
-            lpProvider = null,
+            lpProvider = provider,
         };
 
         return WNetAddConnection2W(ref resource, password, username, flags);
@@ -706,7 +752,27 @@ internal sealed class WindowsNasConnector(
     private static Result Test(Drive drive, DriveRoute route)
     {
         string host = EffectiveHostFor(drive, route);
-        string remoteName = ShareOn(host, drive.Name);
+        string remoteName = RemoteFor(drive, host);
+
+        if (drive.Protocol != DriveProtocol.Smb)
+        {
+            int result = AddConnection(
+                local: null,
+                remoteName,
+                CredentialOrNull(drive, drive.Username),
+                CredentialOrNull(drive, drive.Password),
+                CONNECT_TEMPORARY,
+                ProviderFor(drive));
+
+            if (result != NO_ERROR)
+            {
+                return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(result, drive.Protocol)));
+            }
+
+            WNetCancelConnection2W(remoteName, 0, fForce: false);
+
+            return Result.Success();
+        }
 
         int code = AddConnection(local: null, remoteName, drive.Username, drive.Password, CONNECT_TEMPORARY);
 
@@ -875,6 +941,15 @@ internal sealed class WindowsNasConnector(
         }
     }
 
+    private static string DescribeWNetError(int code, DriveProtocol protocol) => (code, protocol) switch
+    {
+        (ERROR_BAD_PROVIDER or ERROR_NO_NET_OR_BAD_PATH, DriveProtocol.Nfs) =>
+            "Windows' Client for NFS is not installed. Turn on \"Services for NFS\" under Windows Features and try again.",
+        (ERROR_BAD_PROVIDER or ERROR_NO_NET_OR_BAD_PATH, DriveProtocol.WebDav) =>
+            "Windows' WebDAV client is not running. Start the \"WebClient\" service and try again.",
+        _ => DescribeWNetError(code),
+    };
+
     private static string DescribeWNetError(int code) => code switch
     {
         ERROR_ACCESS_DENIED => "Access denied. Check the username and password.",
@@ -910,6 +985,12 @@ internal sealed class WindowsNasConnector(
     private const int ERROR_NO_NETWORK = 1222;
     private const int ERROR_NOT_CONNECTED = 2250;
     private const int ERROR_SESSION_CREDENTIAL_CONFLICT = 1219;
+    private const int ERROR_BAD_PROVIDER = 1204;
+    private const int ERROR_NO_NET_OR_BAD_PATH = 1203;
+
+    private const string WebDavProvider = "Web Client Network";
+    private const string NfsProvider = "NFS Network";
+    private const string WebDavRoot = "DavWWWRoot";
 
     private const int MaxPathLength = 32_767;
     private const int RemoteNameLength = 1_024;

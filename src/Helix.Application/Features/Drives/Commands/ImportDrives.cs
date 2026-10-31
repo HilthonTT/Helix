@@ -112,7 +112,9 @@ public sealed class ImportDrives(
                     d.Password,
                     d.AutoConnect,
                     d.Persistent,
-                    d.ConnectByHostname);
+                    d.ConnectByHostname,
+                    d.Protocol,
+                    d.Port);
 
                 drive.RememberMacAddress(d.MacAddress);
                 drive.PinToNetwork(d.HomeNetworkId, d.HomeNetworkName);
@@ -300,9 +302,13 @@ public sealed class ImportDrives(
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(dto.Name) ||
-            string.IsNullOrWhiteSpace(dto.Username) ||
-            string.IsNullOrWhiteSpace(dto.Password))
+        if (!DriveProtocols.IsKnown(dto.Protocol) || string.IsNullOrWhiteSpace(dto.Name))
+        {
+            return false;
+        }
+
+        if (dto.Protocol.UsesCredentials() &&
+            (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password)))
         {
             return false;
         }

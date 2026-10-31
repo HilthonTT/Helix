@@ -1041,6 +1041,53 @@ the host string, case-insensitive — two spellings of one NAS are two servers h
 errs towards changing too little.
 
 
+### Protocols other than SMB
+
+A drive is SMB unless `Drive.Protocol` says **WebDAV** or **NFS**. `Drive.Name` is then a path
+rather than a share name (`home`, `remote.php/dav/files/me`, `/volume1/media`), and
+`DriveProtocols.NormalizePath` is how both connectors read it: slashes either way, none at the
+ends. `Drive.Port` is kept for WebDAV only, and dropped when it is 443, so a drive typed with and
+without the default port is one drive; `UsePort` re-applies that whenever the protocol changes.
+The migration defaults every existing row to SMB.
+
+Both protocols go through the **same mount APIs** as SMB rather than a client of Helix's own.
+On Windows, `WNetAddConnection2` takes an explicit `lpProvider` — `"Web Client Network"` for
+WebDAV, `"NFS Network"` for NFS — and the remote name is built by
+`WindowsNasConnector.RemoteFor`: `\\host@SSL[@port]\path` for WebDAV (always HTTPS: the WebClient
+service refuses basic authentication over plain HTTP, and a NAS password is not something to send
+in the clear anyway; an empty path is `DavWWWRoot`), `\\host\volume1\media` for NFS. On macOS
+`NetFSMountURLSync` takes an `https://` or `nfs://` URL (`MacNasConnector.UrlFor`). The mount
+point, the letter, persistence, the monitor, suppression and the storage probe are all the
+letter's business and did not have to change. A missing Windows feature — Client for NFS turned
+off, the WebClient service stopped — comes back as `ERROR_BAD_PROVIDER`, and is reported as
+that rather than as the generic Win32 sentence.
+
+**NFS carries no credentials.** `DriveProtocols.UsesCredentials` is false for it, the entity
+accepts empty ones, the sheets hide the fields and the connectors pass null; NFS
+authorization is by host and UID on the server, and a stored password would be a field that
+does nothing. "Apply these credentials to the server" skips NFS siblings for the same reason.
+
+Everything SMB-specific stays SMB-only, and `Drive.Protocol` is the guard: the 1219
+credential-conflict branches, `TryAlternateSpelling`, `ConnectByHostname`, `HasOtherMountsOn`
+(answers false, so the diagnosis never claims a password went unchecked), share browsing and
+adopting existing mappings. Reachability is not: `IHostReachability`, `IHostDiagnostics` and
+`IDriveRouter` take the ports from `DriveProtocols.ProbePortsFor` — 2049 for NFS, the WebDAV
+port or 443 — because a NAS that serves NFS with SMB switched off would otherwise read as
+unreachable forever. SMB passes `null`, which is the 445-then-139 it always probed, and the
+reachability cache is keyed by host **and** ports so an SMB reading never answers for WebDAV.
+
+The protocol and port travel in the vault. An unknown protocol makes the row invalid rather
+than silently mounting it as SMB; an older build reads a WebDAV drive as SMB and an NFS drive
+as invalid (no credentials), which is the price of an additive field.
+
+**SFTP is not offered and should not be added this way.** Neither OS mounts it natively: it
+needs WinFsp + SSHFS on Windows and macFUSE on macOS, both third-party kernel drivers that
+Helix would have to detect, version-check and explain, and neither goes through the mount
+APIs everything above relies on. **Mounting to a folder** rather than a letter on Windows was
+also left out: `WNetAddConnection2` only maps devices, a folder mount means a directory
+symlink to a UNC path (which needs Developer Mode or elevation), and the letter is the
+identity the monitor, suppression, the audit log, the command line and the vault all key on.
+
 ### Finding a drive, and a row in the log
 
 Both lists filter live, from a box that is always on screen, over what is already in
@@ -1380,6 +1427,39 @@ their stored `Message` verbatim.
 `LastConnectedOnUtc` and `ModifiedOnUtc`: connecting a drive stamps it, and without that
 filter every connect would file a "the drive was changed" entry.
 
+### Insights
+
+The **Insights** page (`Views/Insights`, route `insights`) shows two things Helix already
+recorded and had nowhere to show.
+
+**Storage over time** is `GetStorageHistory` over the `StorageSample` rows the alert service
+writes: one series per volume, oldest first, for 30 days, 90 days or a year. The chart plots
+**used percent**, not free bytes, so volumes orders of magnitude apart share one scale and a
+volume that was grown reads as a step rather than a cliff. The caption's trend is fitted over
+the **last 30 days** whatever range is shown, the same window `GetStorageForecasts` uses, so
+the page and the dashboard tile cannot disagree about when a pool fills; a year of history is
+for looking at, not for extrapolating from. Volumes filling soonest come first.
+
+**Drive reliability** is `GetEstateReliability`: one audit-log read for the window rather than
+a query per drive, grouped by drive id and summarized by `Core/Drives/ReliabilitySummary`,
+which is the same code `GetDriveReliability` runs for the diagnosis sheet — so the page and the
+sheet cannot count a drop differently. Only drives that dropped are listed; a list of thirteen
+rows saying "no drops" buries the one that did.
+
+### Exporting the history
+
+The audit log page exports the whole history as CSV (`ExportAuditlogs`), oldest first, through
+the same `IFolderPicker` as the vault. The sentence column is composed by the presentation layer
+and handed in as `Request.Describe`, because the sentence is built from `AppResources` at
+display time and the Application layer has no business with resource files; the headers come
+in the same way. Times are UTC, as the page shows them. The file is UTF-8 **with** a BOM, which
+is what makes Excel read the translated sentences as anything but mojibake.
+
+Every field is escaped, and a field starting with `=`, `+`, `-`, `@`, a tab or a carriage return
+is prefixed with `'`. Drive names are typed by the user and a vault can be imported from
+anywhere, so a drive called `=HYPERLINK(...)` would otherwise be a formula the moment the
+export is opened in a spreadsheet.
+
 ### Helix.Infrastructure
 
 Concrete implementations, one folder per abstraction group:
@@ -1610,8 +1690,8 @@ Services/      DriveWatchdog, TrayIconService, StorageAlertService, ScheduleServ
                IdleLockService, HotkeyService, CommandListener, EstateStatus, ModalHost,
                PassphrasePromptService, Notifier
 Theming/       ThemeChoice, ThemePalette, ThemePalettes, ThemeSwitcher
-ViewModels/    BaseViewModel + Auditlogs/, Drives/, Settings/, Users/
-Views/         pages, modals and item templates: Auditlogs/, Drives/, Settings/, Users/
+ViewModels/    BaseViewModel + Auditlogs/, Drives/, Insights/, Settings/, Users/
+Views/         pages, modals and item templates: Auditlogs/, Drives/, Insights/, Settings/, Users/
 ```
 
 A view and its viewmodel sit in the same feature folder under their respective roots — `Views/Drives/HomePage.xaml` pairs with `ViewModels/Drives/HomeViewModel.cs`.

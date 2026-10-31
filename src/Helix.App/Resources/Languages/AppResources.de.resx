@@ -1145,4 +1145,79 @@
   <data name="LinkFailed" xml:space="preserve">
     <value>Helix konnte nicht ausführen, worum der Link gebeten hat. Details stehen im Protokoll.</value>
   </data>
+  <data name="Protocol" xml:space="preserve">
+    <value>Protokoll</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="ProtocolSmb" xml:space="preserve">
+    <value>SMB (Windows-Dateifreigabe)</value>
+  </data>
+  <data name="ProtocolWebDav" xml:space="preserve">
+    <value>WebDAV (HTTPS)</value>
+  </data>
+  <data name="ProtocolNfs" xml:space="preserve">
+    <value>NFS</value>
+  </data>
+  <data name="ProtocolWebDavHint" xml:space="preserve">
+    <value>Tragen Sie den Ordnerpfad als Namen ein, etwa home oder remote.php/dav/files/ich. Lassen Sie den Port für 443 leer.</value>
+  </data>
+  <data name="ProtocolNfsHint" xml:space="preserve">
+    <value>Tragen Sie den Exportpfad als Namen ein, etwa /volume1/media. NFS braucht keinen Benutzernamen und kein Passwort; unter Windows ist die Funktion „Client für NFS“ nötig.</value>
+  </data>
+  <data name="ExportHistory" xml:space="preserve">
+    <value>Als CSV exportieren</value>
+  </data>
+  <data name="ExportColumnTime" xml:space="preserve">
+    <value>Zeit (UTC)</value>
+  </data>
+  <data name="ExportColumnAction" xml:space="preserve">
+    <value>Aktion</value>
+  </data>
+  <data name="ExportColumnDescription" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="HistoryExported" xml:space="preserve">
+    <value>Verlauf nach {0} exportiert.</value>
+  </data>
+  <data name="Insights" xml:space="preserve">
+    <value>Einblicke</value>
+  </data>
+  <data name="StorageHistoryTitle" xml:space="preserve">
+    <value>Speicher im Zeitverlauf</value>
+  </data>
+  <data name="Range30Days" xml:space="preserve">
+    <value>30 Tage</value>
+  </data>
+  <data name="Range90Days" xml:space="preserve">
+    <value>90 Tage</value>
+  </data>
+  <data name="Range365Days" xml:space="preserve">
+    <value>1 Jahr</value>
+  </data>
+  <data name="StorageHistoryEmpty" xml:space="preserve">
+    <value>Noch nichts aufgezeichnet. Helix misst jedes verbundene Volume bis zu viermal am Tag, solange es läuft, und das Diagramm füllt sich nach und nach.</value>
+  </data>
+  <data name="StorageUsedPercent" xml:space="preserve">
+    <value>{0} % belegt</value>
+  </data>
+  <data name="StorageTrendNotEnoughHistory" xml:space="preserve">
+    <value>Noch zu wenig Verlauf für einen Trend</value>
+  </data>
+  <data name="StorageTrendShrinking" xml:space="preserve">
+    <value>Freier Speicher sinkt um {0} GB pro Tag</value>
+  </data>
+  <data name="StorageTrendSteady" xml:space="preserve">
+    <value>Freier Speicher bleibt gleich oder wächst</value>
+  </data>
+  <data name="StorageHistorySpan" xml:space="preserve">
+    <value>{0} bis {1} · {2} Messungen</value>
+  </data>
+  <data name="ReliabilityEstateTitle" xml:space="preserve">
+    <value>Zuverlässigkeit der Laufwerke, letzte {0} Tage</value>
+  </data>
+  <data name="ReliabilityEstateNoDrops" xml:space="preserve">
+    <value>In diesem Zeitraum ist kein Laufwerk weggefallen.</value>
+  </data>
 </root>

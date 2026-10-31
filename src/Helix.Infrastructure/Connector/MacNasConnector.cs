@@ -190,10 +190,10 @@ internal sealed class MacNasConnector : INasConnector
                 $"Could not prepare the mount point '{mountPoint}': {ex.Message}"));
         }
 
-        var url = new NSUrl($"smb://{ToUrlHost(route.Host)}/{Uri.EscapeDataString(drive.Name)}");
+        var url = new NSUrl(UrlFor(drive, route.Host));
         var mountPath = NSUrl.FromFilename(mountPoint);
-        var user = new NSString(drive.Username);
-        var password = new NSString(drive.Password);
+        NSString? user = drive.Protocol.UsesCredentials() ? new NSString(drive.Username) : null;
+        NSString? password = drive.Protocol.UsesCredentials() ? new NSString(drive.Password) : null;
 
         var mountOptions = new NSMutableDictionary();
         mountOptions[MountAtMountDirKey] = NSNumber.FromBoolean(true);
@@ -205,8 +205,8 @@ internal sealed class MacNasConnector : INasConnector
             int code = NetFSMountURLSync(
                 url.Handle,
                 mountPath.Handle,
-                user.Handle,
-                password.Handle,
+                user is null ? IntPtr.Zero : (IntPtr)user.Handle,
+                password is null ? IntPtr.Zero : (IntPtr)password.Handle,
                 IntPtr.Zero,
                 mountOptions.Handle,
                 out mountedPaths);
@@ -224,8 +224,8 @@ internal sealed class MacNasConnector : INasConnector
 
             url.Dispose();
             mountPath.Dispose();
-            user.Dispose();
-            password.Dispose();
+            user?.Dispose();
+            password?.Dispose();
             mountOptions.Dispose();
         }
     }
@@ -244,6 +244,24 @@ internal sealed class MacNasConnector : INasConnector
         return errno == Einval
             ? Result.Success()
             : Result.Failure(DriveErrors.FailedToDisconnect(DescribeErrno(errno)));
+    }
+
+    internal static string UrlFor(Drive drive, string host)
+    {
+        string urlHost = ToUrlHost(host);
+
+        string path = string.Join(
+            '/',
+            DriveProtocols.NormalizePath(drive.Name).Split('/').Select(Uri.EscapeDataString));
+
+        return drive.Protocol switch
+        {
+            DriveProtocol.WebDav => drive.Port is int port
+                ? $"https://{urlHost}:{port}/{path}"
+                : $"https://{urlHost}/{path}",
+            DriveProtocol.Nfs => $"nfs://{urlHost}/{path}",
+            _ => $"smb://{urlHost}/{Uri.EscapeDataString(drive.Name.Trim())}",
+        };
     }
 
     private static string MountPointFor(string letter) => Path.Combine(MountRoot, Normalize(letter));

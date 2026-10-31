@@ -1145,4 +1145,79 @@
   <data name="LinkFailed" xml:space="preserve">
     <value>Helix tidak dapat melakukan permintaan tautan. Detailnya ada di log.</value>
   </data>
+  <data name="Protocol" xml:space="preserve">
+    <value>Protokol</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="ProtocolSmb" xml:space="preserve">
+    <value>SMB (berbagi file Windows)</value>
+  </data>
+  <data name="ProtocolWebDav" xml:space="preserve">
+    <value>WebDAV (HTTPS)</value>
+  </data>
+  <data name="ProtocolNfs" xml:space="preserve">
+    <value>NFS</value>
+  </data>
+  <data name="ProtocolWebDavHint" xml:space="preserve">
+    <value>Isi nama dengan jalur folder, seperti home atau remote.php/dav/files/saya. Kosongkan port untuk 443.</value>
+  </data>
+  <data name="ProtocolNfsHint" xml:space="preserve">
+    <value>Isi nama dengan jalur ekspor, seperti /volume1/media. NFS tidak memakai nama pengguna atau kata sandi; di Windows diperlukan fitur Client for NFS.</value>
+  </data>
+  <data name="ExportHistory" xml:space="preserve">
+    <value>Ekspor sebagai CSV</value>
+  </data>
+  <data name="ExportColumnTime" xml:space="preserve">
+    <value>Waktu (UTC)</value>
+  </data>
+  <data name="ExportColumnAction" xml:space="preserve">
+    <value>Tindakan</value>
+  </data>
+  <data name="ExportColumnDescription" xml:space="preserve">
+    <value>Deskripsi</value>
+  </data>
+  <data name="HistoryExported" xml:space="preserve">
+    <value>Riwayat diekspor ke {0}.</value>
+  </data>
+  <data name="Insights" xml:space="preserve">
+    <value>Wawasan</value>
+  </data>
+  <data name="StorageHistoryTitle" xml:space="preserve">
+    <value>Penyimpanan dari waktu ke waktu</value>
+  </data>
+  <data name="Range30Days" xml:space="preserve">
+    <value>30 hari</value>
+  </data>
+  <data name="Range90Days" xml:space="preserve">
+    <value>90 hari</value>
+  </data>
+  <data name="Range365Days" xml:space="preserve">
+    <value>1 tahun</value>
+  </data>
+  <data name="StorageHistoryEmpty" xml:space="preserve">
+    <value>Belum ada yang tercatat. Helix mengukur setiap volume yang terhubung hingga empat kali sehari selama berjalan, dan grafik akan terisi dari situ.</value>
+  </data>
+  <data name="StorageUsedPercent" xml:space="preserve">
+    <value>{0}% terpakai</value>
+  </data>
+  <data name="StorageTrendNotEnoughHistory" xml:space="preserve">
+    <value>Riwayat belum cukup untuk tren</value>
+  </data>
+  <data name="StorageTrendShrinking" xml:space="preserve">
+    <value>Ruang kosong berkurang {0} GB per hari</value>
+  </data>
+  <data name="StorageTrendSteady" xml:space="preserve">
+    <value>Ruang kosong stabil atau bertambah</value>
+  </data>
+  <data name="StorageHistorySpan" xml:space="preserve">
+    <value>{0} sampai {1} · {2} pembacaan</value>
+  </data>
+  <data name="ReliabilityEstateTitle" xml:space="preserve">
+    <value>Keandalan drive, {0} hari terakhir</value>
+  </data>
+  <data name="ReliabilityEstateNoDrops" xml:space="preserve">
+    <value>Tidak ada drive yang terputus dalam periode ini.</value>
+  </data>
 </root>

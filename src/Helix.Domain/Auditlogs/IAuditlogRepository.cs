@@ -17,6 +17,11 @@ public interface IAuditlogRepository
         DateTime sinceUtc,
         CancellationToken cancellationToken = default);
 
+    Task<List<Auditlog>> GetSinceAsNoTrackingAsync(
+        Guid userId,
+        DateTime sinceUtc,
+        CancellationToken cancellationToken = default);
+
     void Insert(Auditlog auditlog);
 
     Task<int> DeleteOlderThanAsync(Guid userId, DateTime cutoffUtc, CancellationToken cancellationToken = default);

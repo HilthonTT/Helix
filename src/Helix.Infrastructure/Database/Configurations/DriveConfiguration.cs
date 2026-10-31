@@ -20,6 +20,8 @@ internal sealed class DriveConfiguration : IEntityTypeConfiguration<Drive>
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Property(d => d.Protocol).HasConversion<int>();
+
         builder.HasIndex(d => new { d.Name, d.Letter });
 
         builder.HasIndex(d => d.Name);

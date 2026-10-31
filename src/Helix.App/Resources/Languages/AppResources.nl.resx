@@ -1145,4 +1145,79 @@
   <data name="LinkFailed" xml:space="preserve">
     <value>Helix kon niet doen wat de link vroeg. De details staan in het logboek.</value>
   </data>
+  <data name="Protocol" xml:space="preserve">
+    <value>Protocol</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>Poort</value>
+  </data>
+  <data name="ProtocolSmb" xml:space="preserve">
+    <value>SMB (Windows-bestandsdeling)</value>
+  </data>
+  <data name="ProtocolWebDav" xml:space="preserve">
+    <value>WebDAV (HTTPS)</value>
+  </data>
+  <data name="ProtocolNfs" xml:space="preserve">
+    <value>NFS</value>
+  </data>
+  <data name="ProtocolWebDavHint" xml:space="preserve">
+    <value>Vul het mappad in als naam, zoals home of remote.php/dav/files/ik. Laat de poort leeg voor 443.</value>
+  </data>
+  <data name="ProtocolNfsHint" xml:space="preserve">
+    <value>Vul het exportpad in als naam, zoals /volume1/media. NFS gebruikt geen gebruikersnaam of wachtwoord; op Windows is de functie Client voor NFS nodig.</value>
+  </data>
+  <data name="ExportHistory" xml:space="preserve">
+    <value>Exporteren als CSV</value>
+  </data>
+  <data name="ExportColumnTime" xml:space="preserve">
+    <value>Tijd (UTC)</value>
+  </data>
+  <data name="ExportColumnAction" xml:space="preserve">
+    <value>Actie</value>
+  </data>
+  <data name="ExportColumnDescription" xml:space="preserve">
+    <value>Omschrijving</value>
+  </data>
+  <data name="HistoryExported" xml:space="preserve">
+    <value>Geschiedenis geëxporteerd naar {0}.</value>
+  </data>
+  <data name="Insights" xml:space="preserve">
+    <value>Inzichten</value>
+  </data>
+  <data name="StorageHistoryTitle" xml:space="preserve">
+    <value>Opslag door de tijd</value>
+  </data>
+  <data name="Range30Days" xml:space="preserve">
+    <value>30 dagen</value>
+  </data>
+  <data name="Range90Days" xml:space="preserve">
+    <value>90 dagen</value>
+  </data>
+  <data name="Range365Days" xml:space="preserve">
+    <value>1 jaar</value>
+  </data>
+  <data name="StorageHistoryEmpty" xml:space="preserve">
+    <value>Nog niets vastgelegd. Helix meet elk verbonden volume tot vier keer per dag zolang het draait, en de grafiek vult zich vanaf daar.</value>
+  </data>
+  <data name="StorageUsedPercent" xml:space="preserve">
+    <value>{0}% gebruikt</value>
+  </data>
+  <data name="StorageTrendNotEnoughHistory" xml:space="preserve">
+    <value>Nog te weinig geschiedenis voor een trend</value>
+  </data>
+  <data name="StorageTrendShrinking" xml:space="preserve">
+    <value>Vrije ruimte daalt met {0} GB per dag</value>
+  </data>
+  <data name="StorageTrendSteady" xml:space="preserve">
+    <value>Vrije ruimte is stabiel of groeit</value>
+  </data>
+  <data name="StorageHistorySpan" xml:space="preserve">
+    <value>{0} tot {1} · {2} metingen</value>
+  </data>
+  <data name="ReliabilityEstateTitle" xml:space="preserve">
+    <value>Betrouwbaarheid van de schijven, afgelopen {0} dagen</value>
+  </data>
+  <data name="ReliabilityEstateNoDrops" xml:space="preserve">
+    <value>Geen enkele schijf is in deze periode weggevallen.</value>
+  </data>
 </root>

@@ -30,7 +30,9 @@ public sealed class UpdateDrive(
         string? HomeNetworkName = null,
         string? MacAddress = null,
         bool ApplyCredentialsToServer = false,
-        string? RemoteHost = null);
+        string? RemoteHost = null,
+        DriveProtocol Protocol = DriveProtocol.Smb,
+        int? Port = null);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -72,7 +74,9 @@ public sealed class UpdateDrive(
                     request.Host,
                     request.Name,
                     request.Username,
-                    request.Password);
+                    request.Password,
+                    protocol: request.Protocol,
+                    port: request.Port);
 
                 candidate.ReachAwayAt(request.RemoteHost);
 
@@ -85,7 +89,9 @@ public sealed class UpdateDrive(
         }
 
         bool isSameShare = string.Equals(drive.Host, request.Host.Trim(), StringComparison.OrdinalIgnoreCase) &&
-                           string.Equals(drive.Name, request.Name.Trim(), StringComparison.OrdinalIgnoreCase);
+                           string.Equals(drive.Name, request.Name.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                           drive.Protocol == request.Protocol &&
+                           drive.Port == DriveProtocols.PortFor(request.Protocol, request.Port);
 
         bool unmounted = false;
 
@@ -113,7 +119,9 @@ public sealed class UpdateDrive(
             request.Password,
             request.AutoConnect,
             request.Persistent,
-            request.ConnectByHostname);
+            request.ConnectByHostname,
+            request.Protocol,
+            request.Port);
 
         drive.PinToNetwork(request.HomeNetworkId, request.HomeNetworkName);
 
@@ -125,7 +133,9 @@ public sealed class UpdateDrive(
         {
             List<Drive> drives = await driveRepository.GetAsync(loggedInUser.UserId, cancellationToken);
 
-            foreach (Drive sibling in drives.Where(d => d.Id != drive.Id && d.IsOnSameServerAs(drive.Host)))
+            foreach (Drive sibling in drives.Where(d => d.Id != drive.Id &&
+                                                               d.Protocol.UsesCredentials() &&
+                                                               d.IsOnSameServerAs(drive.Host)))
             {
                 sibling.ChangeCredentials(drive.Username, drive.Password);
             }
@@ -186,7 +196,9 @@ public sealed class UpdateDrive(
             drive.Host,
             drive.Name,
             drive.Username,
-            drive.Password);
+            drive.Password,
+            protocol: drive.Protocol,
+            port: drive.Port);
 
         return nasConnector.IsMountedFrom(drive) && !nasConnector.IsMountedFrom(homeOnly);
     }
@@ -213,10 +225,13 @@ public sealed class UpdateDrive(
             return Result.Failure(DriveErrors.InvalidRemoteHost);
         }
 
-        string[] properties = [request.Letter, request.Host, request.Name, request.Username, request.Password];
-
-        return properties.Any(string.IsNullOrWhiteSpace)
-            ? Result.Failure(ValidationErrors.MissingFields)
-            : Result.Success();
+        return ProtocolValidation.Validate(
+            request.Protocol,
+            request.Port,
+            request.Letter,
+            request.Host,
+            request.Name,
+            request.Username,
+            request.Password);
     }
 }

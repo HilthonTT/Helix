@@ -52,6 +52,20 @@ internal sealed class AuditlogRepository(AppDbContext context) : IAuditlogReposi
             .ToListAsync(cancellationToken);
     }
 
+    public Task<List<Auditlog>> GetSinceAsNoTrackingAsync(
+        Guid userId,
+        DateTime sinceUtc,
+        CancellationToken cancellationToken = default)
+    {
+        return context
+            .AuditLogs
+            .AsNoTracking()
+            .Where(a => a.UserId == userId && a.CreatedOnUtc >= sinceUtc)
+            .OrderBy(a => a.CreatedOnUtc)
+            .ThenBy(a => a.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public void Insert(Auditlog auditlog)
     {
         context.AuditLogs.Add(auditlog);

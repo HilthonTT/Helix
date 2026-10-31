@@ -25,7 +25,7 @@
             <Border Grid.Row="1" Style="{StaticResource Card}">
                 <Grid RowDefinitions="Auto,Auto,*" Padding="20">
 
-                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" Margin="0,0,0,16">
+                    <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,16">
                         <Label Text="{l10n:Translate YourAuditlogs}"
                                Style="{StaticResource Title1}"
                                VerticalOptions="Center"/>
@@ -71,6 +71,19 @@
                                            TextColor="{DynamicResource TextMuted}"/>
                                 </Border>
                             </Grid>
+                        </Border>
+
+                        <Border Grid.Column="3"
+                                Style="{StaticResource IconChip}"
+                                VerticalOptions="Center"
+                                ToolTipProperties.Text="{l10n:Translate ExportHistory}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ExportCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="{x:Static icons:IconFont.FileCsv}"
+                                   Style="{StaticResource IconSm}"
+                                   InputTransparent="True"
+                                   TextColor="{DynamicResource TextMuted}"/>
                         </Border>
                     </Grid>
 

@@ -1,8 +1,10 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Helix.App.Icons;
 using Helix.App.Models;
+using Helix.App.Resources.Languages;
 using Helix.Application.Core.Sorting;
+using Helix.Application.Features.Auditlogs.Commands;
 using Helix.Application.Features.Auditlogs.Contracts;
 using Helix.Application.Features.Auditlogs.Queries;
 using Helix.Domain.Auditlogs;
@@ -84,6 +86,43 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
     public int CountDisplay => HasSearchTerm ? Auditlogs.Count : _totalCount;
 
     public string SortGlyph => SortOrder == SortOrder.Ascending ? IconFont.CaretUp : IconFont.CaretDown;
+
+    [RelayCommand]
+    private async Task ExportAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            var request = new ExportAuditlogs.Request(
+                [
+                    AppResources.ExportColumnTime,
+                    AppResources.ExportColumnAction,
+                    AppResources.Letter,
+                    AppResources.DriveName,
+                    AppResources.ExportColumnDescription,
+                ],
+                row => new AuditlogDisplay(row).Description);
+
+            Result<string> result = await ScopedHandler.HandleAsync((ExportAuditlogs h) => h.Handle(request));
+            if (result.IsFailure)
+            {
+                await DisplayErrorAsync(result.Error);
+                return;
+            }
+
+            await DisplaySuccessAsync(string.Format(AppResources.HistoryExported, Path.GetFileName(result.Value)));
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 
     [RelayCommand]
     private async Task ToggleSortOrderAsync()

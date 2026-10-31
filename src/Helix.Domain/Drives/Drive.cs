@@ -12,7 +12,8 @@ public sealed class Drive : Entity, IAuditable
         string password,
         bool autoConnect,
         bool persistent,
-        bool connectByHostname)
+        bool connectByHostname,
+        DriveProtocol protocol)
         : base(id)
     {
         Ensure.NotNullOrEmpty(id, nameof(id));
@@ -21,18 +22,23 @@ public sealed class Drive : Entity, IAuditable
         Ensure.MustBeOneChar(letter, nameof(letter));
         Ensure.NotNullOrEmpty(host, nameof(host));
         Ensure.NotNullOrEmpty(name, nameof(name));
-        Ensure.NotNullOrEmpty(username, nameof(username));
-        Ensure.NotNullOrEmpty(password, nameof(password));
+
+        if (protocol.UsesCredentials())
+        {
+            Ensure.NotNullOrEmpty(username, nameof(username));
+            Ensure.NotNullOrEmpty(password, nameof(password));
+        }
 
         UserId = userId;
         Letter = letter;
         Host = host.Trim();
         Name = name.Trim();
-        Username = username.Trim();
-        Password = password;
+        Username = username?.Trim() ?? string.Empty;
+        Password = password ?? string.Empty;
         AutoConnect = autoConnect;
         Persistent = persistent;
         ConnectByHostname = connectByHostname;
+        Protocol = protocol;
 
         DateTime utcNow = DateTime.UtcNow;
 
@@ -74,6 +80,10 @@ public sealed class Drive : Entity, IAuditable
     public string? MacAddress { get; private set; }
 
     public string? RemoteHost { get; private set; }
+
+    public DriveProtocol Protocol { get; private set; }
+
+    public int? Port { get; private set; }
 
     public DateTime? LastConnectedOnUtc { get; private set; }
 
@@ -119,6 +129,11 @@ public sealed class Drive : Entity, IAuditable
             : candidate;
     }
 
+    public void UsePort(int? port)
+    {
+        Port = DriveProtocols.PortFor(Protocol, port);
+    }
+
     public void ChangeCredentials(string username, string password)
     {
         Ensure.NotNullOrEmpty(username, nameof(username));
@@ -140,7 +155,9 @@ public sealed class Drive : Entity, IAuditable
         string password,
         bool autoConnect = true,
         bool persistent = false,
-        bool connectByHostname = false)
+        bool connectByHostname = false,
+        DriveProtocol protocol = DriveProtocol.Smb,
+        int? port = null)
     {
         var drive = new Drive(
             Guid.CreateVersion7(),
@@ -152,7 +169,10 @@ public sealed class Drive : Entity, IAuditable
             password,
             autoConnect,
             persistent,
-            connectByHostname);
+            connectByHostname,
+            protocol);
+
+        drive.UsePort(port);
 
         return drive;
     }
@@ -165,22 +185,31 @@ public sealed class Drive : Entity, IAuditable
         string password,
         bool autoConnect,
         bool persistent,
-        bool connectByHostname)
+        bool connectByHostname,
+        DriveProtocol protocol = DriveProtocol.Smb,
+        int? port = null)
     {
         Ensure.NotNullOrEmpty(letter, nameof(letter));
         Ensure.MustBeOneChar(letter, nameof(letter));
         Ensure.NotNullOrEmpty(host, nameof(host));
         Ensure.NotNullOrEmpty(name, nameof(name));
-        Ensure.NotNullOrEmpty(username, nameof(username));
-        Ensure.NotNullOrEmpty(password, nameof(password));
+
+        if (protocol.UsesCredentials())
+        {
+            Ensure.NotNullOrEmpty(username, nameof(username));
+            Ensure.NotNullOrEmpty(password, nameof(password));
+        }
 
         Letter = letter.ToUpperInvariant();
         Host = host.Trim();
         Name = name.Trim();
-        Username = username.Trim();
-        Password = password;
+        Username = username?.Trim() ?? string.Empty;
+        Password = password ?? string.Empty;
         AutoConnect = autoConnect;
         Persistent = persistent;
         ConnectByHostname = connectByHostname;
+        Protocol = protocol;
+
+        UsePort(port);
     }
 }

@@ -1,4 +1,5 @@
-using Helix.Application.Abstractions.Connector;
+﻿using Helix.Application.Abstractions.Connector;
+using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
 
@@ -6,11 +7,12 @@ namespace Helix.Infrastructure.Connector;
 
 internal sealed class HostDiagnostics(ILogger<HostDiagnostics> logger) : IHostDiagnostics
 {
-    private static readonly int[] SmbPorts = [445, 139];
-
     private static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(3);
 
-    public async Task<HostProbe> ProbeAsync(string host, CancellationToken cancellationToken = default)
+    public async Task<HostProbe> ProbeAsync(
+        string host,
+        CancellationToken cancellationToken = default,
+        IReadOnlyList<int>? ports = null)
     {
         if (string.IsNullOrWhiteSpace(host))
         {
@@ -20,7 +22,7 @@ internal sealed class HostDiagnostics(ILogger<HostDiagnostics> logger) : IHostDi
         string trimmed = host.Trim();
         string? alternate = await Task.Run(() => HostSpelling.AlternateOf(trimmed), cancellationToken);
 
-        foreach (int port in SmbPorts)
+        foreach (int port in ports ?? DriveProtocols.SmbPorts)
         {
             if (await CanConnectAsync(host, port, cancellationToken))
             {

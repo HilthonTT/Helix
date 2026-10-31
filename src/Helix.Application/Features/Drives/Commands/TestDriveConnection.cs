@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
@@ -19,7 +19,9 @@ public sealed class TestDriveConnection(
         string Username,
         string Password,
         bool ConnectByHostname = false,
-        string? RemoteHost = null);
+        string? RemoteHost = null,
+        DriveProtocol Protocol = DriveProtocol.Smb,
+        int? Port = null);
 
     public async Task<Result> Handle(Request request, CancellationToken cancellationToken = default)
     {
@@ -41,7 +43,9 @@ public sealed class TestDriveConnection(
             request.Name,
             request.Username,
             request.Password,
-            connectByHostname: request.ConnectByHostname);
+            connectByHostname: request.ConnectByHostname,
+            protocol: request.Protocol,
+            port: request.Port);
 
         candidate.ReachAwayAt(request.RemoteHost);
 
@@ -65,10 +69,13 @@ public sealed class TestDriveConnection(
             return Result.Failure(DriveErrors.InvalidRemoteHost);
         }
 
-        string[] properties = [request.Letter, request.Host, request.Name, request.Username, request.Password];
-
-        return properties.Any(string.IsNullOrWhiteSpace)
-            ? Result.Failure(ValidationErrors.MissingFields)
-            : Result.Success();
+        return ProtocolValidation.Validate(
+            request.Protocol,
+            request.Port,
+            request.Letter,
+            request.Host,
+            request.Name,
+            request.Username,
+            request.Password);
     }
 }

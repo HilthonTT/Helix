@@ -1,4 +1,5 @@
-using Helix.Application.Abstractions.Connector;
+﻿using Helix.Application.Abstractions.Connector;
+using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 using System.Net.Sockets;
 
@@ -6,8 +7,6 @@ namespace Helix.Infrastructure.Connector;
 
 internal class HostReachability : IHostReachability
 {
-    private static readonly int[] SmbPorts = [445, 139];
-
     private static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(2);
 
     private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(10);
@@ -24,7 +23,10 @@ internal class HostReachability : IHostReachability
         _logger = logger;
     }
 
-    public Task<bool> IsReachableAsync(string host, CancellationToken cancellationToken = default)
+    public Task<bool> IsReachableAsync(
+        string host,
+        CancellationToken cancellationToken = default,
+        IReadOnlyList<int>? ports = null)
     {
         if (string.IsNullOrWhiteSpace(host))
         {
@@ -35,20 +37,25 @@ internal class HostReachability : IHostReachability
 
         lock (_gate)
         {
-            if (_cache.TryGetValue(host, out CachedProbe? cached) && now < cached.ExpiresAtUtc)
+            string key = KeyFor(host, ports);
+
+            if (_cache.TryGetValue(key, out CachedProbe? cached) && now < cached.ExpiresAtUtc)
             {
                 return cached.Probe;
             }
 
-            Task<bool> probe = ProbeAsync(host);
+            Task<bool> probe = ProbeAsync(host, ports ?? DriveProtocols.SmbPorts);
 
-            _cache[host] = new CachedProbe(probe, now + CacheDuration);
+            _cache[key] = new CachedProbe(probe, now + CacheDuration);
 
             return probe;
         }
     }
 
-    public Task<bool> ProbeNowAsync(string host, CancellationToken cancellationToken = default)
+    public Task<bool> ProbeNowAsync(
+        string host,
+        CancellationToken cancellationToken = default,
+        IReadOnlyList<int>? ports = null)
     {
         if (string.IsNullOrWhiteSpace(host))
         {
@@ -59,13 +66,16 @@ internal class HostReachability : IHostReachability
 
         lock (_gate)
         {
-            Task<bool> probe = ProbeAsync(host);
+            Task<bool> probe = ProbeAsync(host, ports ?? DriveProtocols.SmbPorts);
 
-            _cache[host] = new CachedProbe(probe, now + CacheDuration);
+            _cache[KeyFor(host, ports)] = new CachedProbe(probe, now + CacheDuration);
 
             return probe;
         }
     }
+
+    private static string KeyFor(string host, IReadOnlyList<int>? ports) =>
+        ports is null ? host : $"{host}|{string.Join(',', ports)}";
 
     protected virtual async Task<bool> CanConnectAsync(string host, int port, CancellationToken cancellationToken)
     {
@@ -79,9 +89,9 @@ internal class HostReachability : IHostReachability
         return true;
     }
 
-    private async Task<bool> ProbeAsync(string host)
+    private async Task<bool> ProbeAsync(string host, IReadOnlyList<int> ports)
     {
-        foreach (int port in SmbPorts)
+        foreach (int port in ports)
         {
             try
             {

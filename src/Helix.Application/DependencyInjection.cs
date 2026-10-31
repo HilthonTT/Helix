@@ -39,6 +39,7 @@ public static class DependencyInjection
     {
         services.AddScoped<GetAuditlogs>();
         services.AddScoped<PruneAuditlogs>();
+        services.AddScoped<ExportAuditlogs>();
 
         return services;
     }
@@ -75,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<GetAvailableDriveLetters>();
         services.AddScoped<GetDriveById>();
         services.AddScoped<GetDriveReliability>();
+        services.AddScoped<GetEstateReliability>();
         services.AddScoped<GetDrives>();
         services.AddScoped<GetUnmanagedMappings>();
         services.AddScoped<ListShares>();
@@ -117,6 +119,7 @@ public static class DependencyInjection
     {
         services.AddScoped<GetStorageAlerts>();
         services.AddScoped<GetStorageForecasts>();
+        services.AddScoped<GetStorageHistory>();
         services.AddScoped<RecordStorageSamples>();
 
         return services;

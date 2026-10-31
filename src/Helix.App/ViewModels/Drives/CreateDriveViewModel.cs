@@ -47,7 +47,7 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 
     private void OnFormPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(CreateDriveModel.Host))
+        if (e.PropertyName is nameof(CreateDriveModel.Host) or nameof(CreateDriveModel.ProtocolIndex))
         {
             ClearShares();
         }
@@ -60,6 +60,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
     public partial bool HideSecrets { get; set; }
 
     public NetworkPinModel NetworkPin { get; }
+
+    public IReadOnlyList<string> ProtocolNames => DriveProtocolText.Names;
 
     public bool SupportsPersistentMappings => DrivePlatform.SupportsPersistentMappings;
 
@@ -205,7 +207,9 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 NetworkPin.NetworkId,
                 NetworkPin.NetworkName,
                 Form.MacAddress,
-                Form.RemoteHost);
+                Form.RemoteHost,
+                Form.Protocol,
+                Form.PortNumber);
 
             Result<Drive> result = await Task.Run(() => ScopedHandler.HandleAsync((CreateDrive h) => h.Handle(request)));
             if (result.IsFailure)
@@ -304,7 +308,9 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 Form.Username,
                 Form.Password,
                 Form.ConnectByHostname,
-                Form.RemoteHost);
+                Form.RemoteHost,
+                Form.Protocol,
+                Form.PortNumber);
 
             Result result = await ScopedHandler.HandleAsync((TestDriveConnection h) => h.Handle(request));
             if (result.IsFailure)
