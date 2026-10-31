@@ -1,198 +1,122 @@
 ﻿# CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code in this repository. This file holds the rules; the reasoning behind
+them lives in `docs/design/` (see **Design docs** at the end). **Read the matching design doc
+before changing an area** — most rules below exist because the obvious version was tried and
+broke on a real NAS.
 
 ## Project
 
-Helix is a .NET MAUI desktop app for managing connections to NAS drives. It ships two heads:
+Helix is a .NET MAUI desktop app for managing connections to NAS drives. Two heads:
 
-- **Windows** — `net10.0-windows10.0.19041.0`. Open `Helix.slnx` in Visual Studio 2022 to build/run.
-- **macOS** — `net10.0-maccatalyst`. Build on a Mac with Xcode installed; Catalyst cannot be compiled from Windows.
+- **Windows** — `net10.0-windows10.0.19041.0`. Open `Helix.slnx` in Visual Studio 2022; run `Helix.App` from there, not `dotnet run`.
+- **macOS** — `net10.0-maccatalyst`. Build on a Mac with Xcode; Catalyst cannot be compiled from Windows.
 
-`Helix.App` and `Helix.Infrastructure` each gate their target frameworks on the host OS, so `dotnet build` produces the right head on either machine without a `-f` switch. Adding a target framework to one of those projects means adding it to both.
+`Helix.App` and `Helix.Infrastructure` gate their target frameworks on the host OS, so
+`dotnet build` picks the right head without `-f`. Adding a target framework to one means adding
+it to both.
 
 ## Commands
-
-Build and test from the repo root:
 
 ```bash
 dotnet build Helix.slnx
 dotnet test Helix.slnx
-dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
-dotnet test tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj
-dotnet test tests/ArchitectureTests/ArchitectureTests.csproj
-```
-
-Run a single test:
-
-```bash
 dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --filter "FullyQualifiedName~CreateDriveTests"
-```
-
-EF Core migrations target `Helix.Infrastructure` but `Microsoft.EntityFrameworkCore.Tools` is referenced from `Helix.App`, so migrations are run with the App as the startup project:
-
-```bash
 dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App --framework net10.0-windows10.0.19041.0
 ```
 
-`scripts/` wraps these in PowerShell (5.1 or 7), each with `Get-Help` documentation. They
-pick the right projects for the host OS, so `test.ps1` on a Mac runs only the Application
-suite:
+`scripts/` wraps these in PowerShell (5.1 or 7, each with `Get-Help`) and picks the right
+projects for the host OS:
 
 ```powershell
 ./scripts/build.ps1 [-Configuration Release] [-Clean]
 ./scripts/test.ps1 [-Suite Application,Architecture] [-Filter CreateDriveTests] [-NoBuild] [-Trx]
-./scripts/clean.ps1                      # every bin/obj under src and tests
-./scripts/publish.ps1 [-Runtime win-x64,win-arm64] [-Zip] [-Tag v2.2.6]   # as release.yml does
+./scripts/clean.ps1
+./scripts/publish.ps1 [-Runtime win-x64,win-arm64] [-Zip] [-Tag v2.2.6]
 ./scripts/migration.ps1 add <Name> | remove | list
 ```
 
-`dotnet ef` also needs `--framework` now that the projects are multi-targeted; `migration.ps1`
-passes the host's head.
-
-Running the MAUI app itself is normally done via Visual Studio 2022 (`Helix.App` startup project), not `dotnet run`, because of the MAUI/Windows packaging configuration.
-
-`Application.UnitTests` targets plain `net10.0` and runs anywhere; `Infrastructure.UnitTests`
-and `ArchitectureTests` target `net10.0-windows10.0.19041.0`, because the assemblies they load
-are the Windows head. On a Mac, build the app project on its own and run the Application suite
-— the solution also contains those Windows-only projects:
-
-```bash
-dotnet build src/Helix.App/Helix.App.csproj
-dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
-```
-
-The test projects use **`xunit.v3.mtp-off`**, xunit v3 without Microsoft Testing Platform,
-so `dotnet test` keeps running them through VSTest and `--filter "FullyQualifiedName~…"` and
-`--logger trx` (which `test.ps1` and CI pass) keep working. Plain `xunit.v3` turns MTP on,
-and the .NET 10 SDK then refuses the VSTest path outright. `xUnit1051` (pass
-`TestContext.Current.CancellationToken`) is suppressed: the handlers under test run against
-substitutes and have nothing to cancel.
-
-xunit v3 runs each test project as its own **executable**, and an executable that references
-the Windows App SDK (through MAUI) gets the SDK's bootstrapper, which goes looking for an
-installed Windows App Runtime at startup. CI runners have none, so the process hung before
-xunit could talk to it ("Test process did not respond within 60 seconds") while every
-developer machine passed. `Infrastructure.UnitTests` and `ArchitectureTests` therefore set
-`WindowsAppSdkBootstrapInitialize` to false; under xunit 2 they were loaded into the test
-host as libraries and the bootstrapper never ran.
-
-CI covers both: a Windows job builds and runs all three suites, a macOS job compile-verifies the
-Catalyst head and runs the Application suite.
-
-The macOS jobs in `ci.yml` and `release.yml` install the MAUI workload **pinned to 10.0.401**.
-Workload set 10.0.401.1 brought the Mac Catalyst 27.0 SDK, which requires Xcode 27, and the
-`macos-latest` image tops out at Xcode 26.6 — an unpinned install failed the build on the SDK's
-Xcode check. Lift the pin once the runner image carries the Xcode the latest set asks for.
+- `Application.UnitTests` targets plain `net10.0` and runs anywhere. `Infrastructure.UnitTests`
+  and `ArchitectureTests` target the Windows head. On a Mac: build `src/Helix.App/Helix.App.csproj`
+  and run only the Application suite.
+- Test projects use **`xunit.v3.mtp-off`** (VSTest, so `--filter` and `--logger trx` work). Plain
+  `xunit.v3` turns on MTP and the .NET 10 SDK then refuses VSTest. `xUnit1051` is suppressed.
+- `Infrastructure.UnitTests` and `ArchitectureTests` set `WindowsAppSdkBootstrapInitialize=false`;
+  without it the Windows App SDK bootstrapper hangs the test executable on CI runners.
+- CI: Windows runs all three suites; macOS compile-verifies Catalyst and runs the Application
+  suite. The macOS jobs pin the MAUI workload to **10.0.401** (10.0.401.1 needs Xcode 27, which
+  `macos-latest` lacks). Lift the pin once the image carries it.
 
 ## Documentation website
 
-`website/` is the documentation site, a Next.js static export with MDX pages under
-`app/docs/<page>/page.mdx` and the sidebar order in `lib/docs.ts`. `.github/workflows/website.yml`
-builds it on every change under `website/` and deploys `main` to GitHub Pages with
-`NEXT_PUBLIC_BASE_PATH=/Helix`; the repository's Pages source has to be **GitHub Actions** for
-the deploy job to succeed.
+`website/` is a Next.js static export: MDX under `app/docs/<page>/page.mdx`, sidebar order in
+`lib/docs.ts`. `.github/workflows/website.yml` deploys `main` to GitHub Pages
+(`NEXT_PUBLIC_BASE_PATH=/Helix`; Pages source must be GitHub Actions). `cd website && npm ci && npm run dev`.
 
-```bash
-cd website && npm ci && npm run dev
-```
-
-The GIFs and screenshots in `website/public/media` are recorded from the real app by
-`website/scripts/record-media.py`. It publishes Helix with `-p:Company=HelixMedia
--p:AssemblyTitle=HelixMedia`, which is what moves `FileSystem.AppDataDirectory` (see **Where
-the data lives**) to `%LOCALAPPDATA%\HelixMedia`, so recording never touches a real install's
-account; the demo drives use RFC 5737 addresses so no probe reaches a real LAN. The README embeds
-two of those GIFs rather than keeping screenshots of its own — re-record rather than adding
-images elsewhere.
+Media in `website/public/media` is recorded from the real app by `website/scripts/record-media.py`,
+which publishes with `-p:Company=HelixMedia -p:AssemblyTitle=HelixMedia` so it uses a separate
+data folder, and uses RFC 5737 addresses. The README embeds those GIFs — re-record rather than
+adding images elsewhere.
 
 ## Build configuration
 
-Two repo-root files own the shared MSBuild configuration; keep project files free of anything they already cover:
+- `Directory.Build.props` — shared properties (`ImplicitUsings`, `Nullable`).
+- `Directory.Packages.props` — Central Package Management. `.csproj` files reference packages **without** `Version`.
+- Keep project files free of anything those two already cover.
+- **Adding a culture**: add it to `SatelliteResourceLanguages` in `Helix.App.csproj` **and** to
+  `_HelixPruneWindowsAppSdkCultures` (which prunes WinUI's `.mui` folders). That target uses
+  `String.Contains`, not a regex, on purpose — MSBuild mis-parses `(…)` in a quoted argument.
+- **Versioning**: bump only `ApplicationDisplayVersion` in the `.csproj`. Leave
+  `Platforms/Windows/Package.appxmanifest` on the `0.0.0.0` placeholder (a real number there
+  wins and the app announces an update to itself). Do not remove `_HelixRefreshStampedAppxManifest`.
+  Details in `docs/design/updates.md`.
 
-- `Directory.Build.props` — properties every project inherits (`ImplicitUsings`, `Nullable`).
-- `Directory.Packages.props` — Central Package Management. Every NuGet version lives here and `.csproj` files reference packages *without* a `Version` attribute.
+## Code style
 
-`Helix.App.csproj` sets `SatelliteResourceLanguages` to the cultures Helix is translated
-into, and `_HelixPruneWindowsAppSdkCultures` finishes the job: the property trims the .NET
-satellite assemblies, but the self-contained Windows App SDK also copies WinUI's own
-`.mui` resources as one folder per culture — 86 of them, for dialogs in languages the app
-cannot be switched to — and those are `None` items the SDK's targets add, so they are
-removed by matching on the language in their `Link`. Together they took a published
-install from 119 culture folders to 13 and 650 files to 494; file count, not size, is what
-an antivirus scan, a copy and a backup pay for. **Add a culture to both places** when adding
-an `AppResources.<culture>.resx`. The prune target uses `String.Contains` rather than a
-regex on purpose: MSBuild's property-function parser mis-parses a `(…)` group inside a
-quoted argument and the condition silently matched nothing.
+- **No comments in code** — no `///`, no `//`, in C# or XAML. Reasoning goes in `docs/design/`.
+- **Namespaces mirror folders exactly** in every project (architecture tests enforce it for
+  Infrastructure and Application handlers). Move the namespace with the file.
+- Never `Debug.WriteLine`; use `ILogger<T>` (DI types) or `AppLog.For<T>()` (only pages,
+  viewmodels and static helpers that MAUI rather than DI constructs). Release logs Information+.
+  Keep credentials, hosts and share names out of log messages — users send these files to strangers.
+- Every UI string is in `AppResources` (`en`, `de`, `fr`, `id`, `ja`, `nl`), via
+  `{l10n:Translate Key}` / `LocalizationResourceManager`. Command-line replies are the one English exception.
+- XAML prefixes: `vm:` (the file's viewmodel), `views:` (sibling views), `l10n:`, `controls:`,
+  `behaviors:`, `converters:`, `icons:`, `models:`, `local:` (only `AppShell.xaml`).
+- Everything a compiled binding reaches from a public host must be **public** (internal degrades to `XC0045`, a binding that silently does nothing).
+- **No SVG under `Resources/` may use a `<filter>`** — breaks the Mac build (`MAUIR0001`). Use radial gradients.
 
 ## Architecture
 
-Clean Architecture with four layers plus a SharedKernel. Dependencies only point inward, and this is enforced by `tests/ArchitectureTests/Layers/LayerTests.cs` using NetArchTest — do not break those rules.
+Clean Architecture: SharedKernel → Domain → Application → Infrastructure / Presentation.
+Dependencies point inward only; `tests/ArchitectureTests/Layers/LayerTests.cs` (NetArchTest)
+enforces it. Each layer has an `XxxAssembly.cs` marker (`DomainAssembly`, `ApplicationAssembly`,
+`InfrastructureAssembly`, `PresentationAssembly`).
 
-**Namespaces mirror folders exactly, in every project.** The architecture tests guard this for Infrastructure (`tests/ArchitectureTests/Infrastructure/InfrastructureTests.cs`) and for Application handlers (`tests/ArchitectureTests/Application/ApplicationTests.cs`). When you move a file, move its namespace with it.
+- **SharedKernel** — `SharedKernel.Abstractions` (`IAuditable`, `IDateTimeProvider`),
+  `.Primitives` (`Entity`, `Enumeration`, `Ensure`), `.Results` (`Result`, `Result<T>`, `Error`,
+  `ErrorType`, `ValidationError`). Imported via each project's `GlobalUsings.cs`; files don't
+  write `using SharedKernel...`. **No MAUI or EF Core reference.**
+- **Helix.Domain** — entities, domain errors (plural: `DriveErrors`, `UserErrors`, …) and
+  repository interfaces, one folder per aggregate. Framework-free.
+- **Helix.Application** — `Abstractions/` (interfaces only), `Core/` (cross-feature helpers:
+  Drives, Errors, Security, Sorting, Storage, Validation), `Features/<Feature>/{Commands,Queries,Contracts}`,
+  `DependencyInjection.cs`. No Infrastructure dependency and **no MAUI**
+  (`ApplicationLayer_Should_NotHaveDependencyOn_Maui`). Dialogs go through `IFolderPicker` /
+  `IFilePicker` / `IPassphrasePrompt`, implemented in the presentation layer's `Services/`.
+  (Those two names collide with MAUI/Toolkit types the App imports implicitly, so the
+  implementations qualify one side.)
+- **Helix.Infrastructure** — implementations, one folder per abstraction group, plus
+  `Database/` (`AppDbContext`, `Configurations/`, `Constants/`, `Interceptors/`, `Repositories/`,
+  `Sqlite/`) and `Migrations/`.
+- **Helix.App** — MAUI presentation. A view and its viewmodel share a feature folder
+  (`Views/Drives/HomePage.xaml` ↔ `ViewModels/Drives/HomeViewModel.cs`). `GlobalUsings.cs` also
+  imports `Helix.App.Common` and `Helix.App.Localization`.
 
-Each layer exposes an `XxxAssembly.cs` marker type (`DomainAssembly`, `ApplicationAssembly`, `InfrastructureAssembly`, `PresentationAssembly`) used by the architecture tests and for assembly scanning.
+### Handler pattern
 
-### SharedKernel
-
-Framework-free primitives, in three folders/namespaces:
-
-- `SharedKernel.Abstractions` — `IAuditable`, `IDateTimeProvider`.
-- `SharedKernel.Primitives` — `Entity`, `Enumeration`, `Ensure`.
-- `SharedKernel.Results` — `Result`, `Result<T>`, `Error`, `ErrorType`, `ValidationError`.
-
-All three are imported through a `GlobalUsings.cs` in every consuming project, so individual files do not write `using SharedKernel...;`. The project deliberately has **no** MAUI or EF Core reference — do not add one.
-
-### Helix.Domain
-
-Entities, domain errors and repository **interfaces**, one folder per aggregate (`Auditlogs/`, `DriveGroups/`, `Drives/`, `Schedules/`, `Settings/`, `Users/`). Also framework-free: no MAUI, no EF Core, no Application/Infrastructure dependency. Error classes are plural (`DriveErrors`, `UserErrors`, `SettingsErrors`, `AuthenticationErrors`).
-
-### Helix.Application
-
-```
-Abstractions/   Authentication, Connector, Cryptography, Data, Desktop, Diagnostics,
-                Handlers, Security, Startup, Storage, Time, Updates — interfaces only
-Core/           Drives, Errors, Security, Sorting, Validation — cross-feature helpers
-Features/       one folder per feature, split into Commands / Queries
-                Auditlogs/{Commands,Queries}
-                Diagnostics/Commands
-                DriveGroups/{Commands,Queries}
-                Drives/{Commands,Queries,Contracts}
-                Schedules/{Commands,Queries,Contracts}
-                Settings/{Commands,Queries}
-                Storage/{Queries,Contracts}
-                Updates/{Commands,Queries}
-                Users/Commands
-DependencyInjection.cs
-```
-
-No dependency on Infrastructure — it consumes its own `Abstractions/` interfaces only.
-
-**No MAUI, either**, and `ApplicationLayer_Should_NotHaveDependencyOn_Maui` in the architecture
-tests holds it to that. Three handlers used to raise a file dialog through the static
-`FolderPicker.Default` / `FilePicker.Default`, which cost more than it looked: `ImportDrives`,
-`ExportDrives` and `ExportDiagnostics` were the only handlers that could not be unit-tested —
-and `ImportDrives` is the one that decrypts a vault, validates every DTO and decides which
-letters are free — and the whole reference dragged `Application.UnitTests` onto a Windows target
-framework, so every Application test was Windows-only for the sake of three dialogs.
-`IFolderPicker` and `IFilePicker` sit in `Abstractions/Desktop/` beside `IFileBrowser` and are
-implemented in the **presentation** layer (`Services/FolderPickerService`,
-`Services/FilePickerService`), the same place `IPassphrasePrompt` is: a picker is a modal the
-user answers, not a platform capability, and neither needs an `#if` — the toolkit's
-`FolderPicker` and MAUI's `FilePicker` cover both heads.
-
-`IFilePicker` and `IFolderPicker` collide by name with `Microsoft.Maui.Storage.IFilePicker` and
-`CommunityToolkit.Maui.Storage.IFolderPicker`, both of which the App project has through
-implicit usings — which is why the two implementations qualify one side or the other rather
-than importing both namespaces.
-
-`FolderPick` keeps the two failure cases the toolkit reports separately: a dialog the user
-dismissed and a dialog that answered with no path are different errors
-(`FolderPickerErrors.Cancelled` and `InvalidFolderPath`), and collapsing them into a nullable
-string would have lost one.
-
-#### Handler pattern (use cases)
-
-Every use case is a `sealed class` implementing the marker interface `IHandler` (`Abstractions/Handlers/IHandler.cs`) and lives under `Features/`. The shape is consistent — match it when adding new use cases:
+Every use case is a `sealed class` implementing `IHandler` under `Features/`, registered as
+Scoped in `Helix.Application/DependencyInjection.cs` (**add new handlers there**):
 
 ```csharp
 public sealed class CreateDrive(IDriveRepository repo, IUnitOfWork uow, ...) : IHandler
@@ -201,1967 +125,130 @@ public sealed class CreateDrive(IDriveRepository repo, IUnitOfWork uow, ...) : I
 
     public async Task<Result<Drive>> Handle(Request request, CancellationToken ct = default)
     {
-        // 1. Validate (static Validate(request) returning Result)
-        // 2. Authorize via ILoggedInUser
-        // 3. Domain rule checks via repositories
-        // 4. Mutate via repository
-        // 5. await unitOfWork.SaveChangesAsync(ct)
-        // 6. return Result/Result<T>
+        // validate (static Validate) → authorize (ILoggedInUser) → domain checks
+        // → mutate → await uow.SaveChangesAsync(ct) → return Result
     }
 }
 ```
 
-Outcomes flow through `Result` / `Result<T>` — handlers never throw for expected failures. Errors come from static error classes (e.g. `DriveErrors`, `AuthenticationErrors`, `ValidationErrors`).
-
-### Logging
-
-Use `ILogger<T>` — **never `Debug.WriteLine`**, which no released build writes anywhere and
-which left every unattended reconnect failure unreportable. A `FileLoggerProvider` in
-`Infrastructure/Diagnostics` writes a dated file under `%LOCALAPPDATA%/.../logs`, kept for
-14 days, and the settings page exports them as a zip through `IDiagnosticsLog`.
-
-`LogFileWriter` rolls to `helix-<date>-<n>.log` at 2 MB, and the sequence lives in memory. At
-startup it steps past files that are already full before opening one; it used to reopen
-`helix-<date>.log` regardless and push one line into each full file on its way back to the
-live one.
-
-Anything the container constructs takes `ILogger<T>` as a constructor dependency. Pages,
-viewmodels and static helpers are built by MAUI rather than DI and use `AppLog.For<T>()`
-instead — that is the only reason it exists, so do not reach for it from a type that could
-have taken the dependency properly.
-
-Release builds log Information and above; Debug builds also log Debug. Keep credentials,
-hosts and share names out of log messages beyond what a drive letter already reveals — the
-user is expected to send these files to a stranger.
-
-### Telling the user what happened
-
-Outcomes go through `Notifier`, which puts a dismissible banner on the page — not a
-`DisplayAlert`. `BaseViewModel.DisplayErrorAsync` and `DisplaySuccessAsync` still exist
-and still return a `Task`, because every call site already awaits them; they route to the
-banner now. **Do not reintroduce an alert for a result.**
-
-A dialog for a success is a keystroke the user owes the app for work they asked for and
-watched happen. Worse, WinUI throws when a second alert is raised while one is showing,
-which "connect all" over thirteen shares walks straight into — `DriveTemplate` carried a
-try/catch for exactly that, and it is gone. Modal dialogs are kept for the cases that are
-genuinely a **question**: deleting a group, installing an update, the export passphrase.
-
-`Notifier` marshals to the UI thread itself, because most of its callers are background
-work — the watchdog, the storage sweep, an `async void` handler — and none of them should
-have to know that. A message nobody displayed is held for 30 seconds rather than dropped:
-a failure raised mid-navigation, or before the first page is up, then lands on the page
-that arrives. That is what makes the WinUI last-resort handler in `App.xaml.cs` reportable
-at all — it previously had no window to raise an alert on.
-
-`NotificationHost` is the banner stack, one per page in the **last child of the root
-grid**, so a banner sits above the modal layer: a failure raised from inside a sheet has
-to be readable without closing it. Only the host whose page is `Shell.Current.CurrentPage`
-accepts a message — Shell keeps visited pages alive, so a plain broadcast would leave a
-banner waiting on three pages the user is not on. `LockPage` deliberately has none; it
-renders its own error inline.
-
-Banners dismiss themselves, a failure getting noticeably longer than a success, and the
-stack is capped so a sweep failing over thirteen shares cannot bury the page it is
-reporting on. Nothing is lost when one goes: the audit log and the diagnostics file are
-what the record is for.
-
-Every string either side of this is in `AppResources`. The app is translated into five
-languages and was still saying "Something went wrong!" in English at eleven call sites.
-
-A banner can also be **taken back**. `Notifier.Retract` names one line of banner text and
-`NotificationHost` removes it: a banner that was only that line is dismissed, and one
-carrying several — the aggregated failures of a "connect all" — is rewritten without it,
-since the other twelve drives' failures are still true. It works on the held queue as well,
-so a message retracted before any page displayed it is never shown. The line is the unit
-because that is what `DriveMountBatch` composes (`"{Letter}: {description}"`), and
-`DriveTemplate` now prefixes a single row's failure the same way — a bare "Connection timed
-out." named no drive and could not be told apart from another drive's.
-
-### The update check
-
-`GitHubUpdateChecker` reads `/releases/latest` — unauthenticated, read-only, nothing
-downloaded or installed. `/releases/latest` rather than the tag list on purpose: tags exist
-for things never released, and it excludes pre-releases, which an unattended NAS tool
-should not be nudging people onto.
-
-Version comparison goes through `ReleaseVersion`, and it must. `ApplicationDisplayVersion`
-is three-part (`2.2.1`) to match the release tags, Windows reports the running build padded
-to four (`2.2.1.0`), and `Version` treats a missing component as **-1, not 0** — so an
-unnormalized compare makes the running build "older" than the release it was built from and
-announces an update to itself. Both sides are widened to four components first. A tag that
-is not a version (`nightly`) is refused rather than guessed at.
-
-Bumping `ApplicationDisplayVersion` is **not** enough on its own. What Windows reports is
-stamped out of the `Package.appxmanifest` MAUI generates under `obj`, and that generated
-copy is incremental on the manifest in `Platforms/Windows` — which deliberately never
-carries a version, so a version bump does not invalidate it. Left alone, the app goes on
-reporting the previous version in the sidebar, on the sign-in pages and to the update
-check until somebody deletes `obj`; the giveaway is an `AssemblyInfo.cs` whose
-`AssemblyFileVersion` is the new number while its `AppInfo.Version` metadata is the old
-one. The `_HelixRefreshStampedAppxManifest` target in `Helix.App.csproj` deletes the stale
-copy when its version no longer matches `ApplicationDisplayVersion.ApplicationVersion`, so
-the build regenerates it — do not remove it, and expect to bump nothing but the `.csproj`.
-
-`ApplicationDisplayVersion` is not, on Windows, where the running version comes from.
-The resizetizer targets XmlPeek `Identity/@Version` out of
-`Platforms/Windows/Package.appxmanifest` into
-`[AssemblyMetadata("Microsoft.Maui.ApplicationModel.AppInfo.Version")]`, and that is what
-`AppInfo.Current.VersionString` returns for an unpackaged build — the sidebar and the
-update check both read it. MAUI only stamps `ApplicationDisplayVersion` into that
-attribute when it is empty or the literal `0.0.0.0`, so **leave the manifest on the
-placeholder**: a real number written there wins over the `.csproj` and the app announces
-an update to itself. The stamped value is `ApplicationDisplayVersion` with
-`ApplicationVersion` as a fourth component (`2.2.1.3`), which is why what is compared is
-four-part and what is shown is not — `ReleaseVersion.ToDisplayString` reduces it for the
-update dialog.
-
-`Common/VersionInfo` reduces the same string back to three components for the UI, so what
-is shown is exactly the tag on the releases page. It also strips a `+<commit>` suffix
-first: the build emits both a file version and an informational one, and
-`Version.TryParse` rejects the latter, which would otherwise put a commit hash in the UI.
-Both places that display the version go through it — the sidebar footer via
-`AppShell.AppVersion`, the sign-in pages via `BaseViewModel.AppVersion` — so the two can
-never disagree about what is running.
-
-### Reconnecting away from the NAS
-
-`ReconnectDrive` asks `IDriveRouter` — and through it `IHostReachability` — whether the NAS
-answers before it tries to mount anything, and returns `DriveErrors.HostUnreachable` when it does not. The point is
-that a drive whose host is absent has not failed to connect: on the NAS's own network a
-bad mount fails in milliseconds, but away from it every attempt waits out the platform's
-SMB timeout and files a warning naming a share that was never going to answer.
-
-`HostReachability` opens a TCP connection to 445, then 139, rather than pinging — ICMP is
-blocked or deprioritised often enough that a ping proves less than the connection Helix is
-about to make. Readings are cached for ten seconds and the in-flight task is shared, so
-thirteen shares of one pool cost one handshake per sweep rather than thirteen. **Anything
-that is not the host declining to answer reads as reachable**, deliberately: a false
-"unreachable" would stop Helix reconnecting a drive that would have come back, which is
-the one thing the watchdog exists to do.
-
-Both connectors also probe for themselves, before the gate and the mount, so a row
-connected by hand and a batch get the same amber "Unreachable" as the watchdog. That is
-what lets the **mount timeout be thirty seconds** rather than five. Neither `WNetAddConnection2`
-nor `NetFSMountURLSync` takes a token: a timeout only abandons the thread the mount is on,
-and the mount then finishes on its own. At five seconds a NAS addressed by name — a NetBIOS
-or mDNS lookup and then the session — regularly came up a moment after its row had been told
-"Connection timed out", and the other twelve drives, whose gate wait was capped at the same
-five seconds, burst through ungated into the credential conflicts the gate exists to
-prevent. Switching the drives back to the IP address "fixed" both, which is how it was
-reported. The short timeout was only ever guarding against an absent host, and the probe
-answers that in two seconds, once per host.
-
-The per-host gate is held until the **mount itself** finishes, not until the caller has
-been answered: a timed-out mount is still building the server session, and releasing the
-gate at the timeout let the next drive in, whose conflict handling dropped the session the
-first was creating. `RunWithTimeoutAsync` hands the underlying task back through
-`onStarted` for exactly that, and logs what a timed-out mount eventually did. `HostSpelling`
-caches answers, including "nothing", for the life of the process, but **not a lookup that
-timed out** — that switched `ConnectByHostname` off for a host until restart because DNS
-was slow at logon. A timeout is remembered for **one minute** instead, and that minute is not
-optional: the lookup blocks its caller, `IsMountedFrom` is a caller, and `IsMountedFrom` runs
-on the UI thread once per drive from the startup connect, "connect all" and the tray. Away
-from home the reverse lookup of `192.168.1.6` never answers, so with nothing remembered every
-one of those checks waited out the full 1.5s again, and the app hung at boot and after every
-connect.
-
-`IsMountedFrom` also does no lookup it can avoid. It answers "no" as soon as the letter's share
-name is not the drive's — nothing under another share name can be this drive, whatever the
-host is called — and it tries the home address and the away address as typed before it asks
-for the other spelling. A drive mounted through its away address used to fall through to the
-lookup on every check.
-
-A **timed-out mount that then succeeds** is reconciled rather than left standing. The
-caller has already been answered `DriveErrors.ConnectionTimedOut` while the mount is still
-running, so what the user was told is wrong the moment it comes up: the tester screenshot
-is thirteen connected drives under a "Connection timed out." banner. The abandoned task
-therefore raises `INasConnector.MountSettledLate` with a `LateMountOutcome`, which
-`MountReconciler` in the presentation layer turns into the three things that were missing —
-the banner line is retracted, the drive is stamped through `MarkDriveConnected`, and the
-row is told it is up. Only a *connect* reports itself this way (`reportsMount`); a late
-disconnect or a late `Test` is logged and nothing more, because nothing was claimed about a
-drive that a later success would contradict. A late mount that fails is not reported
-either: the failure banner already says so.
-
-`MarkDriveConnected` is addressed by **letter**, because a letter is all the connector
-knows, and it refuses unless `IsLiveFrom` still says that letter points at that drive's
-share — the mount may have been taken down again in the thirty seconds it took to arrive,
-and a stamp is a claim about now. It writes no audit entry, for the same reason
-`ConnectDrive` does not: the interceptor skips a save whose only change is
-`LastConnectedOnUtc`.
-
-The reconciler is subscribed for the length of a **session**, not a page: it starts at the
-top of `HomePage.OnAppearing`, before the startup connect, since that batch is exactly what
-produced the screenshot and its timeouts land while the page is still assembling. It stops
-where `DriveWatchdog` stops — sign-out, in `AppShell` and `IdleLockService` — and not on an
-idle lock, where the drives and the watchdog carry on.
-
-The reconciler cannot fix the case where the late mount lands **before the batch has
-answered**. The per-host gate serializes thirteen shares, so the first drive's timeout settles
-while the other twelve are still mounting, `Notifier.Retract` finds no banner to take its line
-out of, and the batch's aggregated failure (still carrying that line) is posted afterwards.
-`DriveMountBatch.SettledLate` therefore re-checks every `ConnectionTimedOut` against
-`IsLiveFrom` before the failure list is composed, in the batch and in `ConnectAllDrives`, and
-a drive that has since come up counts as connected.
-
-The row says which of the two it is. `DriveDisplay.OfflineReason` carries
-`HostUnreachable` or `Refused`, and the status pill has one for each — amber "Unreachable"
-against red "Failed" — beside the plain "Disconnected" that a drive the user put down
-keeps. Without it, a laptop away from its NAS showed thirteen identical red pills, which
-is also what thirteen wrong passwords look like. The reason is only ever set from an
-attempt that actually happened, by `DriveWatchdog` through `DriveAttemptFailedMessage` or
-by the row's own connect; a drive nobody has tried stays on the plain pill rather than
-being guessed at, and a drive that comes up clears it, so a new outage cannot be blamed on
-the old one. The unreachable pill gets the localized sentence and the refused one the
-share's own words, since the domain's error descriptions are not translated.
-
-`DriveWatchdog` reads that error code and puts the drive back at a flat 30-second interval
-without counting it as a failure, so a laptop returning to the NAS's network reconnects in
-seconds rather than at whatever the exponential backoff had escalated to.
-A `NotFound` from `ReconnectDrive` is terminal — the drive was deleted while queued — and
-`RefreshWatchedDrivesAsync` prunes the pending queue of drives that are gone or have their
-own auto-connect off, since otherwise a deleted drive was retried and logged as a warning
-every five minutes for the session. Drops are handled **in parallel**; the connector's gate
-serializes the mounts anyway, and one hung share used to hold every other drive's drop
-record and pill behind it. `DriveAttemptFailedMessage` is applied by `HomeViewModel` to the
-master list, for the same reason `DriveUpdatedMessage` is: a row scrolled out of the
-recycling list or hidden by the filter has no template to hear it. It logs those at
-Debug rather than Warning — on a laptop this is the ordinary state of affairs for most of
-the day, and a warning per drive per sweep buries the real failures in the file the user is
-asked to send on. The sweep is skipped outright when `Connectivity` reports no network.
-
-### Waking a NAS that is asleep
-
-A drive can carry the **hardware address** of its NAS (`Drive.MacAddress`), and when it does,
-a host that does not answer is sent a Wake-on-LAN packet before Helix reports it unreachable.
-The unreachable branch used to be a dead end — the watchdog waited politely at thirty seconds
-a try for somebody to walk over and press the NAS's power button. Now it is the thing that
-fixes it: the packet goes out, the drive stays on that flat thirty-second retry, and the
-first retry after the NAS has booted connects it.
-
-The wake is sent by `IDriveRouter`, which is the one thing that decides a host is
-unreachable, and both paths go through it: `ReconnectDrive`'s own gate, which answers before
-the connector is reached, and the connectors' `WhenReachableAsync`, which is behind every
-deliberate connect — a row, a group, a selection, "connect all" and the startup batch. Either
-on its own would leave half the paths unable to wake anything. It is **not sent at all** when
-the drive is pinned to a home network and the laptop is somewhere else, deliberate connect or
-not, so a laptop at a café does not broadcast for a NAS it is nowhere near — a wake-up packet
-does not leave the local network, so it could not have reached it anyway.
-
-`IWakeOnLan.TryWakeAsync` holds a **five-minute quiet period per address**, which is what
-makes calling it from two places, and from thirteen shares of one NAS, harmless: a pool of
-thirteen drives sends one packet, not thirteen, and a NAS that is genuinely gone is not
-broadcast at every thirty seconds all day. The quiet period starts only on a packet that
-actually went out: a send that failed — the nudge after a resume can run before the adapters
-are back — used to start it anyway and hold off every wake for five minutes. `WakeNowAsync` skips it, and is only used by the
-explicit **Wake NAS** action (the row's menu, Ctrl+W, `--wake`) — a user pressing a button
-has already decided it is worth sending. Addresses are normalized first
-(`MacAddresses.Normalize`, `1a-2b-3c-4d-5e-6f`), so two spellings of one NAS share a quiet
-period.
-
-The packet is the standard six `FF`s and sixteen copies of the address, to UDP 9 and 7, both
-to the limited broadcast and to **every up adapter's subnet broadcast**. The limited
-broadcast alone only leaves by the default route, which on a laptop with a VPN or a Hyper-V
-switch is often not the adapter the NAS is on.
-
-Nobody knows their NAS's hardware address, so the drive sheets offer **Look up**, which
-resolves the host and asks ARP (`SendARP`, the same call `WindowsNetworkLocation` uses for
-the gateway). That only answers on the NAS's own network while it is awake, which is exactly
-when the user is adding it — and the error says so rather than just failing. macOS has no
-lookup (`IWakeOnLan.CanLookUp` is false and the button is hidden); the address can still be
-typed and waking works on both heads. An address that does not parse is refused by
-`CreateDrive`/`UpdateDrive` (`DriveErrors.NotAMacAddress`) but **dropped** on import: a vault
-is restored whole or not at all, and a bad optional field is not worth losing the drive over.
-The address travels in the export.
-
-### Coming back from sleep
-
-`DriveWatchdog` used to have exactly one trigger, its own five-second sweep, and that is
-exactly wrong after a resume: every SMB session died with the lid closed, and the backoff
-queue was still sitting on whatever delay it had escalated to — five minutes, commonly. Two
-things now **nudge** it: `Connectivity.ConnectivityChanged` reporting access back, and the
-sweep itself noticing that **more than a minute passed between five-second ticks**. The second
-is how resume is detected, deliberately, rather than through `SystemEvents.PowerModeChanged`:
-it needs no package, no eighth platform seam and works on both heads, and the only other thing
-that stalls a timer for a minute is a machine so overloaded that re-checking the drives is the
-right response anyway. The gap is measured from the **end** of the previous sweep, not its
-start: a sweep that sat through a few thirty-second mount timeouts ran past a minute on its
-own and was taken for a resume.
-
-"Access back" means a **transition from no access**, not every event `ConnectivityChanged`
-raises. Windows raises one for a VPN or a virtual adapter coming and going, and each of those
-used to be a nudge — which remounts the auto-connect drives that are down, including the ones
-the user had just disconnected by hand.
-
-A nudge polls the monitor, brings **every pending retry forward to now**, and connects the
-auto-connect drives that are down and not away from their home network, through the same
-`ConnectDownDrivesAsync` the home-network arrival uses — arrival passes `pinnedOnly: true`,
-a nudge does not. A drive that batch leaves down is put on the flat thirty-second retry rather
-than forgotten: the batch's suppression re-seeds its letter as down, so the monitor will never
-report it again, and a NAS still booting after the resume would otherwise wait for somebody to
-press something. Nudges do not overlap: a resume that also brings the network back is one
-recheck, not two. The ordinary sweep is skipped on the tick that detected the resume, since
-the nudge has just done its work.
-
-### Diagnosing a drive that will not connect
-
-Everything above is what Helix knows about *why* a mount failed, and until now all of it
-collapsed into one pill and one banner: a drive that is off, a drive whose share was
-renamed, a drive whose password is wrong and a drive whose server is held by somebody
-else's session all read as "Failed". The stethoscope chip on the row runs `DiagnoseDrive`
-and reports the chain step by step, so the user can answer for themselves the question
-that otherwise becomes an email.
-
-Four steps, in this order, and the order is the narrative: the server's **name**, then
-**reaching** it, then the **share and credentials**, then the **drive letter**.
-
-- **Name.** `IHostDiagnostics` asks `HostSpelling` for the host's other spelling and says
-  what it found. A miss is a warning, not a failure — a home router with no PTR records
-  for its leases is the normal case, and Helix mounts by what was typed regardless.
-- **Reaching it.** A fresh TCP probe of 445 then 139, and it names the port that answered.
-  Deliberately **not** `IHostReachability`: that one caches for ten seconds and shares its
-  in-flight task so a sweep of thirteen shares costs one handshake, which is exactly wrong
-  for a check the user just pressed a button to run. A failure here stops the chain and
-  the share step is reported as **skipped** rather than guessed at.
-- **Share and credentials.** `INasConnector.TestAsync`, whose deviceless mount never
-  touches the drive's own letter. Three outcomes rather than two, and the third is the
-  point: **`SessionConflict`** is now a distinct error code from the Windows connector
-  rather than a sentence inside `FailedToConnect`, so "the password is wrong" and "Windows
-  is signed in to this server as somebody else" stop looking identical.
-- **Letter.** Always runs, even when the server never answered — a letter taken by a USB
-  stick is worth knowing about while the NAS is off. It tells "already mounted from this
-  share" apart from "in use by something else", which are the same letter and opposite
-  problems.
-
-The step this exists for is the **warning** on a share that tested fine.
-`INasConnector.HasOtherMountsOn` answers whether another letter is already mounted from
-this drive's server; when it is, Windows reuses that credential context and the stored
-password is never actually checked, so the check reports success **and says so**. That is
-the limit documented above — "editing a password and reconnecting that one drive will
-appear to work whatever you type" — finally said out loud at the moment it is misleading
-somebody. On macOS `HasOtherMountsOn` is `false` and means it: NetFS authenticates per
-mount, so there is no session to inherit and nothing to warn about.
-
-A share Helix already has mounted is reported as such and **not tested again**. Testing it
-would either join its own session or conflict with it, and both answers would be about the
-test rather than about the drive.
-
-`IHostDiagnostics` is **not** a platform seam. Like `IFileBrowser`, it has one
-implementation for both heads and is registered outside `AddPlatformServices()` — a TCP
-connect and a DNS lookup are the same on either OS.
-
-Nothing here composes a sentence. Each step carries a `DiagnosticStep`, a
-`DiagnosticOutcome`, a `DiagnosticFinding` and at most one piece of data — a resolved name,
-a port, a letter — and `DiagnosticStepDisplay` builds the sentence from `AppResources` at
-display time, in the user's language, the same way `AuditlogDisplay` does. The one
-exception is a rejected credential, which shows the connector's own words, because the
-domain's error descriptions are not translated and paraphrasing "The network name cannot be
-found" into something vaguer would lose the only part that identifies the problem.
-
-The report is a modal sheet, which is not a contradiction of the no-alerts rule: that rule
-is about announcing the *outcome of work the user asked for and watched happen*. This is a
-document the user opened, reads, and closes — and it is too long to be a banner.
-
-Below the steps the sheet shows the drive's **last 30 days** from `GetDriveReliability`, which
-reads the audit rows `ReconnectDrive` already writes: each `DriveDisconnected` is a drop, a
-`DriveReconnected` that follows one is a recovery (one with no drop before it — a network
-arrival, a resume nudge — is not counted), and the typical recovery is the **median**, because
-an app closed overnight turns one drop into a ten-hour outage. There is no uptime percentage:
-`ConnectDrive` writes no row, so a drive the user brought back by hand would read as down until
-the next unattended reconnect, and the figure would be fiction. Three drops in a week marks the
-drive with a warning. It is loaded beside the check, not after it, and a failure to read it
-leaves the section out rather than failing the report.
-
-### Telling a deliberate disconnect from a drop
-
-`IDriveMonitor.Suppress` hands back a handle; while it is held, the letters it names are
-neither reported as changed nor used to move the baseline, and disposing it re-seeds them
-from what is actually mounted. Every handler that mounts or unmounts on purpose —
-`ConnectDrive`, `DisconnectDrive`, `ConnectAllDrives`, `DisconnectAllDrives`,
-`ConnectDriveGroup`, and `DeleteDrive` for the mount it takes down — holds one
-across the operation. **Add one to any new handler that mounts or unmounts.**
-
-Without it the monitor cannot tell "the user pressed disconnect" from "the NAS fell over",
-because both are a letter that stopped being there, and everything downstream believes the
-second: the tray fires a toast per drive and, with auto-connect on, `DriveWatchdog` puts
-every one of them straight back. Pressing "disconnect all" told the user seconds later
-that their drives had reconnected. The same on the way up — the startup connect fired a
-"reconnected" toast per drive, because the watchdog had seeded its baseline from a machine
-with nothing mounted moments earlier.
-
-The handle covers the whole operation rather than being a note filed after it: a poll
-landing between the unmount and the note is the case that produces the spurious reconnect,
-so there must be no window at all. Suppressions are counted, so a group going down while a
-row's own disconnect is in flight cannot uncover the other's letters.
-
-Releasing a suppression also raises `IDriveMonitor.TakenDown` for every letter that was up
-before the operation and is down after it, and `DriveWatchdog` drops its pending retry for
-those letters. A drive that had dropped and was still in the backoff queue when the user
-connected and then disconnected it by hand used to be remounted at its next retry, with a
-"reconnected" toast. A connect that merely failed is down before and after, so it is not
-reported and the retries carry on.
-
-`DisconnectDrive` refuses, with `DriveErrors.LetterInUse`, a letter that is not mounted from
-the drive's own share, and `DeleteDrive` only cancels a persistent mapping that is down when
-nothing else holds the letter: the connector's unmount is a forced cancel of whatever is on
-that letter, and a row whose letter had been taken by another mapping offered to pull it out
-from under whoever made it.
-
-`ReconnectDrive` deliberately does **not** suppress. A drive coming back unattended is
-exactly what the tray notification and the audit entry exist to report.
-
-### The low-space warning
-
-`Settings.StorageAlertThresholdPercent` is free space, as a percentage of a volume, below
-which Helix says something; 0 turns it off. A percentage rather than a byte figure because
-one install commonly watches volumes orders of magnitude apart in size.
-
-`GetStorageAlerts` measures through the same `IStorageProbe` the dashboard uses, so it
-answers in **volumes, not drives** — thirteen shares of one pool are one thing running out
-of room, and warning about it thirteen times would train the user to dismiss the warning.
-`VolumeUsage` carries the letters that resolved to each volume so the warning can name the
-drives. Only mounted drives are measured: an unmounted one has not run out of space, it
-has not been asked.
-
-`StorageAlertService` runs it on its own 15-minute timer — free space moves over days, and
-each reading is a blocking call against a share — and remembers which volumes it has
-already warned about, so a full pool is reported once rather than every quarter of an hour.
-A volume that recovers is forgotten, so it can warn again months later.
-"Recovers" means **measured and found fine**: `StorageAlertReport` carries every volume the
-check measured alongside the alerts, and only those are eligible to be forgotten. A pool
-whose drives were unmounted for one check, or whose probe ran past the timeout, is absent
-from the alerts without having recovered, and forgetting it re-fired the warning. It starts a minute
-after the dashboard does, because the drives are still being connected at that moment.
-
-The same service records **storage history**: `RecordStorageSamples`, at most every six hours,
-writes one `StorageSample` per volume per **UTC day** (the unique index is `(UserId, VolumeId,
-Day)`; a later reading the same day updates the row) and prunes anything older than 400 days. It
-probes on its own rather than reusing the alert check's reading, because the alert check returns
-early when the threshold is 0 and history is wanted regardless; four probes a day is nothing.
-A volume is its `VolumeId` — the total size, as the probe already keys it — so a volume that is
-grown starts a new history, which is the honest answer.
-
-`GetStorageForecasts` fits a least-squares line through the last 30 days of each volume
-(`Core/Storage/StorageTrend`) and turns a falling one into days until full. It answers nothing
-from fewer than three samples or less than a week of span, for a volume not measured in three
-days, or past ten years. The dashboard's storage tile shows the **soonest** volume within a year
-as one caption, with the volume's drives and its daily rate in the tooltip, and refreshes on
-`StorageSamplesRecordedMessage`. It is a straight line on purpose: free space on a NAS moves in
-steps (a backup, a deleted folder), and anything cleverer than a trend over a month would be
-claiming a precision the data does not have.
-
-### Closing the window
-
-`Settings.CloseToTray` decides what the title bar's close button means: hide to the tray,
-or quit. On, because everything Helix does unattended — reconnecting a dropped share,
-warning about a full pool, locking itself — stops the moment the process does, and a NAS
-tool that only works while its window is open is a NAS tool that does not work. Off is
-for the user who wants the button to mean what it says.
-
-`Settings.NotifyOnMinimizeToTray` is whether the tray says so when the window is put away
-there, once per session, and covers the auto-minimize countdown as well as the close
-button — both go through `TrayIconService.NotifyHiddenToTray`. On, because a window that
-vanishes from the taskbar unexplained reads as a crash.
-
-Both are cached in `TrayIconService` and read from there synchronously, because the
-window's `Closing` handler is a WinUI event that has to decide before it returns and
-cannot await a query. The cache is filled per sign-in and refreshed on
-`SettingsChangedMessage`, which `SettingsDisplay` sends after any accepted write — a
-cache that only refilled at sign-in would be a switch that did nothing until the next
-one. A failed read leaves the last known values rather than reverting to the defaults.
-
-Neither switch is offered on macOS, although the menu bar icon is: `SettingsViewModel
-.SupportsTray` is `ITrayIcon.IsSupported` **and** Windows, because both switches are about
-hiding the window, and Catalyst has no public way to hide one — the rows would be shown
-and ignored. `BaseViewModel.MinimizeApp` carries the same guard, or the countdown would
-announce "still running in the tray" over a window that never moved.
-
-The menu also rebuilds on `CheckDrivesStatusMessage`. A connect from the window holds a
-suppression, so the monitor never reports it, and the tray kept offering "Connect Z:" for a
-drive the row had just mounted — and `ToggleDriveAsync`, which reads the live state, then
-*disconnected* it under that label.
-
-Every tray-menu action reports its failure through the balloon (`TrayIconService.Report`)
-and a warning in the log; the tray is used while the window is away, so there is no banner
-to land on, and a "connect all" with a wrong password used to produce nothing at all. The
-dashboard's "disconnect all" reads its result too — connect-all always did. At logon Helix
-can be up before the taskbar is, and the shell refuses the icon; `WindowsTrayIcon.Show`
-now adds the icon whenever it is missing and the service retries `Show` every ten seconds
-for three minutes, because the earlier "no tray" verdict left an icon with an empty menu
-and a close button that quit.
-
-### Drive groups
-
-A `DriveGroup` is a named set of drives — "Home", "Office" — connected or disconnected in
-one action from the dashboard strip, the group manager sheet or the tray menu.
-`ConnectDriveGroup` does both directions, because everything around the mount is identical
-either way and only the call in the middle differs. A drive's own `AutoConnect` flag does
-**not** apply: that flag holds a drive back from the *unattended* passes, and pressing a
-group button is as deliberate as it gets.
-
-Membership is a list of drive ids on the group, stored as a **primitive collection** (one
-JSON column) rather than a join table to `Drives`. A group does not own its drives: several
-groups may name the same one, and deleting a drive must not delete the groups it was in.
-Readers resolve the ids against the drives that exist, so an id left behind by a deleted
-drive disappears from the group rather than becoming an error — `DeleteDrive` prunes them
-anyway, to stop a long-lived install accumulating ids that name nothing.
-
-### Acting on several drives at once
-
-Everything used to be all-or-nothing — every drive, or one row at a time — with saved
-groups as the only way to act on a subset. A group is something you set up in advance for a
-set you use repeatedly; "these three, now" had no answer that did not involve creating a
-group and leaving it behind. Rows carry a tick, and `ConnectDrives` takes the ids.
-
-`ConnectDrives` and `ConnectDriveGroup` are the same work reached two ways, so everything
-below the list of drives lives in `Core/Drives/DriveMountBatch`: which of the set are in the
-wrong state, one suppression covering the whole batch, the mounts in parallel, the stamps
-on one thread, the failures aggregated into a single error. What stays in each handler is
-how the list was arrived at. The batch is a static helper rather than a handler because it
-does **no authorization and no lookup** — the caller has already established that these
-drives exist and belong to the signed-in user, and nothing that has not done so may reach
-it.
-
-Like a group, a selection ignores each drive's own `AutoConnect`: that flag holds a drive
-back from what Helix does unattended, and ticking a row is as deliberate as it gets. Ids
-that name nothing are skipped rather than failing the batch — a drive can be deleted from
-another window while a selection is held — and the ids are de-duplicated, since a repeated
-one would otherwise be mounted twice.
-
-The selection bar **replaces** the all-drives chips rather than sitting beside them. Two
-pairs of Connect/Disconnect on one line, one meaning "every drive" and the other "the three
-you ticked", is the kind of ambiguity that gets a NAS unmounted by accident; for the same
-reason the surviving chips now say "Connect all" and "Disconnect all" rather than "Connect"
-and "Disconnect". The selection is deliberately **not** cleared after an action: connecting
-three drives and then wanting to disconnect the same three is the common second act.
-
-Unmounting is confirmed, in a dialog — the one thing on the page that is a question rather
-than a result. Deleting a single drive was confirmed and unmounting thirteen at a stroke
-was not, which had the risk backwards: an unmount pulls the filesystem out from under
-whatever has a file open on it. The confirmation is skipped when nothing would actually
-come down, because a confirmation for a no-op teaches the user to dismiss them unread, and
-it has a singular and a plural form rather than one string with a number in it. A group's
-disconnect, from the strip or the sidebar, is confirmed the same way through
-`Common/DisconnectConfirmation`, counting the members `IsMountedFrom` reports. The tray's
-own "disconnect all" is not confirmed and should not be: there is no window to put a dialog
-on when it is used.
-
-The question names the letters that still have something **open** on them, from
-`INasConnector.CountOpenHandles` — on Windows `NetUseGetInfo`'s `ui1_refcount`, the same count
-`net use /delete` warns from, which covers files, directories and an Explorer window's change
-notifications. It is a count, not a list of programs, and deliberately so: the only way to name
-the process is to enumerate every handle on the system and resolve each one's path, which needs
-access to other processes, hangs on some handle types, and on a share means asking the NAS. A
-**single row's** disconnect asks only when its letter is in use — a confirmation for every row
-would be the no-op question that teaches people to dismiss them — and the count is taken off the
-UI thread. macOS returns null (unknown), which leaves the question as it was.
-
-### Schedules
-
-A `Schedule` connects or disconnects a group, or every drive, at a time of day on chosen
-weekdays — "connect *Office* at 07:00 on weekdays", "disconnect everything at 23:00". The
-command line and Task Scheduler could always do this; next to nobody sets that up, and it
-cannot run behind the idle lock. The sheet is under **Drives → Schedules** (Ctrl+T).
-
-`RunDueSchedules` is the whole of the rule, and `ScheduleService` asks it every twenty
-seconds for the length of a session. It starts beside `StorageAlertService` and stops where
-that does — sign-out, not the idle lock — because a schedule is the user's standing
-instruction, like the watchdog's reconnects, and not a keyboard the lock should stop.
-
-The time is **wall-clock local time**, compared through `ILocalTimeZone`, which clears
-`TimeZoneInfo`'s cache on every read: a laptop that changes time zone means 07:00 where it
-now is. `Schedule.DueOccurrence` finds the latest occurrence at or before now and calls it
-due when it is later than both the last run and the last edit, and **no more than ten
-minutes old** (`RunDueSchedules.Grace`). The grace is the design, not a tolerance:
-
-- An occurrence missed by more than that is **skipped, not run late.** A laptop opened at
-  08:00 after sleeping through 23:00 must not pull every drive down the moment it wakes,
-  and a "connect at 07:00" opened at 10:00 is what auto-connect is for anyway. Ten minutes
-  still covers a resume a little after the hour and a sign-in at the time itself.
-- A schedule saved **after** its time today waits for the next occurrence. Without the
-  edit stamp as a floor, creating "23:00" at 23:05 fired it on the spot.
-
-`LastRunOnUtc` is stamped and saved **before** the drives are touched, so a run that fails,
-hangs or crashes the app is not retried every twenty seconds for the rest of its grace. A
-failed run is reported, not repeated; the watchdog and the user own it from there.
-
-The run itself is `DriveMountBatch`, the same work as a group or a selection — suppression,
-parallel mounts, stamps, one aggregated failure. Like a group button it **ignores
-`AutoConnect`**: the user named these drives when they wrote the schedule. It **does** honour
-the home-network pin on a connect, as the startup connect does: a pinned drive with no away
-address is left out when the laptop is elsewhere, because a 07:00 "connect Office" at home on
-a Saturday would otherwise probe, and try to wake, a NAS across town. A disconnect ignores
-the pin — a drive mounted through its away address should still come down at 23:00.
-
-A schedule names a group by id, with a **cascading foreign key**: deleting a group deletes
-the schedules that name it. That is the one place `DriveGroup` is referenced from another
-table rather than the other way round; a schedule whose target has gone could only fail at
-its next run. `ScheduleRepositoryTests` holds SQLite to that, since EF's in-memory cascade
-would hide a missing `PRAGMA foreign_keys`.
-
-Each run says what it did, through the tray balloon when the icon is up and the banner
-otherwise — the `HotkeyService` rule. A scheduled disconnect that just happens, with nothing
-said, reads as the NAS falling over. Schedules and groups travel in the vault with the drives
-(see **What the vault carries**).
-
-### Importing over live mappings
-
-`ImportDrives` and `CreateDrive` refuse a letter the connector reports as mounted — a USB
-stick, an optical drive, another account's mapping would save fine and then fail at every
-connect. The exception is a letter mounted **from the share being described**, which
-`INasConnector.IsMountedFrom` answers: on Windows by comparing what `WNetGetConnection`
-reports the letter points at with `\\host\share` under either spelling of the host, on
-macOS by the volume being under Helix's own mount root. That is the normal state of a
-machine a backup is restored on — persistent mappings survive a reinstall and live ones
-survive an update, so the drives are up before the records that describe them are back —
-and treating them as taken meant a vault of thirteen drives imported nothing until every
-share had been disconnected by hand. A vault that ends up importing nothing is reported as
-`JsonErrors.NothingToImport` rather than announced as a success.
-
-#### What the vault carries
-
-A vault is a `VaultContents` — `Version`, the drives, the groups and the schedules — rather than
-the bare drive list it used to be, and `ImportDrives` still reads that list (a JSON array is
-version 1). Groups and schedules could not travel as they are stored, because both are keyed by
-ids that mean nothing on another machine: a group carries its members' **letters**, a schedule
-its group's **name** (`null` for every drive), and import maps them back onto the drives and
-groups that exist after the drives are in. That is what makes a group naming a drive the
-machine already had point at that drive, rather than at nothing.
-
-A group whose name is taken (case-insensitively, as `IsNameUniqueAsync` compares) is skipped,
-not merged; a schedule identical to an existing one, or naming a group that is in neither the
-vault nor the database, is skipped; nothing new at all is still `NothingToImport`. A vault with a
-higher `Version` than the build knows is `VaultUnsupportedVersion` — and an **older** build
-reads a version-2 vault as invalid drive data, which is the price of an object at the top level.
-Schedules keep their switched-off state; their run and edit stamps are not carried, so an
-imported schedule waits for its next occurrence like any newly saved one.
-
-`INasConnector` answers two different questions about a letter, and they must not be
-confused. `IsMountedFrom` is "this letter **points at** this drive's share", and on Windows
-that includes a **remembered** persistent mapping that is not connected — `WNetGetConnection`
-answers `ERROR_CONNECTION_UNAVAIL` with the remote name when a restore at logon failed because
-the NAS was asleep or the laptop was elsewhere. `IsLiveFrom` is "this drive **is up**", and
-excludes it. Deciding which to ask is deciding whether the remembered entry matters:
-
-- **Is the drive up** — `IsLiveFrom`. `DriveMountBatch.IsUp` (connect all, a group, a
-  selection, the startup connect, the low-space check), `DiagnoseDrive`'s share step,
-  `MarkDriveConnected`, the watchdog's `ConnectDownDrivesAsync`, `--status` and the tray's
-  folder menu. Asking `IsMountedFrom` here was the bug: a persistent drive whose restore
-  failed at logon read as up everywhere, so nothing ever connected it again, and the
-  diagnosis reported it "already mounted" and skipped the credential test.
-- **Does the letter belong to this share** — `IsMountedFrom`. `DisconnectDrive`, "disconnect
-  all" (`DriveMountBatch.IsMapped`), `DeleteDrive`, `UpdateDrive`'s unmount before a share
-  change, and the letter-in-use checks in `CreateDrive`, `CreateDrives` and `ImportDrives`.
-  Cancelling a remembered entry is exactly what a disconnect should do, and a remembered
-  mapping of the same share is the restore-after-reinstall case, not a conflict.
-
-The same split applies to the letter sets. `GetConnectedLetters` is every letter present,
-remembered mappings included, and answers "is this letter **taken**" — the letter pickers and
-the letter-in-use checks. `GetLiveLetters` leaves out a network letter whose mapping is only
-remembered, and is what `DriveMonitor` polls: a persistent drive whose server went away keeps
-its letter, and reading presence as "up" meant its drop was never reported and the watchdog
-never brought it back. The dashboard rows, counts, donut and storage total, the sidebar and the
-tray all ask `GetLiveLetters` and then `IsLiveFrom` per drive (`DriveDisplay.IsUp`), so a USB
-stick on a drive's letter is not the drive being connected; "disconnect all" confirms against
-`DriveDisplay.IsMapped`, the letters it will actually take down.
-
-`Drive.Persistent` is fixed when a mapping is made, so `UpdateDrive` re-makes the mapping
-when the switch moves on a mounted drive — but only when `CountOpenHandles` says nothing is
-open on it; with files open, or where the count is unknown (macOS, which ignores the flag
-anyway), it applies at the next connect. A mapping that is only remembered is cancelled.
-
-`HasOtherMountsOn` only counts **live** mappings, since a remembered one holds no session
-to inherit. It also asks `HostSpelling` for the other spelling only once it has found a
-network letter that neither the home nor the away address explains, because that lookup
-can block for its full 1.5s.
-
-Mounting onto a letter that holds a remembered entry is refused by `WNetAddConnection2`
-(`ERROR_ALREADY_ASSIGNED`, or `ERROR_DEVICE_ALREADY_REMEMBERED` with
-`CONNECT_UPDATE_PROFILE`). `Connect` then cancels that entry, unforced and only when it is
-**this drive's share and not connected**, and tries once more. An `ERROR_ALREADY_ASSIGNED`
-on a letter that is already **live** from this share is answered as success: it is what two
-overlapping batches (the startup connect and a "connect all" pressed during it) produce,
-and the drive is up.
-
-A letter merely present on the machine is not up either: a USB stick that landed on `E:` used to make
-"connect all" skip the NAS drive defined there, "disconnect all" try to unmount the stick,
-and the low-space check measure it under the drive's name. `DeleteDrive` unmounts whatever
-is mounted from the share, persistent or not, and refuses the delete if that fails, since a
-record deleted out from under a live mapping leaves a letter nothing in Helix can take down.
-
-### A drive's home network
-
-A drive can be pinned to the network it lives on — `Drive.HomeNetworkId`, with the name it
-had when it was pinned in `HomeNetworkName` for the switch and the pill to show. The
-unattended passes then leave it alone anywhere else: `ReconnectDrive` answers
-`DriveErrors.AwayFromHomeNetwork` **before** it probes the host, and the startup
-`ConnectAllDrives(OnlyAutoConnect)` drops it from the batch. Before this a laptop off its
-NAS's network probed every share every thirty seconds all day and showed a row of amber
-pills for a state that is not a fault; now the row says "Away", in neutral grey, and nothing
-is attempted. Anything the user presses — the row, a group, a selection, "connect all" —
-ignores the pin, for the same reason those ignore `AutoConnect`.
-
-`INetworkLocation` is the seventh platform seam. On Windows a network is identified by the
-**hardware address of the default gateway**: the adapter `GetBestInterface` would route the
-internet through, its IPv4 gateway, and `SendARP` for that gateway's MAC. Not the SSID —
-reading it needs location permission on current Windows, it misses a wired dock entirely,
-and two cafés called "Guest" are not the same place. Not the gateway's IP either, since half
-the routers in the world are `192.168.1.1`; that is only the fallback when ARP will not
-answer. The connection profile's name is read for display and nothing else. Readings are
-cached for ten seconds with the in-flight task shared, like `HostReachability`, because
-every reconnect of a pinned drive asks.
-
-The pin travels in the export, id and name both. The id is the gateway's hardware address,
-which is just as true on another machine on the same LAN; a restore used to unpin every
-drive, and they went back to probing the NAS from everywhere.
-
-When the adapter Windows would route through has **no IPv4 gateway** — a full-tunnel VPN,
-commonly — the network is read from the first adapter that has one instead. Reading the VPN
-adapter found nothing, which reads as home, and a laptop at a café probed and woke its
-pinned drives.
-
-A network that **cannot be identified reads as home**, never as away. A false "away" would
-stop a drive reconnecting that would have come back — the same asymmetry
-`HostReachability` is built on. That includes a reading that fell back to `gateway-ip:`
-for a drive pinned by `gateway:<mac>`: ARP missing its first answer just after the adapter
-comes up is ordinary, and comparing the two kinds as strings read every pinned drive as
-"Away" on its own network until a later reading got the hardware address.
-`Drive.IsAwayFrom` treats that pair as unknown.
-
-On macOS (`MacNetworkLocation`) the same identity is read by running `/sbin/route -n get
-default` and `/usr/sbin/arp -n <gateway>` — no shell, `ArgumentList`, a two-second timeout
-that kills the process tree. There is no `GetBestInterface`/`SendARP` to P/Invoke into that
-is any simpler, and both tools are on every Mac. `arp` prints octets without their leading
-zero (`0:11:32:a:b:c`), so they are padded before the id is built, and the id has exactly
-the Windows form (`gateway:<mac>`, `gateway-ip:<ip>`) so a pin exported on one OS matches on
-the other. The name shown is the interface (`en0`): the SSID needs location permission, as
-on Windows.
-
-`DriveWatchdog` reads the network on every retry sweep, and when it **changes** to a known
-one it connects the auto-connect drives pinned there that are down, through `ConnectDrives`.
-That is what makes "Office" come up on arriving at the office: the monitor only reports
-letters that went away, so a drive that was never mounted this session would otherwise wait
-for somebody to press something. The first reading of a session is only a baseline — the
-startup connect has just handled that network. An `AwayFromHomeNetwork` reconnect is
-treated like `HostUnreachable`: a flat thirty-second retry, logged at Debug, not counted as
-a failure.
-
-### A second address for away from home
-
-A drive can carry an **address for away from home** (`Drive.RemoteHost`) — usually what a VPN
-or Tailscale gives the NAS. Pinning a drive to its home network made a laptop stop hammering a
-NAS it could not reach, but "Away" was then a dead end for everybody who *can* reach their NAS
-from elsewhere, just not at `192.168.1.6`.
-
-Which address a connect uses is decided in one place, `IDriveRouter`, and every mount and
-test goes through it — the connectors' `WhenReachableAsync` and `ReconnectDrive`'s own gate.
-It is not a platform seam: one implementation (`Infrastructure/Connector/DriveRouter`) covers
-both heads, registered outside `AddPlatformServices()`, like `IHostReachability`, which it is
-built on. The rule:
-
-- **Pinned, and away from the home network:** straight to the away address. The home address
-  is not probed — the pin already answered that — and no wake-up packet is sent.
-- **Otherwise** (on the home network, unpinned, or a network that cannot be identified):
-  the home address is preferred, and the away address used only if home is silent. Both are
-  probed **at once**, so falling back costs one probe timeout rather than two in a row; the
-  extra probe when home answers is one cached TCP connect. An unpinned drive gets the
-  fallback too.
-- Neither answers: `DriveErrors.HostUnreachable`, naming the address that was the last hope —
-  the away one when away, the home one otherwise — so the watchdog's flat 30-second retry and
-  the amber pill carry on exactly as before.
-
-A drive with an away address is therefore **never** "Away": `ReconnectDrive` only answers
-`AwayFromHomeNetwork` for a pinned drive that has none, and the startup
-`ConnectAllDrives(OnlyAutoConnect)` and the watchdog's `ConnectDownDrivesAsync` keep it in the
-batch rather than dropping it.
-
-The away address is its own **server name string**, so on Windows it is its own credential
-context and its own per-host gate — the gate is keyed by the address actually used, not
-`Drive.Host`. That is the same property `TryAlternateSpelling` relies on, and it means a drive
-coming up over the VPN never collides with a leftover session under the LAN address.
-`ConnectByHostname` applies to the home address only; the away address is used as typed.
-
-`IsMountedFrom` and `HasOtherMountsOn` recognise a mount under the away address as the
-drive's own, or disconnecting it would have been refused as `LetterInUse`. Editing the away
-address of a drive mounted **through** it unmounts it first (`UpdateDrive`), the same as
-changing its share, for the same reason — the letter would otherwise point at an address
-nothing in Helix claims. A drive mounted through its home address is left alone.
-
-What it does **not** do: move a drive back to the home address on arriving home. A mount made
-over the VPN keeps working while the VPN is up, and switching means unmounting a share
-somebody may have a file open on. When the VPN drops, the drive drops, and the reconnect that
-follows takes the home address.
-
-`DiagnoseDrive` follows the same choice: when the home address is silent and the away one
-answers, the report is about the away address — that is what a connect would have used.
-
-The address travels in the export and is dropped rather than refused on import when it does not
-parse, like the hardware address. Duplicating a drive copies it. It is not a credential and is
-not tied to the home-network pin: a drive can have one without the other.
-
-### Adding drives from what is already there
-
-**Browsing a server's shares.** The add-drive sheet lists what the server shares, given its
-host and credentials, and a share ticked there fills the name; ticking several creates one
-drive per share through `CreateDrives`, the first on the chosen letter and the rest on the
-next free ones counting down, as the letter picker itself defaults to the last. Shares the
-user already has as drives are shown with their letter and cannot be ticked. `ListShares`
-goes through `INasConnector.ListSharesAsync`, which on Windows is `NetShareEnum` at level 1,
-keeping disk shares that are neither special nor `$`-suffixed.
-
-How it authenticates is the part to leave alone. With a drive letter already mounted from the
-server it enumerates on that session. Otherwise it connects `\\host\IPC$` with the typed
-credentials first — **never** enumerates anonymously first, because an unauthenticated
-`NetShareEnum` signs in as the Windows account and leaves exactly the session that turns the
-next mount into `ERROR_SESSION_CREDENTIAL_CONFLICT`. A 1219 on that `IPC$` connection takes
-the same leftover-session branch as a mount (drop it unforced, try again), and a conflict
-that survives the drop lists the shares on the session that holds the server, because a list
-of names is not a claim about the credentials. It holds the per-host gate like a mount does.
-macOS has no equivalent and the button is hidden (`DrivePlatform.SupportsShareBrowsing`).
-
-**Duplicate** — the row's right-click menu or Ctrl+Shift+D — opens the add sheet with the
-drive's server, credentials, switches and home network filled in and the share left blank:
-the second drive on a NAS is the common case and it is everything but the share. It is the
-natural partner of the browser.
-
-**Adopting existing mappings** lists the letters mapped on this machine that no Helix drive
-claims (`GetUnmanagedMappings` over `INasConnector.GetMappedShares`, which on Windows asks
-`WNetGetConnection` for every letter, remembered-but-unavailable ones included) and turns
-the ticked ones into drives with one set of credentials. They are created persistent,
-because a mapping someone made in Explorer almost always was. `CreateDrives` accepts a letter
-that is mounted from the share it describes, the same exception `CreateDrive` makes, so
-adopting does not require unmapping first. WebDAV mappings (`\\server@SSL\...`) are left
-out; `Drive.Host` cannot hold them.
-
-`CreateDrives` is all-or-nothing: every letter is checked — unique within the batch, not
-already a drive, not held by something else — before anything is inserted, so a batch that
-fails leaves no half of itself behind.
-
-### One server, one set of credentials
-
-Each drive still stores its own username and password, but editing them on a drive whose
-server has other drives offers to apply them to those too (`UpdateDrive.Request
-.ApplyCredentialsToServer`). The switch appears only once the credentials have actually
-changed and only when there is a sibling; it is **off by default**, because a NAS commonly
-carries an admin share and a guest share under different accounts, and changing the other
-drives silently is worse than one more click. "Same server" is `Drive.IsOnSameServerAs`:
-the host string, case-insensitive — two spellings of one NAS are two servers here, which
-errs towards changing too little.
-
-
-### Protocols other than SMB
-
-A drive is SMB unless `Drive.Protocol` says **WebDAV** or **NFS**. `Drive.Name` is then a path
-rather than a share name (`home`, `remote.php/dav/files/me`, `/volume1/media`), and
-`DriveProtocols.NormalizePath` is how both connectors read it: slashes either way, none at the
-ends. `Drive.Port` is kept for WebDAV only, and dropped when it is 443, so a drive typed with and
-without the default port is one drive; `UsePort` re-applies that whenever the protocol changes.
-The migration defaults every existing row to SMB.
-
-Both protocols go through the **same mount APIs** as SMB rather than a client of Helix's own.
-On Windows, `WNetAddConnection2` takes an explicit `lpProvider` — `"Web Client Network"` for
-WebDAV, `"NFS Network"` for NFS — and the remote name is built by
-`WindowsNasConnector.RemoteFor`: `\\host@SSL[@port]\path` for WebDAV (always HTTPS: the WebClient
-service refuses basic authentication over plain HTTP, and a NAS password is not something to send
-in the clear anyway; an empty path is `DavWWWRoot`), `\\host\volume1\media` for NFS. On macOS
-`NetFSMountURLSync` takes an `https://` or `nfs://` URL (`MacNasConnector.UrlFor`). The mount
-point, the letter, persistence, the monitor, suppression and the storage probe are all the
-letter's business and did not have to change. A missing Windows feature — Client for NFS turned
-off, the WebClient service stopped — comes back as `ERROR_BAD_PROVIDER`, and is reported as
-that rather than as the generic Win32 sentence.
-
-**NFS carries no credentials.** `DriveProtocols.UsesCredentials` is false for it, the entity
-accepts empty ones, the sheets hide the fields and the connectors pass null; NFS
-authorization is by host and UID on the server, and a stored password would be a field that
-does nothing. "Apply these credentials to the server" skips NFS siblings for the same reason.
-
-Everything SMB-specific stays SMB-only, and `Drive.Protocol` is the guard: the 1219
-credential-conflict branches, `TryAlternateSpelling`, `ConnectByHostname`, `HasOtherMountsOn`
-(answers false, so the diagnosis never claims a password went unchecked), share browsing and
-adopting existing mappings. Reachability is not: `IHostReachability`, `IHostDiagnostics` and
-`IDriveRouter` take the ports from `DriveProtocols.ProbePortsFor` — 2049 for NFS, the WebDAV
-port or 443 — because a NAS that serves NFS with SMB switched off would otherwise read as
-unreachable forever. SMB passes `null`, which is the 445-then-139 it always probed, and the
-reachability cache is keyed by host **and** ports so an SMB reading never answers for WebDAV.
-
-The protocol and port travel in the vault. An unknown protocol makes the row invalid rather
-than silently mounting it as SMB; an older build reads a WebDAV drive as SMB and an NFS drive
-as invalid (no credentials), which is the price of an additive field.
-
-**SFTP is not offered and should not be added this way.** Neither OS mounts it natively: it
-needs WinFsp + SSHFS on Windows and macFUSE on macOS, both third-party kernel drivers that
-Helix would have to detect, version-check and explain, and neither goes through the mount
-APIs everything above relies on. **Mounting to a folder** rather than a letter on Windows was
-also left out: `WNetAddConnection2` only maps devices, a folder mount means a directory
-symlink to a UNC path (which needs Developer Mode or elevation), and the letter is the
-identity the monitor, suppression, the audit log, the command line and the vault all key on.
-
-### Finding a drive, and a row in the log
-
-Both lists filter live, from a box that is always on screen, over what is already in
-memory. Both used to be a modal: open a sheet, type, press Search, wait for a database
-round trip, and have the results replace the list — four interactions and a query to narrow
-thirteen rows. `SearchDrives` and `SearchAuditlogs` were deleted along with the sheets;
-`GetDrives` already loads everything, so the drive query was narrowing a set the app was
-holding anyway, and the history is loaded a page at a time with a search widening it (see
-**Long lists**) rather than being asked a question the database cannot answer.
-
-A drive letter is `GeneralValidation.IsDriveLetter`: one character, A to Z. `char.IsLetter`
-let a hand-edited vault save `É` as a letter the edit modal could not even offer. Export and
-import catch `IOException` — the folder picked is as likely as not a NAS share — and a vault
-that adds nothing is `JsonErrors.NothingToImport`, not a success banner. EF Core's command
-logging is filtered to Warning in `AddInfrastructure`, because every query at Information
-rolled the 2 MB log over the reconnect lines it exists for.
-
-Filtering in the viewmodel buys two things the queries could not have. The drive rows are
-**reused** rather than rebuilt, so a tick, a mount in flight and a drive's offline reason
-all survive typing — re-projecting fresh `DriveDisplay`s per keystroke would have thrown the
-selection away on the first letter. And the audit log is matched against the **sentence the
-row shows**, which is composed at display time in the user's language and does not exist in
-the database: searching for "disconnected" used to find nothing while the page was full of
-the word.
-
-Each page keeps a master list (`_allDrives`, `_allAuditlogs`) and `Drives`/`Auditlogs` is
-the filtered, sorted view onto it. **Anything that describes the estate rather than the
-list reads the master**: the storage and connection tiles, the connectivity donut, group
-membership, and the count "disconnect all" confirms against. A search box narrowing the
-list below them is not the NAS getting smaller.
-
-`RefreshTotalsAsync` is raised once per drive by a "connect all", each run probes the shares,
-and the probes finish in whatever order they like — so the storage figure is only applied by
-the **latest** request, or a reading taken before the last drive mounted could land last and
-stay. A reading that **measured nothing while drives are connected** is not applied at all,
-on the dashboard or in the sidebar: every share of one pool rides the same SMB session, so
-when Windows re-establishes an idle one, or the NAS spins its disks up, all thirteen
-measurements miss the three-second cap together and the probe returns no volumes. That used
-to be shown as "0 TB" for a NAS that was plainly there, until some later refresh happened to
-be quick. Only "no drive is connected" shows zero. The probe writes an Information line when
-it measures nothing, since the per-drive failures are Debug and a release build drops them.
-`DriveCreatedMessage` is ignored for a drive the master list already holds: a fetch that
-was in flight when the drive was saved returns it too, and the duplicate row it left made the
-next `FetchDrivesAsync` throw on its id lookup.
-
-Rows filtered out are **deselected** on the way. Acting on a ticked row that is not on
-screen is the one outcome worth ruling out — "disconnect" has to mean the rows the user can
-see.
-
-An empty list now has two states. Filtering thirteen drives down to none and being told
-"you have no drives yet — add one" is the app forgetting what the user just typed, so
-`ShowNoMatches` offers to clear the search and `ShowNoDrives` offers to add a drive.
-
-Column headers sort. The list always drew a header row and never let anyone click it; the
-only ordering was ascending or descending, chosen in the modal, with no way to say by what.
-Letter, Name and Status sort; **storage usage does not**, because the column holds a
-sentence built for reading ("1.2 TB free of 43.2 TB") and ordering drives by the text of
-that puts 9 GB after 40 TB. A fresh column starts ascending rather than keeping the previous
-direction, and the caret marks which column is live.
-
-### The drive card at an ordinary window size
-
-The screenshots that exposed this were taken at 150% display scaling, which is worth
-remembering before reading pixel positions off one: a 1960px-wide window is a 1300 DIP
-window, and after the sidebar and the 320 DIP connectivity column the drive card is about
-670 DIP wide. Fixed row columns totalling 636 left the one flexible column — the drive's
-**name** — with nothing, and the header's title, search box and three labelled chips wanted
-about 810 in a 610 slot, so the search box got squeezed to a stub.
-
-`HomeViewModel.IsCompact` is the answer, set by the page from the **card's own measured
-width** (`DriveCard.SizeChanged`, threshold `CompactCardWidth`), not the window's — the
-card is what has to fit. Compact hides the chip labels (each chip carries the same text as a
-tooltip, so icon-only is still explained) and collapses the storage-usage column to 0.
-Storage is the column that goes because for every drive that is down it reads "Drive not
-ready", and the name is the column that matters.
-
-The column width lives on `Common/DriveListLayout`, an observable singleton that the header
-grid and every row grid bind with a **static `Source`** — never `RelativeSource`. A
-`ColumnDefinition` is a `BindableObject` but not an `Element`: it has no place in the visual
-tree and no parent, so an `AncestorType` lookup on it has nothing to walk and fails inside
-the item template, which took every row with it — a list that counted thirteen drives and
-drew none. A static-source binding needs only something to subscribe to and works on any
-bindable object. `HomeViewModel.IsCompact` mirrors into the singleton for the labels that
-bind through the viewmodel.
-
-**The header grid on `HomePage` and the row grid in `DriveTemplate` must stay identical**
-— same widths, same spacing — or the column labels drift off the data. The twelve-DIP
-column gap beside the collapsed storage column is the one thing the binding cannot remove,
-and is accepted.
-
-### Long lists
-
-Both lists are `CollectionView`, not `BindableLayout` over a `VerticalStackLayout` in a
-`ScrollView`. That shape realizes every row before the page can be drawn, which is
-survivable for thirteen drives and is not for ninety days of audit history — the default
-retention. `SelectionMode` is `None` on both: the drive rows carry their own tick, and
-CollectionView's own selection would also fire on a click anywhere in the row, so pressing
-"Disconnect" would select the row as a side effect.
-
-Rows are recycled, which `DriveTemplate` already handles — `OnBindingContextChanged`
-unregisters before it re-registers, so a view handed a different drive does not keep the
-old one's subscriptions.
-
-**The drive rows are reachable from the keyboard**, through `Behaviors/RowFocus` — one tab
-stop per row, not one per control. The row's status pills and icon chips are styled
-`Border`s with tap gestures, which take no focus, and MAUI's `Button` takes text rather than
-arbitrary content, so making each of them focusable would have meant rebuilding every
-interactive part of the row *and* putting a hundred tab stops in front of a user with
-thirteen drives. Focus lands on the row and the keys act on it, the way a file manager's
-list does: **Enter** connects or disconnects, **Space** ticks, **Delete** deletes, **F2**
-edits, **Ctrl+D** diagnoses, **Ctrl+Shift+D** duplicates, **Ctrl+O** opens the folder,
-**Ctrl+W** wakes the NAS. Every one of them is the same work
-the mouse reaches through a pill or a chip, routed through `IRowKeys` on `DriveTemplate`, so
-a row does the same thing either way. Ctrl+O is refused rather than swallowed when the drive
-is down, because the chip is not there either. The same actions are on the row's right-click
-menu (`FlyoutBase.ContextFlyout`), which is also where Duplicate lives: a fifth chip would
-have widened the actions column and taken the room from the drive's name.
-
-Up and Down are answered by the behavior itself, with WinUI's `FocusManager.TryMoveFocus` —
-moving between rows is the list's business, not the drive's, and this way nothing has to
-find the `CollectionView`. The behavior is Windows-only like `Hover`; Mac Catalyst has no
-equivalent seam in MAUI and the rows stay mouse-only there. The focus ring is a `Focused`
-visual state on the `Row` style, and the style carries a **two-wide transparent stroke with
-two less padding at rest** so the ring appearing cannot shift the row's columns off the
-header grid they have to line up with.
-
-`GetAuditlogs` is **paged** — `Skip`, `Take` and the sort order go to the database, and
-`AuditlogPage` carries the total so the page can tell there is more behind it without asking
-for it. Virtualizing the rows stopped the page *drawing* ninety days of history; it was still
-reading all of it out of SQLite and holding it. The `CollectionView`'s
-`RemainingItemsThresholdReached` pulls the next hundred as the user scrolls, and the composite
-`(UserId, CreatedOnUtc)` index is what keeps a page from being a scan and a sort. The page
-boundary breaks ties on the id, so rows written in the same tick cannot straddle it and be
-handed over twice.
-
-Paging is by `Skip`, and the history is **written to while it is read** — the watchdog files a
-row per drop and per reconnect. Newest-first, a row written after the first page pushes every
-later one down by one, so the next page began with the row the last one ended on and the list
-showed it twice. `AuditlogsViewModel` keeps the ids it has loaded and drops repeats. The same
-rows also mean the loaded count never reaches the total, so `HasMore` stayed true forever and
-the search's load-the-rest loop had nothing bounding it; a page that adds **nothing new** now
-marks the history exhausted. A page that arrives is **appended** to the bound collection when
-what is shown is a prefix of what is wanted, rather than replacing it — a new `ItemsSource`
-per page makes the `CollectionView` rebuild itself, which discards the scroll position the
-user had just reached in order to ask for that page.
-
-Searching is the one thing that cannot be paged, and it pulls the rest of the history in
-instead. The sentence a row shows is composed at display time in the user's language and is
-not in the database, so a search can only be answered over rows that are loaded — typing
-therefore filters what is loaded immediately and widens behind that, once. The count beside
-the title reads the **estate**: the whole history while the list is merely scrolled part of
-the way through it, the matches once a search narrows it. Changing the sort order re-asks
-from the top rather than re-sorting what is loaded, since sorting a hundred of the newest
-rows ascending would present them as the oldest history.
-
-### Installing an update
-
-`GitHubUpdateChecker` also reads the release's `assets` and picks the archive whose name
-carries a moniker this machine can run — `win-x64`, `win-arm64`, `macos`, matching what the
-release workflow publishes. The match is on `-{moniker}.` and has to stay exact enough that
-an x64 machine can never be handed the arm64 build, which installs cleanly and then will
-not start. A release with no asset for this machine still reports the update; only the
-release page is offered.
-
-`UpdateConfiguration.AssetMonikers` asks the **operating system** its architecture, not
-this process, and returns candidates best-first. What gets replaced is the whole install
-folder, which the helper then starts fresh, so the question is what the machine can run
-rather than what happens to be running: a 32-bit build on 64-bit Windows reported x86, had
-no asset, and could never update itself out of that state. Arm64 lists `win-x64` behind
-`win-arm64` because Windows on Arm runs x64 under emulation, so a release carrying no Arm64
-archive is still installable; the fallback only ever runs in that direction, and
-`SelectAsset` walks the list in order rather than matching it all at once, which is the
-whole of what keeps that safe.
-
-`UpdateInstaller` splits the work at the point it stops being undoable. `StageAsync`
-downloads, checks the bytes against the digest GitHub published, unpacks, and checks that
-what came down contains `Helix.App.exe` (or a `.app` bundle), all while Helix runs and with
-the install untouched — every failure before this point costs nothing, and none of them
-leave the download behind. `Apply` writes a helper script, starts it and returns; the caller
-**must quit immediately**, because the helper is waiting on this process to exit before it
-moves anything. The helper moves the install aside rather than writing over it, so a
-failure halfway puts back exactly what was there; the moved-aside copy is deleted only once
-the copy has finished.
-
-The helper is started with its **`WorkingDirectory` set to its own folder**, and that line
-is load-bearing on Windows. A child process with no working directory set inherits the
-parent's, which for Helix is the install folder — Explorer starts an app there, and
-`WindowsStartupService` and `WindowsDesktopService` both set it there explicitly in the
-shortcuts they write. A process holds a handle to its current directory and Windows will
-not rename a held folder, so the move that puts the install aside failed with a sharing
-violation every time, the script's `catch` swallowed it, and the last line started the old
-build again: 2.2.0 "updated" to 2.2.1, restarted, and was still 2.2.0. PowerShell's
-`Set-Location` inside the script does not fix this — it moves the shell's location, not the
-process's current directory, and it is the process handle that holds the folder.
-
-`IsSupported` checks the install folder's **parent** as well as the folder: the helper
-renames the install and creates `<install>.old` beside it, so Modify rights on
-`C:\Program Files\Helix` without them on `Program Files` downloaded every release, failed
-every move and restarted the old build.
-
-The move is retried for `MoveAttempts` seconds, because an indexer or a virus scanner
-holding the folder for a moment should not cost the release.
-
-The helper replaces the **whole folder** the executable runs from, and the release zip has
-no wrapper folder, so "extract here" in Downloads puts `Helix.App.exe` straight into
-Downloads. `IsSafeToReplace` refuses to stage or apply from a shell folder, a drive root, a
-folder without the executable, or anywhere under the staging root, with
-`UpdateErrors.UnsafeInstallLocation`; without it the swap would have moved Downloads aside
-and deleted it. The helper also **gives up if Helix is still running** after its wait,
-rather than starting a second copy beside the first; restarts Helix with
-`-WorkingDirectory $install` so the new process does not inherit the helper's folder; and,
-when a restore finds the install folder still standing because a half-copied file is
-held, copies the backup's contents back over it rather than `Move-Item`, which would have
-put the backup *inside* the broken install. A stale `.old` that cannot be removed is
-logged and the update skipped, so the script never dies before the restart line. Only
-assets ending in `.zip` are considered, so a future `.sha256` sidecar cannot be staged as
-the build.
-
-`MauiProgram` holds a named mutex per logon session and a second instance brings the
-first's window forward and exits (see **The command line**, which that second instance now
-also carries): two Helixes on one database is what the helper
-produced, and what a shortcut double-clicked while the first is in the tray produces. Whatever happens is appended
-to `helix-updates.log` in the log directory, named so `LogFileWriter` collects it into the
-diagnostics zip: the helper outlives the logger, and its failure path puts the old version
-back and starts it, which is indistinguishable from success unless it is written down.
-
-Neither script carries a comment of its own and both are built line by line rather than as
-raw string literals. Each lives in a branch excluded on the other platform, and the
-preprocessor still scans excluded regions for directives: any line starting with `#` — a
-shell comment, a shebang — reads as one and fails the other head's build.
-
-Two things are checked before the archive is opened, and they answer different questions.
-
-The **digest** is the SHA-256 the release API publishes for each asset, compared against
-the hash taken as the download is written rather than by reading the file back; a mismatch
-is `UpdateErrors.DownloadCorrupt`, distinct from an unreadable archive because a truncated
-or substituted file may well open perfectly well. A release that publishes **no** digest, or
-one in an algorithm this build does not know, is staged anyway: GitHub only began returning
-the field recently, so refusing those would break updating for exactly the installs furthest
-behind, and a hard failure on an unknown algorithm would let one change at GitHub's end stop
-every install at once.
-
-The **signature** is the half the digest cannot prove. GitHub publishes the asset as well as
-its hash, so the digest only says the bytes arrived intact — `ReleaseSignature` checks a
-detached ECDSA P-256 signature over that same hash against a public key compiled into the
-build, whose private half lives only in the release workflow's `RELEASE_SIGNING_KEY` secret.
-ECDSA rather than Ed25519 because the BCL has it, and an update path is the last place to
-take a dependency on a third-party crypto library.
-
-The release publishes **one** manifest, `Helix-<tag>-signatures.txt`, whose lines are
-`<asset name> <base64 signature>`, rather than a `.sig` beside each archive — and that name
-is load-bearing. Every build published up to v2.2.3 picks its download with
-`Name.Contains($"-{moniker}.")` and **no extension filter**; the `.zip` filter is newer than
-every release. `Helix-<tag>-win-x64.zip.sig` satisfies that predicate, so a sidecar would
-have let an existing install download the signature as its update and fail with "does not
-look like Helix", with the order GitHub returned the assets in deciding which it got.
-`Helix-<tag>-signatures.txt` carries no moniker and none of them can select it —
-`TheSignatureManifestName_Should_NotMatchWhatOlderBuildsSelectOn` guards exactly that.
-**Do not rename it to anything carrying a moniker.** Which line is read is decided by asset
-name in `ReleaseSignature.FindSignature`, so an x64 machine is never checked against the
-arm64 build's signature.
-
-`UpdateConfiguration.SigningPublicKey` is empty, and while it is empty nothing is checked
-and updates go on being verified by digest alone — a build that demanded a signature no
-published release carries could not update itself at all. Once a key is set, a missing or
-wrong signature is fatal (`UpdateErrors.SignatureMissing`, `UpdateErrors.SignatureInvalid`);
-leniency there would make the check decorative. Which is why the order matters: **publish a
-signed release before shipping the build that pins the key**. `docs/release-signing.md` has
-the key generation, the rotation story and what this still does not prove — the archives are
-not code-signed, so SmartScreen and Gatekeeper know nothing about them, and a first download
-from the releases page trusts GitHub and the account exactly as before.
-
-Staged downloads do not accumulate. `StageAsync` prunes every other release folder under
-the staging root before it starts — they are installed or abandoned, and each is an
-unpacked build of a couple of hundred megabytes — and the swap script deletes the folder it
-copied out of, but only after the copy has succeeded, since until then it is the only copy
-of the new version. The helper's own folder is never pruned: a helper started seconds ago
-may still be running from it. `ReleaseFolderOf` finds what the helper should delete by
-climbing to the child of the staging root rather than by taking the path apart, because the
-payload sits a folder or two below it (`unpacked`, and on macOS the `.app` inside that);
-anything not under the staging root at all yields nothing to delete, and both scripts guard
-on that before removing anything.
-
-### The recovery key
-
-A forgotten account password used to be the end of the install: the drives and their
-credentials were still in the database, but nothing short of deleting it would sign anybody
-in again. A **recovery key** is the second way in. It is not a key to anything
-cryptographic — the database is encrypted under the device key `PasswordGenerator` holds,
-not the account password — it is a second verifier for the same account, stored as
-`User.RecoveryKeyHash` through the same `IPasswordHasher` as the password.
-
-The key is 25 characters of Crockford base32 in five groups (`RecoveryKeyFormat`), 125 bits,
-generated by `IRecoveryKeyGenerator`. Typing it is forgiven: case, spaces, missing dashes,
-and `O`/`I`/`L` for `0`/`1` all normalize to the same key, since it will be read off paper.
-It is **shown once** and never stored in the clear.
-
-- `RegisterUser` issues one and the register page shows it before going on to the
-  dashboard, so no new account exists without one.
-- `ResetPasswordWithRecoveryKey` ("Forgot your password?" on the sign-in page) takes the
-  username, the key and a new password, and **rotates the key** — the one just typed was
-  written down somewhere and has now been used, so a new one is shown the same way. A wrong
-  key, an unknown user and a user with no key all get one answer,
-  `InvalidUsernameOrRecoveryKey`, so the form does not reveal which accounts exist.
-- `CreateRecoveryKey` (Settings → Account) replaces the key after asking for the current
-  password. That is how an account created before this gets one, and how a key that has
-  been seen by somebody else is retired. Signing in to an account with no key puts up a
-  banner saying so, every time, until there is one.
-
-The idle lock has no "forgot" path of its own: signing out of it lands on the sign-in page,
-which has.
-
-### The idle lock
-
-`Settings.IdleLockMinutes` asks for the password again after that many minutes without
-input; 0 never locks, and that is the default for new accounts and existing ones alike.
-
-It is a **lock, not a sign-out**, and the distinction is the whole design. Signing out stops
-`DriveWatchdog`, `TrayIconService` and `StorageAlertService`, because all three act as the
-signed-in user. Locking stops none of them: the session stays live, the drives stay mounted
-and the watchdog keeps reconnecting them behind the lock screen. An unattended NAS tool
-that stopped working the moment nobody was at the keyboard would have it exactly backwards.
-`UnlockSession` therefore only reads `ILoggedInUser` — it establishes nothing.
-
-`IIdleTimeProvider` reports **system-wide** idle time, not this app's: someone working in
-another window is at their desk. Where it cannot tell, it answers zero — "someone is here" —
-because a lock nobody asked for is worse than one that failed to happen.
-
-`LockPage` is its own Shell route, and `AppShell.OnNavigated` groups it with the sign-in
-pages when it disables the flyout. A locked session that still showed the sidebar would be
-one anyone could click straight past, into the drive list it was put up to cover.
-
-### The audit log
-
-`Auditlog` stores an `AuditAction` plus the drive's id, name and letter **as they were at
-the time** — never a composed sentence. The sentence is built in `AuditlogDisplay` from
-localized format strings, so the page reads in the user's language and a later rename
-cannot rewrite history. `AuditAction.Legacy` marks rows written before this and renders
-their stored `Message` verbatim.
-
-`InsertAuditLogsInterceptor` deliberately skips a save whose only modified properties are
-`LastConnectedOnUtc` and `ModifiedOnUtc`: connecting a drive stamps it, and without that
-filter every connect would file a "the drive was changed" entry.
-
-### Insights
-
-The **Insights** page (`Views/Insights`, route `insights`) shows two things Helix already
-recorded and had nowhere to show.
-
-**Storage over time** is `GetStorageHistory` over the `StorageSample` rows the alert service
-writes: one series per volume, oldest first, for 30 days, 90 days or a year. The chart plots
-**used percent**, not free bytes, so volumes orders of magnitude apart share one scale and a
-volume that was grown reads as a step rather than a cliff. The caption's trend is fitted over
-the **last 30 days** whatever range is shown, the same window `GetStorageForecasts` uses, so
-the page and the dashboard tile cannot disagree about when a pool fills; a year of history is
-for looking at, not for extrapolating from. Volumes filling soonest come first.
-
-**Drive reliability** is `GetEstateReliability`: one audit-log read for the window rather than
-a query per drive, grouped by drive id and summarized by `Core/Drives/ReliabilitySummary`,
-which is the same code `GetDriveReliability` runs for the diagnosis sheet — so the page and the
-sheet cannot count a drop differently. Only drives that dropped are listed; a list of thirteen
-rows saying "no drops" buries the one that did.
-
-### Exporting the history
-
-The audit log page exports the whole history as CSV (`ExportAuditlogs`), oldest first, through
-the same `IFolderPicker` as the vault. The sentence column is composed by the presentation layer
-and handed in as `Request.Describe`, because the sentence is built from `AppResources` at
-display time and the Application layer has no business with resource files; the headers come
-in the same way. Times are UTC, as the page shows them. The file is UTF-8 **with** a BOM, which
-is what makes Excel read the translated sentences as anything but mojibake.
-
-Every field is escaped, and a field starting with `=`, `+`, `-`, `@`, a tab or a carriage return
-is prefixed with `'`. Drive names are typed by the user and a vault can be imported from
-anywhere, so a drive called `=HYPERLINK(...)` would otherwise be a formula the moment the
-export is opened in a spreadsheet.
-
-### Helix.Infrastructure
-
-Concrete implementations, one folder per abstraction group:
-
-```
-Authentication/  Connector/  Cryptography/  Desktop/  Diagnostics/  Platform/
-Startup/  Storage/  Time/  Updates/
-Database/
-    AppDbContext.cs, AppDbContextFactory.cs
-    Configurations/   EF entity configurations
-    Constants/        table names, connection settings
-    Interceptors/     InsertAuditLogsInterceptor
-    Repositories/     the IXxxRepository implementations
-    Sqlite/           SQLCipher command-builder plumbing
-Migrations/
-DependencyInjection.cs
-```
-
-#### Platform seams
-
-Exactly seven abstractions have a genuinely per-OS implementation, and they are bound in
-`AddPlatformServices()` behind `#if WINDOWS` / `#elif MACCATALYST` (with an `#else` that
-throws, so a new head fails at composition rather than at first use):
-
-| Abstraction | Windows | macOS |
-|---|---|---|
-| `INasConnector` | `WindowsNasConnector` — `mpr.dll` WNet, mounts to `Z:` | `MacNasConnector` — `NetFSMountURLSync`, mounts to `~/Helix Drives/Z` |
-| `IStartupService` | `WindowsStartupService` — `.lnk` in the Startup folder | `MacStartupService` — LaunchAgent plist |
-| `IDesktopService` | `WindowsDesktopService` — `.lnk` on the Desktop | `MacDesktopService` — symlink to the `.app` |
-| `ITrayIcon` | `WindowsTrayIcon` — `Shell_NotifyIcon`, hidden window on its own message loop | `MacTrayIcon` — AppKit `NSStatusItem` through the ObjC runtime, `UNUserNotificationCenter` |
-| `IStorageProbe` | `WindowsStorageProbe` — mounts are `Z:\` | `MacStorageProbe` — mounts are `~/Helix Drives/Z` |
-| `IIdleTimeProvider` | `WindowsIdleTimeProvider` — `GetLastInputInfo` | `MacIdleTimeProvider` — `CGEventSourceSecondsSinceLastEventType` |
-| `INetworkLocation` | `WindowsNetworkLocation` — default gateway's MAC via `SendARP` | `MacNetworkLocation` — `route get default` and `arp` |
-
-`INasConnector.GetMountPath` is the seventh thing that needs to know where a letter
-lives, after the two connectors and the two probes. It is asked of the connector because
-the connector is what put it there; it answers for any letter, mounted or not.
-
-`IWakeOnLan` is not a seam either. Sending the packet is a UDP broadcast on both heads; only
-the ARP lookup is Windows-only, and it sits behind an `#if WINDOWS` inside the one
-implementation, the same way `WindowsNetworkLocation.ProfileName` does, with `CanLookUp`
-saying which.
-
-Opening that folder goes through `IFileBrowser`, which is deliberately **not** a seventh
-platform seam: `ProcessStartInfo.UseShellExecute` hands a directory to Explorer on Windows
-and to `open` on macOS, so one implementation covers both and it is registered outside
-`AddPlatformServices()`. The drive row's folder button is the whole reason it exists — the
-point of the app is that `Z:` is there, and until this there was no way to go and look at
-it.
-
-Both storage probes derive from `StorageProbe`, which holds the part that matters: **one
-reading per volume, not per drive**. Several mapped drives are usually several shares of
-one NAS pool, and each reports that pool's entire size, so adding the letters up read a
-43.2 TB QNAP mapped thirteen times as 562 TB.
-
-Two mounts are treated as one volume when they report the **same total size, to the byte**.
-That is a property of the filesystem: it is identical across every share of a pool and it
-does not move while the probe runs. Three other ideas were tried against that real
-thirteen-share NAS and all failed — do not reintroduce them:
-
-- **The volume serial number** (`GetVolumeInformation`). Looks precise, is not, for SMB:
-  Samba and most NAS firmware derive it per share, so thirteen shares gave thirteen
-  serials and nothing merged. Volume labels are per-share for the same reason.
-- **The free byte count**, as part of the key. Free space drifts continuously on a NAS
-  anything is writing to — across those thirteen shares it spanned ~12 MB with no two
-  readings equal — so requiring it to match merged nothing either.
-- **The host**, as part of the key. It splits one NAS added twice under two spellings (by
-  IP and by name), and that fails in the damaging direction: over-counting.
-
-The accepted cost is that two volumes of byte-identical size are counted once. Real volume
-sizes are not round numbers, so that means two identically built volumes, and it
-understates rather than multiplies. The smallest free reading in a group is the one kept,
-so the figure does not flicker as parallel probes finish in a different order.
-
-Do not "simplify" the dashboard total back into a sum over drive letters.
-
-Both connectors take the NAS password as a separate credential argument rather than
-putting it in a command line — do not "simplify" either into a `net.exe` or
-`mount_smbfs //user:pass@host` shell-out.
-
-Windows allows **one credential context per server for the whole logon session**, which is
-why `WindowsNasConnector` does three things it would otherwise not need to.
-
-It holds a per-host `SemaphoreSlim` around each mount, so the thirteen shares of one NAS
-that "connect all" and the drive groups hand over at once do not race to establish that
-context and come back `ERROR_SESSION_CREDENTIAL_CONFLICT` (1219). The gate's wait is
-capped at the mount timeout, so an absent NAS cannot turn "connect all" into five seconds
-per drive; going ahead ungated is safe there, because a server that is not answering has
-no session to conflict over.
-
-When a mount hits 1219 anyway, **what happens next turns entirely on whether any drive
-letter is still mounted from that server** (`HasLiveConnectionTo`), and the two branches
-must not be collapsed into one:
-
-- **Something is using it.** A share mapped by hand in Explorer, or the first of this
-  NAS's own thirteen drives. Windows will not hold a second credential set for that
-  server while the first is in use, so the mount is retried **with no credentials at
-  all** — how a share is asked onto an existing session — and comes up on whatever
-  account that session belongs to. This is the branch that stopped one drive working and
-  twelve failing.
-- **Nothing is using it.** The context is a leftover: a session outlives the last
-  connection to it, invisible to `net use` and unrelated to Credential Manager, and the
-  deviceless session `Test` opens is a common way to leave one behind. Joining it would
-  mount the share while proving nothing about the credentials, so **a wrong password
-  would go on working** until the leftover expired. The session is dropped instead
-  (`DropIdleServerSession`) and the drive's own credentials get a real attempt, whose
-  error — a plain logon failure, usually — is what gets reported.
-
-`HasLiveConnectionTo` can only answer for sessions that carry a **drive letter**, and a
-deviceless one — a backup client that mounts the NAS at boot, an Explorer window left on a
-UNC path, a leftover of Helix's own `Test` — is indistinguishable from nothing at all. So
-the drop is refused by whatever holds it and the honest retry conflicts a second time.
-**That second conflict is the tell**: a real leftover would have gone. The session is
-therefore treated as the first branch after all and joined with no credentials, rather than
-the drive giving up. Every drive of a NAS failing at boot because a backup had opened it
-first is what the missing third case cost. Only a retry that comes back with something
-*other* than 1219 — a logon failure, a missing share — is reported as the failure it is.
-
-The wrong-password guarantee is untouched by that, because it only ever applied to the
-genuinely idle case: there the drop succeeds and the retry is a real authentication. A
-session that refuses to be dropped was never going to test a password.
-
-`Test` takes the same first branch for the same reason, and more urgently: a connection
-test answered out of a session nobody is using has tested nothing. It deliberately does
-**not** gain the join-it-anyway fallback — a test that mounts on somebody else's session
-has tested nothing either, so a conflict it cannot clear is reported as a conflict.
-
-Dropping the session is only ever done on the second branch. On the first,
-`WNetCancelConnection2` against a server name would take down the user's Explorer
-mappings and every Helix drive already mounted on that NAS — never do that from a
-background reconnect. Even on the second branch the cancel is **unforced**, so a
-deviceless connection held by some other process refuses it rather than being broken.
-
-When even the join is refused, one thing is left: Windows keys credentials per server
-**name string**, not per machine, so `\192.168.1.6` and `\NAS` are two slots for one NAS.
-`TryAlternateSpelling` asks `HostSpelling` for the other spelling and mounts under it,
-where there is no session to conflict with and the drive's own credentials get a clean
-attempt. It is a last resort and must stay one: its cost is a second credential context to
-a NAS that already has one, which is the state that produces these conflicts. A failure
-there returns null rather than an error, so what gets reported is still the conflict that
-actually stopped the drive.
-
-`Drive.ConnectByHostname` is the same trick asked for in advance — mount under the server's
-name rather than the address typed into `Host`, so the collision never happens. It is worth
-more than the fallback, because it never joins anybody's session: the drive comes up on its
-own credentials, so a wrong password is still reported as one. Off by default, a no-op
-unless the host is an IP literal, and hidden on macOS (`DrivePlatform.SupportsHostnameConnect`)
-where NetFS asks for credentials per mount and the spelling buys nothing.
-
-`HostSpelling` caches every answer for the life of the process, **including the failures**:
-a home router with no PTR records for its DHCP leases is the normal case, not the
-exception, and a lookup per drive per sweep would put thirteen of them on the critical path
-of every reconnect. Lookups are capped at 1.5s and abandoned rather than cancelled, because
-the BCL's synchronous resolver takes no token. A lookup that answers nothing leaves the
-address as typed — failing a mount because DNS was quiet would turn an optional improvement
-into a new way to lose a drive.
-
-That normal case reaches the BCL as an **exception**: `Dns.GetHostEntry` throws
-`SocketException` for an address with no PTR record, and `GetHostAddresses` does the same
-for a name that does not resolve. Both are caught where they are raised, so "nothing" is a
-return value rather than something for the blanket `catch` in `Within` to mop up — which
-matters now that the drive diagnosis calls this on the ordinary path rather than only on a
-credential conflict. A lookup that outlives its 1.5s cap is abandoned, and its exception is
-observed on the way past: an abandoned task that faults with nobody watching is an
-`UnobservedTaskException` raised from the finalizer, minutes later, with no way to tell
-what asked for it.
-
-The limit worth knowing, because no amount of code moves it: while other shares of a NAS
-are mounted, a drive on that NAS mounts on the existing session and its stored password
-is never checked. Editing a password and reconnecting that one drive will appear to work
-whatever you type. Only with nothing else mounted from that server does the password get
-tested.
-
-macOS has no drive letters, so `Drive.Letter` names a directory under the mount root
-instead. The persisted domain model is identical on both platforms.
-
-`Drive.Host` accepts an IPv4 address, an IPv6 address or a hostname, so each connector
-renders it into its own platform's form: Windows encodes IPv6 as `ipv6-literal.net`
-because a UNC path cannot contain a colon, macOS brackets it for the `smb://` URL.
-`Drive.Persistent` is Windows-only — it selects `CONNECT_UPDATE_PROFILE` over
-`CONNECT_TEMPORARY`, and the Mac connector ignores it because NetFS has no equivalent.
-
-`MacTrayIcon` is the one place Helix talks to AppKit, and it has to do it the long way:
-Mac Catalyst binds UIKit, not AppKit, so there is no `NSStatusBar` type to call. AppKit is
-nevertheless loaded in every Catalyst process, and `NSStatusBar`, `NSMenu` and `NSMenuItem`
-are public classes, so they are driven through `objc_msgSend` with one typed overload per
-signature — never the variadic form, which is wrong on arm64. Clicks arrive on an
-`NSObject` subclass exported as `helixItemClicked:`, and each leaf's `tag` is its position in
-the whole menu tree, the same numbering `WindowsTrayIcon` uses. Every AppKit call is made on
-the main thread; a failure makes `Show` return false, which is what `TrayIconService` already
-treats as "no tray". Apple does not promise any of this from Catalyst, which is the price of
-not shipping a separate AppKit bundle; a macOS release that breaks it degrades to no menu
-bar icon rather than to a crash. The balloon's equivalent is a Notification Center post,
-permission for which is asked the first time there is something to say.
-
-`ITrayIcon` renders labels and reports which one was clicked, and knows nothing about
-drives. Deciding what the menu says and what a click means is `TrayIconService`'s job in
-the presentation layer, which is the only layer that can open a DI scope and reach a use
-case — the same split as `IDriveMonitor` and `DriveWatchdog`.
-
-Windows implementations carry `[SupportedOSPlatform("windows")]` and compile on both
-heads; macOS implementations are wrapped in `#if MACCATALYST` because they reference
-Apple BCL types that only exist on that target framework. `Platform/MacBundle` resolves
-the running `.app` bundle for the two shortcut services.
-
-### Helix.App (presentation)
-
-Standard MAUI layout, feature-foldered inside `Views/` and `ViewModels/`:
-
-```
-App.xaml, AppShell.xaml, MauiProgram.cs, GlobalUsings.cs
-Behaviors/     attached behaviors used from XAML
-Common/        ScopedHandler, PageNames, PresentationAssembly, StorageUsageHelper, WindowSizing,
-               MainWindow, DrivePlatform, AppLog
-Controls/      custom controls and layouts (NavItem, ChartView, HorizontalWrapLayout,
-               NotificationHost, NumberField)
-Converters/    IValueConverter implementations
-Extensions/    DependencyInjection (AddPresensation)
-Icons/         IconFont glyph constants
-Localization/  LocalizationResourceManager, TranslateExtension, CultureSwitcher
-Messaging/     CommunityToolkit.Mvvm messages, by feature
-               Auditlogs/, DriveGroups/, Drives/, Navigation/, Notifications/,
-               Schedules/, Settings/, Storage/, Updates/, Users/
-Models/        observable display models bound by the views
-Platforms/     MAUI platform heads
-Resources/     AppIcon, Fonts, Images, Languages, Splash, Styles
-Services/      DriveWatchdog, TrayIconService, StorageAlertService, ScheduleService,
-               IdleLockService, HotkeyService, CommandListener, EstateStatus, ModalHost,
-               PassphrasePromptService, Notifier
-Theming/       ThemeChoice, ThemePalette, ThemePalettes, ThemeSwitcher
-ViewModels/    BaseViewModel + Auditlogs/, Drives/, Insights/, Settings/, Users/
-Views/         pages, modals and item templates: Auditlogs/, Drives/, Insights/, Settings/, Users/
-```
-
-A view and its viewmodel sit in the same feature folder under their respective roots — `Views/Drives/HomePage.xaml` pairs with `ViewModels/Drives/HomeViewModel.cs`.
-
-`GlobalUsings.cs` imports `Helix.App.Common` and `Helix.App.Localization` alongside the SharedKernel namespaces, so `ScopedHandler`, `PageNames` and `LocalizationResourceManager` need no per-file using.
-
-#### What the sidebar carries
-
-The flyout's flexible row was empty, and four things live in it now, each because the app
-already knew something it had no way to say from anywhere but the dashboard.
-
-**The groups** are listed and connectable from the sidebar. `TrayIconService` already
-renders the same set as a menu, so this is that list with the window up — the dashboard
-strip is where a group is *managed*, the sidebar is where one is *used* from whatever page
-the user happens to be on. Both rows go through `Common/DriveGroupActions`, which is the
-whole of what surrounds `ConnectDriveGroup` — the busy flag, the connectivity refresh, the
-per-drive notification, the failure banner — so the strip and the sidebar cannot drift.
-
-**The overview** — connected count, storage total, a low-space warning — is held by
-`Services/EstateStatus`, a singleton, for the length of the session. The dashboard's own
-tiles compute the same numbers off `HomeViewModel`'s master list, and those die with the
-page: navigating to the settings or the audit log left the user with no sight of the NAS at
-all. Refreshes are driven by the messages that mean the estate changed
-(`CheckDrivesStatusMessage`, `DriveCreatedMessage`, `DriveDeletedMessage`) rather than by a
-timer, they are serialized, and one arriving mid-probe is *remembered rather than dropped* —
-a "connect all" raises one per drive and the reading taken before the last of them mounted
-would otherwise be what stayed on screen. The low-space light is not a probe of its own: it
-is `StorageAlertService`'s own 15-minute check, published as `StorageAlertsChangedMessage`,
-because a second sweep of the shares for the same answer is exactly what `GetStorageAlerts`
-exists to avoid.
-
-**The update badge** is the result of one check per signed-in session, run from
-`AppShell.BeginSession`. It is only ever a badge: tapping it navigates to the settings page
-and sends `ShowUpdatesMessage`, which runs the check-download-install flow that page already
-owns, rather than carrying a second copy of it. `SettingsViewModel` sends
-`UpdateCheckedMessage` back after any check it runs, so a badge cannot outlive a check the
-user ran themselves. While an install is downloading, the badge shows the same status line the settings page
-does, with a progress bar under it: `SettingsViewModel` sends `UpdateProgressMessage` whenever
-`UpdateStatus` changes, so the progress stays in view after the user navigates away from the
-page that started it. An empty status puts the badge back to "Update available". A check that cannot reach GitHub is logged and nothing is shown — the
-user did not ask for it.
-
-**Lock** sits beside Logout. `IdleLockService.LockNowAsync` is deliberately independent of
-the idle poller: the lock is offered whether or not the platform can report idle time, and
-whether or not `IdleLockMinutes` is set to never lock on its own. Before it, the only way to
-lock was to wait out the timer, and the alternative — signing out — stops the watchdog, the
-tray and the storage alerts, which is precisely what locking does not.
-
-`AppShell.BeginSession` and `EndSession` bracket all four, driven from `OnNavigated`. The
-sign-in pages end the session; **`LockPage` does not**, for the same reason the watchdog
-keeps running behind it — the session is live, the drives are mounted, and only the screen
-is covered.
-
-Everything the flyout binds must be **public**, including `EstateStatus` and
-`DriveGroupDisplay`. XamlC will not resolve an internal member for a compiled binding on a
-public host type; it degrades to `XC0045` and a binding that silently does nothing.
-
-#### The auto-minimize countdown
-
-`ICountdownService` is paused by `HomePage.OnDisappearing` and picked back up by
-`InitializeCountdownAsync` in `OnAppearing`. The dashboard is the only page that shows the
-countdown and the only one that can call it off, so a countdown left running while the user
-reads the settings page minimizes the window out from under them.
-
-Settings are re-read on every resume rather than on first start, so auto-minimize switched
-off — or its timer changed — while the user was away is honoured the moment they come back:
-off clears the countdown outright, a changed `TimerCount` restarts rather than resuming a
-stale count. A countdown the user **cancelled**, or one that already fired and minimized,
-is not auto-resumed; it comes back showing its "Continue" affordance, which is what
-cancelling meant. A return to the dashboard while the first `OnAppearing` is still starting
-the session's services is remembered and the countdown resumed once that finishes, since the
-re-entrant call returns early and the pause from leaving would otherwise stand.
-
-`System.Timers.Timer` can raise an `Elapsed` that was already queued when `Stop` was called.
-`CountdownService` ignores a tick that arrives while the timer is off: without that, leaving
-the dashboard on the last second paused the countdown and then let it finish anyway, and the
-window minimized from under the settings page — the thing the pause exists to prevent.
-
-#### What the dashboard gives room to
-
-The stat row is **two cards, not three**. The auto-minimize countdown used to hold the
-third, level with how much storage the NAS has and how many drives are up — app chrome
-given the same weight as the two facts the page exists to report, and shown even to the
-users who have auto-minimize switched off and will never see it move. It is a chip in the
-page header now, present only while something is counting (`BaseViewModel.ShowCountdown`),
-carrying the same cancel and resume affordances the card had.
-
-`CountdownDisplay` renders it as `m:ss`. It was `$"{SecondsRemaining} seconds"` — English
-in an app translated into five languages, and "1 seconds" on the way past. Digits and a
-colon are the same in every locale, and the chip's icon and tooltip carry the meaning.
-
-The drive row's second line is the **host and** the last-connected stamp. A name is
-whatever the user called it, so two drives on two different NASes were told apart only by
-that; the address is the thing they actually differ by.
-
-#### Numbers in the settings page
-
-The four numeric preferences bind to `Controls/NumberField` rather than a bare `Entry`,
-and it is the answer to three separate problems with what was there.
-
-The **unit** lived in the row's title — "Timer count in seconds" — so the box was a number
-with no dimension, and the retention and idle-lock rows never said what they counted at
-all. **Zero means something** in three of the four — keep every audit log, never warn about
-space, never lock — and nothing on screen said so; `OffText` replaces the unit with that
-meaning the moment the value reaches zero. And the **bounds were only enforced after the
-write**: the handler rejected the value and the row rolled back, which is a failure banner
-for something the control could simply not have allowed. The low-space ceiling is bound
-from `Settings.MaximumStorageAlertThresholdPercent` rather than written into the page, so
-the two cannot drift. `UpdateSettings` still validates — this is a keyboard, not a trust
-boundary.
-`UpdateSettings` touches the startup and desktop shortcuts **only when their switch
-moved**: rewriting both on every save meant a Startup folder that had become unwritable
-failed the timer, the retention and the language with an error about a shortcut nobody
-had touched. Language has a rollback like every other setting, switching the culture
-back, since the page had already switched it before the write.
-
-The typed value is committed on Enter or on leaving the field, never per keystroke.
-The `−`/`+` step is per field: the countdown moves by one second, because a user tuning it
-wants 12 rather than 10 or 15; days, percent and minutes move by a stride.
-`SettingsDisplay` debounces these by 500ms precisely because "9" on the way to "90" used to
-be saved and acted on; committing whole values means there is no such intermediate, and the
-timer stays as a backstop rather than as the thing standing between the user and a wrong
-setting.
-
-Every write sends the whole settings row, and `SettingsDisplay` fills the four numbers and the
-language from what was **last persisted**, not from what the fields currently show. A number
-still inside its debounce used to ride along on whichever switch was flipped next: it was saved
-without its own confirmation or its `_persisted` baseline moving, and if it was the one the
-handler refused, the switch rolled back with an error about a field the user had not finished
-typing in.
-
-The settings page builds a fresh `SettingsDisplay` every time it appears, so
-`LoadSettingsAsync` first **flushes** the old one (`FlushAsync`): a debounce still running
-is saved at once and any save already queued is awaited. Without it a value committed just
-before leaving the page was read back stale, saved a moment later by the discarded
-instance, and then overwritten by the next switch the user flipped.
-
-Only these four confirm themselves, through `Notifier`. A switch is its own confirmation —
-it is sitting there in its new position — but a number typed into a box looks identical
-whether it was stored or thrown away, and the write lands well after the keystroke that
-caused it.
-
-#### Global shortcuts
-
-`Settings.GlobalHotkeys` turns on **Ctrl+Alt+Shift+C** (connect every drive) and
-**Ctrl+Alt+Shift+D** (disconnect every drive) from any application, through the SharpHook
-hook `MauiProgram` already runs. Off by default: a system-wide chord is something a user
-should ask for, not discover. Three modifiers because Ctrl+Alt is AltGr on the European
-layouts Helix is translated for, and AltGr+C and AltGr+D type characters there. The hook
-does not swallow keys, so another application bound to the same chord still gets it.
-
-`HotkeyService` answers only while a session is live and **not while the idle lock is up** —
-the lock exists to stop someone at an unattended keyboard, and "disconnect every drive" is
-exactly what it should stop. Like the tray's own "disconnect all" it does not confirm: the
-point is that the window is not in front. The outcome goes to the tray balloon when the icon
-is up and to the banner otherwise, and a repeat while one is running is ignored rather than
-queued, since a held key auto-repeats.
-
-#### The command line
-
-`Helix.App.exe --connect-all`, `--disconnect-all`, `--connect <drive>`, `--disconnect <drive>`,
-`--connect-group <name>`, `--disconnect-group <name>`, `--wake <drive>`, `--status`, `--show`,
-`--quit`, `--help`. A drive is named by letter (`Z`, `Z:`) or by name; a name two drives share
-is refused with their letters rather than guessed at. Task Scheduler, a backup job's pre-script
-and a Stream Deck button are what this is for.
-
-It drives the **running** instance, and only that. The second process that `MauiProgram`'s
-single-instance mutex already turned away now carries its arguments to the first over a named
-pipe (`CommandListener`, `Helix.App.Command.<session id>`, `PipeOptions.CurrentUserOnly` on
-both ends) and prints the one-line answer. There is no cold path: a command given with no Helix
-running says so and exits 1, because every drive's credentials are behind the account password
-and nothing without a signed-in session can mount anything. For the same reason a command is
-refused while signed out and while the **idle lock** is up — the lock stops an unattended
-keyboard, and a script is one. `--help` and a mistyped flag are answered by the client itself,
-so a typo is not reported as "Helix is not running".
-
-The pipe **replaced** the `EventWaitHandle` a second launch used to set. An event carries no
-payload, and two mechanisms for "a second copy started" is one too many; a bare launch is now
-`--show` over the same pipe, which restores a window hidden to the tray the way the event did.
-Each connection is answered on its own task. The listener used to take one at a time, so a
-`--connect-all` waiting out a mount timeout left the next client — a second launch's `--show`
-included — to time out and report "did not answer". A request that throws is still answered,
-with a failure, and `--quit` writes its reply before it exits rather than racing it.
-The client still calls `ShowWindow`/`SetForegroundWindow` on the other's visible window itself,
-and grants it `AllowSetForegroundWindow` first — the freshly launched process is the one
-Windows lets take the foreground, not the one sitting in the tray.
-
-Every command is also a **`helix://` link** (`helix://connect/Z`, `helix://connect-group/Office`,
-`helix://disconnect-all`), parsed by `CommandRequest.FromUri` into the same request with
-`FromLink` set, and that flag rides the pipe as a third field. On Windows `Common/UrlScheme`
-writes `HKCU\Software\Classes\helix` at every start, so the scheme follows the install across
-an update's folder swap; a link then launches a second process like any other command and is
-forwarded. On macOS the scheme is in `Info.plist` and the link arrives in the running process
-through the `OpenUrl` lifecycle event, straight to `CommandListener.RunLinkAsync` — which is how
-links give the Mac the command line it otherwise cannot have.
-
-A link is not a command typed at a console, and three things follow. It is answered through the
-**tray balloon or the banner**, in the user's language, since there is nobody reading stdout. A
-link opened with Helix closed **starts Helix** and drops the request, rather than failing at a
-user who just clicked something. And because any web page can ask a browser to open one, a link
-that **disconnects or quits** brings the window forward and asks first (`NeedsConfirmation`);
-the flags never ask, since a local script already runs as the user. Connecting, waking and the
-status are harmless enough to run unasked. Control characters are stripped from a link's target
-so a crafted one cannot forge the pipe's field separators.
-
-The answer goes to the parent console through `AttachConsole`, success on stdout and failure
-on stderr, and the exit code is 0 or 1. Helix is a GUI executable, so **PowerShell and cmd do
-not wait for it** unless asked: `Start-Process -Wait -PassThru`, `start /wait`, or piping the
-output. The replies are English, like every other CLI on the machine, while the Wake NAS banner
-and everything else a window shows stay in `AppResources`. Windows only: Mac Catalyst has no
-single-instance mutex, and a second `open` of a running `.app` does not forward its arguments.
-
-#### The tray's folder menu
-
-The tray menu carries **Open folder**, a submenu of the drives that are mounted from their
-share. `TrayMenuItem.Children` is what makes a submenu; `WindowsTrayIcon` numbers every leaf
-of the tree in one sequence as it builds the popup, so a selection still maps back to one
-item id. Only mounted drives are listed — a folder that is not there is not a menu item.
-
-#### Platform-specific presentation code
-
-The XAML, viewmodels, converters and behaviours are shared verbatim; only these carry an
-`#if`, and each has a working macOS path or a deliberate no-op:
-
-- `MauiProgram` — the WinUI lifecycle hook, the `EntryHandler` chrome tweak and the link
-  scheme registration are `#if WINDOWS`; the `OpenUrl` hook that delivers a link is
-  `#if MACCATALYST`. The SharpHook startup is not: as of SharpHook 8 the package ships a Mac
-  Catalyst assembly and the libuiohook natives for it, so the global hook runs on both
-  heads.
-- `App.CreateWindow` — Catalyst sizes its window here from `Common/WindowSizing`, the
-  same rule the Windows lifecycle event applies through `AppWindow`. Change the rule in
-  one place and both heads follow.
-- `Common/MainWindow` — hides, minimizes and restores the app window; Windows only,
-  except `Restore`, which on macOS activates the app (`NSApplication
-  activateIgnoringOtherApps:`) so the menu bar's Open item brings Helix forward. Mac
-  Catalyst exposes no public API for hiding a window scene, so `BaseViewModel.MinimizeApp`
-  runs its countdown and then does nothing on macOS rather than reaching for a private
-  selector. On Windows it hides to the tray while `TrayIconService` is running, because
-  the icon is then the way back, and falls back to a plain minimize when it is not. The
-  title bar close button follows the same rule: `MauiProgram.OnWindowClosing` cancels the
-  close and hides to the tray while the icon is up, and lets the window close when it is
-  not, so the app is never hidden with no way back. The tray Exit item is the only real
-  quit, and it goes through `MainWindow.Exit` — the `IsExiting` flag is what stops that
-  shutdown being turned back into a hide. `Settings.CloseToTray` turned off is the other
-  way out: the close still cancels, but it then goes through `MainWindow.Exit` too, so
-  the icon comes down with the process rather than sitting in the tray until somebody
-  mouses over it.
-- `Common/DrivePlatform` — the one flag the shared drive modals bind to, so the
-  "reconnect at sign-in" switch is hidden rather than shown-and-ignored on macOS.
-- `Behaviors/Hover` (hand cursor) and `Services/ModalHost` (Escape-to-dismiss) — Windows
-  only, no-ops elsewhere.
-- `AppShell` — on Windows it clears the visual-state transitions of the `SplitView` inside
-  Shell's `NavigationView` once the platform view loads. The sign-in pages run with the
-  flyout `Disabled` and the session switches it to `Locked`, which takes the pane from
-  closed to open-inline. WinUI animates that, so the first page after signing in slid the
-  sidebar in and reflowed the page under it. Without the transitions the pane snaps into
-  place.
-
-The `LoginPage`/`RegisterPage` Ctrl+Enter shortcut used to be in that list and no longer
-is. The hook is started once in `MauiProgram` and both pages subscribe to the singleton,
-because libuiohook allows one running hook per process. It is asked for as
-`GlobalHookType.Keyboard`: Ctrl+Enter is all it is for, and the mouse half would put every
-pointer move across the native boundary for nothing. macOS refuses a global hook until the
-app is granted Accessibility access, so on a Mac where it has not been, `RunAsync` faults
-at startup, that is logged with what to do about it, and everything else carries on —
-subscribing to a hook that never started simply never raises. Linux is not a question
-Helix can answer: libuiohook supports it, MAUI has no Linux head.
-
-The Catalyst head ships with the **App Sandbox disabled** (`Platforms/MacCatalyst/Entitlements.plist`).
-A sandboxed process cannot mount a network filesystem, write a LaunchAgent or touch the
-real Desktop, so sandboxing it would break every platform service at once. That makes the
-macOS build Developer ID / direct distribution, not Mac App Store.
-
-#### A `Picker` bound to a value needs its items first
-
-`UpdateDriveViewModel` loads `AvailableLetters` **before** it assigns `Drive`. A `Picker`
-whose `SelectedItem` arrives while its `ItemsSource` is empty, or still holds the previous
-drive's letters, selects nothing, and replacing the list afterwards does not select it
-either — so the sheet opened with no letter chosen and every edit had to start by choosing
-the same letter again.
-
-#### XAML conventions
-
-XML namespace prefixes are consistent across every page and modal:
-
-- `vm:` — the file's viewmodel namespace (`x:DataType`)
-- `views:` — sibling views in the same feature
-- `l10n:` — `Helix.App.Localization`, for `{l10n:Translate Key}` and `LocalizationResourceManager`
-- `controls:`, `behaviors:`, `converters:`, `icons:`, `models:` — the matching folders
-- `local:` — the root `Helix.App` namespace (only `AppShell.xaml` needs it)
-
-### Dependency injection
-
-DI is composed via three static extension methods chained in `Helix.App/MauiProgram.cs`:
-
-- `services.AddApplication()` — `Helix.Application/DependencyInjection.cs` registers every handler as `Scoped`. New handlers must be added here.
-- `services.AddInfrastructure()` — `Helix.Infrastructure/DependencyInjection.cs` registers `AppDbContext`, repositories, auth, time, NAS connector, etc.
-- `services.AddPresensation()` — `Helix.App/Extensions/DependencyInjection.cs` (note: the method name is misspelled but kept consistent across the codebase).
-
-Handlers are scoped and must never be cached in viewmodel/page fields. The presentation layer invokes them per operation through `ScopedHandler.HandleAsync((MyHandler h) => h.Handle(request))` (`src/Helix.App/Common/ScopedHandler.cs`), which creates a DI scope per call so each operation gets a fresh `AppDbContext`. Only singletons (`ILoggedInUser`, `INasConnector`, `IDriveMonitor`, `ICountdownService`, `IGlobalHook`, `IVaultCipher`, `IDateTimeProvider`, `INetworkLocation`, `IWakeOnLan`) may be resolved from `App.ServiceProvider` and stored in fields.
-
-`ScopedHandler` runs the handler on whatever thread calls it — the UI thread, from a
-viewmodel — and Microsoft.Data.Sqlite has no real asynchronous I/O: its `…Async` methods
-complete synchronously. So every query and every encrypted write a handler makes blocks the
-window. Saving a drive froze its sheet for exactly that reason, and then again for everything
-`DriveUpdatedMessage` set off, because `WeakReferenceMessenger.Send` runs every recipient
-before it returns and the sheet only closed after it. `UpdateDriveViewModel` now saves through
-`Task.Run`, closes the sheet, and only then announces the change; `DriveWatchdog` and
-`TrayIconService` do their refresh-on-message on the thread pool. **Do not wrap
-`ScopedHandler` itself in `Task.Run`**: `ImportDrives`, `ExportDrives` and `ExportDiagnostics`
-raise pickers and prompts through presentation services that expect the UI thread.
-The same applies to the **sign-in handlers** (`LoginUser`, `RegisterUser`, `UnlockSession`,
-`ChangeUserPassword`, each a 600k-iteration PBKDF2), to `CreateDrive`/`CreateDrives` (which
-close their sheet before announcing, like the edit sheet), to the dashboard chart's and the
-sidebar's refresh-on-`CheckDrivesStatusMessage`, and to the audit log's paging, which a
-search runs to the end of the history.
-
-**Every background loop is started with `Task.Run`** — `DriveMonitor`, the watchdog's retry
-sweep, `StorageAlertService`, `IdleLockService`, `CommandListener` and the tray's show
-retry. They are started from `HomePage.OnAppearing` or `CreateMauiApp`, on the UI thread, and
-an `await` on a `PeriodicTimer` resumes on the context it was started from: every tick of
-every one of them — the monitor's poll and everything its `ConnectivityChanged` fans out to,
-the watchdog's reconnects and their database writes, the resume nudge's host lookups, every
-command-line request — ran on the UI thread, whatever `Task.Run` its callees used. Whatever
-they touch in the UI is marshalled by the thing that touches it (`PublishToUi`, `Notifier`,
-`MainWindow`, `EstateStatus`, `LockAsync`); a new loop must do the same rather than lean on
-the context it happened to be started from. `DriveMonitor` also invokes each
-`ConnectivityChanged` subscriber on its own and survives a poll that throws: a single
-exception used to end the loop, and drops then went unnoticed until the next sign-in.
-
-`StorageProbe` shares a measurement that is still running for a letter rather than starting
-another. `DriveInfo.TotalSize` on a share whose NAS has died blocks for the SMB timeout, the
-probe's three-second cap only abandons it, and a "connect all" raises a refresh per drive — so
-thirteen dead shares used to pile blocked threads onto the pool until the `HostSpelling`
-lookups queued behind them started timing out as well.
+Handlers never throw for expected failures; errors come from static error classes.
+
+### Dependency injection and threading
+
+- Composition in `MauiProgram.cs`: `AddApplication()`, `AddInfrastructure()`, `AddPresensation()` (misspelling is intentional and consistent).
+- Handlers are scoped: **never cache them in fields**. Call through
+  `ScopedHandler.HandleAsync((MyHandler h) => h.Handle(request))`, a fresh scope (and `AppDbContext`) per call.
+  Never resolve `AppDbContext` or anything scoped from the root provider.
+- Only singletons may be stored from `App.ServiceProvider`: `ILoggedInUser`, `INasConnector`,
+  `IDriveMonitor`, `ICountdownService`, `IGlobalHook`, `IVaultCipher`, `IDateTimeProvider`,
+  `INetworkLocation`, `IWakeOnLan`.
+- SQLite's async methods complete synchronously, so handlers block the calling thread. Run
+  heavy handlers (saves, sign-in PBKDF2, paging, refresh-on-message) via `Task.Run` at the call
+  site, close sheets **before** sending change messages. **Do not wrap `ScopedHandler` itself in
+  `Task.Run`** — `ImportDrives`, `ExportDrives`, `ExportDiagnostics` raise UI pickers.
+- **Every background loop starts with `Task.Run`**, and marshals its own UI work (`Notifier`,
+  `MainWindow`, `EstateStatus`, `PublishToUi`). Never rely on the context it was started from.
 
 ### Persistence
 
-`AppDbContext` (`src/Helix.Infrastructure/Database/AppDbContext.cs`) implements both `IDbContext` and `IUnitOfWork` (abstractions in `Helix.Application/Abstractions/Data/`). The SQLite database is encrypted: the connection string is built with a password from `PasswordGenerator.GetOrCreatePassword()`, and `IRelationalCommandBuilderFactory` is replaced with a custom builder (`Database/Sqlite/CustomRelationalCommandBuilderFactory`) to support the cipher. `InsertAuditLogsInterceptor` is registered as a singleton and attached to the context to write audit logs automatically on save. Entity configurations are picked up via `ApplyConfigurationsFromAssembly` from `Database/Configurations/`.
+- `AppDbContext` implements `IDbContext` and `IUnitOfWork`. Configurations come from
+  `Database/Configurations/`. `InsertAuditLogsInterceptor` writes audit rows on save and skips
+  saves that only touch `LastConnectedOnUtc`/`ModifiedOnUtc`.
+- The cipher is **SQLite3 Multiple Ciphers** with `cipher=sqlcipher&legacy=4` in a hand-built
+  `file:` URI (escape only `%`, `?`, `#`). **Do not drop the parameters or change the cipher**
+  without a rekeying migration; `SqlCipherCompatibilityTests` guards it.
+- Data folder: `FileSystem.AppDataDirectory`, which derives from the build's company/title.
+  Published builds use `%LOCALAPPDATA%\Helix.App\Helix.App\Data`. **Do not add a
+  `Package.appxmanifest` to the repo, or a `Company`/`AssemblyTitle`, without migrating the old folder.**
+- `PasswordGenerator` must **never generate a key while `helix.db` exists**; startup failures go
+  through `Common/StartupFailure`.
 
-The cipher is **SQLite3 Multiple Ciphers** (`SQLite3MC.PCLRaw.bundle`), not SQLCipher itself.
-`SQLitePCLRaw.bundle_e_sqlcipher` is deprecated — SQLitePCLRaw 3.0 stopped shipping free
-encrypted builds — and SQLite3MC is the open-source library that reads the SQLCipher format.
-Its default cipher is ChaCha20, though, so `DatabaseLocation.DataSource` is a `file:` URI
-carrying `cipher=sqlcipher&legacy=4` (`DatabaseConfiguration.CipherParameters`): every
-install's `helix.db` was written by SQLCipher 4, and without those parameters it reads as
-"file is not a database". The URI is built by hand, escaping only `%`, `?` and `#`, never
-through `new Uri(path).AbsoluteUri`: that leaves a `%41` already in the path unescaped, SQLite
-decodes it, and a profile folder with one in it opened an empty database somewhere else.
-New databases are written in the same format, so a build that an
-update rolls back to can still open them. **Do not drop the parameters or change the cipher**
-without a migration that rekeys existing files. `SqlCipherCompatibilityTests` opens
-`Database/Fixtures/sqlcipher-v4.db`, written by the old bundle, to hold that.
+## Rules by area
 
-The `DbContext` lifetime and threading were a recurring issue historically; the fix is the per-operation scope pattern above (`ScopedHandler`). Do not resolve `AppDbContext` (or anything scoped) from the root provider, and do not share a context instance across concurrent operations.
+Each block is the short form; the linked doc has the why.
 
-#### Where the data lives
+**User feedback** (`notifications.md`)
+- Results go through `Notifier` banners. **Never reintroduce a `DisplayAlert` for a result.**
+  Modals are only for questions (delete group, install update, passphrase, unmount confirmation)
+  and documents (the diagnosis sheet).
+- A failure line about a drive is `"{Letter}: {description}"` — that is the unit `Notifier.Retract` removes.
+- Tray-originated actions report through the tray balloon, falling back to the banner.
 
-`DatabaseLocation` is the one place that knows: `helix.db` in `FileSystem.AppDataDirectory`,
-with the SQLCipher key beside it in MAUI's `Settings/securestorage.dat`. On an unpackaged
-Windows build that directory is `%LOCALAPPDATA%\<publisher>\<package>\Data`, and **both
-names come out of the build**: the AppInfo metadata the resizetizer stamps from a
-`Package.appxmanifest` when the project has one, and the assembly's company and title
-(`Helix.App`) when it does not. The release workflow builds from a checkout with no
-manifest — `Platforms/Windows/Package.appxmanifest` is gitignored — so every published
-build reads and writes `%LOCALAPPDATA%\Helix.App\Helix.App\Data`. A machine that builds
-with a manifest in place resolves to whatever that manifest says; this one produced
-`%LOCALAPPDATA%\YourName\com.companyname.helix.app\Data` until late August 2026, and both
-folders are still there. A copy of the app built that way keeps its account and drives in a
-folder the published builds never look in, so updating it to a release comes up with an
-empty database and the register page, while the Windows mappings it made are still up.
-**Do not add a manifest, or a `Company`/`AssemblyTitle`, without deciding what happens to
-the data in the old folder.**
+**Mounting and the connectors** (`platform.md`, `connectivity.md`)
+- Every handler that mounts or unmounts on purpose holds an `IDriveMonitor.Suppress` handle for
+  the whole operation. **Add one to any new such handler.** `ReconnectDrive` deliberately does not.
+- `IsLiveFrom` = "the drive is up"; `IsMountedFrom` = "the letter points at this share"
+  (includes remembered mappings). `GetLiveLetters` vs `GetConnectedLetters` likewise. Pick
+  deliberately — the split table is in `drives.md`.
+- Connectors take the password as a separate credential argument. **Never shell out** to
+  `net.exe` / `mount_smbfs` with credentials.
+- Windows SMB 1219 handling has distinct branches (live session → join with no credentials;
+  idle leftover → unforced drop and real retry; drop refused → join). **Do not collapse them**,
+  and never cancel a connection by server name from a background reconnect.
+- SMB-only logic (1219 branches, `TryAlternateSpelling`, `ConnectByHostname`, `HasOtherMountsOn`,
+  share browsing, adopting mappings) is guarded by `Drive.Protocol`. Probe ports come from
+  `DriveProtocols.ProbePortsFor`. **Do not add SFTP or folder mounts** this way.
+- Which address a connect uses is decided only in `IDriveRouter`. Anything that cannot tell
+  reads as **reachable / home**, never unreachable / away.
+- Mount timeout is 30s and the per-host gate is held until the mount itself finishes.
+- `HostSpelling` caches answers for the process, but a timed-out lookup for only one minute.
 
-`DatabaseInitializer` runs the migrations at startup and logs, at Information, the
-directory it used and whether a database was there — the one line the diagnostics zip was
-missing when a user reported exactly that. `PasswordGenerator` logs when it has to
-generate a key rather than read one, since a fresh key on a machine that already has a
-database is what makes that database unreadable. Before a migration runs against an
-existing database, a copy is left beside it as `helix.db.bak`, overwritten by the next one.
+**Storage** (`platform.md`, `storage.md`)
+- Volumes are grouped by **identical total size**. Do not key on serial number, free bytes or
+  host, and **do not turn the dashboard total back into a sum over letters**.
+- A probe that measured nothing while drives are connected is not displayed as zero.
 
-`PasswordGenerator` **never generates a key while `helix.db` exists.** A read that threw
-used to be indistinguishable from "no key", so one DPAPI failure at logon generated a
-fresh key, wrote it over the real one, and the database was unreadable for good even
-after the failure cleared. It now throws, and both that and a database that will not
-open or migrate go through `Common/StartupFailure`, which logs at Critical, puts up one
-native message box naming the reason and the log folder, and exits. There is no window
-yet at either point, so nothing else could have said anything.
+**Updates** (`updates.md`)
+- Compare versions only through `ReleaseVersion` (four-part normalized). `UpdateCheck.LatestVersion`
+  and `CurrentVersion` are both display form (`2.3.5`, no `v`); the UI adds the `v`.
+- Asset match is exact on `-{moniker}.` and `.zip`. **Never rename the signature manifest
+  `Helix-<tag>-signatures.txt` to anything containing a moniker.**
+- The update helper's `WorkingDirectory` must be its own folder. Publish a signed release before
+  shipping a build that sets `SigningPublicKey`.
+- Update scripts in C# are built line by line with no lines starting with `#` (the other head's preprocessor reads them).
 
+**UI** (`presentation.md`, `lists.md`, `themes.md`)
+- Both lists are `CollectionView` with `SelectionMode=None`. Anything describing the estate reads the master list, not the filtered view.
+- The header grid on `HomePage` and the row grid in `DriveTemplate` **must stay identical**. Bind
+  `ColumnDefinition` widths with a static `Source` (`DriveListLayout`), never `RelativeSource`.
+- A `Picker` needs its `ItemsSource` before its `SelectedItem`.
+- Theme colors are `{DynamicResource Token}` from `ThemePalette` (add new colors to every palette);
+  never `AppThemeBinding` or `StaticResource`. The theme choice lives in MAUI `Preferences`.
+- Logo paths are shared with `website/components/logo.tsx` and `public/logo.svg` — change both.
+- Platform `#if`s in the presentation layer are listed in `presentation.md`; any new one needs a working macOS path or a deliberate no-op.
 
-### Themes
+**Platform seams** (`platform.md`)
+Exactly seven abstractions are per-OS, bound in `AddPlatformServices()` behind `#if WINDOWS` /
+`#elif MACCATALYST` / `#else throw`: `INasConnector`, `IStartupService`, `IDesktopService`,
+`ITrayIcon`, `IStorageProbe`, `IIdleTimeProvider`, `INetworkLocation`. `IFileBrowser`,
+`IHostDiagnostics`, `IDriveRouter`, `IHostReachability` and `IWakeOnLan` are single
+implementations registered outside it. Windows types carry `[SupportedOSPlatform("windows")]`;
+macOS types are wrapped in `#if MACCATALYST`. The Catalyst head has the App Sandbox disabled.
 
-Settings → Preferences offers **Crimson**, **System**, **Light**, **Dark** and four custom
-palettes (Midnight, Amethyst, Sand, Glacier). **Crimson is the default** — a near-black canvas
-with the brand's crimson accent, the same look as the documentation site — and is what an
-install with no saved choice, or an unreadable one, gets. A user who had picked **System**
-keeps it. Light and Dark carry the crimson accent too, so the logo never sits beside an
-accent from the old orange brand. Every color that differs between themes is a
-**`{DynamicResource}` token**, never an `AppThemeBinding` and never a `StaticResource`:
-`AppThemeBinding` only knows two themes, and a `StaticResource` is resolved once, so a theme
-picked at runtime would have repainted nothing. The tokens are written into
-`Application.Resources` by `Theming/ThemeSwitcher` from a `ThemePalette` record, and every
-bound property follows. **A new color goes into `ThemePalette` and every palette, and is
-referenced as `{DynamicResource Name}`.** C# that builds views does the same with
-`SetDynamicResource` (`NotificationHost`, `NumberField`); code that needs a value rather
-than a binding — the dashboard donut — reads `ThemeSwitcher.Palette`.
+**Data** (`drives.md`, `schedules.md`, `security.md`)
+- `Auditlog` stores an `AuditAction` plus drive id/name/letter, never a sentence; sentences are built at display time.
+- Vault import: an invalid optional field (MAC, away address) is dropped, not refused; groups travel by letters, schedules by group name.
+- CSV export prefixes formula-leading fields with `'` and is UTF-8 with BOM.
 
-The tokens: `Canvas`, `Surface`, `SurfaceAlt`, `SurfaceHover`, `SurfaceRaised` (a field or
-chip: `Surface` on a light theme, `SurfaceAlt` on a dark one), `Border`, `BorderControl`
-(an input's outline, likewise), `BorderStrong`, `Text`, `TextMuted`, `TextFaint`, `Success`,
-`Danger`, `Warning`, `Accent`, `AccentHover`, `AccentPressed`, `AccentSoft`, plus the
-brushes `CanvasBrush`, `SurfaceBrush`, `SurfaceAltBrush`, `SurfaceRaisedBrush`,
-`BorderBrush`, `AccentBrush` and the translucent `AccentWashBrush`, `SuccessWashBrush`,
-`DangerWashBrush`, `WarningWashBrush`, which are derived from the palette rather than
-listed in it. `Colors.xaml` keeps only what does not change with the theme: the brand
-colors, the brand gradient behind the sign-in artwork, `DangerSolid` for the destructive
-button, `OnAccent`, and the scrim.
+## Design docs
 
-The choice is stored in MAUI `Preferences`, **not** in the `Settings` table, because it has
-to apply to the sign-in and lock pages, which are drawn before any account's settings can
-be read. It is per Windows user rather than per Helix account for the same reason.
-`ThemeSwitcher` also sets `UserAppTheme` to the palette's light or dark base, so WinUI's own
-chrome — the title bar, text selection, picker drop-downs — matches, and under **System**
-it re-applies on `RequestedThemeChanged`.
+| Doc | Read before touching |
+|---|---|
+| `docs/design/notifications.md` | logging, `Notifier`, banners, retracting |
+| `docs/design/connectivity.md` | `ReconnectDrive`, watchdog, reachability, Wake-on-LAN, resume, suppression, home network, away address, late mounts |
+| `docs/design/diagnostics.md` | `DiagnoseDrive`, reliability figures |
+| `docs/design/drives.md` | groups, selections, import/vault, `IsMountedFrom` vs `IsLiveFrom`, share browsing, adopting, credentials, WebDAV/NFS |
+| `docs/design/schedules.md` | `Schedule`, `RunDueSchedules` |
+| `docs/design/storage.md` | low-space alerts, storage history, forecasts, Insights |
+| `docs/design/lists.md` | filtering, sorting, compact card, keyboard rows, audit paging |
+| `docs/design/updates.md` | update check, versioning, installer, signatures |
+| `docs/design/security.md` | recovery key, idle lock, audit log, CSV export |
+| `docs/design/platform.md` | Infrastructure layout, platform seams, storage probe, Windows SMB credential handling, macOS tray |
+| `docs/design/presentation.md` | close-to-tray, sidebar, countdown, settings numbers, hotkeys, command line / `helix://`, platform `#if`s |
+| `docs/design/persistence.md` | DI, threading, database cipher, data location |
+| `docs/design/themes.md` | themes, logo, tray/taskbar icons |
+| `docs/design/build-and-architecture.md` | build props, culture pruning, xunit/CI setup, layer rules, pickers |
+| `docs/release-signing.md` | signing key generation and rotation |
 
-The logo is a double helix in a crimson gradient, square, drawn on a 32-unit grid; the
-website's `components/logo.tsx` and `public/logo.svg` carry the same paths, so **change it in
-both places**. The `LogoImage` resource is `helix_logo.png` (a deeper gradient, for contrast
-on white) on light palettes and `helix_logo_on_dark.png` on dark ones; the `Image`s bind it
-dynamically. The sign-in and lock pages' artwork is `brand_background.svg` — the helix on a
-near-black field with a crimson bloom — behind `BrandGradientBrush`, and is dark on purpose:
-the "Helix" caption over its lower left is white whatever the theme. **No SVG under
-`Resources/` may use a `<filter>`** (`feGaussianBlur` and friends): on the Mac head the
-resizetizer's Svg.Skia calls an `SKImageFilter` overload its SkiaSharp does not have and the
-build fails with `MAUIR0001 … MissingMethodException`, while Windows builds the same file
-happily. Soft glows are radial gradients instead.
-
-#### The tray and taskbar icon
-
-The Windows app icon (`MauiIcon`) has **no background color**: `Color="#050505"` filled
-the whole square, and that black tile is what the taskbar and the tray showed. The Mac head
-keeps the color, since a Mac app icon is expected to be a full tile. A stale icon survives
-an incremental build; delete the app's `obj/.../resizetizer` folder if the tile persists.
-
-`Helix.Infrastructure/Desktop/Icons` carries two `.ico` files —
-`helix-light-taskbar` (the deeper crimson) and `helix-dark-taskbar` (the brighter one), 16 to
-256 px, rendered from the logo SVG at each size rather than scaled from one — and
-`ShellIcons.CurrentPath()` picks by `SystemUsesLightTheme`, which is the **taskbar's**
-setting, independent of both Windows' app mode and the Helix theme. `WindowsTrayIcon` loads
-it at the small-icon size and swaps it on `WM_SETTINGCHANGE` "ImmersiveColorSet";
-`MauiProgram` sets the same file as the window icon, which is what the running app's taskbar
-button shows, at creation and again on activation. Library content is copied by the Windows
-App SDK into a folder named after the assembly (`Helix.Infrastructure\Icons`), which is why
-`CurrentPath` looks there before the root. When neither file is found the tray falls back to
-the executable's icon.
-
-### Localization
-
-UI strings live in `src/Helix.App/Resources/Languages/AppResources.resx` with translations for `de`, `fr`, `id`, `ja`, `nl`. Use `TranslateExtension` (the `{l10n:Translate}` XAML markup extension) and `LocalizationResourceManager` rather than hard-coding strings.
+When you change behaviour in an area, update its design doc with the reasoning — that is where
+explanations go instead of code comments.
