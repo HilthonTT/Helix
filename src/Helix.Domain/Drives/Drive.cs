@@ -99,9 +99,14 @@ public sealed class Drive : Entity, IAuditable
     public bool IsAwayFrom(string? currentNetworkId) =>
         HomeNetworkId is not null &&
         currentNetworkId is not null &&
-        !(currentNetworkId.StartsWith(GatewayIpPrefix, StringComparison.OrdinalIgnoreCase) &&
-          HomeNetworkId.StartsWith(GatewayHardwarePrefix, StringComparison.OrdinalIgnoreCase)) &&
+        !IsGatewayKindMismatch(HomeNetworkId, currentNetworkId) &&
         !string.Equals(HomeNetworkId, currentNetworkId, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsGatewayKindMismatch(string first, string second) =>
+        (first.StartsWith(GatewayIpPrefix, StringComparison.OrdinalIgnoreCase) &&
+         second.StartsWith(GatewayHardwarePrefix, StringComparison.OrdinalIgnoreCase)) ||
+        (first.StartsWith(GatewayHardwarePrefix, StringComparison.OrdinalIgnoreCase) &&
+         second.StartsWith(GatewayIpPrefix, StringComparison.OrdinalIgnoreCase));
 
     private const string GatewayIpPrefix = "gateway-ip:";
 

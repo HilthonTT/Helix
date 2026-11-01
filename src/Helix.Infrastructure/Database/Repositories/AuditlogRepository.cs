@@ -17,8 +17,6 @@ internal sealed class AuditlogRepository(AppDbContext context) : IAuditlogReposi
             .AsNoTracking()
             .Where(a => a.UserId == userId);
 
-        // The id breaks the tie so a page boundary cannot fall inside a group of rows
-        // written in the same tick and hand the same row back twice.
         query = oldestFirst
             ? query.OrderBy(a => a.CreatedOnUtc).ThenBy(a => a.Id)
             : query.OrderByDescending(a => a.CreatedOnUtc).ThenByDescending(a => a.Id);

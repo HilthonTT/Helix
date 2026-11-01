@@ -89,8 +89,6 @@ public static class MauiProgram
 
                     WindowBounds bounds = WindowSizing.Calculate(displayBounds.Width, displayBounds.Height);
 
-                    // The work area is not at the origin on a secondary monitor, or with the
-                    // taskbar docked at the top or left, and the sizing rule only knows its size.
                     appWindow.MoveAndResize(new RectInt32(
                         displayBounds.X + bounds.X,
                         displayBounds.Y + bounds.Y,
@@ -183,8 +181,6 @@ public static class MauiProgram
 
         if (createdNew)
         {
-            // A link clicked with nothing running starts Helix; what it asked for needs a
-            // signed-in session that does not exist yet, so it is dropped rather than queued.
             if (request.Verb != CommandVerb.None && !request.FromLink)
             {
                 ExitWith(CommandListener.Failure + "Helix is not running. Start it and sign in, then try again.");

@@ -18,6 +18,10 @@ public static class DriveGroupErrors
         "DriveGroup.NoDrivesSelected",
         "Choose at least one drive for the group.");
 
+    public static Error NoMembers(string name) => Error.Problem(
+        "DriveGroup.NoMembers",
+        $"The group '{name}' has no drives left. Edit it or delete it.");
+
     public static readonly Error NoGroupsFound = Error.NotFound(
         "DriveGroup.NoGroupsFound",
         "No groups have been created yet.");

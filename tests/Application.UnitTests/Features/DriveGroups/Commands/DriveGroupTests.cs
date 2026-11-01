@@ -219,13 +219,14 @@ public class DriveGroupTests
     }
 
     [Fact]
-    public async Task Connect_Should_DoNothing_WhenEveryDriveItNamedHasBeenDeleted()
+    public async Task Connect_Should_Fail_WhenEveryDriveItNamedHasBeenDeleted()
     {
         DriveGroup group = GivenGroup(Guid.NewGuid());
 
         Result result = await Connect().Handle(new ConnectDriveGroup.Request(group.Id));
 
-        result.IsSuccess.Should().BeTrue();
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("DriveGroup.NoMembers");
         await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
     }
 

@@ -32,6 +32,12 @@ public sealed class DriveHomeNetworkTests
     }
 
     [Fact]
+    public void IsAwayFrom_Should_BeFalse_WhenPinnedByAddressAndTheHardwareIsNowRead()
+    {
+        PinnedTo("gateway-ip:192.168.1.1").IsAwayFrom("gateway:aa-bb-cc-dd-ee-ff").Should().BeFalse();
+    }
+
+    [Fact]
     public void IsAwayFrom_Should_CompareAddresses_WhenTheDriveWasPinnedByAddress()
     {
         Drive drive = PinnedTo("gateway-ip:192.168.1.1");

@@ -148,13 +148,6 @@ public sealed class UpdateDrive(
             : Result.Success();
     }
 
-    /// <summary>
-    /// Whether a mapping is remembered is fixed when it is made, so a switch flipped on a mounted
-    /// drive did nothing: Windows went on restoring one the user had made temporary, and never
-    /// restored one made persistent. The mapping is made again under the new flag — but only
-    /// when nothing has a file open on it, since that means pulling the share out for a moment.
-    /// Otherwise, and where the count is unknown, the switch applies at the next connect.
-    /// </summary>
     private async Task<Result> ReapplyPersistenceAsync(Drive drive, CancellationToken cancellationToken)
     {
         if (!nasConnector.IsMountedFrom(drive))

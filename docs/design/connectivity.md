@@ -16,7 +16,9 @@ about to make. Readings are cached for ten seconds and the in-flight task is sha
 thirteen shares of one pool cost one handshake per sweep rather than thirteen. **Anything
 that is not the host declining to answer reads as reachable**, deliberately: a false
 "unreachable" would stop Helix reconnecting a drive that would have come back, which is
-the one thing the watchdog exists to do.
+the one thing the watchdog exists to do. That includes a probe refused with
+`SocketError.AccessDenied`: a local firewall refusing this process says nothing about the host,
+and the kernel's SMB redirector is not bound by a per-app rule.
 
 Both connectors also probe for themselves, before the gate and the mount, so a row
 connected by hand and a batch get the same amber "Unreachable" as the watchdog. That is
@@ -100,7 +102,10 @@ seconds rather than at whatever the exponential backoff had escalated to.
 A `NotFound` from `ReconnectDrive` is terminal — the drive was deleted while queued — and
 `RefreshWatchedDrivesAsync` prunes the pending queue of drives that are gone or have their
 own auto-connect off, since otherwise a deleted drive was retried and logged as a warning
-every five minutes for the session. Drops are handled **in parallel**; the connector's gate
+every five minutes for the session. A due retry is forgotten as already done only when the
+letter is **live from the drive's own share** (`IsLiveFrom`), not merely present: a remembered
+persistent mapping whose restore failed, or a USB stick, holds the letter too, and forgetting
+the retry there left the drive down for the rest of the session. Drops are handled **in parallel**; the connector's gate
 serializes the mounts anyway, and one hung share used to hold every other drive's drop
 record and pill behind it. `DriveAttemptFailedMessage` is applied by `HomeViewModel` to the
 master list, for the same reason `DriveUpdatedMessage` is: a row scrolled out of the
@@ -259,7 +264,16 @@ stop a drive reconnecting that would have come back — the same asymmetry
 for a drive pinned by `gateway:<mac>`: ARP missing its first answer just after the adapter
 comes up is ordinary, and comparing the two kinds as strings read every pinned drive as
 "Away" on its own network until a later reading got the hardware address.
-`Drive.IsAwayFrom` treats that pair as unknown.
+`Drive.IsAwayFrom` treats that pair as unknown — **in both directions**. A drive pinned
+during that same ARP miss stores `gateway-ip:<ip>` and then sees `gateway:<mac>` on every
+later reading; only excusing the first direction read such a drive as "Away" on its own
+network forever, dropping it from auto-connect and schedules until it was re-pinned.
+
+Both `WindowsNetworkLocation` and `MacNetworkLocation` also remember **each gateway's hardware
+address as last read this session** (`_hardwareByGateway`), and use it when ARP misses. A
+reading that misses ARP once — after a resume, or on a Mac whose ARP cache entry has expired —
+would otherwise be a different network id and put every pinned drive "Away" on its own
+network.
 
 On macOS (`MacNetworkLocation`) the same identity is read by running `/sbin/route -n get
 default` and `/usr/sbin/arp -n <gateway>` — no shell, `ArgumentList`, a two-second timeout
@@ -269,6 +283,13 @@ zero (`0:11:32:a:b:c`), so they are padded before the id is built, and the id ha
 the Windows form (`gateway:<mac>`, `gateway-ip:<ip>`) so a pin exported on one OS matches on
 the other. The name shown is the interface (`en0`): the SSID needs location permission, as
 on Windows.
+
+A full-tunnel VPN owns the Mac's default route too, with no gateway or the tunnel's own, and
+reading that read a café as home. When the route's gateway is not IPv4 or its interface is a
+tunnel, `MacNetworkLocation` reads the physical adapter's default route from `netstat -rn -f
+inet` instead, as Windows reads the first adapter with a gateway. Older macOS releases print
+`Refs` and `Use` before `Netif`, so the interface is taken as the first column after the flags
+that starts with a letter rather than a number.
 
 `DriveWatchdog` reads the network on every retry sweep, and when it **changes** to a known
 one it connects the auto-connect drives pinned there that are down, through `ConnectDrives`.
@@ -326,7 +347,9 @@ somebody may have a file open on. When the VPN drops, the drive drops, and the r
 follows takes the home address.
 
 `DiagnoseDrive` follows the same choice: when the home address is silent and the away one
-answers, the report is about the away address — that is what a connect would have used.
+answers, the report is about the away address — that is what a connect would have used. A
+pinned drive away from home goes straight to its away address, as `IDriveRouter` does:
+probing the home address there would report on whatever answers at it on this network.
 
 The address travels in the export and is dropped rather than refused on import when it does not
 parse, like the hardware address. Duplicating a drive copies it. It is not a credential and is

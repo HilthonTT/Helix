@@ -20,7 +20,6 @@ internal sealed partial class DriveDisplay : ObservableObject
     [NotifyPropertyChangedFor(nameof(Subtitle))]
     public partial string Host { get; set; }
 
-    // Not shown; it is what lets IsUp recognise a mount made through the away address.
     public string? RemoteHost { get; set; }
 
     [ObservableProperty]
@@ -195,25 +194,15 @@ internal sealed partial class DriveDisplay : ObservableObject
         CanWake = MacAddresses.IsValid(updateDrive.MacAddress);
     }
 
-    /// <summary>
-    /// Whether this drive is up from its own share. A letter that is merely present — a USB stick
-    /// on it, or a remembered mapping whose restore failed — is not the drive being connected.
-    /// </summary>
     public bool IsUp(INasConnector nasConnector, HashSet<string> liveLetters) =>
         CanProbe && liveLetters.Contains(Letter) && nasConnector.IsLiveFrom(Probe());
 
-    /// <summary>
-    /// Whether this drive's letter points at its own share, remembered or live — what a
-    /// disconnect would take down.
-    /// </summary>
     public bool IsMapped(INasConnector nasConnector, HashSet<string> presentLetters) =>
         CanProbe && presentLetters.Contains(Letter) && nasConnector.IsMountedFrom(Probe());
 
-    // What Drive's constructor insists on; a row missing any of it cannot be anybody's share.
     private bool CanProbe =>
         Letter?.Trim().Length == 1 && !string.IsNullOrWhiteSpace(Host) && !string.IsNullOrWhiteSpace(Name);
 
-    // A Drive refuses an empty user id; the probe is never saved, so any id will do.
     private static readonly Guid ProbeOwner = Guid.NewGuid();
 
     private Drive Probe()

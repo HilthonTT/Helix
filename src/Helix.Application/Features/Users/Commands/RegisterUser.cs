@@ -55,8 +55,6 @@ public sealed class RegisterUser(
 
         userRepository.Insert(user);
 
-        // The language picked on the register page is the account's from the start; GetSettings
-        // would otherwise create the row in English on the first sign-in and switch the UI back.
         settingsRepository.Insert(SettingsModel.Create(
             user.Id, false, false, false, false, SettingsModel.DefaultTimerCount, request.Language));
 

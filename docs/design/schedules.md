@@ -31,6 +31,17 @@ minutes old** (`RunDueSchedules.Grace`). The grace is the design, not a toleranc
 hangs or crashes the app is not retried every twenty seconds for the rest of its grace. A
 failed run is reported, not repeated; the watchdog and the user own it from there.
 
+The changes of offset are handled in `Schedule.ToUtc`. A time the **spring-forward skips** runs
+at the end of the gap, found by stepping a minute at a time: offset changes are minute-aligned,
+so a minute step lands on the end exactly, where a larger step overshot it and a schedule saved
+just after the gap could come out later than its edit stamp and fire. In the hour a **fall-back
+repeats**, `ConvertTimeToUtc` picks the later instant; the earlier one is taken instead, since
+that is when the wall clock first showed the time, and taking the later let a schedule saved
+after its time in that hour fire at once.
+
+`Common/ScheduleText` names the weekdays from `AppResources.Culture`, not the thread's culture:
+that is where `CultureSwitcher` puts the language Helix is set to.
+
 The run itself is `DriveMountBatch`, the same work as a group or a selection — suppression,
 parallel mounts, stamps, one aggregated failure. Like a group button it **ignores
 `AutoConnect`**: the user named these drives when they wrote the schedule. It **does** honour
@@ -44,6 +55,14 @@ the schedules that name it. That is the one place `DriveGroup` is referenced fro
 table rather than the other way round; a schedule whose target has gone could only fail at
 its next run. `ScheduleRepositoryTests` holds SQLite to that, since EF's in-memory cascade
 would hide a missing `PRAGMA foreign_keys`.
+
+Deleting a drive removes it from its groups, which can leave a group with **no drives** —
+a state `CreateDriveGroup`/`UpdateDriveGroup` refuse but nothing else prevents. Such a group
+fails, both from its button (`ConnectDriveGroup`) and from a schedule (`RunDueSchedules`),
+with `DriveGroupErrors.NoMembers`. It used to succeed with nothing to do, so a 07:00
+"connect Office" announced "Connected Office" with nothing mounted. That differs from a
+pinned group whose members are all filtered out as away, which still succeeds quietly:
+there the drives exist and were deliberately skipped.
 
 Each run says what it did, through the tray balloon when the icon is up and the banner
 otherwise — the `HotkeyService` rule. A scheduled disconnect that just happens, with nothing

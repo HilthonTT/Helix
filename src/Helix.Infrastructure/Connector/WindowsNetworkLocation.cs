@@ -20,9 +20,6 @@ internal sealed class WindowsNetworkLocation(
 
     private readonly Lock _gate = new();
 
-    // A gateway's hardware address as last read this session. A reading that misses ARP once —
-    // after a resume, or on a Mac whose ARP cache entry has expired — would otherwise be a
-    // different network id and put every pinned drive "Away" on its own network.
     private readonly ConcurrentDictionary<string, string> _hardwareByGateway = new();
 
     private Task<NetworkLocation?>? _reading;
@@ -116,7 +113,6 @@ internal sealed class WindowsNetworkLocation(
 
     private static string? HardwareAddressOf(IPAddress address)
     {
-        // SendARP wants room for two ULONGs, not six bytes, and writes into the pinned array.
         byte[] hardware = new byte[8];
         uint length = (uint)hardware.Length;
 

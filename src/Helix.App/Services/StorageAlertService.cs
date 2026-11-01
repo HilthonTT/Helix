@@ -130,8 +130,8 @@ internal sealed class StorageAlertService
             string names = string.Join(", ", alert.DriveNames);
 
             _logger.LogWarning(
-                "A volume is low on space: {Drives} — {FreePercent}% free.",
-                names,
+                "A volume shared by {DriveCount} drive(s) is low on space: {FreePercent}% free.",
+                alert.DriveNames.Count,
                 alert.FreePercent);
 
             string message = string.Format(AppResources.TrayStorageLowMessage, names, alert.FreePercent);

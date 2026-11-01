@@ -472,8 +472,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        // Only what "disconnect all" will actually take down, which is the letters mapped from
-        // each drive's own share (DriveMountBatch.IsMapped), not whatever happens to be on them.
         HashSet<string> connectedLetters = _nasConnector.GetConnectedLetters();
         DriveDisplay[] rows = [.. _allDrives];
 
@@ -688,15 +686,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
             return rows.Select(row => row.IsUp(_nasConnector, liveLetters)).ToArray();
         });
 
-        bool reorder = false;
-
         for (int i = 0; i < rows.Length; i++)
         {
-            reorder |= rows[i].Connected != up[i];
             rows[i].Connected = up[i];
         }
 
-        if (reorder && SortField == DriveSortField.Status)
+        if (SortField == DriveSortField.Status)
         {
             ApplyFilterAndSort();
         }

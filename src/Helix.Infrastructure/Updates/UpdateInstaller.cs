@@ -30,12 +30,6 @@ internal sealed class UpdateInstaller : IUpdateInstaller
     private readonly Func<string> _logDirectory;
     private readonly string _signingPublicKey;
 
-    /// <param name="signingPublicKey">
-    /// The key updates must be signed with, or null for the one compiled into this build.
-    /// Taken here so the signature path can be exercised at all: the compiled key is a
-    /// constant, and a constant that is empty until a key is minted would otherwise leave
-    /// the whole check untested until the day it starts refusing releases.
-    /// </param>
     public UpdateInstaller(
         HttpClient httpClient,
         ILogger<UpdateInstaller> logger,
@@ -343,11 +337,6 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         return Result.Success();
     }
 
-    /// <summary>
-    /// Checked against the hash the download already produced rather than by reading the
-    /// archive back, and before it is opened: an archive that is not the one the signer
-    /// signed should never be unpacked, whatever it claims to hold.
-    /// </summary>
     private async Task<Result> VerifySignatureAsync(
         UpdateCheck update,
         byte[] archiveHash,
@@ -380,9 +369,6 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         }
         catch (Exception ex)
         {
-            // A manifest that could not be fetched is a network failure, not an unsigned
-            // release, and it is reported as one: told "this release is not signed", a user
-            // would go and look for a signed one rather than try again.
             _logger.LogWarning(ex, "The signatures published for the update could not be fetched.");
 
             return Result.Failure(UpdateErrors.DownloadFailed);

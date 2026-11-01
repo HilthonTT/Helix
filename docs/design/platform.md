@@ -43,7 +43,8 @@ the connector is what put it there; it answers for any letter, mounted or not.
 `IWakeOnLan` is not a seam either. Sending the packet is a UDP broadcast on both heads; only
 the ARP lookup is Windows-only, and it sits behind an `#if WINDOWS` inside the one
 implementation, the same way `WindowsNetworkLocation.ProfileName` does, with `CanLookUp`
-saying which.
+saying which. Both `SendARP` callers (`WakeOnLan` and `WindowsNetworkLocation`) pass a buffer
+with room for two `ULONG`s, not six bytes: that is what the call writes into the pinned array.
 
 Opening that folder goes through `IFileBrowser`, which is deliberately **not** a seventh
 platform seam: `ProcessStartInfo.UseShellExecute` hands a directory to Explorer on Windows
@@ -87,10 +88,15 @@ why `WindowsNasConnector` does three things it would otherwise not need to.
 
 It holds a per-host `SemaphoreSlim` around each mount, so the thirteen shares of one NAS
 that "connect all" and the drive groups hand over at once do not race to establish that
-context and come back `ERROR_SESSION_CREDENTIAL_CONFLICT` (1219). The gate's wait is
-capped at the mount timeout, so an absent NAS cannot turn "connect all" into five seconds
-per drive; going ahead ungated is safe there, because a server that is not answering has
-no session to conflict over.
+context and come back `ERROR_SESSION_CREDENTIAL_CONFLICT` (1219). The gate (`HostGate`)
+gives up waiting only when **the current holder** has had it for longer than the mount
+timeout — a mount that has stalled. Going ahead ungated is safe there, because a server
+that is not answering has no session to conflict over. Time spent queued does not count:
+an earlier version capped each caller's own wait at 30s, so on a healthy NAS taking ~3s per
+mount, the last few of thirteen drives timed out of the queue and mounted at once — the
+very 1219 burst the gate exists to prevent. Each turnover (acquire or release) restarts the
+stall clock, and a waiter always waits at least a second so it never mistakes a holder that
+has not yet stamped the clock for a stalled one.
 
 When a mount hits 1219 anyway, **what happens next turns entirely on whether any drive
 letter is still mounted from that server** (`HasLiveConnectionTo`), and the two branches
@@ -180,7 +186,8 @@ instead. The persisted domain model is identical on both platforms.
 
 `Drive.Host` accepts an IPv4 address, an IPv6 address or a hostname, so each connector
 renders it into its own platform's form: Windows encodes IPv6 as `ipv6-literal.net`
-because a UNC path cannot contain a colon, macOS brackets it for the `smb://` URL.
+because a UNC path cannot contain a colon, macOS brackets it for the `smb://` URL. A zone
+id's `%` is written `%25` inside those brackets (RFC 6874), or the URL does not parse.
 `Drive.Persistent` is Windows-only — it selects `CONNECT_UPDATE_PROFILE` over
 `CONNECT_TEMPORARY`, and the Mac connector ignores it because NetFS has no equivalent.
 

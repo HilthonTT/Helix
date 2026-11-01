@@ -27,9 +27,6 @@ internal sealed class MacNetworkLocation(
 
     private readonly Lock _gate = new();
 
-    // A gateway's hardware address as last read this session. A reading that misses ARP once —
-    // after a resume, or on a Mac whose ARP cache entry has expired — would otherwise be a
-    // different network id and put every pinned drive "Away" on its own network.
     private readonly ConcurrentDictionary<string, string> _hardwareByGateway = new();
 
     private Task<NetworkLocation?>? _reading;
@@ -66,8 +63,6 @@ internal sealed class MacNetworkLocation(
             string? gatewayText = ValueOf(route, "gateway");
             string? networkInterface = ValueOf(route, "interface");
 
-            // A full-tunnel VPN owns the default route, with no gateway or the tunnel's own, and
-            // reading that read a café as home. The network is the physical adapter's, as on Windows.
             if (!IPAddress.TryParse(gatewayText, out IPAddress? gateway) ||
                 gateway.AddressFamily != AddressFamily.InterNetwork ||
                 IsTunnel(networkInterface))
@@ -117,8 +112,6 @@ internal sealed class MacNetworkLocation(
                 continue;
             }
 
-            // Older releases print Refs and Use before Netif, so the interface is the first
-            // column after the flags that is not a number.
             string? adapter = columns.Skip(3).FirstOrDefault(column => char.IsLetter(column[0]));
 
             if (adapter is not null &&

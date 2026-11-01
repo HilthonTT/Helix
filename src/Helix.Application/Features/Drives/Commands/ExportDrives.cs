@@ -93,7 +93,6 @@ public sealed class ExportDrives(
     private static VaultContents Compose(List<Drive> drives, List<DriveGroup> groups, List<Schedule> schedules)
     {
         Dictionary<Guid, string> letters = drives.ToDictionary(d => d.Id, d => d.Letter);
-        Dictionary<Guid, string> groupNames = groups.ToDictionary(g => g.Id, g => g.Name);
 
         List<DriveImportDto> exportedDrives = drives
             .Select(d => new DriveImportDto(
@@ -113,11 +112,14 @@ public sealed class ExportDrives(
                 d.Port))
             .ToList();
 
-        List<DriveGroupImportDto> exportedGroups = groups
+        List<DriveGroup> groupsWithDrives = [.. groups.Where(g => g.DriveIds.Any(letters.ContainsKey))];
+
+        Dictionary<Guid, string> groupNames = groupsWithDrives.ToDictionary(g => g.Id, g => g.Name);
+
+        List<DriveGroupImportDto> exportedGroups = groupsWithDrives
             .Select(g => new DriveGroupImportDto(
                 g.Name,
                 [.. g.DriveIds.Where(letters.ContainsKey).Select(id => letters[id])]))
-            .Where(g => g.Letters.Count > 0)
             .ToList();
 
         List<ScheduleImportDto> exportedSchedules = schedules

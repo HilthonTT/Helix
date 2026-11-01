@@ -182,8 +182,6 @@
         <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=11}"/>
     </Style>
 
-    <!-- The stroke is always two wide and the padding two short of what the row wants, so
-         the focus ring appears and disappears without moving the columns off the header. -->
     <Style x:Key="Row" TargetType="Border">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Stroke" Value="Transparent"/>

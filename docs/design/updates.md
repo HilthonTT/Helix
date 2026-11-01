@@ -158,7 +158,8 @@ look like Helix", with the order GitHub returned the assets in deciding which it
 `TheSignatureManifestName_Should_NotMatchWhatOlderBuildsSelectOn` guards exactly that.
 **Do not rename it to anything carrying a moniker.** Which line is read is decided by asset
 name in `ReleaseSignature.FindSignature`, so an x64 machine is never checked against the
-arm64 build's signature.
+arm64 build's signature. Blank or malformed lines are skipped rather than failing the file:
+the answer that matters is whether *this* asset is in it.
 
 `UpdateConfiguration.SigningPublicKey` is empty, and while it is empty nothing is checked
 and updates go on being verified by digest alone — a build that demanded a signature no
@@ -169,6 +170,15 @@ signed release before shipping the build that pins the key**. `docs/release-sign
 the key generation, the rotation story and what this still does not prove — the archives are
 not code-signed, so SmartScreen and Gatekeeper know nothing about them, and a first download
 from the releases page trusts GitHub and the account exactly as before.
+
+The signature is checked against the hash the download already produced, before the archive
+is opened: an archive that is not the one the signer signed should never be unpacked, whatever
+it claims to hold. A manifest that could not be **fetched** is reported as a network failure,
+not as an unsigned release — told "this release is not signed", a user would go looking for a
+signed one rather than try again. `UpdateInstaller` takes the public key as an optional
+constructor argument (`signingPublicKey`, null meaning the compiled one) so the signature path
+can be tested at all: the compiled key is a constant that stays empty until a key is minted,
+which would otherwise leave the whole check untested until the day it starts refusing releases.
 
 Staged downloads do not accumulate. `StageAsync` prunes every other release folder under
 the staging root before it starts — they are installed or abandoned, and each is an

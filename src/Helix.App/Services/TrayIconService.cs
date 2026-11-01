@@ -162,7 +162,6 @@ internal sealed class TrayIconService
         }
         catch (ObjectDisposedException)
         {
-            // The retry finished and disposed its source between the read and the cancel.
         }
 
         _announcedHiding = false;
@@ -314,8 +313,6 @@ internal sealed class TrayIconService
     {
         try
         {
-            // The idle lock stops an unattended keyboard, and the tray menu is one: the hotkeys
-            // and the command line already refuse while it is up.
             if (id != OpenId && App.ServiceProvider.GetRequiredService<IdleLockService>().IsLocked)
             {
                 MainWindow.Restore();

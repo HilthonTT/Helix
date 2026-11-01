@@ -75,6 +75,13 @@ sentence built for reading ("1.2 TB free of 43.2 TB") and ordering drives by the
 that puts 9 GB after 40 TB. A fresh column starts ascending rather than keeping the previous
 direction, and the caret marks which column is live.
 
+Under the Status sort, every estate refresh re-sorts, whether or not the refresh itself
+changed a row's `Connected`. Re-sorting only on a change it made missed every row whose flag
+was already set — the row pill and `DriveAttemptSucceededMessage` both set `Connected` before
+the refresh they trigger — so a drive connected from its own row stayed among the
+disconnected ones. `Reconcile` moves nothing when the order already holds, so the
+unconditional pass costs no flicker.
+
 ## The drive card at an ordinary window size
 
 The screenshots that exposed this were taken at 150% display scaling, which is worth
@@ -141,6 +148,13 @@ visual state on the `Row` style, and the style carries a **two-wide transparent 
 two less padding at rest** so the ring appearing cannot shift the row's columns off the
 header grid they have to line up with.
 
+`DriveTemplate` hands itself to the behavior as an `IRowKeys` rather than the behavior raising
+a static event: an event subscription would have to be undone every time a recycled row is
+handed a different drive. `RowFocus` redoes its attachment on **every handler change**, because
+the platform view does not exist yet the first time it runs from XAML and a recycled row is
+handed a new one; it remembers the platform view and the MAUI element as a pair rather than
+walking back through the handler, which a recycled row may already have replaced.
+
 `GetAuditlogs` is **paged** — `Skip`, `Take` and the sort order go to the database, and
 `AuditlogPage` carries the total so the page can tell there is more behind it without asking
 for it. Virtualizing the rows stopped the page *drawing* ninety days of history; it was still
@@ -148,7 +162,9 @@ reading all of it out of SQLite and holding it. The `CollectionView`'s
 `RemainingItemsThresholdReached` pulls the next hundred as the user scrolls, and the composite
 `(UserId, CreatedOnUtc)` index is what keeps a page from being a scan and a sort. The page
 boundary breaks ties on the id, so rows written in the same tick cannot straddle it and be
-handed over twice.
+handed over twice. An out-of-range `Skip` or `Take` is **clamped** rather than refused: the
+page size is the app's own, not something typed in, and a query that answers nothing is worse
+than one that answers less.
 
 Paging is by `Skip`, and the history is **written to while it is read** — the watchdog files a
 row per drop and per reconnect. Newest-first, a row written after the first page pushes every

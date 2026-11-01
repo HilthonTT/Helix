@@ -28,8 +28,6 @@ public sealed class GetAuditlogs(
 
         request ??= new Request();
 
-        // Clamped rather than refused: the page size is the app's own, not something
-        // typed in, and a query that answers nothing is worse than one that answers less.
         int skip = Math.Max(0, request.Skip);
         int take = Math.Clamp(request.Take, 1, MaximumPageSize);
 

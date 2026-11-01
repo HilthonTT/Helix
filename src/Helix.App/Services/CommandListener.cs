@@ -243,8 +243,6 @@ internal sealed class CommandListener
                     string.Format(AppResources.LinkUnknown, request.Target)));
 
             case CommandVerb.Quit:
-                // A link asks before it quits, and that question must not go up over the lock
-                // for whoever is at the keyboard to answer — the tray refuses Exit there too.
                 if (request.NeedsConfirmation && IdleLockService.ScreenLocked)
                 {
                     return (false, Say(link, "Helix is locked. Unlock it, then try again.", AppResources.LinkLocked));

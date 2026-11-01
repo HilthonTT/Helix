@@ -177,11 +177,6 @@ internal sealed class GitHubUpdateChecker : IUpdateChecker
         return null;
     }
 
-    /// <summary>
-    /// One manifest for the whole release, found by its suffix. Which archive's signature
-    /// to read out of it is decided later, by asset name, so an x64 machine can never
-    /// check itself against the arm64 build's signature.
-    /// </summary>
     private static GitHubAsset? SelectSignature(GitHubRelease release, GitHubAsset? asset)
     {
         if (asset is null || release.Assets is null)

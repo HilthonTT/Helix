@@ -95,11 +95,19 @@ machine already had point at that drive, rather than at nothing.
 
 A group whose name is taken (case-insensitively, as `IsNameUniqueAsync` compares) is skipped,
 not merged; a schedule identical to an existing one, or naming a group that is in neither the
-vault nor the database, is skipped; nothing new at all is still `NothingToImport`. A vault with a
+vault nor the database, is skipped; nothing new at all is still `NothingToImport`. The
+name-to-group map that schedules resolve through is filled with `TryAdd`, not `ToDictionary`:
+the database only folds ASCII case when it keeps names unique, so "Büro" and "BÜRO" can both
+exist, and `ToDictionary` threw on them and failed every import. A vault with a
 higher `Version` than the build knows is `VaultUnsupportedVersion` — and an **older** build
 reads a version-2 vault as invalid drive data, which is the price of an object at the top level.
 Schedules keep their switched-off state; their run and edit stamps are not carried, so an
 imported schedule waits for its next occurrence like any newly saved one.
+
+Export leaves out a group with no drives (a drive deletion can empty one), and **its schedules
+go with it**. Checking schedules against every group rather than the exported ones wrote a
+schedule naming a group the vault did not carry, and import then either dropped it or, matching
+by name, attached it to an unrelated local group that happened to share the name.
 
 `INasConnector` answers two different questions about a letter, and they must not be
 confused. `IsMountedFrom` is "this letter **points at** this drive's share", and on Windows
@@ -128,7 +136,11 @@ its letter, and reading presence as "up" meant its drop was never reported and t
 never brought it back. The dashboard rows, counts, donut and storage total, the sidebar and the
 tray all ask `GetLiveLetters` and then `IsLiveFrom` per drive (`DriveDisplay.IsUp`), so a USB
 stick on a drive's letter is not the drive being connected; "disconnect all" confirms against
-`DriveDisplay.IsMapped`, the letters it will actually take down.
+`DriveDisplay.IsMapped`, the letters it will actually take down. A row asks both through a
+throwaway `Drive` built from its own fields (never saved, so its owner id is a random one), and
+carries `RemoteHost` although nothing shows it, because that is what lets `IsUp` recognise a
+mount made through the away address. A row missing a letter, host or share — what `Drive`'s
+constructor insists on — cannot be anybody's share and is neither.
 
 `Drive.Persistent` is fixed when a mapping is made, so `UpdateDrive` re-makes the mapping
 when the switch moves on a mounted drive — but only when `CountOpenHandles` says nothing is

@@ -38,8 +38,6 @@ public sealed class DiagnoseDrive(
 
         string host = drive.Host;
 
-        // A pinned drive away from home goes straight to its away address, as IDriveRouter does;
-        // probing the home address there reports on whatever answers at it on this network.
         if (drive.HomeNetworkId is not null && drive.RemoteHost is not null)
         {
             NetworkLocation? here = await networkLocation.GetCurrentAsync(cancellationToken);

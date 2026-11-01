@@ -44,10 +44,6 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
     {
         ApplyFilterAndSort();
 
-        // The sentence a row shows is composed here, in the user's language, and is not
-        // in the database — so a search can only be answered over rows that are loaded.
-        // Typing therefore pulls the rest of the history in, once, behind the matches
-        // the loaded pages can already show.
         if (!string.IsNullOrEmpty(value.Trim()) && HasMore)
         {
             _ = WidenSearchAsync();
@@ -79,10 +75,6 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
 
     public bool ShowNoMatches => _hasLoaded && Auditlogs.Count == 0 && HasSearchTerm;
 
-    /// <summary>
-    /// What the page reports it is holding: the whole history while the list is merely
-    /// scrolled part of the way through it, and the matches once a search narrows it.
-    /// </summary>
     public int CountDisplay => HasSearchTerm ? Auditlogs.Count : _totalCount;
 
     public string SortGlyph => SortOrder == SortOrder.Ascending ? IconFont.CaretUp : IconFont.CaretDown;
@@ -138,9 +130,6 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
             return;
         }
 
-        // The order is the database's, not the loaded page's, so it has to be asked again
-        // from the top: sorting thirteen loaded rows of ninety days ascending would put the
-        // newest rows in the oldest order and call it the oldest history.
         await GetAuditlogsAsync();
     }
 
@@ -185,7 +174,6 @@ internal sealed partial class AuditlogsViewModel : BaseViewModel
 
             ApplyFilterAndSort();
 
-            // A search that survived a reload still has to see the whole history.
             if (HasSearchTerm && HasMore)
             {
                 _loading = false;

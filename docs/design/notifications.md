@@ -53,7 +53,9 @@ renders its own error inline.
 Banners dismiss themselves, a failure getting noticeably longer than a success, and the
 stack is capped so a sweep failing over thirteen shares cannot bury the page it is
 reporting on. Nothing is lost when one goes: the audit log and the diagnostics file are
-what the record is for.
+what the record is for. A message identical to a banner already showing restarts that
+banner's lifetime instead of stacking a copy — unless it is already fading out, since it is
+about to be removed and restarting it would lose the new message.
 
 Every string either side of this is in `AppResources`. The app is translated into five
 languages and was still saying "Something went wrong!" in English at eleven call sites.

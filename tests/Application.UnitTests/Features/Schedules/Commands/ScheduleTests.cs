@@ -260,6 +260,23 @@ public class ScheduleTests
     }
 
     [Fact]
+    public async Task Run_Should_Fail_WhenTheGroupHasNoDrivesLeft()
+    {
+        DriveGroup group = DriveGroup.Create(UserId, "Office", [Guid.NewGuid()]);
+        _driveGroupRepositoryMock.GetAsNoTrackingAsync(UserId, Arg.Any<CancellationToken>()).Returns([group]);
+
+        Schedule schedule = GivenSchedule("08:00", groupId: group.Id);
+
+        Result<List<ScheduleRun>> result = await Run(MondayMorning.AddMinutes(1), schedule).Handle();
+
+        ScheduleRun run = result.Value.Should().ContainSingle().Subject;
+        run.GroupName.Should().Be("Office");
+        run.Outcome.IsFailure.Should().BeTrue();
+        run.Outcome.Error.Code.Should().Be("DriveGroup.NoMembers");
+        await _nasConnectorMock.DidNotReceive().ConnectAsync(Arg.Any<Drive>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Run_Should_LeaveADrivePinnedElsewhere_Alone()
     {
         _media.PinToNetwork("gateway:home", "Home");

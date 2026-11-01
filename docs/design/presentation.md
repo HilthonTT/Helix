@@ -184,11 +184,18 @@ boundary.
 moved**: rewriting both on every save meant a Startup folder that had become unwritable
 failed the timer, the retention and the language with an error about a shortcut nobody
 had touched. Language has a rollback like every other setting, switching the culture
-back, since the page had already switched it before the write.
+back, since the page had already switched it before the write. The language picked on the
+register page is the account's from the start: `RegisterUser` writes it into the settings row,
+because `GetSettings` would otherwise create that row in English on the first sign-in and
+switch the UI back.
 
 The typed value is committed on Enter or on leaving the field, never per keystroke.
 The `−`/`+` step is per field: the countdown moves by one second, because a user tuning it
 wants 12 rather than 10 or 15; days, percent and minutes move by a stride.
+A tap on `−`/`+` takes no focus, so `NumberField.Nudge` commits whatever is typed before it
+steps — otherwise a number typed and not yet committed would be overwritten by a step from the
+old value. Text is parsed as a `long`, so a number past `int`'s range clamps to the maximum
+rather than being refused.
 `SettingsDisplay` debounces these by 500ms precisely because "9" on the way to "90" used to
 be saved and acted on; committing whole values means there is no such intermediate, and the
 timer stays as a backstop rather than as the thing standing between the user and a wrong
@@ -301,7 +308,9 @@ The XAML, viewmodels, converters and behaviours are shared verbatim; only these 
   heads.
 - `App.CreateWindow` — Catalyst sizes its window here from `Common/WindowSizing`, the
   same rule the Windows lifecycle event applies through `AppWindow`. Change the rule in
-  one place and both heads follow.
+  one place and both heads follow. The rule only knows the work area's size, so the Windows
+  hook in `MauiProgram` adds the work area's origin to the position it returns: the work area
+  is not at the origin on a secondary monitor, or with the taskbar docked at the top or left.
 - `Common/MainWindow` — hides, minimizes and restores the app window; Windows only,
   except `Restore`, which on macOS activates the app (`NSApplication
   activateIgnoringOtherApps:`) so the menu bar's Open item brings Helix forward. Mac
@@ -350,6 +359,21 @@ whose `SelectedItem` arrives while its `ItemsSource` is empty, or still holds th
 drive's letters, selects nothing, and replacing the list afterwards does not select it
 either — so the sheet opened with no letter chosen and every edit had to start by choosing
 the same letter again.
+
+## Sheets
+
+`Services/ModalHost` shows one sheet at a time over a shared scrim. `ShowAsync` hides whatever
+is open **in a loop** rather than once: another `ShowAsync` can open its sheet while this one
+waits out the close animation, and taking over from it unhidden left that sheet on screen and
+the open count one too high for good, which switched off every row shortcut. `HideAsync` only
+touches the scrim when no sheet is current, because a late hide of a sheet that is no longer
+the one showing would otherwise leave the open sheet with clicks passing through to the page
+under it.
+
+Escape and a tap on the scrim close a sheet without going through its viewmodel's own close
+command, so a sheet that must not keep what was typed into it resets on the way **in** as well
+— `UpdatePasswordModal.Reset` (and `CreateRecoveryKeyModal.Reset`) clears the viewmodel for
+exactly that.
 
 ## XAML conventions
 

@@ -2,19 +2,6 @@
 
 namespace Helix.App.Behaviors;
 
-/// <summary>
-/// Makes a list row reachable and operable from the keyboard.
-///
-/// The row is one tab stop rather than eight: its status pill and icon chips are styled
-/// <see cref="Border"/>s with tap gestures, and MAUI's <see cref="Button"/> takes text
-/// rather than arbitrary content, so making each of them focusable would mean rebuilding
-/// every interactive part of the row — and would put a hundred tab stops in front of a
-/// user with thirteen drives. Focus lands on the row and the keys act on it, the way a
-/// file manager's list does.
-///
-/// Windows only, like <see cref="Hover"/>. Mac Catalyst has no equivalent seam in MAUI
-/// and the rows stay mouse-only there.
-/// </summary>
 internal static class RowFocus
 {
     public static readonly BindableProperty OwnerProperty =
@@ -38,8 +25,6 @@ internal static class RowFocus
 
         Attach(element);
 
-        // The platform view does not exist yet the first time this runs from XAML, and a
-        // recycled row is handed a new one, so the attachment is redone on every handler.
         element.HandlerChanged -= OnHandlerChanged;
         element.HandlerChanged += OnHandlerChanged;
     }
@@ -102,9 +87,6 @@ internal static class RowFocus
 
     private static void OnKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
     {
-        // Up and Down are answered here rather than by the row: moving between rows is
-        // the list's business, not the drive's, and WinUI already knows what is above and
-        // below a focused element without this having to find the CollectionView.
         switch (e.Key)
         {
             case Windows.System.VirtualKey.Up:
@@ -163,9 +145,6 @@ internal static class RowFocus
         }
     }
 
-    // The platform view is what raises the events and the MAUI element is what carries the
-    // owner and the visual state, so the pair is remembered here rather than walked back
-    // through the handler, which a recycled row may already have replaced.
     private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<
         Microsoft.UI.Xaml.UIElement,
         VisualElement> Rows = [];

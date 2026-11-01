@@ -45,6 +45,5 @@ internal static class ScheduleText
     public static string ShortName(DayOfWeek day) =>
         Culture.DateTimeFormat.GetAbbreviatedDayName(day);
 
-    // The language Helix is set to, which CultureSwitcher puts on AppResources rather than on the thread.
     private static CultureInfo Culture => AppResources.Culture ?? CultureInfo.CurrentUICulture;
 }

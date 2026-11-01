@@ -103,14 +103,41 @@ public sealed class UpdateSettings(
             return Result.Failure(SettingsErrors.NotFound);
         }
 
-        bool startupChanged = settings.SetOnStartup != request.SetOnStartup;
-        bool desktopChanged = settings.SetDesktopShortcut != request.SetDesktopShortcut;
+        bool setOnStartup = settings.SetOnStartup;
+        bool setDesktopShortcut = settings.SetDesktopShortcut;
+        Error? toggleFailure = null;
+
+        if (setOnStartup != request.SetOnStartup)
+        {
+            try
+            {
+                startupService.ToggleStartup(request.SetOnStartup);
+                setOnStartup = request.SetOnStartup;
+            }
+            catch (Exception ex) when (ex is IOException or InvalidOperationException)
+            {
+                toggleFailure = SettingsErrors.ShortcutUpdateFailed(ex.Message);
+            }
+        }
+
+        if (setDesktopShortcut != request.SetDesktopShortcut)
+        {
+            try
+            {
+                desktopService.ToggleDesktopShortcut(request.SetDesktopShortcut);
+                setDesktopShortcut = request.SetDesktopShortcut;
+            }
+            catch (Exception ex) when (ex is IOException or InvalidOperationException)
+            {
+                toggleFailure ??= SettingsErrors.ShortcutUpdateFailed(ex.Message);
+            }
+        }
 
         settings.Update(
             request.AutoConnect,
             request.AutoMinimize,
-            request.SetOnStartup,
-            request.SetDesktopShortcut,
+            setOnStartup,
+            setDesktopShortcut,
             request.TimerCount,
             request.Language,
             request.AuditlogRetentionDays,
@@ -120,26 +147,9 @@ public sealed class UpdateSettings(
             request.NotifyOnMinimizeToTray,
             request.GlobalHotkeys);
 
-        try
-        {
-            if (startupChanged)
-            {
-                startupService.ToggleStartup(settings.SetOnStartup);
-            }
-
-            if (desktopChanged)
-            {
-                desktopService.ToggleDesktopShortcut(settings.SetDesktopShortcut);
-            }
-        }
-        catch (Exception ex) when (ex is IOException or InvalidOperationException)
-        {
-            return Result.Failure(SettingsErrors.ShortcutUpdateFailed(ex.Message));
-        }
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success();
+        return toggleFailure is null ? Result.Success() : Result.Failure(toggleFailure);
     }
 
     private static Result Validate(Request request)

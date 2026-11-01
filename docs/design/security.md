@@ -28,6 +28,12 @@ It is **shown once** and never stored in the clear.
   been seen by somebody else is retired. Signing in to an account with no key puts up a
   banner saying so, every time, until there is one.
 
+One answer is no use if the time it takes to arrive gives the account away. `LoginUser` and
+`ResetPasswordWithRecoveryKey` therefore call `IPasswordHasher.VerifyDecoy`
+(`Core/Security/DecoyVerification`) for a user that does not exist, or has no key: it checks
+the secret against a hash made once per process, so the miss costs the same PBKDF2 run as a
+real check and answers no faster.
+
 The idle lock has no "forgot" path of its own: signing out of it lands on the sign-in page,
 which has.
 
@@ -50,6 +56,14 @@ because a lock nobody asked for is worse than one that failed to happen.
 `LockPage` is its own Shell route, and `AppShell.OnNavigated` groups it with the sign-in
 pages when it disables the flyout. A locked session that still showed the sidebar would be
 one anyone could click straight past, into the drive list it was put up to cover.
+
+Locking navigates to the lock page but cannot close a **native dialog already on screen**, so
+an answer to one — a passphrase, a disconnect, an install — is acted on only when
+`IdleLockService.IsLocked` is false once it comes back; otherwise anyone at the unattended
+keyboard could answer it from behind the lock. The tray menu is a keyboard too: while locked,
+every item but Open only brings the window (and the lock) forward, as the hotkeys and the
+command line already refuse. A `helix://` link that quits is refused outright under the lock
+rather than putting its confirmation up over it for whoever is at the keyboard to answer.
 
 ## The audit log
 

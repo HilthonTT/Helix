@@ -212,7 +212,6 @@ internal class WakeOnLan(IDateTimeProvider dateTimeProvider, ILogger<WakeOnLan> 
                 return null;
             }
 
-            // SendARP wants room for two ULONGs, not six bytes, and writes into the pinned array.
             byte[] hardware = new byte[8];
             uint length = (uint)hardware.Length;
 

@@ -94,6 +94,18 @@ public sealed class RunDueSchedules(
                 ? drives
                 : [.. drives.Where(drive => group.DriveIds.Contains(drive.Id))];
 
+            if (group is not null && members.Count == 0)
+            {
+                runs.Add(new ScheduleRun(
+                    schedule.Id,
+                    schedule.Action,
+                    group.Name,
+                    [],
+                    Result.Failure(DriveGroupErrors.NoMembers(group.Name))));
+
+                continue;
+            }
+
             if (!schedule.Disconnects && members.Any(IsPinnedWithoutAwayAddress))
             {
                 if (!locationRead)

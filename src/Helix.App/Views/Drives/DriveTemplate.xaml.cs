@@ -24,10 +24,6 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         _fileBrowser = App.ServiceProvider.GetRequiredService<IFileBrowser>();
     }
 
-    /// <summary>
-    /// The keys the row answers to. Every one of them is the same work the mouse reaches
-    /// through a pill or a chip, so a row does the same thing either way.
-    /// </summary>
     bool IRowKeys.OnRowKey(RowKey key)
     {
         if (BindingContext is not DriveDisplay drive || ModalHost.IsAnyOpen)
@@ -65,8 +61,6 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
                 Wake();
                 return true;
 
-            // The chip is not there when the drive is down, so neither is the shortcut:
-            // swallowing the key would make Ctrl+O look broken rather than inapplicable.
             case RowKey.Open when drive.Connected:
                 OpenFolder();
                 return true;

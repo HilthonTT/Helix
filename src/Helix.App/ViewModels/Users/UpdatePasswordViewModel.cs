@@ -65,8 +65,6 @@ internal sealed partial class UpdatePasswordViewModel : BaseViewModel
         Clear();
     }
 
-    // Escape and a tap on the scrim close the sheet without going through Close, so the
-    // page resets it on the way in as well.
     public void Reset() => Clear();
 
     private void Clear()

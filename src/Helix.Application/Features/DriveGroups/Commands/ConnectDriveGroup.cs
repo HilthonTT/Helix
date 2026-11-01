@@ -51,7 +51,7 @@ public sealed class ConnectDriveGroup(
 
         if (members.Length == 0)
         {
-            return Result.Success();
+            return Result.Failure(DriveGroupErrors.NoMembers(driveGroup.Name));
         }
 
         return await DriveMountBatch.RunAsync(

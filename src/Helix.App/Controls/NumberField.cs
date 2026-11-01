@@ -174,8 +174,6 @@ internal sealed class NumberField : ContentView
 
     private void Nudge(int by)
     {
-        // A tap on a label takes no focus, so a number typed and not yet committed would
-        // otherwise be overwritten by a step from the old value.
         if (TryParse(_entry.Text, out int typed))
         {
             Value = Clamp(typed);
@@ -201,7 +199,6 @@ internal sealed class NumberField : ContentView
 
     private bool TryParse(string? text, out int value)
     {
-        // Parsed wide so a number past int's range clamps to the maximum rather than being refused.
         if (long.TryParse(text, out long typed))
         {
             value = (int)Math.Clamp(typed, Minimum, Maximum);

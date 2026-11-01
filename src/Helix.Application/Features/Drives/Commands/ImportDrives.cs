@@ -149,8 +149,6 @@ public sealed class ImportDrives(
 
         List<DriveGroup> newGroups = ComposeGroups(contents.Groups ?? [], existingGroups, driveIdsByLetter);
 
-        // The database only folds ASCII case when it keeps names unique, so "Büro" and "BÜRO"
-        // can both exist; ToDictionary threw on them and failed every import.
         Dictionary<string, Guid> groupIdsByName = new(StringComparer.OrdinalIgnoreCase);
         foreach (DriveGroup group in existingGroups.Concat(newGroups))
         {

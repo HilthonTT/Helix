@@ -18,7 +18,7 @@ internal sealed class WindowsNasConnector(
 {
     private const int MountTimeoutMilliseconds = 30_000;
 
-    private readonly ConcurrentDictionary<string, SemaphoreSlim> _hostGates =
+    private readonly ConcurrentDictionary<string, HostGate> _hostGates =
         new(StringComparer.OrdinalIgnoreCase);
 
     public event EventHandler<LateMountOutcome>? MountSettledLate;
@@ -225,13 +225,13 @@ internal sealed class WindowsNasConnector(
         }
 
         string uncHost = ToUncHost(host);
-        SemaphoreSlim gate = _hostGates.GetOrAdd(uncHost, _ => new SemaphoreSlim(1, 1));
+        HostGate gate = _hostGates.GetOrAdd(uncHost, _ => new HostGate(MountTimeoutMilliseconds));
 
         bool held;
 
         try
         {
-            held = await gate.WaitAsync(MountTimeoutMilliseconds, cancellationToken);
+            held = await gate.EnterAsync(cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -266,7 +266,7 @@ internal sealed class WindowsNasConnector(
                     finished =>
                     {
                         _ = finished.Exception;
-                        gate.Release();
+                        gate.Exit();
                     },
                     CancellationToken.None,
                     TaskContinuationOptions.ExecuteSynchronously,
@@ -834,13 +834,13 @@ internal sealed class WindowsNasConnector(
             ? await Task.Run(() => EffectiveHostFor(drive, route), CancellationToken.None)
             : ToUncHost(route.Host);
 
-        SemaphoreSlim gate = _hostGates.GetOrAdd(gateHost, _ => new SemaphoreSlim(1, 1));
+        HostGate gate = _hostGates.GetOrAdd(gateHost, _ => new HostGate(MountTimeoutMilliseconds));
 
         bool held;
 
         try
         {
-            held = await gate.WaitAsync(MountTimeoutMilliseconds, cancellationToken);
+            held = await gate.EnterAsync(cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -858,7 +858,7 @@ internal sealed class WindowsNasConnector(
             if (held)
             {
                 _ = completion.ContinueWith(
-                    _ => gate.Release(),
+                    _ => gate.Exit(),
                     CancellationToken.None,
                     TaskContinuationOptions.ExecuteSynchronously,
                     TaskScheduler.Default);
