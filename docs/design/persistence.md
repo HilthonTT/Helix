@@ -24,9 +24,19 @@ before it returns and the sheet only closed after it. `UpdateDriveViewModel` now
 raise pickers and prompts through presentation services that expect the UI thread.
 The same applies to the **sign-in handlers** (`LoginUser`, `RegisterUser`, `UnlockSession`,
 `ChangeUserPassword`, each a 600k-iteration PBKDF2), to `CreateDrive`/`CreateDrives` (which
-close their sheet before announcing, like the edit sheet), to the dashboard chart's and the
-sidebar's refresh-on-`CheckDrivesStatusMessage`, and to the audit log's paging, which a
-search runs to the end of the history.
+close their sheet before announcing, like the edit sheet), to the dashboard's and the
+sidebar's refresh-on-`CheckDrivesStatusMessage` (the mount scan as well as the read:
+`IsLiveFrom` can wait on a host lookup), to the group reads behind the dashboard strip and the
+sidebar, to `StageUpdate` (whose download resumed on the dispatcher per chunk and whose unzip
+was synchronous), and to the audit log's paging, which a search runs to the end of the
+history. `ExportAuditlogs` raises a picker, so it is called on the UI thread and moves its own
+read and write onto the pool **after** the picker closes; it checks for an empty history with
+a count first, so "nothing to export" still comes without a picker.
+
+Creating drives in bulk (import, the multi-share sheet, adopting mappings) announces them as
+**one** `DrivesCreatedMessage`. One message per drive made every recipient — the dashboard,
+the sidebar groups, the watchdog, the tray — refresh once per drive the moment the sheet
+closed.
 
 **Every background loop is started with `Task.Run`** — `DriveMonitor`, the watchdog's retry
 sweep, `StorageAlertService`, `IdleLockService`, `CommandListener` and the tray's show

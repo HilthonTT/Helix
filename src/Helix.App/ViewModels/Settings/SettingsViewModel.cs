@@ -280,8 +280,8 @@ internal sealed partial class SettingsViewModel : BaseViewModel
         _updateFraction = 0;
         UpdateStatus = string.Format(AppResources.UpdateDownloading, 0);
 
-        Result<string> staged = await ScopedHandler.HandleAsync(
-            (StageUpdate h) => h.Handle(new StageUpdate.Request(check, progress)));
+        Result<string> staged = await Task.Run(() => ScopedHandler.HandleAsync(
+            (StageUpdate h) => h.Handle(new StageUpdate.Request(check, progress))));
 
         if (staged.IsFailure)
         {

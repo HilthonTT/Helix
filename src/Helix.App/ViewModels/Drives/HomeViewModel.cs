@@ -261,10 +261,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
             if (at >= 0)
             {
-                shown.RemoveAt(at);
+                shown.Move(at, i);
             }
-
-            shown.Insert(i, drive);
+            else
+            {
+                shown.Insert(i, drive);
+            }
         }
     }
 
@@ -347,10 +349,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         if (drives.Count != 0)
         {
-            foreach (Drive drive in drives)
-            {
-                WeakReferenceMessenger.Default.Send(new DriveCreatedMessage(drive));
-            }
+            WeakReferenceMessenger.Default.Send(new DrivesCreatedMessage(drives));
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
         }
@@ -419,11 +418,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
-            foreach (Guid id in ids)
-            {
-                WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(id));
-            }
-
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
@@ -453,11 +447,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
             Result result = await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle());
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
-
-            foreach (DriveDisplay drive in Drives)
-            {
-                WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
-            }
 
             if (result.IsFailure)
             {
@@ -501,11 +490,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
-            foreach (DriveDisplay drive in Drives)
-            {
-                WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
-            }
-
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
@@ -540,11 +524,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 
-        foreach (DriveDisplay drive in Drives)
-        {
-            WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
-        }
-
         if (connectResult.IsFailure)
         {
             await DisplayErrorAsync(connectResult.Error);
@@ -553,7 +532,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     public async Task<List<Drive>> FetchDrivesAsync()
     {
-        Result<List<Drive>> result = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+        Result<List<Drive>> result = await Task.Run(() => ScopedHandler.HandleAsync((GetDrives h) => h.Handle()));
         if (result.IsFailure)
         {
             return [];
@@ -592,8 +571,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
             }
         }
 
-        SyncConnectivity(_nasConnector.GetLiveLetters());
-
         ApplyFilterAndSort();
 
         await RefreshTotalsAsync();
@@ -601,17 +578,9 @@ internal sealed partial class HomeViewModel : BaseViewModel
         return drives;
     }
 
-    private void SyncConnectivity(HashSet<string> liveLetters)
-    {
-        foreach (DriveDisplay drive in _allDrives)
-        {
-            drive.Connected = drive.IsUp(_nasConnector, liveLetters);
-        }
-    }
-
     public async Task FetchDriveGroupsAsync()
     {
-        Result<List<DriveGroup>> result = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
+        Result<List<DriveGroup>> result = await Task.Run(() => ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle()));
         if (result.IsFailure)
         {
             DriveGroups = [];
@@ -670,64 +639,114 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
     private const int StorageForecastHorizonDays = 365;
 
-    private int _totalsRequest;
+    private readonly SemaphoreSlim _totalsGate = new(1, 1);
+
+    private int _totalsPending;
 
     private async Task RefreshTotalsAsync()
     {
-        int request = ++_totalsRequest;
+        if (!await _totalsGate.WaitAsync(0))
+        {
+            Interlocked.Exchange(ref _totalsPending, 1);
+
+            return;
+        }
 
         try
         {
-            TotalConnected = ValidateTotalConnected();
-
-            string? storage = await ValidateTotalStorageAsync();
-
-            if (storage is not null && request == _totalsRequest)
+            do
             {
-                TotalStorage = storage;
+                Interlocked.Exchange(ref _totalsPending, 0);
+
+                await RefreshEstateAsync();
             }
+            while (Interlocked.Exchange(ref _totalsPending, 0) == 1);
         }
         catch (Exception ex)
         {
             AppLog.For<HomeViewModel>().LogError(ex, "Failed to refresh the dashboard totals.");
         }
+        finally
+        {
+            _totalsGate.Release();
+        }
     }
 
-    private async Task<string?> ValidateTotalStorageAsync()
+    private async Task RefreshEstateAsync()
     {
-        HashSet<string> liveLetters = _nasConnector.GetLiveLetters();
+        DriveDisplay[] rows = [.. _allDrives];
 
-        string[] connected = [.. _allDrives
-            .Where(d => d.IsUp(_nasConnector, liveLetters))
-            .Select(d => d.Letter)];
-
-        IReadOnlyList<VolumeUsage> volumes = await _storageProbe.ProbeAsync(connected);
-
-        if (connected.Length > 0 && volumes.Count == 0)
+        bool[] up = await Task.Run(() =>
         {
-            return null;
+            HashSet<string> liveLetters = _nasConnector.GetLiveLetters();
+
+            return rows.Select(row => row.IsUp(_nasConnector, liveLetters)).ToArray();
+        });
+
+        bool reorder = false;
+
+        for (int i = 0; i < rows.Length; i++)
+        {
+            reorder |= rows[i].Connected != up[i];
+            rows[i].Connected = up[i];
         }
 
-        return StorageUsageHelper.FormatCombined(
-            volumes.Sum(volume => volume.UsedBytes),
-            volumes.Sum(volume => volume.TotalBytes));
-    }
+        if (reorder && SortField == DriveSortField.Status)
+        {
+            ApplyFilterAndSort();
+        }
 
-    private string ValidateTotalConnected()
-    {
-        SyncConnectivity(_nasConnector.GetLiveLetters());
-
-        int count = _allDrives.Count(d => d.Connected);
+        int count = up.Count(isUp => isUp);
 
         ConnectedCount = count;
-        DisconnectedCount = _allDrives.Count - count;
+        DisconnectedCount = rows.Length - count;
+        TotalConnected = $"{count} / {rows.Length}";
 
-        return $"{count} / {_allDrives.Count}";
+        DriveDisplay[] connected = [.. rows.Where((_, i) => up[i])];
+
+        foreach (DriveDisplay row in rows.Where((_, i) => !up[i]))
+        {
+            row.StorageUsage = AppResources.DriveNotReady;
+        }
+
+        IReadOnlyList<VolumeUsage> volumes = await _storageProbe.ProbeAsync([.. connected.Select(row => row.Letter)]);
+
+        bool measuredNothing = connected.Length > 0 && volumes.Count == 0;
+
+        foreach (DriveDisplay row in connected)
+        {
+            VolumeUsage? volume = volumes.FirstOrDefault(
+                candidate => candidate.Letters.Contains(row.Letter, StringComparer.OrdinalIgnoreCase));
+
+            if (volume is not null)
+            {
+                row.StorageUsage = StorageUsageHelper.FormatUsedOf(
+                    volume.UsedBytes,
+                    volume.TotalBytes,
+                    AppResources.StorageUsedOf);
+            }
+            else if (!measuredNothing || row.StorageUsage.Length == 0)
+            {
+                row.StorageUsage = AppResources.DriveNotReady;
+            }
+        }
+
+        if (!measuredNothing)
+        {
+            TotalStorage = StorageUsageHelper.FormatCombined(
+                volumes.Sum(volume => volume.UsedBytes),
+                volumes.Sum(volume => volume.TotalBytes));
+        }
     }
 
     private void RegisterMessages()
     {
         WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(this, (r, m) =>
+        {
+            _ = RefreshTotalsAsync();
+        });
+
+        WeakReferenceMessenger.Default.Register<NotifyDriveConnectivityMessage>(this, (r, m) =>
         {
             _ = RefreshTotalsAsync();
         });
@@ -747,14 +766,17 @@ internal sealed partial class HomeViewModel : BaseViewModel
             }
         });
 
-        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(this, (r, m) =>
+        WeakReferenceMessenger.Default.Register<DrivesCreatedMessage>(this, (r, m) =>
         {
-            if (_allDrives.Any(d => d.Id == m.Drive.Id))
+            HashSet<Guid> shown = [.. _allDrives.Select(d => d.Id)];
+
+            Drive[] added = [.. m.Drives.Where(drive => shown.Add(drive.Id))];
+            if (added.Length == 0)
             {
                 return;
             }
 
-            _allDrives.Add(new DriveDisplay(m.Drive));
+            _allDrives.AddRange(added.Select(drive => new DriveDisplay(drive)));
 
             ApplyFilterAndSort();
 
@@ -778,8 +800,6 @@ internal sealed partial class HomeViewModel : BaseViewModel
             existingDrive.Protocol = m.UpdatedDrive.Protocol;
             existingDrive.Port = m.UpdatedDrive.Port;
             existingDrive.CanWake = m.UpdatedDrive.CanWake;
-
-            SyncConnectivity(_nasConnector.GetLiveLetters());
 
             ApplyFilterAndSort();
 

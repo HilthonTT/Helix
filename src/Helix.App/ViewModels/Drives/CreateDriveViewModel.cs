@@ -220,7 +220,7 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 
             Close();
 
-            WeakReferenceMessenger.Default.Send(new DriveCreatedMessage(result.Value));
+            WeakReferenceMessenger.Default.Send(new DrivesCreatedMessage([result.Value]));
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
         }
         finally
@@ -261,10 +261,7 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 
         Close();
 
-        foreach (Drive drive in result.Value)
-        {
-            WeakReferenceMessenger.Default.Send(new DriveCreatedMessage(drive));
-        }
+        WeakReferenceMessenger.Default.Send(new DrivesCreatedMessage(result.Value));
 
         WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 

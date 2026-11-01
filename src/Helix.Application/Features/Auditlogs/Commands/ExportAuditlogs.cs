@@ -26,14 +26,7 @@ public sealed class ExportAuditlogs(
             return Result.Failure<string>(AuthenticationErrors.InvalidPermissions);
         }
 
-        List<Auditlog> rows = await auditlogRepository.GetPageAsNoTrackingAsync(
-            loggedInUser.UserId,
-            skip: 0,
-            take: int.MaxValue,
-            oldestFirst: true,
-            cancellationToken);
-
-        if (rows.Count == 0)
+        if (await auditlogRepository.CountAsync(loggedInUser.UserId, cancellationToken) == 0)
         {
             return Result.Failure<string>(AuditlogErrors.NothingToExport);
         }
@@ -57,15 +50,25 @@ public sealed class ExportAuditlogs(
             return Result.Failure<string>(FolderPickerErrors.FileAlreadyExists);
         }
 
-        string csv = Compose(rows, request);
+        Guid userId = loggedInUser.UserId;
 
         try
         {
-            await File.WriteAllTextAsync(
-                filePath,
-                csv,
-                new UTF8Encoding(encoderShouldEmitUTF8Identifier: true),
-                cancellationToken);
+            await Task.Run(async () =>
+            {
+                List<Auditlog> rows = await auditlogRepository.GetPageAsNoTrackingAsync(
+                    userId,
+                    skip: 0,
+                    take: int.MaxValue,
+                    oldestFirst: true,
+                    cancellationToken);
+
+                await File.WriteAllTextAsync(
+                    filePath,
+                    Compose(rows, request),
+                    new UTF8Encoding(encoderShouldEmitUTF8Identifier: true),
+                    cancellationToken);
+            }, cancellationToken);
         }
         catch (UnauthorizedAccessException)
         {

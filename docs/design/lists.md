@@ -33,17 +33,25 @@ list reads the master**: the storage and connection tiles, the connectivity donu
 membership, and the count "disconnect all" confirms against. A search box narrowing the
 list below them is not the NAS getting smaller.
 
-`RefreshTotalsAsync` is raised once per drive by a "connect all", each run probes the shares,
-and the probes finish in whatever order they like — so the storage figure is only applied by
-the **latest** request, or a reading taken before the last drive mounted could land last and
-stay. A reading that **measured nothing while drives are connected** is not applied at all,
+`RefreshTotalsAsync` is the dashboard's only reading of the estate. It takes **one** snapshot —
+`GetLiveLetters` plus `DriveDisplay.IsUp` per row, on the thread pool — and one
+`IStorageProbe` call, and from them sets every row's `Connected` and storage text, the counts,
+the donut and the storage total. Rows used to do this themselves from `DriveTemplate` on every
+rebind and every `NotifyDriveConnectivityMessage`, each with its own mount scan and storage
+probe on the UI thread: a "connect all" over thirteen drives was thirteen rows each scanning
+thirteen letters, while the totals and the chart scanned again beside them. A row now only
+reads its model. Refreshes are serialized and one arriving mid-run is remembered rather than
+dropped (the same gate-and-pending pattern as `EstateStatus`), so the per-drive messages a
+"connect all" raises collapse into at most one more run, and that run is the one taken after
+the last drive mounted. A row's storage text comes from the volume its letter was grouped
+into, so two letters on one volume show the same figure. A reading that **measured nothing while drives are connected** is not applied at all,
 on the dashboard or in the sidebar: every share of one pool rides the same SMB session, so
 when Windows re-establishes an idle one, or the NAS spins its disks up, all thirteen
 measurements miss the three-second cap together and the probe returns no volumes. That used
 to be shown as "0 TB" for a NAS that was plainly there, until some later refresh happened to
 be quick. Only "no drive is connected" shows zero. The probe writes an Information line when
 it measures nothing, since the per-drive failures are Debug and a release build drops them.
-`DriveCreatedMessage` is ignored for a drive the master list already holds: a fetch that
+A drive in `DrivesCreatedMessage` is ignored when the master list already holds: a fetch that
 was in flight when the drive was saved returns it too, and the duplicate row it left made the
 next `FetchDrivesAsync` throw on its id lookup.
 

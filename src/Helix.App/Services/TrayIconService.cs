@@ -482,7 +482,7 @@ internal sealed class TrayIconService
 
     private void RegisterMessages()
     {
-        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(this, (r, m) => RefreshSafely());
+        WeakReferenceMessenger.Default.Register<DrivesCreatedMessage>(this, (r, m) => RefreshSafely());
         WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, (r, m) => RefreshSafely());
         WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) => RefreshSafely());
         WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(this, (r, m) => RefreshSafely());

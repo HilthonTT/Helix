@@ -32,7 +32,6 @@ public sealed partial class HomePage : ContentPage
     private bool _isInitializing;
     private bool _isVisible;
 
-    private readonly INasConnector _nasConnector;
     private readonly HomeViewModel _viewModel;
     private readonly ModalHost _modals;
     private readonly DriveWatchdog _watchdog;
@@ -51,7 +50,6 @@ public sealed partial class HomePage : ContentPage
 
         BindingContext = _viewModel;
 
-        _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
         _watchdog = App.ServiceProvider.GetRequiredService<DriveWatchdog>();
         _mountReconciler = App.ServiceProvider.GetRequiredService<MountReconciler>();
         _tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
@@ -77,12 +75,20 @@ public sealed partial class HomePage : ContentPage
 
         DriveCard.SizeChanged += (_, _) => _viewModel.IsCompact = DriveCard.Width < CompactCardWidth;
 
+        _viewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(HomeViewModel.TotalConnected))
+            {
+                UpdateChart();
+            }
+        };
+
+        ThemeSwitcher.Changed += (_, _) => MainThread.BeginInvokeOnMainThread(UpdateChart);
+
         RegisterMessages();
     }
 
     private const double CompactCardWidth = 850;
-
-    private int _chartRequest;
 
     private bool _reappearedWhileInitializing;
 
@@ -102,9 +108,7 @@ public sealed partial class HomePage : ContentPage
         {
             _mountReconciler.Start();
 
-            List<Drive> drives = await _viewModel.FetchDrivesAsync();
-
-            await InitializeChartAsync(drives);
+            await _viewModel.FetchDrivesAsync();
 
             await _viewModel.FetchDriveGroupsAsync();
 
@@ -210,43 +214,16 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    private async Task InitializeChartAsync(List<Drive>? providedDrives = null)
+    private void UpdateChart()
     {
-        int request = Interlocked.Increment(ref _chartRequest);
+        int connected = _viewModel.ConnectedCount;
+        int disconnected = _viewModel.DisconnectedCount;
 
-        List<Drive> drives = providedDrives ?? await FetchDrivesFromDatabaseAsync();
+        ChartEntry[] entries = connected + disconnected == 0
+            ? BuildEntries(0, 1)
+            : BuildEntries(connected, disconnected);
 
-        if (request != Volatile.Read(ref _chartRequest))
-        {
-            return;
-        }
-
-        ChartEntry[] entries = GenerateChartEntries(drives);
         chart.Chart = CreateDonutChart(entries);
-    }
-
-    private static async Task<List<Drive>> FetchDrivesFromDatabaseAsync()
-    {
-        Result<List<Drive>> result = await Task.Run(() => ScopedHandler.HandleAsync((GetDrives h) => h.Handle()));
-        if (result.IsFailure)
-        {
-            return [];
-        }
-
-        return result.Value;
-    }
-
-    private ChartEntry[] GenerateChartEntries(List<Drive> drives)
-    {
-        if (drives.Count == 0)
-        {
-            return BuildEntries(0, 1);
-        }
-
-        HashSet<string> liveLetters = _nasConnector.GetLiveLetters();
-        int connected = drives.Count(d => liveLetters.Contains(d.Letter) && _nasConnector.IsLiveFrom(d));
-
-        return BuildEntries(connected, drives.Count - connected);
     }
 
     private static ChartEntry[] BuildEntries(int connected, int disconnected)
@@ -294,19 +271,6 @@ public sealed partial class HomePage : ContentPage
 
         WeakReferenceMessenger.Default.Register<AdoptMappingsMessage>(
             this, async (r, m) => await _modals.ToggleAsync(AdoptMappings, m.Value));
-
-        WeakReferenceMessenger.Default.Register<CheckDrivesStatusMessage>(
-            this, async (r, m) =>
-            {
-                try
-                {
-                    await InitializeChartAsync();
-                }
-                catch (Exception ex)
-                {
-                    AppLog.For<HomePage>().LogWarning(ex, "The drive chart could not be refreshed.");
-                }
-            });
     }
 
     private async void Preferences_Clicked(object sender, EventArgs e)

@@ -52,10 +52,16 @@ public sealed class ExportAuditlogsTests : IDisposable
         return row;
     }
 
-    private void GivenHistory(params Auditlog[] rows) =>
+    private void GivenHistory(params Auditlog[] rows)
+    {
+        _auditlogRepositoryMock
+            .CountAsync(UserId, Arg.Any<CancellationToken>())
+            .Returns(rows.Length);
+
         _auditlogRepositoryMock
             .GetPageAsNoTrackingAsync(UserId, 0, int.MaxValue, true, Arg.Any<CancellationToken>())
             .Returns([.. rows]);
+    }
 
     [Fact]
     public async Task Handle_Should_WriteEveryRowWithAHeader()

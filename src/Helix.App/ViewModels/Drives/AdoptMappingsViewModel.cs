@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Drives;
@@ -78,10 +78,7 @@ internal sealed partial class AdoptMappingsViewModel : BaseViewModel
 
             Close();
 
-            foreach (Drive drive in result.Value)
-            {
-                WeakReferenceMessenger.Default.Send(new DriveCreatedMessage(drive));
-            }
+            WeakReferenceMessenger.Default.Send(new DrivesCreatedMessage(result.Value));
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
 

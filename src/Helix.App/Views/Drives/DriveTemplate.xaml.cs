@@ -5,8 +5,6 @@ using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Features.Drives.Commands;
-using Helix.Application.Features.Drives.Queries;
-using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 using Helix.App.Services;
 using Helix.App.Behaviors;
@@ -24,44 +22,6 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
 
         _nasConnector = App.ServiceProvider.GetRequiredService<INasConnector>();
         _fileBrowser = App.ServiceProvider.GetRequiredService<IFileBrowser>();
-    }
-
-    protected override void OnBindingContextChanged()
-    {
-        base.OnBindingContextChanged();
-
-        if (BindingContext is DriveDisplay drive)
-        {
-            RefreshStatus(drive);
-            RegisterMessages();
-        }
-    }
-
-    private void RefreshStatus(DriveDisplay drive)
-    {
-        drive.Connected = drive.IsUp(_nasConnector, _nasConnector.GetLiveLetters());
-
-        // A drive that is down has nothing to measure, and asking DriveInfo about a remembered
-        // mapping blocks a pool thread for the SMB timeout.
-        if (!drive.Connected)
-        {
-            drive.StorageUsage = AppResources.DriveNotReady;
-
-            return;
-        }
-
-        _ = RefreshStorageUsageAsync(drive);
-    }
-
-    private async Task RefreshStorageUsageAsync(DriveDisplay drive)
-    {
-        string usage = await StorageUsageHelper.GetStorageUsageAsync(
-            _nasConnector.GetMountPath(drive.Letter),
-            AppResources.DriveNotReady,
-            AppResources.InvalidDriveLetter,
-            AppResources.StorageUsedOf);
-
-        MainThread.BeginInvokeOnMainThread(() => drive.StorageUsage = usage);
     }
 
     /// <summary>
@@ -158,7 +118,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
                 if (request is ConnectDrive.Request)
                 {
                     MarkOffline(drive, result.Error);
-                    RefreshStatus(drive);
+                    WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
                 }
 
                 Notifier.Error($"{drive.Letter}: {result.Error.Description}");
@@ -170,7 +130,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
                 drive.LastConnectedOnUtc = DateTime.UtcNow;
             }
 
-            RefreshStatus(drive);
+            drive.Connected = request is ConnectDrive.Request;
 
             WeakReferenceMessenger.Default.Send(new CheckDrivesStatusMessage());
         }
@@ -294,38 +254,5 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         }
 
         WeakReferenceMessenger.Default.Send(new DeleteDriveMessage(true, drive));
-    }
-
-    private void RegisterMessages()
-    {
-        WeakReferenceMessenger.Default.Unregister<DriveUpdatedMessage>(this);
-
-        WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) =>
-        {
-            if (BindingContext is not DriveDisplay drive || drive.Id != m.UpdatedDrive.Id)
-            {
-                return;
-            }
-
-            drive.Letter = m.UpdatedDrive.Letter;
-            drive.Name = m.UpdatedDrive.Name;
-            drive.Host = m.UpdatedDrive.Host;
-            drive.CanWake = m.UpdatedDrive.CanWake;
-
-            RefreshStatus(drive);
-        });
-
-        WeakReferenceMessenger.Default.Unregister<NotifyDriveConnectivityMessage>(this);
-
-        WeakReferenceMessenger.Default.Register<NotifyDriveConnectivityMessage>(this, (r, m) =>
-        {
-            if (BindingContext is not DriveDisplay drive || drive.Id != m.DriveId)
-            {
-                return;
-            }
-
-            RefreshStatus(drive);
-        });
-
     }
 }

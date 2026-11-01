@@ -93,7 +93,7 @@ per-drive notification, the failure banner — so the strip and the sidebar cann
 tiles compute the same numbers off `HomeViewModel`'s master list, and those die with the
 page: navigating to the settings or the audit log left the user with no sight of the NAS at
 all. Refreshes are driven by the messages that mean the estate changed
-(`CheckDrivesStatusMessage`, `DriveCreatedMessage`, `DriveDeletedMessage`) rather than by a
+(`CheckDrivesStatusMessage`, `DrivesCreatedMessage`, `DriveDeletedMessage`) rather than by a
 timer, they are serialized, and one arriving mid-probe is *remembered rather than dropped* —
 a "connect all" raises one per drive and the reading taken before the last of them mounted
 would otherwise be what stayed on screen. The low-space light is not a probe of its own: it

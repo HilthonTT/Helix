@@ -684,7 +684,7 @@ internal sealed class DriveWatchdog
 
     private void RegisterMessages()
     {
-        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(this, (r, m) => RefreshWatchedDrivesSafely());
+        WeakReferenceMessenger.Default.Register<DrivesCreatedMessage>(this, (r, m) => RefreshWatchedDrivesSafely());
         WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(this, (r, m) => RefreshWatchedDrivesSafely());
         WeakReferenceMessenger.Default.Register<DriveUpdatedMessage>(this, (r, m) => RefreshWatchedDrivesSafely());
     }

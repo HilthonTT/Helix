@@ -219,13 +219,13 @@ public sealed partial class AppShell : Shell
 
         try
         {
-            Result<List<DriveGroup>> groups = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
+            Result<List<DriveGroup>> groups = await Task.Run(() => ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle()));
             if (groups.IsFailure)
             {
                 return;
             }
 
-            Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+            Result<List<Drive>> drives = await Task.Run(() => ScopedHandler.HandleAsync((GetDrives h) => h.Handle()));
 
             HashSet<Guid> existing = drives.IsSuccess
                 ? [.. drives.Value.Select(drive => drive.Id)]
@@ -542,7 +542,7 @@ public sealed partial class AppShell : Shell
         WeakReferenceMessenger.Default.Register<DriveGroupsChangedMessage>(
             this, (r, m) => _ = RefreshGroupsAsync());
 
-        WeakReferenceMessenger.Default.Register<DriveCreatedMessage>(
+        WeakReferenceMessenger.Default.Register<DrivesCreatedMessage>(
             this, (r, m) => _ = RefreshGroupsAsync());
 
         WeakReferenceMessenger.Default.Register<DriveDeletedMessage>(

@@ -92,7 +92,7 @@ public sealed partial class EstateStatus : ObservableObject
             {
                 Interlocked.Exchange(ref _pending, 0);
 
-                await RefreshCoreAsync();
+                await Task.Run(RefreshCoreAsync);
             }
             while (_isRunning && Interlocked.Exchange(ref _pending, 0) == 1);
         }
@@ -106,7 +106,7 @@ public sealed partial class EstateStatus : ObservableObject
     {
         try
         {
-            Result<List<Drive>> result = await Task.Run(() => ScopedHandler.HandleAsync((GetDrives h) => h.Handle()));
+            Result<List<Drive>> result = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
             if (result.IsFailure)
             {
                 _logger.LogDebug("The sidebar could not read the drives: {Reason}", result.Error.Description);
@@ -153,7 +153,7 @@ public sealed partial class EstateStatus : ObservableObject
         WeakReferenceMessenger.Default.Register<EstateStatus, CheckDrivesStatusMessage>(
             this, (r, m) => _ = r.RefreshAsync());
 
-        WeakReferenceMessenger.Default.Register<EstateStatus, DriveCreatedMessage>(
+        WeakReferenceMessenger.Default.Register<EstateStatus, DrivesCreatedMessage>(
             this, (r, m) => _ = r.RefreshAsync());
 
         WeakReferenceMessenger.Default.Register<EstateStatus, DriveDeletedMessage>(
