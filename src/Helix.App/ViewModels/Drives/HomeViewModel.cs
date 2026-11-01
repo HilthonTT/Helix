@@ -58,6 +58,11 @@ internal sealed partial class HomeViewModel : BaseViewModel
     {
         drives.CollectionChanged += (_, e) =>
         {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Move)
+            {
+                return;
+            }
+
             foreach (DriveDisplay added in e.NewItems?.OfType<DriveDisplay>() ?? [])
             {
                 added.PropertyChanged += OnDrivePropertyChanged;

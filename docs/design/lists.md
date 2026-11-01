@@ -59,6 +59,11 @@ Rows filtered out are **deselected** on the way. Acting on a ticked row that is 
 screen is the one outcome worth ruling out — "disconnect" has to mean the rows the user can
 see.
 
+Sorting reorders `Drives` with `Move` rather than removing and re-inserting rows. A `Move`
+event lists the row in both `NewItems` and `OldItems`, so the handler that watches each row's
+`IsSelected` **ignores `Move`**: treating it as an add followed by a remove left every row a
+sort had moved unsubscribed, and ticking it no longer updated the selection bar.
+
 An empty list now has two states. Filtering thirteen drives down to none and being told
 "you have no drives yet — add one" is the app forgetting what the user just typed, so
 `ShowNoMatches` offers to clear the search and `ShowNoDrives` offers to add a drive.

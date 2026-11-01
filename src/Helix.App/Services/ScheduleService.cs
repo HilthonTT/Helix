@@ -112,7 +112,7 @@ internal sealed class ScheduleService
             return;
         }
 
-        await _monitor.PollAsync();
+        await _monitor.PollAsync(cancellationToken);
 
         List<Guid> touched = [.. result.Value.SelectMany(run => run.DriveIds).Distinct()];
 
