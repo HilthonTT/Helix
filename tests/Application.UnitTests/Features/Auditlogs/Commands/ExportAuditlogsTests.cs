@@ -23,7 +23,7 @@ public sealed class ExportAuditlogsTests : IDisposable
     private readonly IFolderPicker _folderPickerMock = Substitute.For<IFolderPicker>();
     private readonly IDateTimeProvider _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), $"helix-export-{Guid.NewGuid():N}");
+    private readonly string _folder = Path.Join(Path.GetTempPath(), $"helix-export-{Guid.NewGuid():N}");
 
     private readonly ExportAuditlogs _handler;
 

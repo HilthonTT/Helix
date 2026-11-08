@@ -367,7 +367,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         {
             throw;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException or UriFormatException)
         {
             _logger.LogWarning(ex, "The signatures published for the update could not be fetched.");
 
@@ -602,7 +602,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
             return false;
         }
 
-        string probe = Path.Combine(parent, $".helix-write-probe-{Guid.NewGuid():N}");
+        string probe = Path.Join(parent, $".helix-write-probe-{Guid.NewGuid():N}");
 
         try
         {

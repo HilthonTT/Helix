@@ -43,7 +43,7 @@ public sealed class ExportAuditlogs(
         }
 
         string fileName = $"helix-history-{dateTimeProvider.UtcNow:yyyyMMdd-HHmmss}{FileExtension}";
-        string filePath = Path.Combine(folder.Path, fileName);
+        string filePath = Path.Join(folder.Path, fileName);
 
         if (File.Exists(filePath))
         {
