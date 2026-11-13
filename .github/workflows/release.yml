@@ -67,6 +67,7 @@ jobs:
 
   publish-macos:
     name: Publish maccatalyst
+    if: vars.HELIX_MACOS_RELEASE == 'true'
     runs-on: macos-latest
 
     env:
@@ -129,6 +130,10 @@ jobs:
   release:
     name: Create GitHub release
     needs: [publish, publish-macos]
+    if: >-
+      !cancelled()
+      && needs.publish.result == 'success'
+      && contains(fromJSON('["success", "skipped"]'), needs.publish-macos.result)
     runs-on: ubuntu-latest
 
     permissions:

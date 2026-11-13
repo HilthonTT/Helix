@@ -105,6 +105,7 @@ jobs:
           --configuration Debug
           -p:EnableCodeSigning=false
           -p:_RequireCodeSigning=false
+          -p:ValidateXcodeVersion=false
 
       - name: Test (Application)
         run: >-

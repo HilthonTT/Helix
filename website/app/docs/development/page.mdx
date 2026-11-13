@@ -98,7 +98,7 @@ Every push and pull request to `main` runs `.github/workflows/ci.yml`:
 | **Build (macOS)** | `macos-latest` | compile-verifies the Mac Catalyst head and runs the Application suite |
 
 <Callout>
-The macOS jobs install the MAUI workload unpinned. The .NET 11 Mac Catalyst SDK needs Xcode 27; if the runner image falls behind, pin the workload to the last set that matches it until the image catches up.
+The .NET 11 Mac Catalyst SDK needs Xcode 27.2, which the GitHub-hosted runners do not have yet. Until they do, the CI build skips the SDK's Xcode check with `-p:ValidateXcodeVersion=false` (it only verifies that the code compiles), and the macOS release job is switched off — see [Releasing](/docs/releasing/).
 </Callout>
 
 CodeQL scans the C# sources and the workflows on every push, every pull request and weekly, and Dependabot opens grouped weekly updates for NuGet packages and GitHub Actions.

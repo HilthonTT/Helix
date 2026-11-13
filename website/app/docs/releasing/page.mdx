@@ -42,7 +42,7 @@ git push origin v2.2.8
 | Job | Runner | Produces |
 | --- | --- | --- |
 | **Publish win-x64** / **win-arm64** | `windows-latest` | `Helix-<tag>-win-x64.zip`, `Helix-<tag>-win-arm64.zip` |
-| **Publish maccatalyst** | `macos-latest` | `Helix-<tag>-macos.zip`, a universal unsigned `.app` archived with `ditto` |
+| **Publish maccatalyst** | `macos-latest` | `Helix-<tag>-macos.zip`, a universal unsigned `.app` archived with `ditto`. Runs only when the repository variable `HELIX_MACOS_RELEASE` is `true` |
 | **Create GitHub release** | `ubuntu-latest` | signs the archives if a key is set, then creates the release with generated notes, or uploads to it if it already exists |
 
 ## Asset names matter

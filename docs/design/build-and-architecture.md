@@ -71,13 +71,28 @@ host as libraries and the bootstrapper never ran.
 CI covers both: a Windows job builds and runs all three suites, a macOS job compile-verifies the
 Catalyst head and runs the Application suite.
 
-The macOS jobs in `ci.yml` and `release.yml` install the MAUI workload unpinned. Under .NET 10
-they were pinned to workload set 10.0.401, because 10.0.401.1 brought the Mac Catalyst 27.0 SDK,
-which requires Xcode 27, while `macos-latest` topped out at Xcode 26.6. The .NET 11 SDK cannot
-install a 10.x workload set, so the pin went with the upgrade to .NET 11, whose Catalyst SDK needs
-Xcode 27 as well. If `macos-latest` lags behind the Xcode the current workload set asks for, the
-build fails on the SDK's Xcode check; pin the workload to the last set that matches the image
-(`dotnet workload install maui --version <set>`) until the image catches up.
+Under .NET 10 the macOS jobs pinned the MAUI workload to set 10.0.401, because 10.0.401.1 brought
+the Mac Catalyst 27.0 SDK, which requires Xcode 27, while `macos-latest` topped out at Xcode 26.6.
+The .NET 11 SDK cannot install a 10.x set, and every .NET 11 set (11.100.0, 11.100.1) ships Mac
+Catalyst 27.2, which requires Xcode 27.2. No GitHub-hosted image carries Xcode 27 yet (`macos-26`
+stops at 26.6), so there is no set to pin back to, and the macOS jobs install the workload unpinned.
+
+The SDK's check (`_ValidateXcodeVersion`, error E0191) can be skipped with
+`-p:ValidateXcodeVersion=false`, and the two workflows treat that differently on purpose:
+
+- **`ci.yml`** passes it. That job only proves the Catalyst head compiles and runs the Application
+  suite; nothing it builds reaches a user.
+- **`release.yml`** does not. A Catalyst build linked against an older Xcode than its SDK was made
+  for is unsupported and cannot be tested in CI, and the zip goes to people's Macs. The
+  `publish-macos` job instead runs only when the repository variable `HELIX_MACOS_RELEASE` is
+  `true`, and the `release` job accepts it being skipped, so Windows releases keep shipping.
+
+While the variable is off, a release has no `-macos.` asset, so a Mac install sees the newer
+version, finds no asset and offers only the release page (see `updates.md`). Say in the release
+notes that the macOS build follows.
+
+Once `macos-latest` carries Xcode 27.2: set `HELIX_MACOS_RELEASE` to `true`, remove
+`-p:ValidateXcodeVersion=false` from `ci.yml`, and shorten this section.
 
 ## Documentation website
 
