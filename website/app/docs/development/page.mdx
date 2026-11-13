@@ -8,9 +8,9 @@ Building Helix from source, running its tests, and what CI checks.
 
 | | Windows | macOS |
 | --- | --- | --- |
-| SDK | [.NET 10 SDK](https://dotnet.microsoft.com/download) | .NET 10 SDK |
+| SDK | [.NET 11 SDK](https://dotnet.microsoft.com/download) | .NET 11 SDK |
 | Workload | .NET MAUI (Visual Studio installer, or `dotnet workload install maui`) | `dotnet workload install maui` |
-| IDE / toolchain | Visual Studio 2022 | Xcode |
+| IDE / toolchain | Visual Studio 2026 | Xcode |
 
 The Mac Catalyst head can only be compiled on a Mac.
 
@@ -22,7 +22,7 @@ cd Helix
 dotnet build Helix.slnx
 ```
 
-`Helix.App` and `Helix.Infrastructure` choose their target framework from the host OS — `net10.0-windows10.0.19041.0` on Windows, `net10.0-maccatalyst` on a Mac — so no `-f` switch is needed. On a Mac, build the app project on its own, because the solution also holds Windows-only test projects:
+`Helix.App` and `Helix.Infrastructure` choose their target framework from the host OS — `net11.0-windows10.0.19041.0` on Windows, `net11.0-maccatalyst` on a Mac — so no `-f` switch is needed. On a Mac, build the app project on its own, because the solution also holds Windows-only test projects:
 
 ```sh
 dotnet build src/Helix.App/Helix.App.csproj
@@ -30,7 +30,7 @@ dotnet build src/Helix.App/Helix.App.csproj
 
 ## Run
 
-On Windows, open `Helix.slnx` in Visual Studio 2022, set `Helix.App` as the startup project and press <Kbd>F5</Kbd>. The app is run from the IDE rather than with `dotnet run` because of its Windows packaging configuration.
+On Windows, open `Helix.slnx` in Visual Studio 2026, set `Helix.App` as the startup project and press <Kbd>F5</Kbd>. The app is run from the IDE rather than with `dotnet run` because of its Windows packaging configuration.
 
 ## Test
 
@@ -46,7 +46,7 @@ dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --filter "F
 
 | Suite | Target | Runs on |
 | --- | --- | --- |
-| `Application.UnitTests` | `net10.0` | anywhere |
+| `Application.UnitTests` | `net11.0` | anywhere |
 | `Infrastructure.UnitTests` | Windows head | Windows |
 | `ArchitectureTests` | Windows head | Windows |
 
@@ -75,7 +75,7 @@ dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --filter "F
 Migrations live in `Helix.Infrastructure`, but the EF tooling is referenced from `Helix.App`, so the app is the startup project, and `--framework` is required because the projects are multi-targeted:
 
 ```sh
-dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App --framework net10.0-windows10.0.19041.0
+dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App --framework net11.0-windows10.0.19041.0
 ```
 
 `./scripts/migration.ps1 add <Name>` does the same and restores `dotnet-ef` from the local tool manifest first.
@@ -98,7 +98,7 @@ Every push and pull request to `main` runs `.github/workflows/ci.yml`:
 | **Build (macOS)** | `macos-latest` | compile-verifies the Mac Catalyst head and runs the Application suite |
 
 <Callout>
-The macOS jobs install the MAUI workload pinned to `10.0.401`, because a newer workload set requires an Xcode the runner image does not have yet. Lift the pin once the image catches up.
+The macOS jobs install the MAUI workload unpinned. The .NET 11 Mac Catalyst SDK needs Xcode 27; if the runner image falls behind, pin the workload to the last set that matches it until the image catches up.
 </Callout>
 
 CodeQL scans the C# sources and the workflows on every push, every pull request and weekly, and Dependabot opens grouped weekly updates for NuGet packages and GitHub Actions.

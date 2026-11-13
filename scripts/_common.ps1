@@ -9,8 +9,8 @@ $script:RepoRoot = Split-Path -Parent $PSScriptRoot
 $script:Solution = Join-Path $RepoRoot 'Helix.slnx'
 $script:AppProject = Join-Path $RepoRoot 'src/Helix.App/Helix.App.csproj'
 $script:InfrastructureProject = Join-Path $RepoRoot 'src/Helix.Infrastructure'
-$script:WindowsFramework = 'net10.0-windows10.0.19041.0'
-$script:MacFramework = 'net10.0-maccatalyst'
+$script:WindowsFramework = 'net11.0-windows10.0.19041.0'
+$script:MacFramework = 'net11.0-maccatalyst'
 
 $script:TestProjects = [ordered]@{
     Application    = Join-Path $RepoRoot 'tests/Application.UnitTests/Application.UnitTests.csproj'

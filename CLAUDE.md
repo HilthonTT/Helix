@@ -9,8 +9,8 @@ broke on a real NAS.
 
 Helix is a .NET MAUI desktop app for managing connections to NAS drives. Two heads:
 
-- **Windows** — `net10.0-windows10.0.19041.0`. Open `Helix.slnx` in Visual Studio 2022; run `Helix.App` from there, not `dotnet run`.
-- **macOS** — `net10.0-maccatalyst`. Build on a Mac with Xcode; Catalyst cannot be compiled from Windows.
+- **Windows** — `net11.0-windows10.0.19041.0`. Open `Helix.slnx` in Visual Studio 2026; run `Helix.App` from there, not `dotnet run`.
+- **macOS** — `net11.0-maccatalyst`. Build on a Mac with Xcode; Catalyst cannot be compiled from Windows.
 
 `Helix.App` and `Helix.Infrastructure` gate their target frameworks on the host OS, so
 `dotnet build` picks the right head without `-f`. Adding a target framework to one means adding
@@ -22,7 +22,7 @@ it to both.
 dotnet build Helix.slnx
 dotnet test Helix.slnx
 dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --filter "FullyQualifiedName~CreateDriveTests"
-dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App --framework net10.0-windows10.0.19041.0
+dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App --framework net11.0-windows10.0.19041.0
 ```
 
 `scripts/` wraps these in PowerShell (5.1 or 7, each with `Get-Help`) and picks the right
@@ -36,16 +36,16 @@ projects for the host OS:
 ./scripts/migration.ps1 add <Name> | remove | list
 ```
 
-- `Application.UnitTests` targets plain `net10.0` and runs anywhere. `Infrastructure.UnitTests`
+- `Application.UnitTests` targets plain `net11.0` and runs anywhere. `Infrastructure.UnitTests`
   and `ArchitectureTests` target the Windows head. On a Mac: build `src/Helix.App/Helix.App.csproj`
   and run only the Application suite.
 - Test projects use **`xunit.v3.mtp-off`** (VSTest, so `--filter` and `--logger trx` work). Plain
-  `xunit.v3` turns on MTP and the .NET 10 SDK then refuses VSTest. `xUnit1051` is suppressed.
+  `xunit.v3` turns on MTP and the .NET 11 SDK then refuses VSTest. `xUnit1051` is suppressed.
 - `Infrastructure.UnitTests` and `ArchitectureTests` set `WindowsAppSdkBootstrapInitialize=false`;
   without it the Windows App SDK bootstrapper hangs the test executable on CI runners.
 - CI: Windows runs all three suites; macOS compile-verifies Catalyst and runs the Application
-  suite. The macOS jobs pin the MAUI workload to **10.0.401** (10.0.401.1 needs Xcode 27, which
-  `macos-latest` lacks). Lift the pin once the image carries it.
+  suite. The macOS jobs install the MAUI workload unpinned; MAUI 11's Catalyst SDK needs Xcode 27
+  on the runner (see `build-and-architecture.md` if `macos-latest` falls behind again).
 
 ## Documentation website
 

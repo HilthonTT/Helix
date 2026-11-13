@@ -29,10 +29,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup .NET 10
+      - name: Setup .NET 11
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Cache NuGet packages
         uses: actions/cache@v6
@@ -83,10 +83,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup .NET 10
+      - name: Setup .NET 11
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Cache NuGet packages
         uses: actions/cache@v6
@@ -97,7 +97,7 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Install .NET MAUI workload
-        run: dotnet workload install maui --version 10.0.401
+        run: dotnet workload install maui
 
       - name: Build Mac Catalyst head
         run: >-

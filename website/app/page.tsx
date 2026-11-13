@@ -334,7 +334,7 @@ export default function Home() {
               Unzip it, register, add a drive.
             </h2>
             <p className="relative mx-auto mt-4 max-w-xl text-mist-300">
-              Releases are self-contained: nothing to install beside them. Or build it yourself with the .NET 10 SDK and
+              Releases are self-contained: nothing to install beside them. Or build it yourself with the .NET 11 SDK and
               the MAUI workload.
             </p>
             <div className="relative mt-8 flex justify-center">

@@ -273,7 +273,7 @@ public sealed partial class HomePage : ContentPage
             this, async (r, m) => await _modals.ToggleAsync(AdoptMappings, m.Value));
     }
 
-    private async void Preferences_Clicked(object sender, EventArgs e)
+    private async void Preferences_Clicked(object? sender, EventArgs e)
     {
         if (_viewModel.GoToSettingsCommand.CanExecute(null))
         {
@@ -281,7 +281,7 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    private void AddDrive_Clicked(object sender, EventArgs e)
+    private void AddDrive_Clicked(object? sender, EventArgs e)
     {
         if (_viewModel.OpenCreateDriveModalCommand.CanExecute(null))
         {
@@ -289,9 +289,9 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    private void Search_Clicked(object sender, EventArgs e) => DriveSearch.Focus();
+    private void Search_Clicked(object? sender, EventArgs e) => DriveSearch.Focus();
 
-    private void DriveGroups_Clicked(object sender, EventArgs e)
+    private void DriveGroups_Clicked(object? sender, EventArgs e)
     {
         if (_viewModel.OpenDriveGroupsModalCommand.CanExecute(null))
         {
@@ -299,7 +299,7 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    private void Schedules_Clicked(object sender, EventArgs e)
+    private void Schedules_Clicked(object? sender, EventArgs e)
     {
         if (_viewModel.OpenSchedulesModalCommand.CanExecute(null))
         {
@@ -307,7 +307,7 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    private void ExportDrives_Clicked(object sender, EventArgs e)
+    private void ExportDrives_Clicked(object? sender, EventArgs e)
     {
         if (_viewModel.ExportDrivesCommand.CanExecute(null))
         {
@@ -315,7 +315,7 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    private void AdoptMappings_Clicked(object sender, EventArgs e)
+    private void AdoptMappings_Clicked(object? sender, EventArgs e)
     {
         if (_viewModel.OpenAdoptMappingsModalCommand.CanExecute(null))
         {
@@ -323,7 +323,7 @@ public sealed partial class HomePage : ContentPage
         }
     }
 
-    private void ImportDrives_Clicked(object sender, EventArgs e)
+    private void ImportDrives_Clicked(object? sender, EventArgs e)
     {
         if (_viewModel.ImportDrivesCommand.CanExecute(null))
         {

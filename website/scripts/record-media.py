@@ -67,7 +67,7 @@ def publish():
     subprocess.run(
         [
             "dotnet", "publish", str(ROOT / "src" / "Helix.App" / "Helix.App.csproj"),
-            "-c", "Release", "-f", "net10.0-windows10.0.19041.0",
+            "-c", "Release", "-f", "net11.0-windows10.0.19041.0",
             "-p:RuntimeIdentifierOverride=win-x64",
             "-p:Company=HelixMedia", "-p:AssemblyTitle=HelixMedia",
             "-o", str(APP_DIR), "-v", "q", "-nologo",

@@ -52,8 +52,8 @@ See [Installation](https://hilthontt.github.io/Helix/docs/installation/) for det
 
 ## Build from source
 
-Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download) and the MAUI workload
-(Visual Studio 2022 on Windows, Xcode on macOS).
+Requires the [.NET 11 SDK](https://dotnet.microsoft.com/download) and the MAUI workload
+(Visual Studio 2026 on Windows, Xcode on macOS).
 
 ```bash
 git clone https://github.com/HilthonTT/Helix.git

@@ -23,7 +23,7 @@ dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --filter "F
 EF Core migrations target `Helix.Infrastructure` but `Microsoft.EntityFrameworkCore.Tools` is referenced from `Helix.App`, so migrations are run with the App as the startup project:
 
 ```bash
-dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App --framework net10.0-windows10.0.19041.0
+dotnet ef migrations add <Name> --project src/Helix.Infrastructure --startup-project src/Helix.App --framework net11.0-windows10.0.19041.0
 ```
 
 `scripts/` wraps these in PowerShell (5.1 or 7), each with `Get-Help` documentation. They
@@ -41,10 +41,10 @@ suite:
 `dotnet ef` also needs `--framework` now that the projects are multi-targeted; `migration.ps1`
 passes the host's head.
 
-Running the MAUI app itself is normally done via Visual Studio 2022 (`Helix.App` startup project), not `dotnet run`, because of the MAUI/Windows packaging configuration.
+Running the MAUI app itself is normally done via Visual Studio 2026 (`Helix.App` startup project), not `dotnet run`, because of the MAUI/Windows packaging configuration.
 
-`Application.UnitTests` targets plain `net10.0` and runs anywhere; `Infrastructure.UnitTests`
-and `ArchitectureTests` target `net10.0-windows10.0.19041.0`, because the assemblies they load
+`Application.UnitTests` targets plain `net11.0` and runs anywhere; `Infrastructure.UnitTests`
+and `ArchitectureTests` target `net11.0-windows10.0.19041.0`, because the assemblies they load
 are the Windows head. On a Mac, build the app project on its own and run the Application suite
 — the solution also contains those Windows-only projects:
 
@@ -56,7 +56,7 @@ dotnet test tests/Application.UnitTests/Application.UnitTests.csproj
 The test projects use **`xunit.v3.mtp-off`**, xunit v3 without Microsoft Testing Platform,
 so `dotnet test` keeps running them through VSTest and `--filter "FullyQualifiedName~…"` and
 `--logger trx` (which `test.ps1` and CI pass) keep working. Plain `xunit.v3` turns MTP on,
-and the .NET 10 SDK then refuses the VSTest path outright. `xUnit1051` (pass
+and the .NET 11 SDK then refuses the VSTest path outright. `xUnit1051` (pass
 `TestContext.Current.CancellationToken`) is suppressed: the handlers under test run against
 substitutes and have nothing to cancel.
 
@@ -71,10 +71,13 @@ host as libraries and the bootstrapper never ran.
 CI covers both: a Windows job builds and runs all three suites, a macOS job compile-verifies the
 Catalyst head and runs the Application suite.
 
-The macOS jobs in `ci.yml` and `release.yml` install the MAUI workload **pinned to 10.0.401**.
-Workload set 10.0.401.1 brought the Mac Catalyst 27.0 SDK, which requires Xcode 27, and the
-`macos-latest` image tops out at Xcode 26.6 — an unpinned install failed the build on the SDK's
-Xcode check. Lift the pin once the runner image carries the Xcode the latest set asks for.
+The macOS jobs in `ci.yml` and `release.yml` install the MAUI workload unpinned. Under .NET 10
+they were pinned to workload set 10.0.401, because 10.0.401.1 brought the Mac Catalyst 27.0 SDK,
+which requires Xcode 27, while `macos-latest` topped out at Xcode 26.6. The .NET 11 SDK cannot
+install a 10.x workload set, so the pin went with the upgrade to .NET 11, whose Catalyst SDK needs
+Xcode 27 as well. If `macos-latest` lags behind the Xcode the current workload set asks for, the
+build fails on the SDK's Xcode check; pin the workload to the last set that matches the image
+(`dotnet workload install maui --version <set>`) until the image catches up.
 
 ## Documentation website
 
