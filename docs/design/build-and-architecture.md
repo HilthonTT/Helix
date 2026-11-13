@@ -91,6 +91,11 @@ While the variable is off, a release has no `-macos.` asset, so a Mac install se
 version, finds no asset and offers only the release page (see `updates.md`). Say in the release
 notes that the macOS build follows.
 
+The .NET 11 Catalyst SDK also refuses a `SupportedOSPlatformVersion` below **17.0** for
+`maccatalyst` (it was 15.0 under .NET 10). Both `Helix.App` and `Helix.Infrastructure` set 17.0.
+Mac Catalyst 17 runs on macOS 14, below the macOS 15 the docs already state, so no supported Mac
+is dropped.
+
 Once `macos-latest` carries Xcode 27.2: set `HELIX_MACOS_RELEASE` to `true`, remove
 `-p:ValidateXcodeVersion=false` from `ci.yml`, and shorten this section.
 
