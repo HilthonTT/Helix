@@ -80,12 +80,15 @@ stops at 26.6), so there is no set to pin back to, and the macOS jobs install th
 The SDK's check (`_ValidateXcodeVersion`, error E0191) can be skipped with
 `-p:ValidateXcodeVersion=false`, and the two workflows treat that differently on purpose:
 
-- **`ci.yml`** passes it. That job only proves the Catalyst head compiles and runs the Application
-  suite; nothing it builds reaches a user. Skipping the check is not enough on its own: a Debug
-  Catalyst build links nothing, so the native step registers every binding in the 27.2 SDK and
-  stops with MT180 for want of its headers. The job therefore also passes `-p:MtouchLink=SdkOnly`,
-  which trims the platform bindings Helix never calls before that step. Neither flag belongs in
-  the project file, where it would change local Mac builds that have the right Xcode.
+- **`ci.yml`** passes it, and runs only the `Compile` target of the Catalyst head
+  (`--framework net11.0-maccatalyst -t:Compile`; the framework is needed because the outer,
+  multi-targeting build has no `Compile` target). That still builds every referenced project and
+  compiles all C# and the source-generated XAML for Catalyst. It cannot go further on Xcode 26.6:
+  a full Debug build fails with MT180 because nothing is linked and the native step needs headers
+  for every 27.2 binding, and with `MtouchLink=SdkOnly` the registrar steps still fail with MT4162,
+  because MAUI subclasses `UIView` and `UITextView`, whose 27.x members cannot be registered
+  against the older SDK. What the compile-only job no longer catches is anything in the bundle
+  stage, such as a `MAUIR0001` from an SVG with a `<filter>`; review such SVGs by hand meanwhile.
 - **`release.yml`** does not. A Catalyst build linked against an older Xcode than its SDK was made
   for is unsupported and cannot be tested in CI, and the zip goes to people's Macs. The
   `publish-macos` job instead runs only when the repository variable `HELIX_MACOS_RELEASE` is
@@ -100,8 +103,8 @@ The .NET 11 Catalyst SDK also refuses a `SupportedOSPlatformVersion` below **17.
 Mac Catalyst 17 runs on macOS 14, below the macOS 15 the docs already state, so no supported Mac
 is dropped.
 
-Once `macos-latest` carries Xcode 27.2: set `HELIX_MACOS_RELEASE` to `true`, remove
-`-p:ValidateXcodeVersion=false` and `-p:MtouchLink=SdkOnly` from `ci.yml`, and shorten this section.
+Once `macos-latest` carries Xcode 27.2: set `HELIX_MACOS_RELEASE` to `true`, restore
+the full `dotnet build` of the Catalyst head in `ci.yml` (no `-t:Compile`, no `ValidateXcodeVersion`), and shorten this section.
 
 ## Documentation website
 
