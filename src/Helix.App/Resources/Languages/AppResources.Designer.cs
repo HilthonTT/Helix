@@ -3540,5 +3540,41 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("ReliabilityEstateNoDrops", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Find on network.
+        /// </summary>
+        internal static string FindServers {
+            get {
+                return ResourceManager.GetString("FindServers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Searching the network for file servers….
+        /// </summary>
+        internal static string SearchingNetwork {
+            get {
+                return ResourceManager.GetString("SearchingNetwork", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing on this network answered as a file server. Type its address instead..
+        /// </summary>
+        internal static string NoServersFound {
+            get {
+                return ResourceManager.GetString("NoServersFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to already added as {0}.
+        /// </summary>
+        internal static string ServerAlreadyAdded {
+            get {
+                return ResourceManager.GetString("ServerAlreadyAdded", resourceCulture);
+            }
+        }
     }
 }

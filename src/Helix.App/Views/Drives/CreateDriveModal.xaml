@@ -74,11 +74,51 @@
 
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l10n:Translate NasHost}" Style="{StaticResource FieldLabel}"/>
-                        <Border Style="{StaticResource Field}">
-                            <Entry Placeholder="{l10n:Translate AddNasHostPlaceholder}"
-                                   Text="{Binding Form.Host}"
-                                   IsEnabled="{Binding IsNotBusy}"/>
-                        </Border>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Border Style="{StaticResource Field}">
+                                <Entry Placeholder="{l10n:Translate AddNasHostPlaceholder}"
+                                       Text="{Binding Form.Host}"
+                                       IsEnabled="{Binding IsNotBusy}"/>
+                            </Border>
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource ButtonSecondary}"
+                                    Text="{l10n:Translate FindServers}"
+                                    Command="{Binding FindServersCommand}"
+                                    IsEnabled="{Binding IsNotBusy}"/>
+                        </Grid>
+
+                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsDiscovering}">
+                            <ActivityIndicator IsRunning="{Binding IsDiscovering}"
+                                               HeightRequest="16"
+                                               WidthRequest="16"
+                                               VerticalOptions="Center"/>
+                            <Label Text="{l10n:Translate SearchingNetwork}"
+                                   Style="{StaticResource Caption}"
+                                   VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+
+                        <VerticalStackLayout Spacing="2"
+                                             IsVisible="{Binding HasServers}"
+                                             BindableLayout.ItemsSource="{Binding Servers}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:ServerOption">
+                                    <Border Style="{StaticResource Row}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CreateDriveViewModel}}, Path=PickServerCommand, x:DataType=vm:CreateDriveViewModel}"
+                                                                  CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout Spacing="2" InputTransparent="True">
+                                            <Label Text="{Binding Title}" Style="{StaticResource BodyStrong}"/>
+                                            <Label Text="{Binding Detail}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <Label Text="{l10n:Translate NoServersFound}"
+                               Style="{StaticResource Caption}"
+                               IsVisible="{Binding ShowNoServers}"/>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="6" IsVisible="{Binding Form.IsWebDav}">

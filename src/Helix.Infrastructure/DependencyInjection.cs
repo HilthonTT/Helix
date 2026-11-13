@@ -120,6 +120,8 @@ public static class DependencyInjection
 
         services.AddSingleton<IWakeOnLan, WakeOnLan>();
 
+        services.AddSingleton<INasDiscovery, NasDiscovery>();
+
         services.AddSingleton<IDriveRouter, DriveRouter>();
 
         services.AddSingleton<IHostDiagnostics, HostDiagnostics>();

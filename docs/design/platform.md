@@ -40,6 +40,9 @@ throws, so a new head fails at composition rather than at first use):
 lives, after the two connectors and the two probes. It is asked of the connector because
 the connector is what put it there; it answers for any letter, mounted or not.
 
+`INasDiscovery` is not a seam either: mDNS, the port sweep and NetBIOS are plain sockets on
+both heads. Its design is in `drives.md`.
+
 `IWakeOnLan` is not a seam either. Sending the packet is a UDP broadcast on both heads; only
 the ARP lookup is Windows-only, and it sits behind an `#if WINDOWS` inside the one
 implementation, the same way `WindowsNetworkLocation.ProfileName` does, with `CanLookUp`

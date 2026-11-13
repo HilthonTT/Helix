@@ -80,6 +80,7 @@ public static class DependencyInjection
         services.AddScoped<GetDrives>();
         services.AddScoped<GetUnmanagedMappings>();
         services.AddScoped<ListShares>();
+        services.AddScoped<DiscoverServers>();
         services.AddScoped<LookUpMacAddress>();
         services.AddScoped<MarkDriveConnected>();
         services.AddScoped<UpdateDrive>();

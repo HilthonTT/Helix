@@ -1220,4 +1220,16 @@
   <data name="ReliabilityEstateNoDrops" xml:space="preserve">
     <value>No drive dropped in this period.</value>
   </data>
+  <data name="FindServers" xml:space="preserve">
+    <value>Find on network</value>
+  </data>
+  <data name="SearchingNetwork" xml:space="preserve">
+    <value>Searching the network for file servers…</value>
+  </data>
+  <data name="NoServersFound" xml:space="preserve">
+    <value>Nothing on this network answered as a file server. Type its address instead.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>already added as {0}</value>
+  </data>
 </root>

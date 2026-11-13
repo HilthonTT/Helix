@@ -1220,4 +1220,16 @@
   <data name="ReliabilityEstateNoDrops" xml:space="preserve">
     <value>Aucun lecteur n’a décroché sur cette période.</value>
   </data>
+  <data name="FindServers" xml:space="preserve">
+    <value>Rechercher sur le réseau</value>
+  </data>
+  <data name="SearchingNetwork" xml:space="preserve">
+    <value>Recherche de serveurs de fichiers sur le réseau…</value>
+  </data>
+  <data name="NoServersFound" xml:space="preserve">
+    <value>Aucun serveur de fichiers n'a répondu sur ce réseau. Saisissez plutôt son adresse.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>déjà ajouté comme {0}</value>
+  </data>
 </root>

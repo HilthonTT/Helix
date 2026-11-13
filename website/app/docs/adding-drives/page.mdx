@@ -46,6 +46,14 @@ Pressing a drive, a group, a selection or **Connect all** always connects, whate
 
 **Test connection** checks the address, share and credentials against the server. Nothing is mounted and no letter is claimed, so it is safe on a half-finished form.
 
+## Find the NAS on the network
+
+Not sure of the address? **Find on network**, next to the address field, searches the network this computer is on for anything that shares files. That includes devices that announce themselves (most Synology, QNAP, TrueNAS and Macs do) and anything that answers on the Windows file-sharing port. It takes a few seconds. Each result shows its name, address and, when the NAS reports it, its model. A server you already have drives on is marked with their letters. Press one to fill in its address.
+
+The address goes in, not the name. If the NAS's address changes from time to time, type the name shown in the list instead, or switch on **Connect using the server name**.
+
+Only your own network is searched. A NAS you reach over a VPN or Tailscale has to be typed in.
+
 ## Browse a server's shares
 
 On Windows, once the address and credentials are filled in, **Browse shares** lists what the server shares. Tick one to fill in the name. Tick several and **Save** creates one drive per share: the first on the letter you chose, the rest on the next free letters counting down. Shares you already have as drives are shown with their letter and cannot be ticked.

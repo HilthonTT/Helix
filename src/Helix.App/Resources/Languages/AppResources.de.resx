@@ -1220,4 +1220,16 @@
   <data name="ReliabilityEstateNoDrops" xml:space="preserve">
     <value>In diesem Zeitraum ist kein Laufwerk weggefallen.</value>
   </data>
+  <data name="FindServers" xml:space="preserve">
+    <value>Im Netzwerk suchen</value>
+  </data>
+  <data name="SearchingNetwork" xml:space="preserve">
+    <value>Netzwerk wird nach Dateiservern durchsucht…</value>
+  </data>
+  <data name="NoServersFound" xml:space="preserve">
+    <value>In diesem Netzwerk hat kein Dateiserver geantwortet. Geben Sie die Adresse stattdessen ein.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>bereits hinzugefügt als {0}</value>
+  </data>
 </root>

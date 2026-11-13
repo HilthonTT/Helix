@@ -25,6 +25,7 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
         HideSecrets = true;
         AvailableLetters = [];
         Shares = [];
+        Servers = [];
         NetworkPin = new();
 
         RegisterMessages();
@@ -43,6 +44,7 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
         newValue.PropertyChanged += OnFormPropertyChanged;
 
         ClearShares();
+        ClearServers();
     }
 
     private void OnFormPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -135,6 +137,67 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
     {
         Shares = [];
         SharesListed = false;
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasServers))]
+    [NotifyPropertyChangedFor(nameof(ShowNoServers))]
+    public partial ObservableCollection<ServerOption> Servers { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowNoServers))]
+    public partial bool ServersListed { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsDiscovering { get; set; }
+
+    public bool HasServers => Servers.Count > 0;
+
+    public bool ShowNoServers => ServersListed && !HasServers;
+
+    private void ClearServers()
+    {
+        Servers = [];
+        ServersListed = false;
+    }
+
+    [RelayCommand]
+    private async Task FindServersAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            IsDiscovering = true;
+            ClearServers();
+
+            Result<List<DiscoveredServer>> result = await Task.Run(
+                () => ScopedHandler.HandleAsync((DiscoverServers h) => h.Handle()));
+            if (result.IsFailure)
+            {
+                await DisplayErrorAsync(result.Error);
+                return;
+            }
+
+            Servers = [.. result.Value.Select(server => new ServerOption(server))];
+            ServersListed = true;
+        }
+        finally
+        {
+            IsDiscovering = false;
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void PickServer(ServerOption server)
+    {
+        Form.Host = server.Address;
+        ClearServers();
     }
 
     [RelayCommand]

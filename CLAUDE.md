@@ -223,7 +223,7 @@ Each block is the short form; the linked doc has the why.
 Exactly seven abstractions are per-OS, bound in `AddPlatformServices()` behind `#if WINDOWS` /
 `#elif MACCATALYST` / `#else throw`: `INasConnector`, `IStartupService`, `IDesktopService`,
 `ITrayIcon`, `IStorageProbe`, `IIdleTimeProvider`, `INetworkLocation`. `IFileBrowser`,
-`IHostDiagnostics`, `IDriveRouter`, `IHostReachability` and `IWakeOnLan` are single
+`IHostDiagnostics`, `IDriveRouter`, `IHostReachability`, `IWakeOnLan` and `INasDiscovery` are single
 implementations registered outside it. Windows types carry `[SupportedOSPlatform("windows")]`;
 macOS types are wrapped in `#if MACCATALYST`. The Catalyst head has the App Sandbox disabled.
 
@@ -239,7 +239,7 @@ macOS types are wrapped in `#if MACCATALYST`. The Catalyst head has the App Sand
 | `docs/design/notifications.md` | logging, `Notifier`, banners, retracting |
 | `docs/design/connectivity.md` | `ReconnectDrive`, watchdog, reachability, Wake-on-LAN, resume, suppression, home network, away address, late mounts |
 | `docs/design/diagnostics.md` | `DiagnoseDrive`, reliability figures |
-| `docs/design/drives.md` | groups, selections, import/vault, `IsMountedFrom` vs `IsLiveFrom`, share browsing, adopting, credentials, WebDAV/NFS |
+| `docs/design/drives.md` | groups, selections, import/vault, network discovery, `IsMountedFrom` vs `IsLiveFrom`, share browsing, adopting, credentials, WebDAV/NFS |
 | `docs/design/schedules.md` | `Schedule`, `RunDueSchedules` |
 | `docs/design/storage.md` | low-space alerts, storage history, forecasts, Insights |
 | `docs/design/lists.md` | filtering, sorting, compact card, keyboard rows, audit paging |

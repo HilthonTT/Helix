@@ -169,6 +169,39 @@ record deleted out from under a live mapping leaves a letter nothing in Helix ca
 
 ## Adding drives from what is already there
 
+**Finding the server.** "Find on network" on the add sheet runs `DiscoverServers` over
+`INasDiscovery`. It uses two sources at once and merges them by IPv4 address.
+
+- **mDNS.** A one-shot query for `_smb._tcp.local` and `_device-info._tcp.local` PTRs, sent to
+  `224.0.0.251:5353` from an **ephemeral port** on each local IPv4 address. Coming from a port
+  other than 5353 makes it a legacy unicast query: responders (Avahi on Synology/QNAP/TrueNAS,
+  mDNSResponder on Macs) answer straight back to that socket. So Helix never binds 5353, which
+  Windows' own mDNS service and Bonjour already hold. It asks twice, 600 ms apart, and listens
+  for 2.5 s. The instance name becomes the display name, and `model=` from the matching
+  device-info TXT becomes the model when the NAS sends it (the test QNAP does not).
+- **A sweep of TCP 445** over the local subnets, 96 connects at a time, 800 ms each. mDNS
+  alone misses a NAS with Bonjour switched off, and every Windows file server. Subnets come from
+  the adapters that have a gateway, which leaves out Hyper-V and WSL switches; if none has one,
+  all adapters are used. A subnet wider than /24 is swept only in the /24 around this machine's
+  address, and the whole sweep stops at 1,024 hosts. A /16 home lab would otherwise be 65,000
+  connects. Link-local, loopback, /31 and /32 are skipped.
+
+Sweep answers without an mDNS name are named over NetBIOS node status (UDP 137, the
+`<20>` file-server name, then `<00>`), then by reverse DNS. This machine's own addresses are
+dropped, so a Mac sharing its own folders does not list itself.
+
+The pick fills the **address**, not the name: it is the one spelling that mounts on both heads
+without depending on name resolution. Matching against existing drives (the "already added as
+M:, P:" note) uses every spelling discovery saw: the address, the instance and NetBIOS name, the
+`.local` name with and without its suffix, and the first label of the drive's host. The match is
+deliberately looser than `Drive.IsOnSameServerAs`, because it is only a hint and never decides
+anything. Discovery never fails: a broken source logs a warning and the other one still answers.
+Nothing in its log line names a host.
+
+`INasDiscovery` is one implementation for both heads (plain sockets), registered outside
+`AddPlatformServices()` like `IWakeOnLan`. On macOS the first use raises the Local Network
+privacy prompt, which `NSLocalNetworkUsageDescription` in `Info.plist` explains.
+
 **Browsing a server's shares.** The add-drive sheet lists what the server shares, given its
 host and credentials, and a share ticked there fills the name; ticking several creates one
 drive per share through `CreateDrives`, the first on the chosen letter and the rest on the

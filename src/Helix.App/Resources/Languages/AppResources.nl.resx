@@ -1220,4 +1220,16 @@
   <data name="ReliabilityEstateNoDrops" xml:space="preserve">
     <value>Geen enkele schijf is in deze periode weggevallen.</value>
   </data>
+  <data name="FindServers" xml:space="preserve">
+    <value>Zoeken op netwerk</value>
+  </data>
+  <data name="SearchingNetwork" xml:space="preserve">
+    <value>Netwerk doorzoeken naar bestandsservers…</value>
+  </data>
+  <data name="NoServersFound" xml:space="preserve">
+    <value>Niets op dit netwerk antwoordde als bestandsserver. Typ het adres zelf.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>al toegevoegd als {0}</value>
+  </data>
 </root>

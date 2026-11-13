@@ -1220,4 +1220,16 @@
   <data name="ReliabilityEstateNoDrops" xml:space="preserve">
     <value>Tidak ada drive yang terputus dalam periode ini.</value>
   </data>
+  <data name="FindServers" xml:space="preserve">
+    <value>Cari di jaringan</value>
+  </data>
+  <data name="SearchingNetwork" xml:space="preserve">
+    <value>Mencari server berkas di jaringan…</value>
+  </data>
+  <data name="NoServersFound" xml:space="preserve">
+    <value>Tidak ada server berkas yang menjawab di jaringan ini. Ketik alamatnya secara manual.</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>sudah ditambahkan sebagai {0}</value>
+  </data>
 </root>

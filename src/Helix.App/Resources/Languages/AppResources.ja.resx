@@ -1220,4 +1220,16 @@
   <data name="ReliabilityEstateNoDrops" xml:space="preserve">
     <value>この期間に切断されたドライブはありません。</value>
   </data>
+  <data name="FindServers" xml:space="preserve">
+    <value>ネットワークで検索</value>
+  </data>
+  <data name="SearchingNetwork" xml:space="preserve">
+    <value>ネットワーク上のファイルサーバーを検索しています…</value>
+  </data>
+  <data name="NoServersFound" xml:space="preserve">
+    <value>このネットワークで応答したファイルサーバーはありません。アドレスを直接入力してください。</value>
+  </data>
+  <data name="ServerAlreadyAdded" xml:space="preserve">
+    <value>{0} として追加済み</value>
+  </data>
 </root>
