@@ -45,9 +45,10 @@ projects for the host OS:
   without it the Windows App SDK bootstrapper hangs the test executable on CI runners.
 - CI: Windows runs all three suites; macOS compile-verifies Catalyst and runs the Application
   suite. Every .NET 11 Catalyst SDK needs Xcode 27.2 and `macos-latest` has 26.6, so the CI build
-  passes `-p:ValidateXcodeVersion=false` (compile check only) and the macOS **release** job runs
-  only when the repo variable `HELIX_MACOS_RELEASE` is `true`. Never skip the Xcode check in
-  `release.yml`; set the variable once the image carries Xcode 27.2, then drop the CI flag.
+  passes `-p:ValidateXcodeVersion=false -p:MtouchLink=SdkOnly` (compile check only) and the macOS
+  **release** job runs only when the repo variable `HELIX_MACOS_RELEASE` is `true`. Never skip the
+  Xcode check in `release.yml`; set the variable once the image carries Xcode 27.2, then drop both
+  CI flags.
 
 ## Documentation website
 

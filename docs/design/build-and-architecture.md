@@ -81,7 +81,11 @@ The SDK's check (`_ValidateXcodeVersion`, error E0191) can be skipped with
 `-p:ValidateXcodeVersion=false`, and the two workflows treat that differently on purpose:
 
 - **`ci.yml`** passes it. That job only proves the Catalyst head compiles and runs the Application
-  suite; nothing it builds reaches a user.
+  suite; nothing it builds reaches a user. Skipping the check is not enough on its own: a Debug
+  Catalyst build links nothing, so the native step registers every binding in the 27.2 SDK and
+  stops with MT180 for want of its headers. The job therefore also passes `-p:MtouchLink=SdkOnly`,
+  which trims the platform bindings Helix never calls before that step. Neither flag belongs in
+  the project file, where it would change local Mac builds that have the right Xcode.
 - **`release.yml`** does not. A Catalyst build linked against an older Xcode than its SDK was made
   for is unsupported and cannot be tested in CI, and the zip goes to people's Macs. The
   `publish-macos` job instead runs only when the repository variable `HELIX_MACOS_RELEASE` is
@@ -97,7 +101,7 @@ Mac Catalyst 17 runs on macOS 14, below the macOS 15 the docs already state, so 
 is dropped.
 
 Once `macos-latest` carries Xcode 27.2: set `HELIX_MACOS_RELEASE` to `true`, remove
-`-p:ValidateXcodeVersion=false` from `ci.yml`, and shorten this section.
+`-p:ValidateXcodeVersion=false` and `-p:MtouchLink=SdkOnly` from `ci.yml`, and shorten this section.
 
 ## Documentation website
 
