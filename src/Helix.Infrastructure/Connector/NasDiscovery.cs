@@ -46,7 +46,7 @@ internal class NasDiscovery(ILogger<NasDiscovery> logger) : INasDiscovery
 
         foreach (MdnsMessage.Service service in services)
         {
-            IPAddress? address = service.Address ?? await AddressOfAsync(service.HostName, cancellationToken);
+            IPAddress? address = service.Address ?? await AddressOfAsync(service.HostName, subnets, cancellationToken);
 
             if (address is null || own.Contains(address))
             {
@@ -179,7 +179,10 @@ internal class NasDiscovery(ILogger<NasDiscovery> logger) : INasDiscovery
         }
     }
 
-    protected virtual async Task<IPAddress?> AddressOfAsync(string? hostName, CancellationToken cancellationToken)
+    protected virtual async Task<IPAddress?> AddressOfAsync(
+        string? hostName,
+        IReadOnlyList<LocalSubnets.Subnet> subnets,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(hostName))
         {
@@ -191,7 +194,7 @@ internal class NasDiscovery(ILogger<NasDiscovery> logger) : INasDiscovery
             IPAddress[] addresses = await Dns.GetHostAddressesAsync(hostName, AddressFamily.InterNetwork, cancellationToken)
                 .WaitAsync(NameTimeout, cancellationToken);
 
-            return addresses.FirstOrDefault();
+            return LocalSubnets.Preferred(addresses, subnets);
         }
         catch (Exception ex) when (ex is SocketException or TimeoutException or ArgumentException)
         {
@@ -207,7 +210,7 @@ internal class NasDiscovery(ILogger<NasDiscovery> logger) : INasDiscovery
         {
             List<MdnsMessage.Record> records = await QueryMdnsAsync(subnets, cancellationToken);
 
-            return MdnsMessage.ResolveSmbServices(records);
+            return MdnsMessage.ResolveSmbServices(records, subnets);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

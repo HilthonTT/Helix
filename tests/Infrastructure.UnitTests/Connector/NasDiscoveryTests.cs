@@ -51,7 +51,10 @@ public sealed class NasDiscoveryTests
         protected override Task<string?> ReverseNameOfAsync(IPAddress address, CancellationToken cancellationToken) =>
             Task.FromResult(ReverseNames.GetValueOrDefault(address.ToString()));
 
-        protected override Task<IPAddress?> AddressOfAsync(string? hostName, CancellationToken cancellationToken) =>
+        protected override Task<IPAddress?> AddressOfAsync(
+            string? hostName,
+            IReadOnlyList<LocalSubnets.Subnet> subnets,
+            CancellationToken cancellationToken) =>
             Task.FromResult(hostName is not null && LocalNames.TryGetValue(hostName, out string? address)
                 ? IPAddress.Parse(address)
                 : null);
@@ -109,6 +112,20 @@ public sealed class NasDiscoveryTests
         IReadOnlyList<DiscoveredHost> hosts = await discovery.DiscoverAsync();
 
         hosts.Should().ContainSingle().Which.Address.Should().Be("192.0.2.30");
+    }
+
+    [Fact]
+    public async Task DiscoverAsync_Should_UseTheAnnouncedAddressOnTheLocalNetwork()
+    {
+        var discovery = new FakeNasDiscovery();
+        Announce(discovery, "Studio", "ds920.local", "172.17.0.1");
+        discovery.Announced.Add(new("ds920.local", MdnsMessage.TypeA, Address: IPAddress.Parse("169.254.10.4")));
+        discovery.Announced.Add(new("ds920.local", MdnsMessage.TypeA, Address: IPAddress.Parse("192.0.2.10")));
+        discovery.SmbHosts.Add("192.0.2.10");
+
+        IReadOnlyList<DiscoveredHost> hosts = await discovery.DiscoverAsync();
+
+        hosts.Should().ContainSingle().Which.Should().Be(new DiscoveredHost("192.0.2.10", "Studio", "ds920.local", null));
     }
 
     [Fact]

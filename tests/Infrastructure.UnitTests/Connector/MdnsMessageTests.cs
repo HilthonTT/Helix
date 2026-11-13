@@ -99,6 +99,20 @@ public sealed class MdnsMessageTests
     }
 
     [Fact]
+    public void ResolveSmbServices_Should_SkipALinkLocalAddressWhenAnotherWasAnnounced()
+    {
+        byte[] packet = new PacketBuilder()
+            .Record("_smb._tcp.local", MdnsMessage.TypePtr, Name("NAS._smb._tcp.local"))
+            .Record("NAS._smb._tcp.local", MdnsMessage.TypeSrv, Srv("nas.local"))
+            .Record("nas.local", MdnsMessage.TypeA, [169, 254, 3, 7])
+            .Record("nas.local", MdnsMessage.TypeA, [192, 0, 2, 10])
+            .Build();
+
+        MdnsMessage.ResolveSmbServices(MdnsMessage.Parse(packet)).Single()
+            .Address.Should().Be(IPAddress.Parse("192.0.2.10"));
+    }
+
+    [Fact]
     public void Parse_Should_FollowCompressedNames()
     {
         var builder = new PacketBuilder();

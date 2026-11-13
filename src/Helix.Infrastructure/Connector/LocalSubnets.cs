@@ -54,6 +54,27 @@ internal static class LocalSubnets
         return hosts;
     }
 
+    internal static IPAddress? Preferred(IEnumerable<IPAddress> addresses, IReadOnlyCollection<Subnet> subnets)
+    {
+        List<IPAddress> candidates = [.. addresses.Where(address => address.AddressFamily == AddressFamily.InterNetwork)];
+
+        return candidates.FirstOrDefault(address => IsOnAny(address, subnets))
+            ?? candidates.FirstOrDefault(address => !IsLinkLocal(ToUInt(address)))
+            ?? candidates.FirstOrDefault();
+    }
+
+    private static bool IsOnAny(IPAddress address, IReadOnlyCollection<Subnet> subnets)
+    {
+        uint value = ToUInt(address);
+
+        return subnets.Any(subnet =>
+        {
+            uint mask = ToUInt(subnet.Mask);
+
+            return mask != 0 && (value & mask) == (ToUInt(subnet.Address) & mask);
+        });
+    }
+
     internal static List<Subnet> Current()
     {
         List<Subnet> withGateway = [];

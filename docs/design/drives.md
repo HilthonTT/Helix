@@ -179,6 +179,12 @@ record deleted out from under a live mapping leaves a letter nothing in Helix ca
   Windows' own mDNS service and Bonjour already hold. It asks twice, 600 ms apart, and listens
   for 2.5 s. The instance name becomes the display name, and `model=` from the matching
   device-info TXT becomes the model when the NAS sends it (the test QNAP does not).
+  A NAS often announces several A records for one host name: its LAN address plus a Docker
+  bridge (`172.17.0.1`), a second NIC or a link-local `169.254.x.x`. The address taken is
+  the first one inside a local subnet, then the first that is not link-local, then the first
+  (`LocalSubnets.Preferred`; the DNS fallback for an announcement without an A record picks the
+  same way). Taking the first record as it arrived used to list the NAS under an unreachable
+  address, and a second time, unnamed, under the address the sweep found.
 - **A sweep of TCP 445** over the local subnets, 96 connects at a time, 800 ms each. mDNS
   alone misses a NAS with Bonjour switched off, and every Windows file server. Subnets come from
   the adapters that have a gateway, which leaves out Hyper-V and WSL switches; if none has one,

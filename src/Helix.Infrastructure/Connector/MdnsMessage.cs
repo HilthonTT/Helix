@@ -108,7 +108,9 @@ internal static class MdnsMessage
         return records;
     }
 
-    internal static List<Service> ResolveSmbServices(IReadOnlyCollection<Record> records)
+    internal static List<Service> ResolveSmbServices(
+        IReadOnlyCollection<Record> records,
+        IReadOnlyCollection<LocalSubnets.Subnet>? subnets = null)
     {
         List<Service> services = [];
 
@@ -126,7 +128,11 @@ internal static class MdnsMessage
 
             IPAddress? address = hostName is null
                 ? null
-                : records.FirstOrDefault(r => r.Type == TypeA && Same(r.Name, hostName))?.Address;
+                : LocalSubnets.Preferred(
+                    records
+                        .Where(r => r.Type == TypeA && r.Address is not null && Same(r.Name, hostName))
+                        .Select(r => r.Address!),
+                    subnets ?? []);
 
             string? model = records
                 .Where(r => r.Type == TypeTxt && Same(r.Name, $"{label}.{DeviceInfoService}"))
