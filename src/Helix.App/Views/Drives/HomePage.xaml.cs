@@ -26,6 +26,7 @@ public sealed partial class HomePage : ContentPage
     private const string DriveGroups = "drive-groups";
     private const string Schedules = "schedules";
     private const string AdoptMappings = "adopt-mappings";
+    private const string Passphrase = "passphrase";
 
     private static bool _isFirstView = true;
     private static bool _prunedAuditlogs;
@@ -66,6 +67,14 @@ public sealed partial class HomePage : ContentPage
         _modals.Register(DriveGroups, DriveGroupsLayout, DriveGroupsView);
         _modals.Register(Schedules, SchedulesLayout, SchedulesView);
         _modals.Register(AdoptMappings, AdoptMappingsLayout, AdoptMappingsView);
+        _modals.Register(Passphrase, PassphraseLayout, PassphraseView);
+        _modals.Hidden += key =>
+        {
+            if (key == Passphrase)
+            {
+                PassphraseView.Cancel();
+            }
+        };
         _modals.AttachEscapeToDismiss(this);
 
         if (!DrivePlatform.SupportsAdoptingMappings)
@@ -271,6 +280,32 @@ public sealed partial class HomePage : ContentPage
 
         WeakReferenceMessenger.Default.Register<AdoptMappingsMessage>(
             this, async (r, m) => await _modals.ToggleAsync(AdoptMappings, m.Value));
+
+        WeakReferenceMessenger.Default.Register<PassphraseRequestMessage>(this, (r, m) =>
+        {
+            if (_isVisible && !m.HasReceivedResponse)
+            {
+                m.Reply(AskPassphraseAsync(m.Confirm));
+            }
+        });
+    }
+
+    private async Task<string?> AskPassphraseAsync(bool confirm)
+    {
+        Task<string?> answer = PassphraseView.AskAsync(confirm);
+
+        await _modals.ShowAsync(Passphrase);
+
+        PassphraseView.FocusPassphrase();
+
+        string? passphrase = await answer;
+
+        if (_modals.IsOpen(Passphrase))
+        {
+            await _modals.HideAsync(Passphrase);
+        }
+
+        return passphrase;
     }
 
     private async void Preferences_Clicked(object? sender, EventArgs e)

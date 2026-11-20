@@ -572,9 +572,6 @@
   <data name="EncryptExportMessage" xml:space="preserve">
     <value>Saisissez une phrase secrète pour protéger cet export de lecteurs.</value>
   </data>
-  <data name="EncryptExportConfirmMessage" xml:space="preserve">
-    <value>Saisissez à nouveau la même phrase secrète pour confirmer.</value>
-  </data>
   <data name="Continue" xml:space="preserve">
     <value>Continuer</value>
   </data>
@@ -587,11 +584,11 @@
   <data name="ConfirmPassphrase" xml:space="preserve">
     <value>Confirmer la phrase secrète</value>
   </data>
-  <data name="PassphrasesDontMatch" xml:space="preserve">
-    <value>Les phrases secrètes ne correspondent pas</value>
-  </data>
   <data name="PassphrasesDontMatchMessage" xml:space="preserve">
     <value>Les deux phrases secrètes saisies sont différentes. Veuillez réessayer.</value>
+  </data>
+  <data name="PassphraseTooShort" xml:space="preserve">
+    <value>Utilisez une phrase secrète d'au moins 8 caractères.</value>
   </data>
   <data name="DecryptImport" xml:space="preserve">
     <value>Déchiffrer l'import</value>

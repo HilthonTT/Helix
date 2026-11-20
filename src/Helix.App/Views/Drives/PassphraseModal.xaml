@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Helix.App.ViewModels.Drives"
+             xmlns:icons="clr-namespace:Helix.App.Icons"
+             xmlns:l10n="clr-namespace:Helix.App.Localization"
+             x:Class="Helix.App.Views.Drives.PassphraseModal"
+             x:DataType="vm:PassphraseViewModel"
+             BackgroundColor="Transparent">
+
+    <Border Style="{StaticResource Sheet}">
+        <Grid RowDefinitions="Auto,Auto,Auto">
+
+            <Grid ColumnDefinitions="*,Auto" Padding="24,20,20,16">
+                <Label Text="{Binding Title}"
+                       Style="{StaticResource Title1}"
+                       VerticalOptions="Center"/>
+
+                <Border Grid.Column="1"
+                        Style="{StaticResource IconChip}"
+                        VerticalOptions="Start"
+                        ToolTipProperties.Text="{l10n:Translate Close}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="{x:Static icons:IconFont.Times}"
+                           Style="{StaticResource IconSm}"
+                           InputTransparent="True"
+                           TextColor="{DynamicResource TextMuted}"/>
+                </Border>
+            </Grid>
+
+            <VerticalStackLayout Grid.Row="1" Spacing="14" Padding="24,4,24,20">
+                <Label Text="{Binding Message}" Style="{StaticResource Caption}"/>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{l10n:Translate Passphrase}" Style="{StaticResource FieldLabel}"/>
+                    <Border Style="{StaticResource Field}">
+                        <Entry x:Name="PassphraseEntry"
+                               IsPassword="True"
+                               IsSpellCheckEnabled="False"
+                               IsTextPredictionEnabled="False"
+                               MaxLength="{Binding PassphraseMaxLength}"
+                               Text="{Binding Passphrase}"
+                               ReturnCommand="{Binding SubmitCommand}"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6" IsVisible="{Binding Confirm}">
+                    <Label Text="{l10n:Translate ConfirmPassphrase}" Style="{StaticResource FieldLabel}"/>
+                    <Border Style="{StaticResource Field}">
+                        <Entry IsPassword="True"
+                               IsSpellCheckEnabled="False"
+                               IsTextPredictionEnabled="False"
+                               MaxLength="{Binding PassphraseMaxLength}"
+                               Text="{Binding ConfirmedPassphrase}"
+                               ReturnCommand="{Binding SubmitCommand}"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <Label Text="{Binding Error}"
+                       Style="{StaticResource DangerText}"
+                       FontSize="12"
+                       IsVisible="{Binding HasError}"/>
+            </VerticalStackLayout>
+
+            <Grid Grid.Row="2"
+                  ColumnDefinitions="*,*"
+                  ColumnSpacing="12"
+                  Padding="24,4,24,24">
+                <Button Style="{StaticResource ButtonSecondary}"
+                        HorizontalOptions="Fill"
+                        Text="{l10n:Translate Cancel}"
+                        Command="{Binding CloseCommand}"/>
+
+                <Button Grid.Column="1"
+                        HorizontalOptions="Fill"
+                        Text="{Binding AcceptText}"
+                        Command="{Binding SubmitCommand}"/>
+            </Grid>
+        </Grid>
+    </Border>
+
+</ContentView>

@@ -681,6 +681,13 @@
                                           AbsoluteLayout.LayoutFlags="PositionProportional"/>
         </AbsoluteLayout>
 
+        <AbsoluteLayout x:Name="PassphraseLayout" IsVisible="False">
+            <views:PassphraseModal x:Name="PassphraseView"
+                                   WidthRequest="440"
+                                   AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1"
+                                   AbsoluteLayout.LayoutFlags="PositionProportional"/>
+        </AbsoluteLayout>
+
         <AbsoluteLayout x:Name="DeleteDriveLayout" IsVisible="False">
             <views:DeleteDriveModal x:Name="DeleteDriveView"
                                           WidthRequest="440"

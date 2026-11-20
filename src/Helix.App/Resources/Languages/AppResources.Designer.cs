@@ -1507,15 +1507,6 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Re-enter the same passphrase to confirm..
-        /// </summary>
-        internal static string EncryptExportConfirmMessage {
-            get {
-                return ResourceManager.GetString("EncryptExportConfirmMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Continue.
         /// </summary>
         internal static string Continue {
@@ -1552,20 +1543,20 @@ namespace Helix.App.Resources.Languages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Passphrases don't match.
-        /// </summary>
-        internal static string PassphrasesDontMatch {
-            get {
-                return ResourceManager.GetString("PassphrasesDontMatch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The two passphrases you entered are different. Please try again..
         /// </summary>
         internal static string PassphrasesDontMatchMessage {
             get {
                 return ResourceManager.GetString("PassphrasesDontMatchMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use a passphrase of at least 8 characters..
+        /// </summary>
+        internal static string PassphraseTooShort {
+            get {
+                return ResourceManager.GetString("PassphraseTooShort", resourceCulture);
             }
         }
         

@@ -32,6 +32,8 @@ internal sealed class ModalHost
         }
     }
 
+    public event Action<string>? Hidden;
+
     public string? Current => _current;
 
     public bool IsOpen(string key) => _current == key;
@@ -94,6 +96,8 @@ internal sealed class ModalHost
             _current = null;
 
             Interlocked.Decrement(ref _openCount);
+
+            Hidden?.Invoke(key);
         }
 
         if (_current is null)

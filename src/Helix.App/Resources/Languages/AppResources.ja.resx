@@ -572,9 +572,6 @@
   <data name="EncryptExportMessage" xml:space="preserve">
     <value>このドライブのエクスポートを保護するパスフレーズを入力してください。</value>
   </data>
-  <data name="EncryptExportConfirmMessage" xml:space="preserve">
-    <value>確認のため同じパスフレーズをもう一度入力してください。</value>
-  </data>
   <data name="Continue" xml:space="preserve">
     <value>続行</value>
   </data>
@@ -587,11 +584,11 @@
   <data name="ConfirmPassphrase" xml:space="preserve">
     <value>パスフレーズの確認</value>
   </data>
-  <data name="PassphrasesDontMatch" xml:space="preserve">
-    <value>パスフレーズが一致しません</value>
-  </data>
   <data name="PassphrasesDontMatchMessage" xml:space="preserve">
     <value>入力された 2 つのパスフレーズが異なります。もう一度お試しください。</value>
+  </data>
+  <data name="PassphraseTooShort" xml:space="preserve">
+    <value>8 文字以上のパスフレーズを使用してください。</value>
   </data>
   <data name="DecryptImport" xml:space="preserve">
     <value>インポートを復号</value>

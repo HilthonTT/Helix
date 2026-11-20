@@ -1,76 +1,28 @@
-﻿using Helix.App.Resources.Languages;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Helix.App.Messaging.Drives;
 using Helix.Application.Abstractions.Security;
 
 namespace Helix.App.Services;
 
 internal sealed class PassphrasePromptService : IPassphrasePrompt
 {
-    private const int MaxLength = 256;
+    public Task<string?> PromptForExportPassphraseAsync(CancellationToken cancellationToken = default) =>
+        AskAsync(confirm: true);
 
-    public async Task<string?> PromptForExportPassphraseAsync(CancellationToken cancellationToken = default)
+    public Task<string?> PromptForImportPassphraseAsync(CancellationToken cancellationToken = default) =>
+        AskAsync(confirm: false);
+
+    private static async Task<string?> AskAsync(bool confirm)
     {
-        Shell? shell = Shell.Current;
-        if (shell is null)
+        PassphraseRequestMessage request = await MainThread.InvokeOnMainThreadAsync(
+            () => WeakReferenceMessenger.Default.Send(new PassphraseRequestMessage(confirm)));
+
+        if (!request.HasReceivedResponse)
         {
             return null;
         }
 
-        string? first = await shell.DisplayPromptAsync(
-            title: AppResources.EncryptExport,
-            message: AppResources.EncryptExportMessage,
-            accept: AppResources.Continue,
-            cancel: AppResources.Cancel,
-            placeholder: AppResources.Passphrase,
-            maxLength: MaxLength,
-            keyboard: Keyboard.Text);
-
-        if (string.IsNullOrWhiteSpace(first) || IdleLockService.ScreenLocked)
-        {
-            return null;
-        }
-
-        string? second = await shell.DisplayPromptAsync(
-            title: AppResources.EncryptExport,
-            message: AppResources.EncryptExportConfirmMessage,
-            accept: AppResources.Encrypt,
-            cancel: AppResources.Cancel,
-            placeholder: AppResources.ConfirmPassphrase,
-            maxLength: MaxLength,
-            keyboard: Keyboard.Text);
-
-        if (string.IsNullOrWhiteSpace(second) || IdleLockService.ScreenLocked)
-        {
-            return null;
-        }
-
-        if (!string.Equals(first, second, StringComparison.Ordinal))
-        {
-            await shell.DisplayAlertAsync(
-                AppResources.PassphrasesDontMatch,
-                AppResources.PassphrasesDontMatchMessage,
-                AppResources.Ok);
-            return null;
-        }
-
-        return first;
-    }
-
-    public async Task<string?> PromptForImportPassphraseAsync(CancellationToken cancellationToken = default)
-    {
-        Shell? shell = Shell.Current;
-        if (shell is null)
-        {
-            return null;
-        }
-
-        string? passphrase = await shell.DisplayPromptAsync(
-            title: AppResources.DecryptImport,
-            message: AppResources.DecryptImportMessage,
-            accept: AppResources.Decrypt,
-            cancel: AppResources.Cancel,
-            placeholder: AppResources.Passphrase,
-            maxLength: MaxLength,
-            keyboard: Keyboard.Text);
+        string? passphrase = await request.Response;
 
         return string.IsNullOrWhiteSpace(passphrase) || IdleLockService.ScreenLocked ? null : passphrase;
     }

@@ -572,9 +572,6 @@
   <data name="EncryptExportMessage" xml:space="preserve">
     <value>Enter a passphrase to protect this drive export.</value>
   </data>
-  <data name="EncryptExportConfirmMessage" xml:space="preserve">
-    <value>Re-enter the same passphrase to confirm.</value>
-  </data>
   <data name="Continue" xml:space="preserve">
     <value>Continue</value>
   </data>
@@ -587,11 +584,11 @@
   <data name="ConfirmPassphrase" xml:space="preserve">
     <value>Confirm passphrase</value>
   </data>
-  <data name="PassphrasesDontMatch" xml:space="preserve">
-    <value>Passphrases don't match</value>
-  </data>
   <data name="PassphrasesDontMatchMessage" xml:space="preserve">
     <value>The two passphrases you entered are different. Please try again.</value>
+  </data>
+  <data name="PassphraseTooShort" xml:space="preserve">
+    <value>Use a passphrase of at least 8 characters.</value>
   </data>
   <data name="DecryptImport" xml:space="preserve">
     <value>Decrypt import</value>

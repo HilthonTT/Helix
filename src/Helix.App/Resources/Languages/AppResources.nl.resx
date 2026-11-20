@@ -572,9 +572,6 @@
   <data name="EncryptExportMessage" xml:space="preserve">
     <value>Voer een wachtwoordzin in om deze schijfexport te beveiligen.</value>
   </data>
-  <data name="EncryptExportConfirmMessage" xml:space="preserve">
-    <value>Voer dezelfde wachtwoordzin nogmaals in ter bevestiging.</value>
-  </data>
   <data name="Continue" xml:space="preserve">
     <value>Doorgaan</value>
   </data>
@@ -587,11 +584,11 @@
   <data name="ConfirmPassphrase" xml:space="preserve">
     <value>Wachtwoordzin bevestigen</value>
   </data>
-  <data name="PassphrasesDontMatch" xml:space="preserve">
-    <value>Wachtwoordzinnen komen niet overeen</value>
-  </data>
   <data name="PassphrasesDontMatchMessage" xml:space="preserve">
     <value>De twee ingevoerde wachtwoordzinnen verschillen. Probeer het opnieuw.</value>
+  </data>
+  <data name="PassphraseTooShort" xml:space="preserve">
+    <value>Gebruik een wachtwoordzin van minstens 8 tekens.</value>
   </data>
   <data name="DecryptImport" xml:space="preserve">
     <value>Import ontsleutelen</value>

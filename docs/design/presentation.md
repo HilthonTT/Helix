@@ -378,6 +378,17 @@ command, so a sheet that must not keep what was typed into it resets on the way 
 — `UpdatePasswordModal.Reset` (and `CreateRecoveryKeyModal.Reset`) clears the viewmodel for
 exactly that.
 
+The vault passphrase is a sheet too (`PassphraseModal` on `HomePage`), not
+`DisplayPromptAsync`, because MAUI's prompt has no masked mode and showed the passphrase that
+guards every NAS credential in clear text. `IPassphrasePrompt` is called from inside the
+import and export handlers, so `PassphrasePromptService` cannot open a sheet itself: it sends
+a `PassphraseRequestMessage` (an `AsyncRequestMessage<string?>`) and awaits whatever the Home
+page replies. No reply — Home not on screen — is a cancel. A sheet's answer has to arrive
+however it was closed, so `ModalHost` raises `Hidden` when the showing sheet goes away, and
+Home turns that into a cancel for the passphrase sheet; without it, Escape or a scrim tap left
+the handler awaiting an answer that never came. Too short and mismatched passphrases are
+refused inline on the sheet, before the handler sees them.
+
 ## XAML conventions
 
 XML namespace prefixes are consistent across every page and modal:

@@ -572,9 +572,6 @@
   <data name="EncryptExportMessage" xml:space="preserve">
     <value>Geben Sie eine Passphrase ein, um diesen Laufwerks-Export zu schützen.</value>
   </data>
-  <data name="EncryptExportConfirmMessage" xml:space="preserve">
-    <value>Geben Sie dieselbe Passphrase zur Bestätigung erneut ein.</value>
-  </data>
   <data name="Continue" xml:space="preserve">
     <value>Weiter</value>
   </data>
@@ -587,11 +584,11 @@
   <data name="ConfirmPassphrase" xml:space="preserve">
     <value>Passphrase bestätigen</value>
   </data>
-  <data name="PassphrasesDontMatch" xml:space="preserve">
-    <value>Passphrasen stimmen nicht überein</value>
-  </data>
   <data name="PassphrasesDontMatchMessage" xml:space="preserve">
     <value>Die beiden eingegebenen Passphrasen sind unterschiedlich. Bitte versuchen Sie es erneut.</value>
+  </data>
+  <data name="PassphraseTooShort" xml:space="preserve">
+    <value>Verwenden Sie eine Passphrase mit mindestens 8 Zeichen.</value>
   </data>
   <data name="DecryptImport" xml:space="preserve">
     <value>Import entschlüsseln</value>

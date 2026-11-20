@@ -572,9 +572,6 @@
   <data name="EncryptExportMessage" xml:space="preserve">
     <value>Masukkan frasa sandi untuk melindungi ekspor drive ini.</value>
   </data>
-  <data name="EncryptExportConfirmMessage" xml:space="preserve">
-    <value>Masukkan kembali frasa sandi yang sama untuk konfirmasi.</value>
-  </data>
   <data name="Continue" xml:space="preserve">
     <value>Lanjutkan</value>
   </data>
@@ -587,11 +584,11 @@
   <data name="ConfirmPassphrase" xml:space="preserve">
     <value>Konfirmasi frasa sandi</value>
   </data>
-  <data name="PassphrasesDontMatch" xml:space="preserve">
-    <value>Frasa sandi tidak cocok</value>
-  </data>
   <data name="PassphrasesDontMatchMessage" xml:space="preserve">
     <value>Kedua frasa sandi yang Anda masukkan berbeda. Silakan coba lagi.</value>
+  </data>
+  <data name="PassphraseTooShort" xml:space="preserve">
+    <value>Gunakan frasa sandi minimal 8 karakter.</value>
   </data>
   <data name="DecryptImport" xml:space="preserve">
     <value>Dekripsi impor</value>
