@@ -458,11 +458,20 @@ internal sealed class DriveWatchdog
             return;
         }
 
-        Drive[] down = [.. drives.Value
+        Drive[] candidates = [.. drives.Value
             .Where(drive => drive.AutoConnect &&
                             (!pinnedOnly || drive.HomeNetworkId is not null) &&
                             (drive.RemoteHost is not null || !drive.IsAwayFrom(here?.Id)) &&
                             !_nasConnector.IsLiveFrom(drive))];
+
+        Drive[] down;
+        int generation;
+
+        lock (_gate)
+        {
+            down = [.. candidates.Where(drive => _inFlight.Add(drive.Id))];
+            generation = _generation;
+        }
 
         if (down.Length == 0)
         {
@@ -471,6 +480,27 @@ internal sealed class DriveWatchdog
 
         Guid[] arriving = [.. down.Select(drive => drive.Id)];
 
+        try
+        {
+            await ConnectClaimedAsync(down, arriving, generation, reason);
+        }
+        finally
+        {
+            lock (_gate)
+            {
+                if (generation == _generation)
+                {
+                    foreach (Guid id in arriving)
+                    {
+                        _inFlight.Remove(id);
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task ConnectClaimedAsync(Drive[] down, Guid[] arriving, int generation, string reason)
+    {
         _logger.LogInformation(
             "Connecting the {Count} drive(s) that are down because {Reason}.",
             arriving.Length,
@@ -484,7 +514,12 @@ internal sealed class DriveWatchdog
             _logger.LogWarning(
                 "Some drives did not connect after {Reason} — {Error}",
                 reason,
-                result.Error.Description);
+                result.Error.Code);
+        }
+
+        if (IsStale(generation))
+        {
+            return;
         }
 
         foreach (Drive drive in down)
@@ -574,7 +609,7 @@ internal sealed class DriveWatchdog
             _logger.LogWarning(
                 "Could not reconnect drive {Letter}: — {Reason}",
                 letter,
-                result.Error.Description);
+                result.Error.Code);
 
             PublishFailureToUi(driveId, result.Error);
 

@@ -240,7 +240,7 @@ internal sealed class CommandListener
                 return (false, Say(
                     link,
                     $"'{request.Target}' is not something Helix understands.{CommandRequest.LineBreak}{CommandRequest.LineBreak}{CommandRequest.Usage}",
-                    string.Format(AppResources.LinkUnknown, request.Target)));
+                    string.Format(AppResources.LinkUnknown, Echo(request.Target))));
 
             case CommandVerb.Quit:
                 if (request.NeedsConfirmation && IdleLockService.ScreenLocked)
@@ -302,6 +302,16 @@ internal sealed class CommandListener
     }
 
     private static string Say(bool link, string english, string localized) => link ? localized : english;
+
+    private const int EchoLength = 32;
+
+    private static string Echo(string text)
+    {
+        string visible = new([.. text.Where(c => !char.IsControl(c))]);
+        visible = visible.Trim();
+
+        return visible.Length <= EchoLength ? visible : visible[..EchoLength] + "…";
+    }
 
     private static async Task<bool> ConfirmLinkAsync(CommandRequest request) =>
         await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -388,12 +398,12 @@ internal sealed class CommandListener
             0 => (false, Say(
                 link,
                 $"No drive is called '{target}'. Use a letter such as Z, or the drive's name.",
-                string.Format(AppResources.LinkNoDrive, target))),
+                string.Format(AppResources.LinkNoDrive, Echo(target)))),
             1 => await action(matches[0], link),
             _ => (false, Say(
                 link,
                 $"More than one drive is called '{target}' ({letters}). Use its letter instead.",
-                string.Format(AppResources.LinkAmbiguousDrive, target, letters))),
+                string.Format(AppResources.LinkAmbiguousDrive, Echo(target), letters))),
         };
     }
 
@@ -433,7 +443,7 @@ internal sealed class CommandListener
         DriveGroup? group = groups.Value.FirstOrDefault(g => string.Equals(g.Name, target.Trim(), StringComparison.OrdinalIgnoreCase));
         if (group is null)
         {
-            return (false, Say(link, $"No drive group is called '{target}'.", string.Format(AppResources.LinkNoGroup, target)));
+            return (false, Say(link, $"No drive group is called '{target}'.", string.Format(AppResources.LinkNoGroup, Echo(target))));
         }
 
         Result result = await ScopedHandler.HandleAsync(

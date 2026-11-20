@@ -3,6 +3,7 @@ using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
+using Helix.Application.Core.Security;
 using Helix.Domain.Settings;
 using Helix.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,11 @@ public sealed class RegisterUser(
         if (request.Password != request.ConfirmedPassword)
         {
             return Result.Failure<Response>(AuthenticationErrors.PasswordsDoNotMatch);
+        }
+
+        if (!PasswordPolicy.IsLongEnough(request.Password))
+        {
+            return Result.Failure<Response>(AuthenticationErrors.PasswordTooShort);
         }
 
         string username = request.Username.Trim();

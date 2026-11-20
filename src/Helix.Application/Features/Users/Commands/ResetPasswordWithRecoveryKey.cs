@@ -34,6 +34,11 @@ public sealed class ResetPasswordWithRecoveryKey(
             return Result.Failure<Response>(AuthenticationErrors.NewPasswordsDoNotMatch);
         }
 
+        if (!PasswordPolicy.IsLongEnough(request.NewPassword))
+        {
+            return Result.Failure<Response>(AuthenticationErrors.PasswordTooShort);
+        }
+
         string? recoveryKey = RecoveryKeyFormat.Normalize(request.RecoveryKey);
         if (recoveryKey is null)
         {

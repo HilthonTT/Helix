@@ -52,11 +52,14 @@ jobs:
 
       - name: Create archive
         shell: pwsh
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+          RID: ${{ matrix.rid }}
         run: |
-          $tag = "${{ inputs.tag }}"
-          if (-not $tag) { $tag = "${{ github.ref_name }}" }
+          $tag = $env:TAG
+          if ($tag -notmatch '^v[0-9]+(\.[0-9]+){1,3}$') { throw "Refusing to publish the malformed tag '$tag'." }
           New-Item -ItemType Directory -Force artifacts | Out-Null
-          Compress-Archive -Path publish/${{ matrix.rid }}/* -DestinationPath "artifacts/Helix-$tag-${{ matrix.rid }}.zip"
+          Compress-Archive -Path "publish/$env:RID/*" -DestinationPath "artifacts/Helix-$tag-$env:RID.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
@@ -97,9 +100,13 @@ jobs:
           -p:EnableCodeSigning=false
 
       - name: Create archive
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          TAG="${{ inputs.tag }}"
-          if [ -z "$TAG" ]; then TAG="${{ github.ref_name }}"; fi
+          if ! [[ "$TAG" =~ ^v[0-9]+(\.[0-9]+){1,3}$ ]]; then
+            echo "::error::Refusing to publish the malformed tag '$TAG'."
+            exit 1
+          fi
 
           BIN="src/Helix.App/bin/Release/net11.0-maccatalyst"
 
@@ -164,6 +171,11 @@ jobs:
         run: |
           set -euo pipefail
 
+          if ! [[ "$TAG" =~ ^v[0-9]+(\.[0-9]+){1,3}$ ]]; then
+            echo "::error::Refusing to publish the malformed tag '$TAG'."
+            exit 1
+          fi
+
           if [ -z "${SIGNING_KEY:-}" ]; then
             echo "::warning::No RELEASE_SIGNING_KEY secret is set; this release will be published unsigned."
             exit 0
@@ -196,6 +208,12 @@ jobs:
 
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Release $TAG already exists, uploading assets."
+            manifest="Helix-$TAG-signatures.txt"
+            if [ ! -f "artifacts/$manifest" ]; then
+              if gh release delete-asset "$TAG" "$manifest" --repo "$GITHUB_REPOSITORY" --yes >/dev/null 2>&1; then
+                echo "::warning::Removed the stale $manifest; its signatures no longer match the re-uploaded archives."
+              fi
+            fi
             gh release upload "$TAG" "${assets[@]}" \
               --repo "$GITHUB_REPOSITORY" \
               --clobber

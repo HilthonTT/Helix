@@ -185,6 +185,12 @@ record deleted out from under a live mapping leaves a letter nothing in Helix ca
   (`LocalSubnets.Preferred`; the DNS fallback for an announcement without an A record picks the
   same way). Taking the first record as it arrived used to list the NAS under an unreachable
   address, and a second time, unnamed, under the address the sweep found.
+  Replies come from anybody on the LAN, so the parser is bounded: a name longer than the
+  255 bytes DNS allows, or a label with the reserved `0x40`/`0x80` bits, ends the packet
+  (`MdnsMessage.ReadName`); one discovery keeps at most 4,096 records and resolves at most 256
+  SMB instances. Compression pointers let a 64 KB packet point thousands of records at one
+  long run of labels, and without the caps a handful of packets could take gigabytes. The DNS
+  fallback for instances without an A record runs concurrently, not one 1.2 s lookup at a time.
 - **A sweep of TCP 445** over the local subnets, 96 connects at a time, 800 ms each. mDNS
   alone misses a NAS with Bonjour switched off, and every Windows file server. Subnets come from
   the adapters that have a gateway, which leaves out Hyper-V and WSL switches; if none has one,

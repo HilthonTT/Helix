@@ -28,6 +28,7 @@ public sealed class ImportDrives(
     INasConnector nasConnector) : IHandler
 {
     private const string FileExtension = ".helixvault";
+    private const long MaxVaultBytes = 16 * 1024 * 1024;
 
     public async Task<Result<VaultImport>> Handle(CancellationToken cancellationToken = default)
     {
@@ -57,6 +58,11 @@ public sealed class ImportDrives(
 
         try
         {
+            if (new FileInfo(filePath).Length > MaxVaultBytes)
+            {
+                return Result.Failure<VaultImport>(JsonErrors.VaultTooLarge);
+            }
+
             vault = await File.ReadAllTextAsync(filePath, cancellationToken);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -139,9 +145,11 @@ public sealed class ImportDrives(
             .Where(drive => !connected.Contains(drive.Letter) || nasConnector.IsMountedFrom(drive))
             .ToList();
 
-        Dictionary<string, Guid> driveIdsByLetter = existingDrives
-            .Concat(newDrives)
-            .ToDictionary(d => d.Letter, d => d.Id, StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, Guid> driveIdsByLetter = new(StringComparer.OrdinalIgnoreCase);
+        foreach (Drive drive in existingDrives.Concat(newDrives))
+        {
+            driveIdsByLetter.TryAdd(drive.Letter, drive.Id);
+        }
 
         List<DriveGroup> existingGroups = await driveGroupRepository.GetAsNoTrackingAsync(
             loggedInUser.UserId,

@@ -67,7 +67,7 @@ internal sealed class MountReconciler
                 _logger.LogWarning(
                     "Drive {Letter}: mounted after its timeout but could not be reconciled - {Reason}",
                     outcome.Letter,
-                    result.Error.Description);
+                    result.Error.Code);
 
                 return;
             }

@@ -3,6 +3,7 @@ using Helix.Application.Abstractions.Cryptography;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
+using Helix.Application.Core.Security;
 using Helix.Domain.Users;
 
 namespace Helix.Application.Features.Users.Commands;
@@ -31,6 +32,11 @@ public sealed class ChangeUserPassword(
         if (request.NewPassword != request.ConfirmedNewPassword)
         {
             return Result.Failure(AuthenticationErrors.NewPasswordsDoNotMatch);
+        }
+
+        if (!PasswordPolicy.IsLongEnough(request.NewPassword))
+        {
+            return Result.Failure(AuthenticationErrors.PasswordTooShort);
         }
 
         User? user = await userRepository.GetByIdAsync(loggedInUser.UserId, cancellationToken);

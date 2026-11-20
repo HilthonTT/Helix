@@ -53,6 +53,18 @@ public sealed class RegisterUserTests
     }
 
     [Fact]
+    public async Task Handle_Should_ReturnError_WhenThePasswordIsTooShort()
+    {
+        _userRepositoryMock.IsUsernameUniqueAsync(Arg.Any<string>()).Returns(true);
+
+        Result<RegisterUser.Response> result = await _registerUser.Handle(
+            Request with { Password = "short", ConfirmedPassword = "short" });
+
+        result.Error.Should().Be(AuthenticationErrors.PasswordTooShort);
+        _userRepositoryMock.DidNotReceive().Insert(Arg.Any<User>());
+    }
+
+    [Fact]
     public async Task Handle_Should_KeepTheLanguagePickedOnTheRegisterPage()
     {
         _passwordHasherMock.Hash(Request.Password).Returns("SomeHashAbc123");

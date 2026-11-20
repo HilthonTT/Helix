@@ -118,7 +118,7 @@ internal sealed class HotkeyService
 
             if (result.IsFailure)
             {
-                _logger.LogWarning("A global shortcut failed: {Reason}", result.Error.Description);
+                _logger.LogWarning("A global shortcut failed: {Reason}", result.Error.Code);
 
                 Tell(result.Error.Description, failed: true);
 

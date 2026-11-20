@@ -280,7 +280,10 @@ user who just clicked something. And because any web page can ask a browser to o
 that **disconnects or quits** brings the window forward and asks first (`NeedsConfirmation`);
 the flags never ask, since a local script already runs as the user. Connecting, waking and the
 status are harmless enough to run unasked. Control characters are stripped from a link's target
-so a crafted one cannot forge the pipe's field separators.
+so a crafted one cannot forge the pipe's field separators. Whatever a link's target puts into
+its answer (an unknown verb, a drive or group that does not exist) is cut to 32 characters
+(`CommandListener.Echo`) before it reaches the balloon, so a web page cannot write a
+sentence of its choosing into a notification that carries Helix's name.
 
 The answer goes to the parent console through `AttachConsole`, success on stdout and failure
 on stderr, and the exit code is 0 or 1. Helix is a GUI executable, so **PowerShell and cmd do

@@ -410,7 +410,7 @@ internal sealed class TrayIconService
             return;
         }
 
-        _logger.LogWarning("A tray action failed: {Reason}", result.Error.Description);
+        _logger.LogWarning("A tray action failed: {Reason}", result.Error.Code);
 
         _trayIcon.Notify(AppInfo.Current.Name, result.Error.Description);
     }

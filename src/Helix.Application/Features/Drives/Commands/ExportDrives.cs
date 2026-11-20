@@ -3,6 +3,7 @@ using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Abstractions.Security;
 using Helix.Application.Core.Errors;
+using Helix.Application.Core.Security;
 using Helix.Application.Features.Drives.Contracts;
 using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
@@ -45,6 +46,11 @@ public sealed class ExportDrives(
         if (string.IsNullOrWhiteSpace(passphrase))
         {
             return Result.Failure(JsonErrors.PassphraseMissing);
+        }
+
+        if (!PasswordPolicy.IsLongEnough(passphrase))
+        {
+            return Result.Failure(JsonErrors.PassphraseTooShort);
         }
 
         List<DriveGroup> groups = await driveGroupRepository.GetAsNoTrackingAsync(loggedInUser.UserId, cancellationToken);

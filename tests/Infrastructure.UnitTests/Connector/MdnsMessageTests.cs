@@ -164,4 +164,27 @@ public sealed class MdnsMessageTests
 
         MdnsMessage.Parse(packet).Should().BeEmpty();
     }
+
+    [Fact]
+    public void Parse_Should_RejectANameLongerThanDnsAllows()
+    {
+        string longName = string.Join('.', Enumerable.Repeat(new string('a', 60), 5)) + ".local";
+
+        byte[] packet = new PacketBuilder()
+            .Record("nas.local", MdnsMessage.TypeA, [192, 0, 2, 10])
+            .Record(longName, MdnsMessage.TypeA, [192, 0, 2, 11])
+            .Build();
+
+        MdnsMessage.Parse(packet).Should().ContainSingle().Which.Name.Should().Be("nas.local");
+    }
+
+    [Fact]
+    public void Parse_Should_RejectAReservedLabelType()
+    {
+        byte[] packet = new PacketBuilder()
+            .RecordWithName([0x41, 0, 0], MdnsMessage.TypeA, [192, 0, 2, 10])
+            .Build();
+
+        MdnsMessage.Parse(packet).Should().BeEmpty();
+    }
 }

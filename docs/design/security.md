@@ -65,6 +65,11 @@ every item but Open only brings the window (and the lock) forward, as the hotkey
 command line already refuse. A `helix://` link that quits is refused outright under the lock
 rather than putting its confirmation up over it for whoever is at the keyboard to answer.
 
+The lock is the one screen whose threat is somebody at the keyboard, so `LockViewModel` slows
+guessing: three wrong passwords are free, then each further one waits 2, 4, 8 … seconds (at
+most 30) before the error shows. The count is static, so leaving and re-entering the page does
+not reset it, and a correct password does.
+
 ## The audit log
 
 `Auditlog` stores an `AuditAction` plus the drive's id, name and letter **as they were at
@@ -92,3 +97,18 @@ is prefixed with `'`. Drive names are typed by the user and a vault can be impor
 anywhere, so a drive called `=HYPERLINK(...)` would otherwise be a formula the moment the
 export is opened in a spreadsheet.
 
+## Password and passphrase length
+
+`PasswordPolicy.MinimumLength` is 8. `RegisterUser`, `ChangeUserPassword` and
+`ResetPasswordWithRecoveryKey` refuse a shorter new password with
+`AuthenticationErrors.PasswordTooShort`; `LoginUser` and `UnlockSession` do not check it, so an
+account made before the rule still signs in and is only held to it when the password next
+changes. The account password encrypts nothing — this gates the UI, it does not protect data
+at rest.
+
+The vault passphrase is held to the same length (`JsonErrors.PassphraseTooShort`) and matters
+more: a `.helixvault` carries every NAS credential and leaves the machine, so it is open to an
+offline guess at whatever rate the attacker's hardware allows, and 600,000 PBKDF2 rounds do
+not rescue a two-letter passphrase. `ImportDrives` refuses a file over 16 MB before reading it
+(`JsonErrors.VaultTooLarge`): a real vault is kilobytes, and reading a multi-gigabyte file
+picked by mistake would run the process out of memory.

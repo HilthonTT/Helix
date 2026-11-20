@@ -10,6 +10,10 @@ public static class AuthenticationErrors
         "Authentication.PasswordsDoNotMatch",
         "The specified passwords do not match.");
 
+    public static readonly Error PasswordTooShort = Error.Problem(
+        "Authentication.PasswordTooShort",
+        "The password must be at least 8 characters long.");
+
     public static readonly Error UsernameNotUnique = Error.Problem(
         "Authentication.UsernameNotUnique",
         "The specified username is not unique.");

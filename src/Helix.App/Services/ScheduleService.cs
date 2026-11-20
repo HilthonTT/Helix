@@ -151,7 +151,7 @@ internal sealed class ScheduleService
         _logger.LogWarning(
             "A schedule did not fully succeed: {Action} — {Reason}",
             run.Action,
-            run.Outcome.Error.Description);
+            run.Outcome.Error.Code);
 
         string title = string.Format(AppResources.ScheduleRunFailed, ScheduleText.Title(run.Action, run.GroupName));
 

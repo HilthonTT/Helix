@@ -191,3 +191,13 @@ payload sits a folder or two below it (`unpacked`, and on macOS the `.app` insid
 anything not under the staging root at all yields nothing to delete, and both scripts guard
 on that before removing anything.
 
+The Windows helper is started as `%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe`,
+never a bare `powershell.exe`: with `UseShellExecute=false`, `CreateProcess` searches the
+application's own folder first, and an install Helix can update is by definition one whose
+folder the user can write to.
+
+The release workflow hands the tag to its scripts through `env:` and refuses one that is not
+`v` plus two to four numbers, since a tag pasted into a `run:` block as `${{ ... }}` is shell
+source. Re-running a release without `RELEASE_SIGNING_KEY` deletes the signature manifest
+already on it: the archives are rebuilt and not byte-identical, so the old signatures would
+make every pinned install refuse them.

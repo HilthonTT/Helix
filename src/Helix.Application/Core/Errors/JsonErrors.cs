@@ -8,6 +8,12 @@ public static class JsonErrors
     public static readonly Error PassphraseMissing = Error.Problem(
         "Vault.PassphraseMissing", "A passphrase is required to encrypt or decrypt this export.");
 
+    public static readonly Error PassphraseTooShort = Error.Problem(
+        "Vault.PassphraseTooShort", "The passphrase must be at least 8 characters long.");
+
+    public static readonly Error VaultTooLarge = Error.Problem(
+        "Vault.TooLarge", "This file is too large to be a Helix vault.");
+
     public static readonly Error PassphraseMismatch = Error.Problem(
         "Vault.PassphraseMismatch", "The two passphrase entries did not match.");
 

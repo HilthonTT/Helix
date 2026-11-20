@@ -9,6 +9,11 @@ namespace Helix.App.ViewModels.Users;
 
 internal sealed partial class LockViewModel : BaseViewModel
 {
+    private const int FreeAttempts = 3;
+    private const int MaxDelaySeconds = 30;
+
+    private static int _failures;
+
     private readonly ILoggedInUser _loggedInUser;
 
     public LockViewModel()
@@ -49,12 +54,21 @@ internal sealed partial class LockViewModel : BaseViewModel
 
             if (result.IsFailure)
             {
-                Error = AppResources.LockWrongPassword;
                 Password = string.Empty;
+
+                int failures = Interlocked.Increment(ref _failures);
+                if (failures > FreeAttempts)
+                {
+                    int seconds = (int)Math.Min(MaxDelaySeconds, Math.Pow(2, failures - FreeAttempts));
+                    await Task.Delay(TimeSpan.FromSeconds(seconds));
+                }
+
+                Error = AppResources.LockWrongPassword;
 
                 return;
             }
 
+            Interlocked.Exchange(ref _failures, 0);
             Password = string.Empty;
 
             await App.ServiceProvider.GetRequiredService<IdleLockService>().UnlockAsync();

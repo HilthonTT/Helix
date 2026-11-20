@@ -115,7 +115,7 @@ internal static class HostSpelling
         }
         catch (Exception)
         {
-            return (true, null);
+            return (false, null);
         }
     }
 

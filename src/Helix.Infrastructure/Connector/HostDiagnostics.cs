@@ -24,7 +24,7 @@ internal sealed class HostDiagnostics(ILogger<HostDiagnostics> logger) : IHostDi
 
         foreach (int port in ports ?? DriveProtocols.SmbPorts)
         {
-            if (await CanConnectAsync(host, port, cancellationToken))
+            if (await CanConnectAsync(trimmed, port, cancellationToken))
             {
                 return new HostProbe(true, port, alternate);
             }

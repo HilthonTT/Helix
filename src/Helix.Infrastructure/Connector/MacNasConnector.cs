@@ -241,7 +241,7 @@ internal sealed class MacNasConnector : INasConnector
 
         int errno = Marshal.GetLastPInvokeError();
 
-        return errno == Einval
+        return errno is Einval or Enoent
             ? Result.Success()
             : Result.Failure(DriveErrors.FailedToDisconnect(DescribeErrno(errno)));
     }

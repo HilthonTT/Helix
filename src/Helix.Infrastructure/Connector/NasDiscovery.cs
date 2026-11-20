@@ -11,6 +11,7 @@ internal class NasDiscovery(ILogger<NasDiscovery> logger) : INasDiscovery
     private const int SmbPort = 445;
     private const int MdnsPort = 5353;
     private const int SweepParallelism = 96;
+    private const int MaxRecords = 4096;
 
     private static readonly IPAddress MdnsGroup = IPAddress.Parse("224.0.0.251");
 
@@ -44,9 +45,15 @@ internal class NasDiscovery(ILogger<NasDiscovery> logger) : INasDiscovery
 
         Dictionary<string, Found> found = new(StringComparer.OrdinalIgnoreCase);
 
-        foreach (MdnsMessage.Service service in services)
+        IPAddress?[] addresses = await Task.WhenAll(services.Select(service =>
+            service.Address is not null
+                ? Task.FromResult<IPAddress?>(service.Address)
+                : AddressOfAsync(service.HostName, subnets, cancellationToken)));
+
+        for (int i = 0; i < services.Count; i++)
         {
-            IPAddress? address = service.Address ?? await AddressOfAsync(service.HostName, subnets, cancellationToken);
+            MdnsMessage.Service service = services[i];
+            IPAddress? address = addresses[i];
 
             if (address is null || own.Contains(address))
             {
@@ -287,6 +294,11 @@ internal class NasDiscovery(ILogger<NasDiscovery> logger) : INasDiscovery
 
                 foreach (MdnsMessage.Record record in MdnsMessage.Parse(reply.Buffer))
                 {
+                    if (records.Count >= MaxRecords)
+                    {
+                        return;
+                    }
+
                     records.Add(record);
                 }
             }

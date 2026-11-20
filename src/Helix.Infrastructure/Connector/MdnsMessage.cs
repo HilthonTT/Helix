@@ -117,7 +117,8 @@ internal static class MdnsMessage
         IEnumerable<string> instances = records
             .Where(r => r.Type == TypePtr && Same(r.Name, SmbService) && r.Target is not null)
             .Select(r => r.Target!)
-            .Distinct(StringComparer.OrdinalIgnoreCase);
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(MaxInstances);
 
         foreach (string instance in instances)
         {
@@ -171,6 +172,9 @@ internal static class MdnsMessage
         stream.WriteByte(0);
     }
 
+    private const int MaxNameLength = 255;
+    private const int MaxInstances = 256;
+
     private static string ReadNameAt(ReadOnlySpan<byte> packet, int offset) => ReadName(packet, ref offset);
 
     private static string ReadName(ReadOnlySpan<byte> packet, ref int offset)
@@ -178,6 +182,7 @@ internal static class MdnsMessage
         List<string> labels = [];
         int position = offset;
         int jumps = 0;
+        int encoded = 1;
         bool jumped = false;
 
         while (true)
@@ -207,6 +212,17 @@ internal static class MdnsMessage
 
                 position = pointer;
                 continue;
+            }
+
+            if ((length & 0xC0) != 0)
+            {
+                throw new FormatException("The name uses a reserved label type.");
+            }
+
+            encoded += 1 + length;
+            if (encoded > MaxNameLength)
+            {
+                throw new FormatException("The name is longer than a DNS name may be.");
             }
 
             labels.Add(Encoding.UTF8.GetString(packet.Slice(position + 1, length)));

@@ -23,6 +23,12 @@ Release builds log Information and above; Debug builds also log Debug. Keep cred
 hosts and share names out of log messages beyond what a drive letter already reveals — the
 user is expected to send these files to a stranger.
 
+That includes **error descriptions**. A drive result's `Error.Description` is written for the
+banner and can carry the host (`DriveErrors.HostUnreachable` names it), so the background
+services — watchdog, reconciler, schedules, tray and hotkeys — log `Error.Code`, a constant,
+and leave the description to the banner or balloon. A diagnostics zip from a tray "Connect
+all" with the NAS off used to name the NAS.
+
 ## Telling the user what happened
 
 Outcomes go through `Notifier`, which puts a dismissible banner on the page — not a
