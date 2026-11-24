@@ -32,6 +32,31 @@ On macOS there are no drive letters: the letter names a folder under `~/Helix Dr
 
 A name keeps working when the NAS's DHCP lease moves; an address is quicker to reach when name lookups are slow.
 
+## Protocols: SMB, WebDAV and NFS
+
+The **Protocol** picker at the top of the sheet chooses how the share is mounted. SMB is the default and what almost every NAS offers.
+
+| Protocol | Use it for | What goes in **Drive's name** | Credentials |
+| --- | --- | --- | --- |
+| **SMB (Windows file sharing)** | Synology, QNAP, TrueNAS, Windows and Mac file sharing | the share name, such as `Photos` | the NAS account |
+| **WebDAV (HTTPS)** | Nextcloud, ownCloud, a NAS's WebDAV server | the folder path, such as `home` or `remote.php/dav/files/me` | the account on that server |
+| **NFS** | a Linux server or a NAS export | the export path, such as `/volume1/media` | none: the server decides by address and user ID |
+
+**WebDAV** always uses HTTPS. Windows refuses to send a password over plain HTTP, and a NAS password should not travel unencrypted anyway. Leave **Port** empty for the standard 443, or type the port your server uses, such as 5006 on Synology. An empty path mounts the server's WebDAV root.
+
+**NFS** has no username or password fields. Access is granted on the server, usually by the client's IP address, so allow this computer in the NFS permissions of the share.
+
+Each protocol needs its client on Windows:
+
+| Protocol | Windows needs | If it is missing |
+| --- | --- | --- |
+| WebDAV | the **WebClient** service running. It is part of Windows, but often set to start manually | Helix says the WebDAV client is not running. See [Troubleshooting](/docs/troubleshooting/) |
+| NFS | **Services for NFS → Client for NFS**, under *Turn Windows features on or off*. Windows Home editions do not include it | Helix says the Client for NFS is not installed |
+
+macOS includes both clients, so there is nothing to install.
+
+Some features only work with SMB, because they depend on how Windows handles SMB sign-in: **Browse shares**, **Add existing mappings**, **Connect using the server name** and the credential-conflict handling in [Troubleshooting](/docs/troubleshooting/). The connection check, Wake-on-LAN, the away address and the home-network pin work with every protocol. Each protocol is checked on its own port: 445 (or 139) for SMB, 2049 for NFS, and the WebDAV port (443 unless set).
+
 ## Switches
 
 | Switch | Effect | Platform |

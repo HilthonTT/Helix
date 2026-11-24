@@ -22,9 +22,9 @@
 
 ## What it does
 
-Helix maps network shares to drive letters (or folders on macOS), watches them, and brings
-them back when they drop — after sleep, on a new network, or when the NAS wakes up. When a
-drive will not connect, a four-step check tells you why.
+Helix maps SMB, WebDAV and NFS shares to drive letters (or folders on macOS), watches them,
+and brings them back when they drop — after sleep, on a new network, or when the NAS wakes
+up. When a drive will not connect, a four-step check tells you why.
 
 - **Connect** one drive, a ticked selection, a saved group or everything, from the window,
   the tray, a global shortcut, a schedule or the command line.
@@ -33,6 +33,8 @@ drive will not connect, a four-step check tells you why.
 - **Diagnose** the name, the server, the share and credentials, and the letter, step by step.
 - **Keep it safe**: a SQLCipher-encrypted database, PBKDF2 passwords, a recovery key and
   AES-256-GCM vault exports.
+- **See trends**: storage use over time for each volume, and which drives keep dropping,
+  on the Insights page.
 - **Make it yours**: eight themes (Crimson by default) and six languages.
 
 <div align="center">
@@ -46,7 +48,10 @@ Download the latest [release](https://github.com/HilthonTT/Helix/releases/latest
 - **Windows 10+** — `Helix-<tag>-win-x64.zip` (or `win-arm64`). Unzip anywhere and run
   `Helix.App.exe`; the build is self-contained.
 - **macOS 15+** — `Helix-<tag>-macos.zip`, drag `Helix.app` to Applications. The bundle is
-  unsigned, so right-click → **Open** the first time.
+  unsigned, so right-click → **Open** the first time. Releases from 2.4.0 onwards have no
+  macOS build yet, because the .NET 11 Mac toolchain needs Xcode 27.2 and GitHub's build
+  machines do not have it. Use [2.3.6](https://github.com/HilthonTT/Helix/releases/tag/v2.3.6)
+  or build from source.
 
 See [Installation](https://hilthontt.github.io/Helix/docs/installation/) for details.
 

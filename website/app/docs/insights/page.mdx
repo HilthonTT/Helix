@@ -1,0 +1,40 @@
+export const metadata = { title: "Insights" };
+
+# Insights
+
+**Insights**, in the sidebar, shows two things Helix records in the background: how full each NAS volume has been over time, and which drives have been dropping their connection.
+
+## Storage over time
+
+Helix measures each connected volume up to four times a day while it runs and keeps one reading per volume per day, for about thirteen months. Insights charts those readings, one chart per volume.
+
+| Control | What it does |
+| --- | --- |
+| **30 days** / **90 days** / **1 year** | how much history the charts show. 90 days is the default |
+
+Each volume shows:
+
+- **how full it is now**, as a percentage and as used against total space,
+- **a trend line**: *Free space falling by 3.2 GB a day*, *Free space is steady or growing*, or *Not enough history for a trend yet*,
+- **the chart**, plotting the percentage used, so a 2 TB volume and a 40 TB pool share one scale,
+- **the span** of the readings shown, and how many there are.
+
+Volumes that will fill up soonest come first.
+
+The trend always comes from the **last 30 days**, whichever range you are looking at. It is the same figure behind the *Full in about … at the current rate* line on the [dashboard](/docs/dashboard/), so the two never disagree. A year of history is there to look at, not to predict from.
+
+A volume is recognized by its total size, the same way the dashboard counts volumes. If you grow a volume it starts a new history, and the old one ages out.
+
+If the page says **Nothing recorded yet**, Helix has not yet measured a connected drive. Leave it running with your drives connected and the charts fill in from the first day.
+
+## Drive reliability
+
+The second half lists every drive that **lost its connection** in the last 30 days, with:
+
+- how many times it dropped, and how many of those were in the last week,
+- when it last dropped,
+- whether it came back on its own, and how quickly it usually did.
+
+A drive that dropped three or more times in the last week is marked with a warning. Drives that never dropped are left out, so the one that keeps disconnecting is not buried among thirteen that never did. If none dropped, the page says so.
+
+The figures come from the [audit log](/docs/settings/) and use the same counting as the reliability lines in [Diagnosing a drive](/docs/diagnosing/). Drops are only noticed while Helix is running: a drive that went down while the app was closed is not counted.

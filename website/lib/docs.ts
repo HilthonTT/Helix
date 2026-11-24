@@ -15,6 +15,7 @@ export const docs: DocSection[] = [
     title: "Using Helix",
     links: [
       { title: "The dashboard", href: "/docs/dashboard/" },
+      { title: "Insights", href: "/docs/insights/" },
       { title: "Adding drives", href: "/docs/adding-drives/" },
       { title: "Diagnosing a drive", href: "/docs/diagnosing/" },
       { title: "Groups & selections", href: "/docs/groups/" },

@@ -13,6 +13,7 @@ Helix runs on Windows and macOS from one codebase. The pages, the encrypted data
 | Distributed as | self-contained zip | unsigned `.app` in a zip |
 | Mount target | a drive letter, `Z:\` | a folder, `~/Helix Drives/Z` |
 | Mount API | Win32 WNet (`mpr.dll`) | NetFS |
+| Protocols | SMB, WebDAV (needs the WebClient service), NFS (needs Client for NFS; not on Home editions) | SMB, WebDAV, NFS |
 | Start at sign-in | shortcut in the Startup folder | LaunchAgent |
 | Desktop shortcut | `.lnk` on the Desktop | link to the `.app` |
 | Tray icon | notification area | menu bar |
@@ -24,11 +25,12 @@ Helix runs on Windows and macOS from one codebase. The pages, the encrypted data
 | Add existing mappings | yes | no |
 | Persistent mapping (restore at sign-in) | yes | no |
 | Connect using the server name | yes | no |
+| Open-file count before disconnecting | yes | no — the confirmation cannot say how many files are open |
 | Close to tray, auto-minimize hiding | yes | no — the window stays in the Dock |
 | Global shortcuts | yes | yes, with Accessibility access |
 | Keyboard navigation of drive rows | yes | no — mouse only |
 | Command line | yes | no |
-| In-app updates | yes | yes |
+| In-app updates | yes | yes, when the release has a macOS build. See below |
 
 Switches that do not apply on macOS are hidden rather than shown and ignored.
 
@@ -39,6 +41,17 @@ macOS has no drive letters, so a drive's letter names a folder under `~/Helix Dr
 ## Credentials per server
 
 Windows allows one set of credentials per server for your whole sign-in session, which is behind most connection trouble with several shares on one NAS — see [Troubleshooting](/docs/troubleshooting/). macOS signs in per mount, so none of that applies there, and the connection check never warns that a password went untested.
+
+## macOS releases are paused
+
+Releases from **2.4.0** onwards have no macOS download. Helix moved to .NET 11, whose Mac toolchain needs Xcode 27.2, and GitHub's macOS build machines do not have it yet. Every release is still checked to compile for the Mac, but the app bundle is not built or published. The last release with a macOS build is [2.3.6](https://github.com/HilthonTT/Helix/releases/tag/v2.3.6).
+
+Until macOS builds return:
+
+- Install `Helix-v2.3.6-macos.zip`, or build the current version from source on a Mac with Xcode 27.2 (see [Development](/docs/development/)).
+- A Mac install still sees each new release, but **Download and install** reports that the release has no download for this computer. **Open release page** is the way out. Nothing on your Mac changes.
+
+macOS builds will be published again once GitHub's build machines have Xcode 27.2.
 
 ## Why the macOS build is unsigned
 
