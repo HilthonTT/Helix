@@ -52,7 +52,8 @@ internal sealed class DiagnosticStepDisplay
         DiagnosticFinding.CredentialsAccepted => AppResources.DiagnoseCredentialsAccepted,
         DiagnosticFinding.CredentialsUntested =>
             string.Format(AppResources.DiagnoseCredentialsUntested, result.Detail),
-        DiagnosticFinding.CredentialsRejected => result.Detail ?? AppResources.UnexpectedError,
+        DiagnosticFinding.CredentialsRejected =>
+            result.Error is null ? result.Detail ?? AppResources.UnexpectedError : ErrorText.For(result.Error),
         DiagnosticFinding.SessionConflict => AppResources.DiagnoseSessionConflict,
         DiagnosticFinding.LetterFree => string.Format(AppResources.DiagnoseLetterFree, result.Detail),
         DiagnosticFinding.LetterHeldByThisShare =>

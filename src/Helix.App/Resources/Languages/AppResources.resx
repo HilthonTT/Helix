@@ -1229,4 +1229,334 @@
   <data name="ServerAlreadyAdded" xml:space="preserve">
     <value>already added as {0}</value>
   </data>
+  <data name="Error_Drive_NotFound" xml:space="preserve">
+    <value>The drive with the specified Id = '{0}' was not found.</value>
+  </data>
+  <data name="Error_Drive_LetterNotUnique" xml:space="preserve">
+    <value>A drive with the letter = '{0}' already exists.</value>
+  </data>
+  <data name="Error_Drive_FailedToConnect" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_FailedToDisconnect" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_SessionConflict" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_SharesNotListed" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_HostUnreachable" xml:space="preserve">
+    <value>'{0}' could not be reached from this network.</value>
+  </data>
+  <data name="Error_Drive_AwayFromHomeNetwork" xml:space="preserve">
+    <value>This drive only reconnects on '{0}', and this is not it.</value>
+  </data>
+  <data name="Error_Drive_AwayFromHomeNetwork_0" xml:space="preserve">
+    <value>This drive only reconnects on its home network, and this is not it.</value>
+  </data>
+  <data name="Error_Drive_ShareListingUnsupported" xml:space="preserve">
+    <value>Listing a server's shares is not supported on this platform.</value>
+  </data>
+  <data name="Error_Drive_NothingToCreate" xml:space="preserve">
+    <value>Choose at least one share to add.</value>
+  </data>
+  <data name="Error_Drive_DuplicateLetter" xml:space="preserve">
+    <value>The drive letter '{0}' was given to more than one share.</value>
+  </data>
+  <data name="Error_Drive_MountNotAvailable" xml:space="preserve">
+    <value>That drive is not mounted, so there is nothing to open.</value>
+  </data>
+  <data name="Error_Drive_LetterNotFound" xml:space="preserve">
+    <value>The drive with the letter = '{0}' was not found.</value>
+  </data>
+  <data name="Error_Drive_LetterInUse" xml:space="preserve">
+    <value>The drive letter '{0}' is already in use on this computer. Choose a free one.</value>
+  </data>
+  <data name="Error_Drive_MacAddressNotFound" xml:space="preserve">
+    <value>The hardware address of '{0}' could not be read. It answers only on this network, while it is awake.</value>
+  </data>
+  <data name="Error_Drive_InvalidRemoteHost" xml:space="preserve">
+    <value>The address for away from home must be an IP address or a hostname, such as nas.example.ts.net.</value>
+  </data>
+  <data name="Error_Drive_UnknownProtocol" xml:space="preserve">
+    <value>That is not a protocol Helix can mount. Choose SMB, WebDAV or NFS.</value>
+  </data>
+  <data name="Error_Drive_InvalidPort" xml:space="preserve">
+    <value>The port must be a number from 1 to 65535.</value>
+  </data>
+  <data name="Error_Drive_NotAMacAddress" xml:space="preserve">
+    <value>That is not a hardware address. Six pairs of hex digits are expected, such as 1a-2b-3c-4d-5e-6f.</value>
+  </data>
+  <data name="Error_Drive_NoMacAddress" xml:space="preserve">
+    <value>This drive has no hardware address, so there is nothing to wake.</value>
+  </data>
+  <data name="Error_Drive_WakeNotSent" xml:space="preserve">
+    <value>The wake-up packet could not be sent from this machine.</value>
+  </data>
+  <data name="Error_Drive_NotALetter" xml:space="preserve">
+    <value>The drive letter must be a single character.</value>
+  </data>
+  <data name="Error_Drive_NoDrivesFound" xml:space="preserve">
+    <value>No drives have been found, please create some first.</value>
+  </data>
+  <data name="Error_Mount_Canceled" xml:space="preserve">
+    <value>The operation was canceled.</value>
+  </data>
+  <data name="Error_Mount_Unexpected" xml:space="preserve">
+    <value>Unexpected error: {0}</value>
+  </data>
+  <data name="Error_Mount_OperationFailed" xml:space="preserve">
+    <value>The operation failed (code {0}).</value>
+  </data>
+  <data name="Error_Mount_TimedOut" xml:space="preserve">
+    <value>Connection timed out.</value>
+  </data>
+  <data name="Error_Mount_DisconnectTimedOut" xml:space="preserve">
+    <value>Disconnection timed out.</value>
+  </data>
+  <data name="Error_Mount_AccessDenied" xml:space="preserve">
+    <value>Access denied. Check the username and password.</value>
+  </data>
+  <data name="Error_Mount_LetterAlreadyAssigned" xml:space="preserve">
+    <value>That drive letter is already in use.</value>
+  </data>
+  <data name="Error_Mount_BadResourceType" xml:space="preserve">
+    <value>The network resource type is not correct.</value>
+  </data>
+  <data name="Error_Mount_NetworkPathNotFound" xml:space="preserve">
+    <value>The network path was not found.</value>
+  </data>
+  <data name="Error_Mount_NetworkNameNotFound" xml:space="preserve">
+    <value>The network name cannot be found.</value>
+  </data>
+  <data name="Error_Mount_PasswordIncorrect" xml:space="preserve">
+    <value>The password is incorrect.</value>
+  </data>
+  <data name="Error_Mount_LogonFailure" xml:space="preserve">
+    <value>Logon failure: unknown user name or bad password.</value>
+  </data>
+  <data name="Error_Mount_NoNetwork" xml:space="preserve">
+    <value>The network is not present or not started.</value>
+  </data>
+  <data name="Error_Mount_NotConnected" xml:space="preserve">
+    <value>The device is not currently connected.</value>
+  </data>
+  <data name="Error_Mount_CredentialConflict" xml:space="preserve">
+    <value>Windows is already signed in to this server with different credentials. Disconnect every drive and Explorer window using it, or sign out of Windows, and try again.</value>
+  </data>
+  <data name="Error_Mount_NfsClientMissing" xml:space="preserve">
+    <value>Windows' Client for NFS is not installed. Turn on "Services for NFS" under Windows Features and try again.</value>
+  </data>
+  <data name="Error_Mount_WebDavClientStopped" xml:space="preserve">
+    <value>Windows' WebDAV client is not running. Start the "WebClient" service and try again.</value>
+  </data>
+  <data name="Error_Mount_AuthenticationFailed" xml:space="preserve">
+    <value>Authentication failed: unknown user name or bad password.</value>
+  </data>
+  <data name="Error_Mount_MountPointBusy" xml:space="preserve">
+    <value>That mount point is already in use.</value>
+  </data>
+  <data name="Error_Mount_ShareNotFound" xml:space="preserve">
+    <value>The share was not found on the server.</value>
+  </data>
+  <data name="Error_Mount_ServerNotResponding" xml:space="preserve">
+    <value>The server did not respond.</value>
+  </data>
+  <data name="Error_Mount_ServerDown" xml:space="preserve">
+    <value>The server is down or unreachable.</value>
+  </data>
+  <data name="Error_Mount_NetworkDown" xml:space="preserve">
+    <value>The network is not available.</value>
+  </data>
+  <data name="Error_Mount_MountPointNotPrepared" xml:space="preserve">
+    <value>Could not prepare the mount point '{0}': {1}</value>
+  </data>
+  <data name="Error_User_NotFound" xml:space="preserve">
+    <value>The user has not been found.</value>
+  </data>
+  <data name="Error_Authentication_InvalidUsernameOrPassword" xml:space="preserve">
+    <value>The username or password is incorrect.</value>
+  </data>
+  <data name="Error_Authentication_PasswordsDoNotMatch" xml:space="preserve">
+    <value>The passwords do not match.</value>
+  </data>
+  <data name="Error_Authentication_PasswordTooShort" xml:space="preserve">
+    <value>The password must be at least 8 characters long.</value>
+  </data>
+  <data name="Error_Authentication_UsernameNotUnique" xml:space="preserve">
+    <value>That username is already taken.</value>
+  </data>
+  <data name="Error_Authentication_InvalidPermissions" xml:space="preserve">
+    <value>You need to be signed in to do that.</value>
+  </data>
+  <data name="Error_Authentication_NewPasswordsDoNotMatch" xml:space="preserve">
+    <value>The new passwords do not match.</value>
+  </data>
+  <data name="Error_Authentication_InvalidUsernameOrRecoveryKey" xml:space="preserve">
+    <value>The username or recovery key is incorrect.</value>
+  </data>
+  <data name="Error_DriveGroup_NotFound" xml:space="preserve">
+    <value>The group with the specified Id = '{0}' was not found.</value>
+  </data>
+  <data name="Error_DriveGroup_NameNotUnique" xml:space="preserve">
+    <value>A group called '{0}' already exists.</value>
+  </data>
+  <data name="Error_DriveGroup_NameMissing" xml:space="preserve">
+    <value>A group needs a name.</value>
+  </data>
+  <data name="Error_DriveGroup_NoDrivesSelected" xml:space="preserve">
+    <value>Choose at least one drive for the group.</value>
+  </data>
+  <data name="Error_DriveGroup_NoMembers" xml:space="preserve">
+    <value>The group '{0}' has no drives left. Edit it or delete it.</value>
+  </data>
+  <data name="Error_DriveGroup_NoGroupsFound" xml:space="preserve">
+    <value>No groups have been created yet.</value>
+  </data>
+  <data name="Error_Schedule_NotFound" xml:space="preserve">
+    <value>The schedule with the specified Id = '{0}' was not found.</value>
+  </data>
+  <data name="Error_Schedule_NoDaysSelected" xml:space="preserve">
+    <value>Choose at least one day for the schedule.</value>
+  </data>
+  <data name="Error_Schedule_UnknownAction" xml:space="preserve">
+    <value>A schedule either connects or disconnects.</value>
+  </data>
+  <data name="Error_Settings_NotFound" xml:space="preserve">
+    <value>No settings were found for you.</value>
+  </data>
+  <data name="Error_Settings_TimerCountMustBePositive" xml:space="preserve">
+    <value>The timer count must be a positive number.</value>
+  </data>
+  <data name="Error_Settings_RetentionMustNotBeNegative" xml:space="preserve">
+    <value>The audit log retention must be zero or more days. Zero keeps every entry.</value>
+  </data>
+  <data name="Error_Settings_StorageAlertThresholdOutOfRange" xml:space="preserve">
+    <value>The low-space warning must be between 0 and {0} percent. Zero turns it off.</value>
+  </data>
+  <data name="Error_Settings_IdleLockMustNotBeNegative" xml:space="preserve">
+    <value>The idle lock must be zero minutes or more. Zero never locks.</value>
+  </data>
+  <data name="Error_Settings_ShortcutUpdateFailed" xml:space="preserve">
+    <value>Failed to update the startup/desktop shortcut: {0}</value>
+  </data>
+  <data name="Error_Auditlog_NothingToExport" xml:space="preserve">
+    <value>There is no history to export yet.</value>
+  </data>
+  <data name="Error_Diagnostics_NoLogs" xml:space="preserve">
+    <value>There are no log files to export yet.</value>
+  </data>
+  <data name="Error_Diagnostics_InvalidTargetDirectory" xml:space="preserve">
+    <value>That folder path is not valid, please choose a different one.</value>
+  </data>
+  <data name="Error_Diagnostics_ExportCancelled" xml:space="preserve">
+    <value>The diagnostics export was cancelled.</value>
+  </data>
+  <data name="Error_Diagnostics_ExportNotPermitted" xml:space="preserve">
+    <value>The diagnostics could not be exported: Helix is not allowed to write to that folder.</value>
+  </data>
+  <data name="Error_Diagnostics_ExportFailed" xml:space="preserve">
+    <value>The diagnostics could not be exported: {0}</value>
+  </data>
+  <data name="Error_Update_Unreachable" xml:space="preserve">
+    <value>Could not reach GitHub to check for updates. Check your internet connection and try again.</value>
+  </data>
+  <data name="Error_Update_NoReleases" xml:space="preserve">
+    <value>No published release was found to compare against.</value>
+  </data>
+  <data name="Error_Update_RateLimited" xml:space="preserve">
+    <value>GitHub is rate-limiting update checks right now. Please try again later.</value>
+  </data>
+  <data name="Error_Update_UnexpectedResponse" xml:space="preserve">
+    <value>GitHub answered the update check with an unexpected status ({0}).</value>
+  </data>
+  <data name="Error_Update_NoAsset" xml:space="preserve">
+    <value>This release has no download built for this computer. Open the release page to fetch it by hand.</value>
+  </data>
+  <data name="Error_Update_DownloadFailed" xml:space="preserve">
+    <value>The update could not be downloaded. Check your internet connection and try again.</value>
+  </data>
+  <data name="Error_Update_UnreadableDownload" xml:space="preserve">
+    <value>The downloaded update could not be read. Nothing has been changed; please try again.</value>
+  </data>
+  <data name="Error_Update_DownloadNotHelix" xml:space="preserve">
+    <value>The downloaded update does not look like Helix, so it was not installed.</value>
+  </data>
+  <data name="Error_Update_DownloadCorrupt" xml:space="preserve">
+    <value>The downloaded update does not match the checksum GitHub published for it, so it was not installed.</value>
+  </data>
+  <data name="Error_Update_SignatureMissing" xml:space="preserve">
+    <value>This release is not signed, and this build of Helix only installs signed updates. Open the release page to fetch it by hand.</value>
+  </data>
+  <data name="Error_Update_SignatureInvalid" xml:space="preserve">
+    <value>The signature on the downloaded update does not match, so it was not installed. It was not built by whoever publishes Helix.</value>
+  </data>
+  <data name="Error_Update_NotWritable" xml:space="preserve">
+    <value>Helix cannot replace its own files where it is installed. Update it by hand, or move it somewhere you own.</value>
+  </data>
+  <data name="Error_Update_UnsafeInstallLocation" xml:space="preserve">
+    <value>Helix is running from a folder it shares with other files, so it cannot replace that folder safely. Move it into a folder of its own and try again.</value>
+  </data>
+  <data name="Error_Update_HelperNotStarted" xml:space="preserve">
+    <value>The update could not be started: the helper process did not start.</value>
+  </data>
+  <data name="Error_Update_InstallFailed" xml:space="preserve">
+    <value>The update could not be started: {0}</value>
+  </data>
+  <data name="Error_Update_UnreadableRelease" xml:space="preserve">
+    <value>The latest release could not be read. It may not be tagged with a version number.</value>
+  </data>
+  <data name="Error_FolderPicker_Cancelled" xml:space="preserve">
+    <value>You've cancelled this operation.</value>
+  </data>
+  <data name="Error_FolderPicker_InvalidFolderPath" xml:space="preserve">
+    <value>This folder path is invalid, please choose a different one.</value>
+  </data>
+  <data name="Error_FolderPicker_FileAlreadyExists" xml:space="preserve">
+    <value>The file already exists, please delete it first.</value>
+  </data>
+  <data name="Error_FolderPicker_UnauthorizedFileAccess" xml:space="preserve">
+    <value>You don't have the necessary permissions to access this file or folder. Please check your permissions and try again.</value>
+  </data>
+  <data name="Error_FolderPicker_WriteFailed" xml:space="preserve">
+    <value>The file could not be written: {0}</value>
+  </data>
+  <data name="Error_FolderPicker_ReadFailed" xml:space="preserve">
+    <value>The file could not be read: {0}</value>
+  </data>
+  <data name="Error_Json_Invalid" xml:space="preserve">
+    <value>The file is not valid JSON.</value>
+  </data>
+  <data name="Error_Vault_PassphraseMissing" xml:space="preserve">
+    <value>A passphrase is required to encrypt or decrypt this export.</value>
+  </data>
+  <data name="Error_Vault_PassphraseTooShort" xml:space="preserve">
+    <value>The passphrase must be at least 8 characters long.</value>
+  </data>
+  <data name="Error_Vault_TooLarge" xml:space="preserve">
+    <value>This file is too large to be a Helix vault.</value>
+  </data>
+  <data name="Error_Vault_PassphraseMismatch" xml:space="preserve">
+    <value>The two passphrase entries did not match.</value>
+  </data>
+  <data name="Error_Vault_DecryptFailed" xml:space="preserve">
+    <value>Invalid passphrase or corrupt vault file.</value>
+  </data>
+  <data name="Error_Vault_UnsupportedVersion" xml:space="preserve">
+    <value>This vault file was written by an unsupported version of Helix.</value>
+  </data>
+  <data name="Error_Vault_InvalidDriveData" xml:space="preserve">
+    <value>The vault contains an invalid drive entry and cannot be imported.</value>
+  </data>
+  <data name="Error_Vault_NothingToImport" xml:space="preserve">
+    <value>Nothing was imported: everything in this file already exists, or its drive letters are mapped to something else.</value>
+  </data>
+  <data name="Error_Validation_MissingFields" xml:space="preserve">
+    <value>One or more required fields are missing. Please ensure all mandatory information is provided.</value>
+  </data>
+  <data name="Error_Validation_InvalidHost" xml:space="preserve">
+    <value>The address must be an IP address (for example 192.168.0.10) or a hostname (for example nas.local).</value>
+  </data>
 </root>

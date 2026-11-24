@@ -94,7 +94,9 @@ attempt that actually happened, by `DriveWatchdog` through `DriveAttemptFailedMe
 by the row's own connect; a drive nobody has tried stays on the plain pill rather than
 being guessed at, and a drive that comes up clears it, so a new outage cannot be blamed on
 the old one. The unreachable pill gets the localized sentence and the refused one the
-share's own words, since the domain's error descriptions are not translated.
+connector's reason, translated by `ErrorText` (see `notifications.md`). The watchdog
+passes the whole `Error` in `DriveAttemptFailedMessage`, not its code and description, so
+that reason keeps its arguments.
 
 `DriveWatchdog` reads that error code and puts the drive back at a flat 30-second interval
 without counting it as a failure, so a laptop returning to the NAS's network reconnects in

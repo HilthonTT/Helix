@@ -18,7 +18,7 @@ internal static class Notifier
 
     public static void Error(string text) => Send(NotificationKind.Error, text);
 
-    public static void Error(Error error) => Send(NotificationKind.Error, error.Description);
+    public static void Error(Error error) => Send(NotificationKind.Error, ErrorText.For(error));
 
     public static void Send(NotificationKind kind, string text)
     {

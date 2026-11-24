@@ -819,7 +819,7 @@ internal sealed partial class HomeViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Register<DriveAttemptFailedMessage>(this, (r, m) =>
         {
             _allDrives.FirstOrDefault(d => d.Id == m.DriveId)
-                ?.MarkOffline(Error.Problem(m.ErrorCode, m.Description));
+                ?.MarkOffline(m.Error);
         });
 
         WeakReferenceMessenger.Default.Register<DriveAttemptSucceededMessage>(this, (r, m) =>

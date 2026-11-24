@@ -43,14 +43,14 @@ internal static class DriveMountBatch
             ? nasConnector.DisconnectAsync(drive, cancellationToken)
             : nasConnector.ConnectAsync(drive, cancellationToken)));
 
-        List<string> failures = [];
+        List<DriveFailure> failures = [];
         bool anyConnected = false;
 
         for (int i = 0; i < results.Length; i++)
         {
             if (results[i].IsFailure && (disconnect || !SettledLate(targets[i], results[i], nasConnector)))
             {
-                failures.Add($"{targets[i].Letter}: {results[i].Error.Description}");
+                failures.Add(new DriveFailure(targets[i].Letter, results[i].Error));
                 continue;
             }
 
@@ -71,11 +71,9 @@ internal static class DriveMountBatch
             return Result.Success();
         }
 
-        string detail = string.Join(Environment.NewLine, failures);
-
         return Result.Failure(disconnect
-            ? DriveErrors.FailedToDisconnect(detail)
-            : DriveErrors.FailedToConnect(detail));
+            ? DriveErrors.FailedToDisconnect(failures)
+            : DriveErrors.FailedToConnect(failures));
     }
 
     public static bool SettledLate(Drive drive, Result result, INasConnector nasConnector) =>

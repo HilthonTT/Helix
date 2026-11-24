@@ -3567,5 +3567,995 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("ServerAlreadyAdded", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The drive with the specified Id = '{0}' was not found..
+        /// </summary>
+        internal static string Error_Drive_NotFound {
+            get {
+                return ResourceManager.GetString("Error_Drive_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A drive with the letter = '{0}' already exists..
+        /// </summary>
+        internal static string Error_Drive_LetterNotUnique {
+            get {
+                return ResourceManager.GetString("Error_Drive_LetterNotUnique", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}.
+        /// </summary>
+        internal static string Error_Drive_FailedToConnect {
+            get {
+                return ResourceManager.GetString("Error_Drive_FailedToConnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}.
+        /// </summary>
+        internal static string Error_Drive_FailedToDisconnect {
+            get {
+                return ResourceManager.GetString("Error_Drive_FailedToDisconnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}.
+        /// </summary>
+        internal static string Error_Drive_SessionConflict {
+            get {
+                return ResourceManager.GetString("Error_Drive_SessionConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}.
+        /// </summary>
+        internal static string Error_Drive_SharesNotListed {
+            get {
+                return ResourceManager.GetString("Error_Drive_SharesNotListed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to '{0}' could not be reached from this network..
+        /// </summary>
+        internal static string Error_Drive_HostUnreachable {
+            get {
+                return ResourceManager.GetString("Error_Drive_HostUnreachable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This drive only reconnects on '{0}', and this is not it..
+        /// </summary>
+        internal static string Error_Drive_AwayFromHomeNetwork {
+            get {
+                return ResourceManager.GetString("Error_Drive_AwayFromHomeNetwork", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This drive only reconnects on its home network, and this is not it..
+        /// </summary>
+        internal static string Error_Drive_AwayFromHomeNetwork_0 {
+            get {
+                return ResourceManager.GetString("Error_Drive_AwayFromHomeNetwork_0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Listing a server's shares is not supported on this platform..
+        /// </summary>
+        internal static string Error_Drive_ShareListingUnsupported {
+            get {
+                return ResourceManager.GetString("Error_Drive_ShareListingUnsupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose at least one share to add..
+        /// </summary>
+        internal static string Error_Drive_NothingToCreate {
+            get {
+                return ResourceManager.GetString("Error_Drive_NothingToCreate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The drive letter '{0}' was given to more than one share..
+        /// </summary>
+        internal static string Error_Drive_DuplicateLetter {
+            get {
+                return ResourceManager.GetString("Error_Drive_DuplicateLetter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That drive is not mounted, so there is nothing to open..
+        /// </summary>
+        internal static string Error_Drive_MountNotAvailable {
+            get {
+                return ResourceManager.GetString("Error_Drive_MountNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The drive with the letter = '{0}' was not found..
+        /// </summary>
+        internal static string Error_Drive_LetterNotFound {
+            get {
+                return ResourceManager.GetString("Error_Drive_LetterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The drive letter '{0}' is already in use on this computer. Choose a free one..
+        /// </summary>
+        internal static string Error_Drive_LetterInUse {
+            get {
+                return ResourceManager.GetString("Error_Drive_LetterInUse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The hardware address of '{0}' could not be read. It answers only on this network, while it is awake..
+        /// </summary>
+        internal static string Error_Drive_MacAddressNotFound {
+            get {
+                return ResourceManager.GetString("Error_Drive_MacAddressNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The address for away from home must be an IP address or a hostname, such as nas.example.ts.net..
+        /// </summary>
+        internal static string Error_Drive_InvalidRemoteHost {
+            get {
+                return ResourceManager.GetString("Error_Drive_InvalidRemoteHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That is not a protocol Helix can mount. Choose SMB, WebDAV or NFS..
+        /// </summary>
+        internal static string Error_Drive_UnknownProtocol {
+            get {
+                return ResourceManager.GetString("Error_Drive_UnknownProtocol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The port must be a number from 1 to 65535..
+        /// </summary>
+        internal static string Error_Drive_InvalidPort {
+            get {
+                return ResourceManager.GetString("Error_Drive_InvalidPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That is not a hardware address. Six pairs of hex digits are expected, such as 1a-2b-3c-4d-5e-6f..
+        /// </summary>
+        internal static string Error_Drive_NotAMacAddress {
+            get {
+                return ResourceManager.GetString("Error_Drive_NotAMacAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This drive has no hardware address, so there is nothing to wake..
+        /// </summary>
+        internal static string Error_Drive_NoMacAddress {
+            get {
+                return ResourceManager.GetString("Error_Drive_NoMacAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The wake-up packet could not be sent from this machine..
+        /// </summary>
+        internal static string Error_Drive_WakeNotSent {
+            get {
+                return ResourceManager.GetString("Error_Drive_WakeNotSent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The drive letter must be a single character..
+        /// </summary>
+        internal static string Error_Drive_NotALetter {
+            get {
+                return ResourceManager.GetString("Error_Drive_NotALetter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No drives have been found, please create some first..
+        /// </summary>
+        internal static string Error_Drive_NoDrivesFound {
+            get {
+                return ResourceManager.GetString("Error_Drive_NoDrivesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operation was canceled..
+        /// </summary>
+        internal static string Error_Mount_Canceled {
+            get {
+                return ResourceManager.GetString("Error_Mount_Canceled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unexpected error: {0}.
+        /// </summary>
+        internal static string Error_Mount_Unexpected {
+            get {
+                return ResourceManager.GetString("Error_Mount_Unexpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operation failed (code {0})..
+        /// </summary>
+        internal static string Error_Mount_OperationFailed {
+            get {
+                return ResourceManager.GetString("Error_Mount_OperationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection timed out..
+        /// </summary>
+        internal static string Error_Mount_TimedOut {
+            get {
+                return ResourceManager.GetString("Error_Mount_TimedOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnection timed out..
+        /// </summary>
+        internal static string Error_Mount_DisconnectTimedOut {
+            get {
+                return ResourceManager.GetString("Error_Mount_DisconnectTimedOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access denied. Check the username and password..
+        /// </summary>
+        internal static string Error_Mount_AccessDenied {
+            get {
+                return ResourceManager.GetString("Error_Mount_AccessDenied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That drive letter is already in use..
+        /// </summary>
+        internal static string Error_Mount_LetterAlreadyAssigned {
+            get {
+                return ResourceManager.GetString("Error_Mount_LetterAlreadyAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The network resource type is not correct..
+        /// </summary>
+        internal static string Error_Mount_BadResourceType {
+            get {
+                return ResourceManager.GetString("Error_Mount_BadResourceType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The network path was not found..
+        /// </summary>
+        internal static string Error_Mount_NetworkPathNotFound {
+            get {
+                return ResourceManager.GetString("Error_Mount_NetworkPathNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The network name cannot be found..
+        /// </summary>
+        internal static string Error_Mount_NetworkNameNotFound {
+            get {
+                return ResourceManager.GetString("Error_Mount_NetworkNameNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password is incorrect..
+        /// </summary>
+        internal static string Error_Mount_PasswordIncorrect {
+            get {
+                return ResourceManager.GetString("Error_Mount_PasswordIncorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logon failure: unknown user name or bad password..
+        /// </summary>
+        internal static string Error_Mount_LogonFailure {
+            get {
+                return ResourceManager.GetString("Error_Mount_LogonFailure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The network is not present or not started..
+        /// </summary>
+        internal static string Error_Mount_NoNetwork {
+            get {
+                return ResourceManager.GetString("Error_Mount_NoNetwork", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The device is not currently connected..
+        /// </summary>
+        internal static string Error_Mount_NotConnected {
+            get {
+                return ResourceManager.GetString("Error_Mount_NotConnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windows is already signed in to this server with different credentials. Disconnect every drive and Explorer window using it, or sign out of Windows, and try again..
+        /// </summary>
+        internal static string Error_Mount_CredentialConflict {
+            get {
+                return ResourceManager.GetString("Error_Mount_CredentialConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windows' Client for NFS is not installed. Turn on "Services for NFS" under Windows Features and try again..
+        /// </summary>
+        internal static string Error_Mount_NfsClientMissing {
+            get {
+                return ResourceManager.GetString("Error_Mount_NfsClientMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windows' WebDAV client is not running. Start the "WebClient" service and try again..
+        /// </summary>
+        internal static string Error_Mount_WebDavClientStopped {
+            get {
+                return ResourceManager.GetString("Error_Mount_WebDavClientStopped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Authentication failed: unknown user name or bad password..
+        /// </summary>
+        internal static string Error_Mount_AuthenticationFailed {
+            get {
+                return ResourceManager.GetString("Error_Mount_AuthenticationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That mount point is already in use..
+        /// </summary>
+        internal static string Error_Mount_MountPointBusy {
+            get {
+                return ResourceManager.GetString("Error_Mount_MountPointBusy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The share was not found on the server..
+        /// </summary>
+        internal static string Error_Mount_ShareNotFound {
+            get {
+                return ResourceManager.GetString("Error_Mount_ShareNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The server did not respond..
+        /// </summary>
+        internal static string Error_Mount_ServerNotResponding {
+            get {
+                return ResourceManager.GetString("Error_Mount_ServerNotResponding", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The server is down or unreachable..
+        /// </summary>
+        internal static string Error_Mount_ServerDown {
+            get {
+                return ResourceManager.GetString("Error_Mount_ServerDown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The network is not available..
+        /// </summary>
+        internal static string Error_Mount_NetworkDown {
+            get {
+                return ResourceManager.GetString("Error_Mount_NetworkDown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not prepare the mount point '{0}': {1}.
+        /// </summary>
+        internal static string Error_Mount_MountPointNotPrepared {
+            get {
+                return ResourceManager.GetString("Error_Mount_MountPointNotPrepared", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The user has not been found..
+        /// </summary>
+        internal static string Error_User_NotFound {
+            get {
+                return ResourceManager.GetString("Error_User_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The username or password is incorrect..
+        /// </summary>
+        internal static string Error_Authentication_InvalidUsernameOrPassword {
+            get {
+                return ResourceManager.GetString("Error_Authentication_InvalidUsernameOrPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The passwords do not match..
+        /// </summary>
+        internal static string Error_Authentication_PasswordsDoNotMatch {
+            get {
+                return ResourceManager.GetString("Error_Authentication_PasswordsDoNotMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password must be at least 8 characters long..
+        /// </summary>
+        internal static string Error_Authentication_PasswordTooShort {
+            get {
+                return ResourceManager.GetString("Error_Authentication_PasswordTooShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That username is already taken..
+        /// </summary>
+        internal static string Error_Authentication_UsernameNotUnique {
+            get {
+                return ResourceManager.GetString("Error_Authentication_UsernameNotUnique", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You need to be signed in to do that..
+        /// </summary>
+        internal static string Error_Authentication_InvalidPermissions {
+            get {
+                return ResourceManager.GetString("Error_Authentication_InvalidPermissions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The new passwords do not match..
+        /// </summary>
+        internal static string Error_Authentication_NewPasswordsDoNotMatch {
+            get {
+                return ResourceManager.GetString("Error_Authentication_NewPasswordsDoNotMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The username or recovery key is incorrect..
+        /// </summary>
+        internal static string Error_Authentication_InvalidUsernameOrRecoveryKey {
+            get {
+                return ResourceManager.GetString("Error_Authentication_InvalidUsernameOrRecoveryKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The group with the specified Id = '{0}' was not found..
+        /// </summary>
+        internal static string Error_DriveGroup_NotFound {
+            get {
+                return ResourceManager.GetString("Error_DriveGroup_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A group called '{0}' already exists..
+        /// </summary>
+        internal static string Error_DriveGroup_NameNotUnique {
+            get {
+                return ResourceManager.GetString("Error_DriveGroup_NameNotUnique", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A group needs a name..
+        /// </summary>
+        internal static string Error_DriveGroup_NameMissing {
+            get {
+                return ResourceManager.GetString("Error_DriveGroup_NameMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose at least one drive for the group..
+        /// </summary>
+        internal static string Error_DriveGroup_NoDrivesSelected {
+            get {
+                return ResourceManager.GetString("Error_DriveGroup_NoDrivesSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The group '{0}' has no drives left. Edit it or delete it..
+        /// </summary>
+        internal static string Error_DriveGroup_NoMembers {
+            get {
+                return ResourceManager.GetString("Error_DriveGroup_NoMembers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No groups have been created yet..
+        /// </summary>
+        internal static string Error_DriveGroup_NoGroupsFound {
+            get {
+                return ResourceManager.GetString("Error_DriveGroup_NoGroupsFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The schedule with the specified Id = '{0}' was not found..
+        /// </summary>
+        internal static string Error_Schedule_NotFound {
+            get {
+                return ResourceManager.GetString("Error_Schedule_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose at least one day for the schedule..
+        /// </summary>
+        internal static string Error_Schedule_NoDaysSelected {
+            get {
+                return ResourceManager.GetString("Error_Schedule_NoDaysSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A schedule either connects or disconnects..
+        /// </summary>
+        internal static string Error_Schedule_UnknownAction {
+            get {
+                return ResourceManager.GetString("Error_Schedule_UnknownAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No settings were found for you..
+        /// </summary>
+        internal static string Error_Settings_NotFound {
+            get {
+                return ResourceManager.GetString("Error_Settings_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The timer count must be a positive number..
+        /// </summary>
+        internal static string Error_Settings_TimerCountMustBePositive {
+            get {
+                return ResourceManager.GetString("Error_Settings_TimerCountMustBePositive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The audit log retention must be zero or more days. Zero keeps every entry..
+        /// </summary>
+        internal static string Error_Settings_RetentionMustNotBeNegative {
+            get {
+                return ResourceManager.GetString("Error_Settings_RetentionMustNotBeNegative", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The low-space warning must be between 0 and {0} percent. Zero turns it off..
+        /// </summary>
+        internal static string Error_Settings_StorageAlertThresholdOutOfRange {
+            get {
+                return ResourceManager.GetString("Error_Settings_StorageAlertThresholdOutOfRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The idle lock must be zero minutes or more. Zero never locks..
+        /// </summary>
+        internal static string Error_Settings_IdleLockMustNotBeNegative {
+            get {
+                return ResourceManager.GetString("Error_Settings_IdleLockMustNotBeNegative", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to update the startup/desktop shortcut: {0}.
+        /// </summary>
+        internal static string Error_Settings_ShortcutUpdateFailed {
+            get {
+                return ResourceManager.GetString("Error_Settings_ShortcutUpdateFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no history to export yet..
+        /// </summary>
+        internal static string Error_Auditlog_NothingToExport {
+            get {
+                return ResourceManager.GetString("Error_Auditlog_NothingToExport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no log files to export yet..
+        /// </summary>
+        internal static string Error_Diagnostics_NoLogs {
+            get {
+                return ResourceManager.GetString("Error_Diagnostics_NoLogs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to That folder path is not valid, please choose a different one..
+        /// </summary>
+        internal static string Error_Diagnostics_InvalidTargetDirectory {
+            get {
+                return ResourceManager.GetString("Error_Diagnostics_InvalidTargetDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The diagnostics export was cancelled..
+        /// </summary>
+        internal static string Error_Diagnostics_ExportCancelled {
+            get {
+                return ResourceManager.GetString("Error_Diagnostics_ExportCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The diagnostics could not be exported: Helix is not allowed to write to that folder..
+        /// </summary>
+        internal static string Error_Diagnostics_ExportNotPermitted {
+            get {
+                return ResourceManager.GetString("Error_Diagnostics_ExportNotPermitted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The diagnostics could not be exported: {0}.
+        /// </summary>
+        internal static string Error_Diagnostics_ExportFailed {
+            get {
+                return ResourceManager.GetString("Error_Diagnostics_ExportFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not reach GitHub to check for updates. Check your internet connection and try again..
+        /// </summary>
+        internal static string Error_Update_Unreachable {
+            get {
+                return ResourceManager.GetString("Error_Update_Unreachable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No published release was found to compare against..
+        /// </summary>
+        internal static string Error_Update_NoReleases {
+            get {
+                return ResourceManager.GetString("Error_Update_NoReleases", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GitHub is rate-limiting update checks right now. Please try again later..
+        /// </summary>
+        internal static string Error_Update_RateLimited {
+            get {
+                return ResourceManager.GetString("Error_Update_RateLimited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GitHub answered the update check with an unexpected status ({0})..
+        /// </summary>
+        internal static string Error_Update_UnexpectedResponse {
+            get {
+                return ResourceManager.GetString("Error_Update_UnexpectedResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This release has no download built for this computer. Open the release page to fetch it by hand..
+        /// </summary>
+        internal static string Error_Update_NoAsset {
+            get {
+                return ResourceManager.GetString("Error_Update_NoAsset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The update could not be downloaded. Check your internet connection and try again..
+        /// </summary>
+        internal static string Error_Update_DownloadFailed {
+            get {
+                return ResourceManager.GetString("Error_Update_DownloadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The downloaded update could not be read. Nothing has been changed; please try again..
+        /// </summary>
+        internal static string Error_Update_UnreadableDownload {
+            get {
+                return ResourceManager.GetString("Error_Update_UnreadableDownload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The downloaded update does not look like Helix, so it was not installed..
+        /// </summary>
+        internal static string Error_Update_DownloadNotHelix {
+            get {
+                return ResourceManager.GetString("Error_Update_DownloadNotHelix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The downloaded update does not match the checksum GitHub published for it, so it was not installed..
+        /// </summary>
+        internal static string Error_Update_DownloadCorrupt {
+            get {
+                return ResourceManager.GetString("Error_Update_DownloadCorrupt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This release is not signed, and this build of Helix only installs signed updates. Open the release page to fetch it by hand..
+        /// </summary>
+        internal static string Error_Update_SignatureMissing {
+            get {
+                return ResourceManager.GetString("Error_Update_SignatureMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The signature on the downloaded update does not match, so it was not installed. It was not built by whoever publishes Helix..
+        /// </summary>
+        internal static string Error_Update_SignatureInvalid {
+            get {
+                return ResourceManager.GetString("Error_Update_SignatureInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Helix cannot replace its own files where it is installed. Update it by hand, or move it somewhere you own..
+        /// </summary>
+        internal static string Error_Update_NotWritable {
+            get {
+                return ResourceManager.GetString("Error_Update_NotWritable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Helix is running from a folder it shares with other files, so it cannot replace that folder safely. Move it into a folder of its own and try again..
+        /// </summary>
+        internal static string Error_Update_UnsafeInstallLocation {
+            get {
+                return ResourceManager.GetString("Error_Update_UnsafeInstallLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The update could not be started: the helper process did not start..
+        /// </summary>
+        internal static string Error_Update_HelperNotStarted {
+            get {
+                return ResourceManager.GetString("Error_Update_HelperNotStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The update could not be started: {0}.
+        /// </summary>
+        internal static string Error_Update_InstallFailed {
+            get {
+                return ResourceManager.GetString("Error_Update_InstallFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The latest release could not be read. It may not be tagged with a version number..
+        /// </summary>
+        internal static string Error_Update_UnreadableRelease {
+            get {
+                return ResourceManager.GetString("Error_Update_UnreadableRelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You've cancelled this operation..
+        /// </summary>
+        internal static string Error_FolderPicker_Cancelled {
+            get {
+                return ResourceManager.GetString("Error_FolderPicker_Cancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This folder path is invalid, please choose a different one..
+        /// </summary>
+        internal static string Error_FolderPicker_InvalidFolderPath {
+            get {
+                return ResourceManager.GetString("Error_FolderPicker_InvalidFolderPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file already exists, please delete it first..
+        /// </summary>
+        internal static string Error_FolderPicker_FileAlreadyExists {
+            get {
+                return ResourceManager.GetString("Error_FolderPicker_FileAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You don't have the necessary permissions to access this file or folder. Please check your permissions and try again..
+        /// </summary>
+        internal static string Error_FolderPicker_UnauthorizedFileAccess {
+            get {
+                return ResourceManager.GetString("Error_FolderPicker_UnauthorizedFileAccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file could not be written: {0}.
+        /// </summary>
+        internal static string Error_FolderPicker_WriteFailed {
+            get {
+                return ResourceManager.GetString("Error_FolderPicker_WriteFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file could not be read: {0}.
+        /// </summary>
+        internal static string Error_FolderPicker_ReadFailed {
+            get {
+                return ResourceManager.GetString("Error_FolderPicker_ReadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file is not valid JSON..
+        /// </summary>
+        internal static string Error_Json_Invalid {
+            get {
+                return ResourceManager.GetString("Error_Json_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A passphrase is required to encrypt or decrypt this export..
+        /// </summary>
+        internal static string Error_Vault_PassphraseMissing {
+            get {
+                return ResourceManager.GetString("Error_Vault_PassphraseMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The passphrase must be at least 8 characters long..
+        /// </summary>
+        internal static string Error_Vault_PassphraseTooShort {
+            get {
+                return ResourceManager.GetString("Error_Vault_PassphraseTooShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This file is too large to be a Helix vault..
+        /// </summary>
+        internal static string Error_Vault_TooLarge {
+            get {
+                return ResourceManager.GetString("Error_Vault_TooLarge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The two passphrase entries did not match..
+        /// </summary>
+        internal static string Error_Vault_PassphraseMismatch {
+            get {
+                return ResourceManager.GetString("Error_Vault_PassphraseMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid passphrase or corrupt vault file..
+        /// </summary>
+        internal static string Error_Vault_DecryptFailed {
+            get {
+                return ResourceManager.GetString("Error_Vault_DecryptFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This vault file was written by an unsupported version of Helix..
+        /// </summary>
+        internal static string Error_Vault_UnsupportedVersion {
+            get {
+                return ResourceManager.GetString("Error_Vault_UnsupportedVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The vault contains an invalid drive entry and cannot be imported..
+        /// </summary>
+        internal static string Error_Vault_InvalidDriveData {
+            get {
+                return ResourceManager.GetString("Error_Vault_InvalidDriveData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nothing was imported: everything in this file already exists, or its drive letters are mapped to something else..
+        /// </summary>
+        internal static string Error_Vault_NothingToImport {
+            get {
+                return ResourceManager.GetString("Error_Vault_NothingToImport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to One or more required fields are missing. Please ensure all mandatory information is provided..
+        /// </summary>
+        internal static string Error_Validation_MissingFields {
+            get {
+                return ResourceManager.GetString("Error_Validation_MissingFields", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The address must be an IP address (for example 192.168.0.10) or a hostname (for example nas.local)..
+        /// </summary>
+        internal static string Error_Validation_InvalidHost {
+            get {
+                return ResourceManager.GetString("Error_Validation_InvalidHost", resourceCulture);
+            }
+        }
     }
 }

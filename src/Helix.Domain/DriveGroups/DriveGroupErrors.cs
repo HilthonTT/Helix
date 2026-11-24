@@ -4,11 +4,13 @@ public static class DriveGroupErrors
 {
     public static Error NotFound(Guid id) => Error.NotFound(
         "DriveGroup.NotFound",
-        $"The group with the specified Id = '{id}' was not found.");
+        $"The group with the specified Id = '{id}' was not found.",
+        id);
 
     public static Error NameNotUnique(string name) => Error.Conflict(
         "DriveGroup.NameNotUnique",
-        $"A group called '{name}' already exists.");
+        $"A group called '{name}' already exists.",
+        name);
 
     public static readonly Error NameMissing = Error.Problem(
         "DriveGroup.NameMissing",
@@ -20,7 +22,8 @@ public static class DriveGroupErrors
 
     public static Error NoMembers(string name) => Error.Problem(
         "DriveGroup.NoMembers",
-        $"The group '{name}' has no drives left. Edit it or delete it.");
+        $"The group '{name}' has no drives left. Edit it or delete it.",
+        name);
 
     public static readonly Error NoGroupsFound = Error.NotFound(
         "DriveGroup.NoGroupsFound",

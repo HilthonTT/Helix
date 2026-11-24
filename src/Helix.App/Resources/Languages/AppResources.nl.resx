@@ -1229,4 +1229,334 @@
   <data name="ServerAlreadyAdded" xml:space="preserve">
     <value>al toegevoegd als {0}</value>
   </data>
+  <data name="Error_Drive_NotFound" xml:space="preserve">
+    <value>De schijf met id '{0}' is niet gevonden.</value>
+  </data>
+  <data name="Error_Drive_LetterNotUnique" xml:space="preserve">
+    <value>Er bestaat al een schijf met de letter '{0}'.</value>
+  </data>
+  <data name="Error_Drive_FailedToConnect" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_FailedToDisconnect" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_SessionConflict" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_SharesNotListed" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_HostUnreachable" xml:space="preserve">
+    <value>'{0}' is vanaf dit netwerk niet bereikbaar.</value>
+  </data>
+  <data name="Error_Drive_AwayFromHomeNetwork" xml:space="preserve">
+    <value>Deze schijf verbindt alleen opnieuw op '{0}', en dit is dat netwerk niet.</value>
+  </data>
+  <data name="Error_Drive_AwayFromHomeNetwork_0" xml:space="preserve">
+    <value>Deze schijf verbindt alleen opnieuw op zijn thuisnetwerk, en dit is dat netwerk niet.</value>
+  </data>
+  <data name="Error_Drive_ShareListingUnsupported" xml:space="preserve">
+    <value>Het tonen van de shares van een server wordt op dit platform niet ondersteund.</value>
+  </data>
+  <data name="Error_Drive_NothingToCreate" xml:space="preserve">
+    <value>Kies minstens één share om toe te voegen.</value>
+  </data>
+  <data name="Error_Drive_DuplicateLetter" xml:space="preserve">
+    <value>De stationsletter '{0}' is aan meer dan één share gegeven.</value>
+  </data>
+  <data name="Error_Drive_MountNotAvailable" xml:space="preserve">
+    <value>Die schijf is niet gekoppeld, dus er valt niets te openen.</value>
+  </data>
+  <data name="Error_Drive_LetterNotFound" xml:space="preserve">
+    <value>De schijf met de letter '{0}' is niet gevonden.</value>
+  </data>
+  <data name="Error_Drive_LetterInUse" xml:space="preserve">
+    <value>De stationsletter '{0}' is op deze computer al in gebruik. Kies een vrije.</value>
+  </data>
+  <data name="Error_Drive_MacAddressNotFound" xml:space="preserve">
+    <value>Het hardwareadres van '{0}' kon niet worden gelezen. Het antwoordt alleen op dit netwerk, zolang het apparaat wakker is.</value>
+  </data>
+  <data name="Error_Drive_InvalidRemoteHost" xml:space="preserve">
+    <value>Het adres voor onderweg moet een IP-adres of hostnaam zijn, zoals nas.example.ts.net.</value>
+  </data>
+  <data name="Error_Drive_UnknownProtocol" xml:space="preserve">
+    <value>Dat protocol kan Helix niet koppelen. Kies SMB, WebDAV of NFS.</value>
+  </data>
+  <data name="Error_Drive_InvalidPort" xml:space="preserve">
+    <value>De poort moet een getal van 1 tot 65535 zijn.</value>
+  </data>
+  <data name="Error_Drive_NotAMacAddress" xml:space="preserve">
+    <value>Dat is geen hardwareadres. Verwacht worden zes paren hexadecimale cijfers, zoals 1a-2b-3c-4d-5e-6f.</value>
+  </data>
+  <data name="Error_Drive_NoMacAddress" xml:space="preserve">
+    <value>Deze schijf heeft geen hardwareadres, dus er valt niets te wekken.</value>
+  </data>
+  <data name="Error_Drive_WakeNotSent" xml:space="preserve">
+    <value>Het wekpakket kon niet vanaf deze computer worden verstuurd.</value>
+  </data>
+  <data name="Error_Drive_NotALetter" xml:space="preserve">
+    <value>De stationsletter moet één teken zijn.</value>
+  </data>
+  <data name="Error_Drive_NoDrivesFound" xml:space="preserve">
+    <value>Er zijn geen schijven gevonden. Maak er eerst een aan.</value>
+  </data>
+  <data name="Error_Mount_Canceled" xml:space="preserve">
+    <value>De bewerking is geannuleerd.</value>
+  </data>
+  <data name="Error_Mount_Unexpected" xml:space="preserve">
+    <value>Onverwachte fout: {0}</value>
+  </data>
+  <data name="Error_Mount_OperationFailed" xml:space="preserve">
+    <value>De bewerking is mislukt (code {0}).</value>
+  </data>
+  <data name="Error_Mount_TimedOut" xml:space="preserve">
+    <value>Time-out bij het verbinden.</value>
+  </data>
+  <data name="Error_Mount_DisconnectTimedOut" xml:space="preserve">
+    <value>Time-out bij het verbreken.</value>
+  </data>
+  <data name="Error_Mount_AccessDenied" xml:space="preserve">
+    <value>Toegang geweigerd. Controleer de gebruikersnaam en het wachtwoord.</value>
+  </data>
+  <data name="Error_Mount_LetterAlreadyAssigned" xml:space="preserve">
+    <value>Die stationsletter is al in gebruik.</value>
+  </data>
+  <data name="Error_Mount_BadResourceType" xml:space="preserve">
+    <value>Het type netwerkbron is onjuist.</value>
+  </data>
+  <data name="Error_Mount_NetworkPathNotFound" xml:space="preserve">
+    <value>Het netwerkpad is niet gevonden.</value>
+  </data>
+  <data name="Error_Mount_NetworkNameNotFound" xml:space="preserve">
+    <value>De netwerknaam kan niet worden gevonden.</value>
+  </data>
+  <data name="Error_Mount_PasswordIncorrect" xml:space="preserve">
+    <value>Het wachtwoord is onjuist.</value>
+  </data>
+  <data name="Error_Mount_LogonFailure" xml:space="preserve">
+    <value>Aanmelden mislukt: onbekende gebruikersnaam of onjuist wachtwoord.</value>
+  </data>
+  <data name="Error_Mount_NoNetwork" xml:space="preserve">
+    <value>Het netwerk is niet aanwezig of niet gestart.</value>
+  </data>
+  <data name="Error_Mount_NotConnected" xml:space="preserve">
+    <value>Het apparaat is momenteel niet verbonden.</value>
+  </data>
+  <data name="Error_Mount_CredentialConflict" xml:space="preserve">
+    <value>Windows is al met andere inloggegevens bij deze server aangemeld. Verbreek elke schijf en elk Verkenner-venster dat hem gebruikt, of meld je af bij Windows, en probeer het opnieuw.</value>
+  </data>
+  <data name="Error_Mount_NfsClientMissing" xml:space="preserve">
+    <value>De Client voor NFS van Windows is niet geïnstalleerd. Schakel "Services voor NFS" in onder Windows-onderdelen en probeer het opnieuw.</value>
+  </data>
+  <data name="Error_Mount_WebDavClientStopped" xml:space="preserve">
+    <value>De WebDAV-client van Windows draait niet. Start de service "WebClient" en probeer het opnieuw.</value>
+  </data>
+  <data name="Error_Mount_AuthenticationFailed" xml:space="preserve">
+    <value>Verificatie mislukt: onbekende gebruikersnaam of onjuist wachtwoord.</value>
+  </data>
+  <data name="Error_Mount_MountPointBusy" xml:space="preserve">
+    <value>Dat koppelpunt is al in gebruik.</value>
+  </data>
+  <data name="Error_Mount_ShareNotFound" xml:space="preserve">
+    <value>De share is niet gevonden op de server.</value>
+  </data>
+  <data name="Error_Mount_ServerNotResponding" xml:space="preserve">
+    <value>De server reageerde niet.</value>
+  </data>
+  <data name="Error_Mount_ServerDown" xml:space="preserve">
+    <value>De server is uit of onbereikbaar.</value>
+  </data>
+  <data name="Error_Mount_NetworkDown" xml:space="preserve">
+    <value>Het netwerk is niet beschikbaar.</value>
+  </data>
+  <data name="Error_Mount_MountPointNotPrepared" xml:space="preserve">
+    <value>Het koppelpunt '{0}' kon niet worden voorbereid: {1}</value>
+  </data>
+  <data name="Error_User_NotFound" xml:space="preserve">
+    <value>De gebruiker is niet gevonden.</value>
+  </data>
+  <data name="Error_Authentication_InvalidUsernameOrPassword" xml:space="preserve">
+    <value>De gebruikersnaam of het wachtwoord is onjuist.</value>
+  </data>
+  <data name="Error_Authentication_PasswordsDoNotMatch" xml:space="preserve">
+    <value>De wachtwoorden komen niet overeen.</value>
+  </data>
+  <data name="Error_Authentication_PasswordTooShort" xml:space="preserve">
+    <value>Het wachtwoord moet minstens 8 tekens lang zijn.</value>
+  </data>
+  <data name="Error_Authentication_UsernameNotUnique" xml:space="preserve">
+    <value>Die gebruikersnaam is al in gebruik.</value>
+  </data>
+  <data name="Error_Authentication_InvalidPermissions" xml:space="preserve">
+    <value>Je moet aangemeld zijn om dat te doen.</value>
+  </data>
+  <data name="Error_Authentication_NewPasswordsDoNotMatch" xml:space="preserve">
+    <value>De nieuwe wachtwoorden komen niet overeen.</value>
+  </data>
+  <data name="Error_Authentication_InvalidUsernameOrRecoveryKey" xml:space="preserve">
+    <value>De gebruikersnaam of herstelsleutel is onjuist.</value>
+  </data>
+  <data name="Error_DriveGroup_NotFound" xml:space="preserve">
+    <value>De groep met id '{0}' is niet gevonden.</value>
+  </data>
+  <data name="Error_DriveGroup_NameNotUnique" xml:space="preserve">
+    <value>Er bestaat al een groep met de naam '{0}'.</value>
+  </data>
+  <data name="Error_DriveGroup_NameMissing" xml:space="preserve">
+    <value>Een groep heeft een naam nodig.</value>
+  </data>
+  <data name="Error_DriveGroup_NoDrivesSelected" xml:space="preserve">
+    <value>Kies minstens één schijf voor de groep.</value>
+  </data>
+  <data name="Error_DriveGroup_NoMembers" xml:space="preserve">
+    <value>De groep '{0}' heeft geen schijven meer. Bewerk of verwijder hem.</value>
+  </data>
+  <data name="Error_DriveGroup_NoGroupsFound" xml:space="preserve">
+    <value>Er zijn nog geen groepen aangemaakt.</value>
+  </data>
+  <data name="Error_Schedule_NotFound" xml:space="preserve">
+    <value>Het schema met id '{0}' is niet gevonden.</value>
+  </data>
+  <data name="Error_Schedule_NoDaysSelected" xml:space="preserve">
+    <value>Kies minstens één dag voor het schema.</value>
+  </data>
+  <data name="Error_Schedule_UnknownAction" xml:space="preserve">
+    <value>Een schema verbindt of verbreekt, niets anders.</value>
+  </data>
+  <data name="Error_Settings_NotFound" xml:space="preserve">
+    <value>Er zijn geen instellingen voor je gevonden.</value>
+  </data>
+  <data name="Error_Settings_TimerCountMustBePositive" xml:space="preserve">
+    <value>De timerwaarde moet een positief getal zijn.</value>
+  </data>
+  <data name="Error_Settings_RetentionMustNotBeNegative" xml:space="preserve">
+    <value>De bewaartermijn van het auditlogboek moet nul of meer dagen zijn. Nul bewaart elke regel.</value>
+  </data>
+  <data name="Error_Settings_StorageAlertThresholdOutOfRange" xml:space="preserve">
+    <value>De waarschuwing voor weinig ruimte moet tussen 0 en {0} procent liggen. Nul zet hem uit.</value>
+  </data>
+  <data name="Error_Settings_IdleLockMustNotBeNegative" xml:space="preserve">
+    <value>De vergrendeling bij inactiviteit moet nul of meer minuten zijn. Nul vergrendelt nooit.</value>
+  </data>
+  <data name="Error_Settings_ShortcutUpdateFailed" xml:space="preserve">
+    <value>De snelkoppeling voor opstarten/bureaublad kon niet worden bijgewerkt: {0}</value>
+  </data>
+  <data name="Error_Auditlog_NothingToExport" xml:space="preserve">
+    <value>Er is nog geen geschiedenis om te exporteren.</value>
+  </data>
+  <data name="Error_Diagnostics_NoLogs" xml:space="preserve">
+    <value>Er zijn nog geen logbestanden om te exporteren.</value>
+  </data>
+  <data name="Error_Diagnostics_InvalidTargetDirectory" xml:space="preserve">
+    <value>Dat mappad is ongeldig. Kies een ander pad.</value>
+  </data>
+  <data name="Error_Diagnostics_ExportCancelled" xml:space="preserve">
+    <value>Het exporteren van de diagnose is geannuleerd.</value>
+  </data>
+  <data name="Error_Diagnostics_ExportNotPermitted" xml:space="preserve">
+    <value>De diagnose kon niet worden geëxporteerd: Helix mag niet naar die map schrijven.</value>
+  </data>
+  <data name="Error_Diagnostics_ExportFailed" xml:space="preserve">
+    <value>De diagnose kon niet worden geëxporteerd: {0}</value>
+  </data>
+  <data name="Error_Update_Unreachable" xml:space="preserve">
+    <value>GitHub was niet bereikbaar om op updates te controleren. Controleer je internetverbinding en probeer het opnieuw.</value>
+  </data>
+  <data name="Error_Update_NoReleases" xml:space="preserve">
+    <value>Er is geen gepubliceerde release gevonden om mee te vergelijken.</value>
+  </data>
+  <data name="Error_Update_RateLimited" xml:space="preserve">
+    <value>GitHub beperkt op dit moment het aantal updatecontroles. Probeer het later opnieuw.</value>
+  </data>
+  <data name="Error_Update_UnexpectedResponse" xml:space="preserve">
+    <value>GitHub beantwoordde de updatecontrole met een onverwachte status ({0}).</value>
+  </data>
+  <data name="Error_Update_NoAsset" xml:space="preserve">
+    <value>Deze release heeft geen download voor deze computer. Open de releasepagina om hem handmatig op te halen.</value>
+  </data>
+  <data name="Error_Update_DownloadFailed" xml:space="preserve">
+    <value>De update kon niet worden gedownload. Controleer je internetverbinding en probeer het opnieuw.</value>
+  </data>
+  <data name="Error_Update_UnreadableDownload" xml:space="preserve">
+    <value>De gedownloade update kon niet worden gelezen. Er is niets gewijzigd; probeer het opnieuw.</value>
+  </data>
+  <data name="Error_Update_DownloadNotHelix" xml:space="preserve">
+    <value>De gedownloade update lijkt niet op Helix en is daarom niet geïnstalleerd.</value>
+  </data>
+  <data name="Error_Update_DownloadCorrupt" xml:space="preserve">
+    <value>De gedownloade update komt niet overeen met de checksum die GitHub ervoor publiceerde en is daarom niet geïnstalleerd.</value>
+  </data>
+  <data name="Error_Update_SignatureMissing" xml:space="preserve">
+    <value>Deze release is niet ondertekend, en deze build van Helix installeert alleen ondertekende updates. Open de releasepagina om hem handmatig op te halen.</value>
+  </data>
+  <data name="Error_Update_SignatureInvalid" xml:space="preserve">
+    <value>De handtekening van de gedownloade update klopt niet, dus hij is niet geïnstalleerd. Hij is niet gemaakt door de uitgever van Helix.</value>
+  </data>
+  <data name="Error_Update_NotWritable" xml:space="preserve">
+    <value>Helix kan zijn eigen bestanden op de installatielocatie niet vervangen. Werk hem handmatig bij, of verplaats hem naar een plek die van jou is.</value>
+  </data>
+  <data name="Error_Update_UnsafeInstallLocation" xml:space="preserve">
+    <value>Helix draait vanuit een map die hij met andere bestanden deelt, dus hij kan die map niet veilig vervangen. Verplaats hem naar een eigen map en probeer het opnieuw.</value>
+  </data>
+  <data name="Error_Update_HelperNotStarted" xml:space="preserve">
+    <value>De update kon niet worden gestart: het hulpproces startte niet.</value>
+  </data>
+  <data name="Error_Update_InstallFailed" xml:space="preserve">
+    <value>De update kon niet worden gestart: {0}</value>
+  </data>
+  <data name="Error_Update_UnreadableRelease" xml:space="preserve">
+    <value>De nieuwste release kon niet worden gelezen. Misschien heeft hij geen versienummer als tag.</value>
+  </data>
+  <data name="Error_FolderPicker_Cancelled" xml:space="preserve">
+    <value>Je hebt deze bewerking geannuleerd.</value>
+  </data>
+  <data name="Error_FolderPicker_InvalidFolderPath" xml:space="preserve">
+    <value>Dit mappad is ongeldig. Kies een ander pad.</value>
+  </data>
+  <data name="Error_FolderPicker_FileAlreadyExists" xml:space="preserve">
+    <value>Het bestand bestaat al. Verwijder het eerst.</value>
+  </data>
+  <data name="Error_FolderPicker_UnauthorizedFileAccess" xml:space="preserve">
+    <value>Je hebt niet de benodigde rechten voor dit bestand of deze map. Controleer je rechten en probeer het opnieuw.</value>
+  </data>
+  <data name="Error_FolderPicker_WriteFailed" xml:space="preserve">
+    <value>Het bestand kon niet worden geschreven: {0}</value>
+  </data>
+  <data name="Error_FolderPicker_ReadFailed" xml:space="preserve">
+    <value>Het bestand kon niet worden gelezen: {0}</value>
+  </data>
+  <data name="Error_Json_Invalid" xml:space="preserve">
+    <value>Het bestand is geen geldige JSON.</value>
+  </data>
+  <data name="Error_Vault_PassphraseMissing" xml:space="preserve">
+    <value>Er is een wachtwoordzin nodig om deze export te versleutelen of te ontsleutelen.</value>
+  </data>
+  <data name="Error_Vault_PassphraseTooShort" xml:space="preserve">
+    <value>De wachtwoordzin moet minstens 8 tekens lang zijn.</value>
+  </data>
+  <data name="Error_Vault_TooLarge" xml:space="preserve">
+    <value>Dit bestand is te groot om een Helix-kluis te zijn.</value>
+  </data>
+  <data name="Error_Vault_PassphraseMismatch" xml:space="preserve">
+    <value>De twee ingevoerde wachtwoordzinnen komen niet overeen.</value>
+  </data>
+  <data name="Error_Vault_DecryptFailed" xml:space="preserve">
+    <value>Onjuiste wachtwoordzin of beschadigd kluisbestand.</value>
+  </data>
+  <data name="Error_Vault_UnsupportedVersion" xml:space="preserve">
+    <value>Dit kluisbestand is geschreven door een niet-ondersteunde versie van Helix.</value>
+  </data>
+  <data name="Error_Vault_InvalidDriveData" xml:space="preserve">
+    <value>De kluis bevat een ongeldige schijf en kan niet worden geïmporteerd.</value>
+  </data>
+  <data name="Error_Vault_NothingToImport" xml:space="preserve">
+    <value>Er is niets geïmporteerd: alles in dit bestand bestaat al, of de stationsletters zijn aan iets anders gekoppeld.</value>
+  </data>
+  <data name="Error_Validation_MissingFields" xml:space="preserve">
+    <value>Een of meer verplichte velden ontbreken. Vul alle verplichte gegevens in.</value>
+  </data>
+  <data name="Error_Validation_InvalidHost" xml:space="preserve">
+    <value>Het adres moet een IP-adres (bijvoorbeeld 192.168.0.10) of een hostnaam (bijvoorbeeld nas.local) zijn.</value>
+  </data>
 </root>

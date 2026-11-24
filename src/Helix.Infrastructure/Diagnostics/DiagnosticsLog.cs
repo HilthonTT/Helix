@@ -64,14 +64,13 @@ internal sealed class DiagnosticsLog : IDiagnosticsLog
         {
             TryDeletePartialExport(path, created);
 
-            return Result.Failure<string>(DiagnosticsErrors.ExportFailed("The export was cancelled."));
+            return Result.Failure<string>(DiagnosticsErrors.ExportCancelled);
         }
         catch (UnauthorizedAccessException)
         {
             TryDeletePartialExport(path, created);
 
-            return Result.Failure<string>(DiagnosticsErrors.ExportFailed(
-                "Helix is not allowed to write to that folder."));
+            return Result.Failure<string>(DiagnosticsErrors.ExportNotPermitted);
         }
         catch (Exception ex)
         {
