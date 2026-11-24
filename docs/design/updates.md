@@ -196,6 +196,24 @@ never a bare `powershell.exe`: with `UseShellExecute=false`, `CreateProcess` sea
 application's own folder first, and an install Helix can update is by definition one whose
 folder the user can write to.
 
+It runs with **`-ExecutionPolicy RemoteSigned`**, not `Bypass`. A Windows client's default
+policy is `Restricted`, which refuses every `.ps1`, so the process-scope override is needed;
+`RemoteSigned` is the narrowest one that runs a script written on this machine (no
+Mark-of-the-Web) and still refuses one that was downloaded. `Bypass` would run anything, and
+it is one of the strings scanners and GitHub's abuse detection read as a malware launcher.
+Machine or user Group Policy wins over either, as it always did.
+
+There is no `-WindowStyle Hidden`: the helper is a console process started with
+`CreateNoWindow` and `UseShellExecute=false`, so it never gets a window to hide, and the
+flag added nothing but a second red flag to the command line. `-NonInteractive` makes a
+prompt the script did not expect fail into the log instead of waiting forever for a console
+nobody can see. `Helper_Should_RunTheScriptItWasGiven_UnderTheDefaultPolicy` starts the
+real `powershell.exe` with the inherited process policy removed, so a flag that stops the
+script from running fails a test rather than every user's next update.
+
+An update from a given version runs the helper **that version** wrote, so this applies from
+the first update made *by* a build carrying it, not to the update that installs it.
+
 The release workflow hands the tag to its scripts through `env:` and refuses one that is not
 `v` plus two to four numbers, since a tag pasted into a `run:` block as `${{ ... }}` is shell
 source. Re-running a release without `RELEASE_SIGNING_KEY` deletes the signature manifest

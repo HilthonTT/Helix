@@ -364,6 +364,41 @@ public sealed class UpdateInstallerTests : IDisposable
     }
 
     [Fact]
+    public void Helper_Should_AllowOnlyLocalScripts_WithoutAskingForAHiddenWindow()
+    {
+        ProcessStartInfo start = UpdateInstaller.CreateHelperStart(Path.Combine(StagingRoot, "helper", "apply-update.ps1"));
+
+        start.Arguments.Should().Contain("-ExecutionPolicy RemoteSigned");
+        start.Arguments.Should().NotContainEquivalentOf("Bypass");
+        start.Arguments.Should().NotContainEquivalentOf("-WindowStyle");
+        start.Arguments.Should().NotContainEquivalentOf("-EncodedCommand");
+        start.UseShellExecute.Should().BeFalse();
+        start.CreateNoWindow.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Helper_Should_RunTheScriptItWasGiven_UnderTheDefaultPolicy()
+    {
+        string helperDirectory = Path.Combine(StagingRoot, "helper");
+        Directory.CreateDirectory(helperDirectory);
+
+        string marker = Path.Combine(helperDirectory, "ran.txt");
+        string scriptPath = Path.Combine(helperDirectory, "apply-update.ps1");
+        File.WriteAllText(
+            scriptPath,
+            $"Set-Content -LiteralPath '{marker.Replace("'", "''")}' -Value ok",
+            new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+
+        ProcessStartInfo start = UpdateInstaller.CreateHelperStart(scriptPath);
+        start.Environment.Remove("PSExecutionPolicyPreference");
+
+        using Process helper = Process.Start(start)!;
+        helper.WaitForExit(TimeSpan.FromSeconds(60)).Should().BeTrue();
+
+        File.Exists(marker).Should().BeTrue();
+    }
+
+    [Fact]
     public void SwapScript_Should_RetryTheMove_AndRecordWhatHappened()
     {
         UpdateInstaller installer = Installer(() => Zip(("Helix.App.exe", "binary")));

@@ -625,7 +625,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
         return new ProcessStartInfo
         {
             FileName = Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe"),
-            Arguments = $"-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File \"{scriptPath}\"",
+            Arguments = $"-NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File \"{scriptPath}\"",
             UseShellExecute = false,
             CreateNoWindow = true,
             WorkingDirectory = helperDirectory,
