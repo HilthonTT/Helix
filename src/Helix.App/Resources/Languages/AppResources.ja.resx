@@ -1229,4 +1229,334 @@
   <data name="ServerAlreadyAdded" xml:space="preserve">
     <value>{0} として追加済み</value>
   </data>
+  <data name="Error_Drive_NotFound" xml:space="preserve">
+    <value>ID '{0}' のドライブが見つかりません。</value>
+  </data>
+  <data name="Error_Drive_LetterNotUnique" xml:space="preserve">
+    <value>ドライブ文字 '{0}' のドライブは既に存在します。</value>
+  </data>
+  <data name="Error_Drive_FailedToConnect" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_FailedToDisconnect" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_SessionConflict" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_SharesNotListed" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_HostUnreachable" xml:space="preserve">
+    <value>このネットワークから '{0}' に到達できません。</value>
+  </data>
+  <data name="Error_Drive_AwayFromHomeNetwork" xml:space="preserve">
+    <value>このドライブは '{0}' でのみ再接続されますが、現在のネットワークは異なります。</value>
+  </data>
+  <data name="Error_Drive_AwayFromHomeNetwork_0" xml:space="preserve">
+    <value>このドライブはホームネットワークでのみ再接続されますが、現在のネットワークは異なります。</value>
+  </data>
+  <data name="Error_Drive_ShareListingUnsupported" xml:space="preserve">
+    <value>このプラットフォームでは、サーバーの共有一覧を取得できません。</value>
+  </data>
+  <data name="Error_Drive_NothingToCreate" xml:space="preserve">
+    <value>追加する共有を 1 つ以上選択してください。</value>
+  </data>
+  <data name="Error_Drive_DuplicateLetter" xml:space="preserve">
+    <value>ドライブ文字 '{0}' が複数の共有に割り当てられています。</value>
+  </data>
+  <data name="Error_Drive_MountNotAvailable" xml:space="preserve">
+    <value>このドライブはマウントされていないため、開くものがありません。</value>
+  </data>
+  <data name="Error_Drive_LetterNotFound" xml:space="preserve">
+    <value>ドライブ文字 '{0}' のドライブが見つかりません。</value>
+  </data>
+  <data name="Error_Drive_LetterInUse" xml:space="preserve">
+    <value>ドライブ文字 '{0}' はこのコンピューターで既に使用されています。空いている文字を選択してください。</value>
+  </data>
+  <data name="Error_Drive_MacAddressNotFound" xml:space="preserve">
+    <value>'{0}' のハードウェアアドレスを読み取れませんでした。同じネットワーク上で、起動している間だけ応答します。</value>
+  </data>
+  <data name="Error_Drive_InvalidRemoteHost" xml:space="preserve">
+    <value>外出先用のアドレスは IP アドレスまたはホスト名 (例: nas.example.ts.net) にしてください。</value>
+  </data>
+  <data name="Error_Drive_UnknownProtocol" xml:space="preserve">
+    <value>Helix はこのプロトコルをマウントできません。SMB、WebDAV、NFS のいずれかを選択してください。</value>
+  </data>
+  <data name="Error_Drive_InvalidPort" xml:space="preserve">
+    <value>ポートは 1～65535 の数値にしてください。</value>
+  </data>
+  <data name="Error_Drive_NotAMacAddress" xml:space="preserve">
+    <value>ハードウェアアドレスではありません。1a-2b-3c-4d-5e-6f のように 16 進数 2 桁を 6 組入力してください。</value>
+  </data>
+  <data name="Error_Drive_NoMacAddress" xml:space="preserve">
+    <value>このドライブにはハードウェアアドレスがないため、ウェイクアップできません。</value>
+  </data>
+  <data name="Error_Drive_WakeNotSent" xml:space="preserve">
+    <value>このコンピューターからウェイクアップ パケットを送信できませんでした。</value>
+  </data>
+  <data name="Error_Drive_NotALetter" xml:space="preserve">
+    <value>ドライブ文字は 1 文字にしてください。</value>
+  </data>
+  <data name="Error_Drive_NoDrivesFound" xml:space="preserve">
+    <value>ドライブが見つかりません。先にドライブを作成してください。</value>
+  </data>
+  <data name="Error_Mount_Canceled" xml:space="preserve">
+    <value>操作はキャンセルされました。</value>
+  </data>
+  <data name="Error_Mount_Unexpected" xml:space="preserve">
+    <value>予期しないエラー: {0}</value>
+  </data>
+  <data name="Error_Mount_OperationFailed" xml:space="preserve">
+    <value>操作に失敗しました (コード {0})。</value>
+  </data>
+  <data name="Error_Mount_TimedOut" xml:space="preserve">
+    <value>接続がタイムアウトしました。</value>
+  </data>
+  <data name="Error_Mount_DisconnectTimedOut" xml:space="preserve">
+    <value>切断がタイムアウトしました。</value>
+  </data>
+  <data name="Error_Mount_AccessDenied" xml:space="preserve">
+    <value>アクセスが拒否されました。ユーザー名とパスワードを確認してください。</value>
+  </data>
+  <data name="Error_Mount_LetterAlreadyAssigned" xml:space="preserve">
+    <value>このドライブ文字は既に使用されています。</value>
+  </data>
+  <data name="Error_Mount_BadResourceType" xml:space="preserve">
+    <value>ネットワーク リソースの種類が正しくありません。</value>
+  </data>
+  <data name="Error_Mount_NetworkPathNotFound" xml:space="preserve">
+    <value>ネットワーク パスが見つかりません。</value>
+  </data>
+  <data name="Error_Mount_NetworkNameNotFound" xml:space="preserve">
+    <value>ネットワーク名が見つかりません。</value>
+  </data>
+  <data name="Error_Mount_PasswordIncorrect" xml:space="preserve">
+    <value>パスワードが正しくありません。</value>
+  </data>
+  <data name="Error_Mount_LogonFailure" xml:space="preserve">
+    <value>ログオンに失敗しました: ユーザー名が不明か、パスワードが正しくありません。</value>
+  </data>
+  <data name="Error_Mount_NoNetwork" xml:space="preserve">
+    <value>ネットワークが存在しないか、開始されていません。</value>
+  </data>
+  <data name="Error_Mount_NotConnected" xml:space="preserve">
+    <value>デバイスは現在接続されていません。</value>
+  </data>
+  <data name="Error_Mount_CredentialConflict" xml:space="preserve">
+    <value>Windows は別の資格情報でこのサーバーに既にサインインしています。このサーバーを使用しているすべてのドライブとエクスプローラーのウィンドウを切断するか、Windows からサインアウトしてから、もう一度お試しください。</value>
+  </data>
+  <data name="Error_Mount_NfsClientMissing" xml:space="preserve">
+    <value>Windows の NFS クライアントがインストールされていません。[Windows の機能] で「NFS 用サービス」を有効にしてから、もう一度お試しください。</value>
+  </data>
+  <data name="Error_Mount_WebDavClientStopped" xml:space="preserve">
+    <value>Windows の WebDAV クライアントが実行されていません。「WebClient」サービスを開始してから、もう一度お試しください。</value>
+  </data>
+  <data name="Error_Mount_AuthenticationFailed" xml:space="preserve">
+    <value>認証に失敗しました: ユーザー名が不明か、パスワードが正しくありません。</value>
+  </data>
+  <data name="Error_Mount_MountPointBusy" xml:space="preserve">
+    <value>このマウントポイントは既に使用されています。</value>
+  </data>
+  <data name="Error_Mount_ShareNotFound" xml:space="preserve">
+    <value>サーバー上に共有が見つかりません。</value>
+  </data>
+  <data name="Error_Mount_ServerNotResponding" xml:space="preserve">
+    <value>サーバーが応答しませんでした。</value>
+  </data>
+  <data name="Error_Mount_ServerDown" xml:space="preserve">
+    <value>サーバーが停止しているか、到達できません。</value>
+  </data>
+  <data name="Error_Mount_NetworkDown" xml:space="preserve">
+    <value>ネットワークを利用できません。</value>
+  </data>
+  <data name="Error_Mount_MountPointNotPrepared" xml:space="preserve">
+    <value>マウントポイント '{0}' を準備できませんでした: {1}</value>
+  </data>
+  <data name="Error_User_NotFound" xml:space="preserve">
+    <value>ユーザーが見つかりません。</value>
+  </data>
+  <data name="Error_Authentication_InvalidUsernameOrPassword" xml:space="preserve">
+    <value>ユーザー名またはパスワードが正しくありません。</value>
+  </data>
+  <data name="Error_Authentication_PasswordsDoNotMatch" xml:space="preserve">
+    <value>パスワードが一致しません。</value>
+  </data>
+  <data name="Error_Authentication_PasswordTooShort" xml:space="preserve">
+    <value>パスワードは 8 文字以上にしてください。</value>
+  </data>
+  <data name="Error_Authentication_UsernameNotUnique" xml:space="preserve">
+    <value>このユーザー名は既に使用されています。</value>
+  </data>
+  <data name="Error_Authentication_InvalidPermissions" xml:space="preserve">
+    <value>この操作を行うにはサインインが必要です。</value>
+  </data>
+  <data name="Error_Authentication_NewPasswordsDoNotMatch" xml:space="preserve">
+    <value>新しいパスワードが一致しません。</value>
+  </data>
+  <data name="Error_Authentication_InvalidUsernameOrRecoveryKey" xml:space="preserve">
+    <value>ユーザー名または回復キーが正しくありません。</value>
+  </data>
+  <data name="Error_DriveGroup_NotFound" xml:space="preserve">
+    <value>ID '{0}' のグループが見つかりません。</value>
+  </data>
+  <data name="Error_DriveGroup_NameNotUnique" xml:space="preserve">
+    <value>'{0}' という名前のグループは既に存在します。</value>
+  </data>
+  <data name="Error_DriveGroup_NameMissing" xml:space="preserve">
+    <value>グループには名前が必要です。</value>
+  </data>
+  <data name="Error_DriveGroup_NoDrivesSelected" xml:space="preserve">
+    <value>グループのドライブを 1 つ以上選択してください。</value>
+  </data>
+  <data name="Error_DriveGroup_NoMembers" xml:space="preserve">
+    <value>グループ '{0}' にはドライブが残っていません。編集するか削除してください。</value>
+  </data>
+  <data name="Error_DriveGroup_NoGroupsFound" xml:space="preserve">
+    <value>グループはまだ作成されていません。</value>
+  </data>
+  <data name="Error_Schedule_NotFound" xml:space="preserve">
+    <value>ID '{0}' のスケジュールが見つかりません。</value>
+  </data>
+  <data name="Error_Schedule_NoDaysSelected" xml:space="preserve">
+    <value>スケジュールの曜日を 1 つ以上選択してください。</value>
+  </data>
+  <data name="Error_Schedule_UnknownAction" xml:space="preserve">
+    <value>スケジュールで実行できるのは接続か切断のみです。</value>
+  </data>
+  <data name="Error_Settings_NotFound" xml:space="preserve">
+    <value>設定が見つかりません。</value>
+  </data>
+  <data name="Error_Settings_TimerCountMustBePositive" xml:space="preserve">
+    <value>タイマーの値は正の数にしてください。</value>
+  </data>
+  <data name="Error_Settings_RetentionMustNotBeNegative" xml:space="preserve">
+    <value>監査ログの保持期間は 0 日以上にしてください。0 にするとすべてのエントリを保持します。</value>
+  </data>
+  <data name="Error_Settings_StorageAlertThresholdOutOfRange" xml:space="preserve">
+    <value>空き容量不足の警告は 0～{0} パーセントにしてください。0 にするとオフになります。</value>
+  </data>
+  <data name="Error_Settings_IdleLockMustNotBeNegative" xml:space="preserve">
+    <value>アイドル時のロックは 0 分以上にしてください。0 にするとロックしません。</value>
+  </data>
+  <data name="Error_Settings_ShortcutUpdateFailed" xml:space="preserve">
+    <value>スタートアップ/デスクトップのショートカットを更新できませんでした: {0}</value>
+  </data>
+  <data name="Error_Auditlog_NothingToExport" xml:space="preserve">
+    <value>エクスポートする履歴はまだありません。</value>
+  </data>
+  <data name="Error_Diagnostics_NoLogs" xml:space="preserve">
+    <value>エクスポートするログファイルはまだありません。</value>
+  </data>
+  <data name="Error_Diagnostics_InvalidTargetDirectory" xml:space="preserve">
+    <value>このフォルダーのパスは無効です。別のフォルダーを選択してください。</value>
+  </data>
+  <data name="Error_Diagnostics_ExportCancelled" xml:space="preserve">
+    <value>診断データのエクスポートはキャンセルされました。</value>
+  </data>
+  <data name="Error_Diagnostics_ExportNotPermitted" xml:space="preserve">
+    <value>診断データをエクスポートできませんでした: Helix にはこのフォルダーへの書き込み権限がありません。</value>
+  </data>
+  <data name="Error_Diagnostics_ExportFailed" xml:space="preserve">
+    <value>診断データをエクスポートできませんでした: {0}</value>
+  </data>
+  <data name="Error_Update_Unreachable" xml:space="preserve">
+    <value>更新を確認するために GitHub に接続できませんでした。インターネット接続を確認してから、もう一度お試しください。</value>
+  </data>
+  <data name="Error_Update_NoReleases" xml:space="preserve">
+    <value>比較対象となる公開リリースが見つかりませんでした。</value>
+  </data>
+  <data name="Error_Update_RateLimited" xml:space="preserve">
+    <value>GitHub が現在、更新確認の回数を制限しています。しばらくしてからもう一度お試しください。</value>
+  </data>
+  <data name="Error_Update_UnexpectedResponse" xml:space="preserve">
+    <value>GitHub から更新確認に対して予期しないステータス ({0}) が返されました。</value>
+  </data>
+  <data name="Error_Update_NoAsset" xml:space="preserve">
+    <value>このリリースには、このコンピューター向けのダウンロードがありません。リリース ページを開いて手動で入手してください。</value>
+  </data>
+  <data name="Error_Update_DownloadFailed" xml:space="preserve">
+    <value>更新プログラムをダウンロードできませんでした。インターネット接続を確認してから、もう一度お試しください。</value>
+  </data>
+  <data name="Error_Update_UnreadableDownload" xml:space="preserve">
+    <value>ダウンロードした更新プログラムを読み取れませんでした。何も変更されていません。もう一度お試しください。</value>
+  </data>
+  <data name="Error_Update_DownloadNotHelix" xml:space="preserve">
+    <value>ダウンロードした更新プログラムは Helix ではないようなので、インストールしませんでした。</value>
+  </data>
+  <data name="Error_Update_DownloadCorrupt" xml:space="preserve">
+    <value>ダウンロードした更新プログラムが GitHub で公開されているチェックサムと一致しないため、インストールしませんでした。</value>
+  </data>
+  <data name="Error_Update_SignatureMissing" xml:space="preserve">
+    <value>このリリースは署名されていません。この Helix ビルドは署名済みの更新のみをインストールします。リリース ページを開いて手動で入手してください。</value>
+  </data>
+  <data name="Error_Update_SignatureInvalid" xml:space="preserve">
+    <value>ダウンロードした更新プログラムの署名が一致しないため、インストールしませんでした。Helix の発行元によってビルドされたものではありません。</value>
+  </data>
+  <data name="Error_Update_NotWritable" xml:space="preserve">
+    <value>Helix はインストール先にある自身のファイルを置き換えられません。手動で更新するか、自分が所有する場所に移動してください。</value>
+  </data>
+  <data name="Error_Update_UnsafeInstallLocation" xml:space="preserve">
+    <value>Helix は他のファイルと共有しているフォルダーから実行されているため、そのフォルダーを安全に置き換えられません。専用のフォルダーに移動してから、もう一度お試しください。</value>
+  </data>
+  <data name="Error_Update_HelperNotStarted" xml:space="preserve">
+    <value>更新を開始できませんでした: ヘルパー プロセスが起動しませんでした。</value>
+  </data>
+  <data name="Error_Update_InstallFailed" xml:space="preserve">
+    <value>更新を開始できませんでした: {0}</value>
+  </data>
+  <data name="Error_Update_UnreadableRelease" xml:space="preserve">
+    <value>最新リリースを読み取れませんでした。バージョン番号のタグが付いていない可能性があります。</value>
+  </data>
+  <data name="Error_FolderPicker_Cancelled" xml:space="preserve">
+    <value>操作をキャンセルしました。</value>
+  </data>
+  <data name="Error_FolderPicker_InvalidFolderPath" xml:space="preserve">
+    <value>このフォルダーのパスは無効です。別のフォルダーを選択してください。</value>
+  </data>
+  <data name="Error_FolderPicker_FileAlreadyExists" xml:space="preserve">
+    <value>ファイルは既に存在します。先に削除してください。</value>
+  </data>
+  <data name="Error_FolderPicker_UnauthorizedFileAccess" xml:space="preserve">
+    <value>このファイルまたはフォルダーにアクセスするための権限がありません。権限を確認してから、もう一度お試しください。</value>
+  </data>
+  <data name="Error_FolderPicker_WriteFailed" xml:space="preserve">
+    <value>ファイルを書き込めませんでした: {0}</value>
+  </data>
+  <data name="Error_FolderPicker_ReadFailed" xml:space="preserve">
+    <value>ファイルを読み取れませんでした: {0}</value>
+  </data>
+  <data name="Error_Json_Invalid" xml:space="preserve">
+    <value>ファイルが有効な JSON ではありません。</value>
+  </data>
+  <data name="Error_Vault_PassphraseMissing" xml:space="preserve">
+    <value>このエクスポートを暗号化または復号するにはパスフレーズが必要です。</value>
+  </data>
+  <data name="Error_Vault_PassphraseTooShort" xml:space="preserve">
+    <value>パスフレーズは 8 文字以上にしてください。</value>
+  </data>
+  <data name="Error_Vault_TooLarge" xml:space="preserve">
+    <value>このファイルは Helix のボールト ファイルにしては大きすぎます。</value>
+  </data>
+  <data name="Error_Vault_PassphraseMismatch" xml:space="preserve">
+    <value>入力した 2 つのパスフレーズが一致しません。</value>
+  </data>
+  <data name="Error_Vault_DecryptFailed" xml:space="preserve">
+    <value>パスフレーズが正しくないか、ボールト ファイルが破損しています。</value>
+  </data>
+  <data name="Error_Vault_UnsupportedVersion" xml:space="preserve">
+    <value>このボールト ファイルは、サポートされていないバージョンの Helix で作成されています。</value>
+  </data>
+  <data name="Error_Vault_InvalidDriveData" xml:space="preserve">
+    <value>ボールト ファイルに無効なドライブ項目が含まれているため、インポートできません。</value>
+  </data>
+  <data name="Error_Vault_NothingToImport" xml:space="preserve">
+    <value>何もインポートされませんでした。このファイルの内容はすべて既に存在するか、ドライブ文字が別の場所に割り当てられています。</value>
+  </data>
+  <data name="Error_Validation_MissingFields" xml:space="preserve">
+    <value>必須項目が入力されていません。必要な情報をすべて入力してください。</value>
+  </data>
+  <data name="Error_Validation_InvalidHost" xml:space="preserve">
+    <value>アドレスは IP アドレス (例: 192.168.0.10) またはホスト名 (例: nas.local) にしてください。</value>
+  </data>
 </root>

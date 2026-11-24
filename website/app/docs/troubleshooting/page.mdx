@@ -23,6 +23,26 @@ Because of the rule above, while **other shares of the same NAS are mounted**, a
 
 To really test a password, disconnect every drive on that NAS first, then connect or run the connection check. The check warns you when the password went untested.
 
+## WebDAV or NFS drives will not connect
+
+On Windows, WebDAV and NFS each go through a client that Windows does not always run or install.
+
+**"Windows' WebDAV client is not running"**: start the **WebClient** service. Open *Services* (`services.msc`), find **WebClient**, set **Startup type** to *Automatic* so it survives a restart, and press **Start**. Or, from an elevated prompt:
+
+```powershell
+Set-Service WebClient -StartupType Automatic
+Start-Service WebClient
+```
+
+**"Windows' Client for NFS is not installed"**: open *Turn Windows features on or off*, tick **Services for NFS → Client for NFS**, and restart. Windows Home editions do not include it; use SMB for those machines.
+
+If the client is running and the drive still fails:
+
+- **WebDAV** connects over HTTPS only. Check the server has HTTPS turned on, and that **Port** matches it. Synology uses 5006 for WebDAV over HTTPS; leave the field empty only when the server answers on 443. A certificate Windows does not trust, such as the NAS's self-signed one, is refused: install a trusted certificate on the NAS, or add its certificate to Windows' trusted root store.
+- **NFS** is decided by the server. Allow this computer's IP address in the NFS permissions of the export, and check that the path in **Drive's name** is the export path exactly as the server lists it, such as `/volume1/media`.
+
+The connection check probes each protocol on its own port, so it tells you whether the server answers on 2049 for NFS or on the WebDAV port before you go looking at permissions.
+
 ## Connections time out
 
 A mount waits up to thirty seconds before giving up. A NAS addressed by name can take several seconds just to be found, especially right after sign-in.

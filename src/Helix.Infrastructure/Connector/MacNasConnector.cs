@@ -42,7 +42,7 @@ internal sealed class MacNasConnector : INasConnector
                 drive.Letter,
                 () => Connect(drive, route),
                 timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
-                failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                failure: reason => Result.Failure(DriveErrors.FailedToConnect(reason)),
                 cancellationToken,
                 reportsMount: true),
             cancellationToken);
@@ -52,7 +52,7 @@ internal sealed class MacNasConnector : INasConnector
             drive.Letter,
             () => Disconnect(drive),
             timeoutError: () => Result.Failure(DriveErrors.DisconnectionTimedOut),
-            failure: message => Result.Failure(DriveErrors.FailedToDisconnect(message)),
+            failure: reason => Result.Failure(DriveErrors.FailedToDisconnect(reason)),
             cancellationToken);
 
     public Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default) =>
@@ -63,7 +63,7 @@ internal sealed class MacNasConnector : INasConnector
                 drive.Letter,
                 () => Test(drive, route),
                 timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
-                failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                failure: reason => Result.Failure(DriveErrors.FailedToConnect(reason)),
                 cancellationToken),
             cancellationToken);
 
@@ -100,7 +100,7 @@ internal sealed class MacNasConnector : INasConnector
         }
         catch (OperationCanceledException)
         {
-            return Result.Failure(DriveErrors.FailedToConnect("Operation canceled by user."));
+            return Result.Failure(DriveErrors.FailedToConnect(MountErrors.Canceled));
         }
 
         return route.IsSuccess
@@ -186,8 +186,7 @@ internal sealed class MacNasConnector : INasConnector
         }
         catch (Exception ex)
         {
-            return Result.Failure(DriveErrors.FailedToConnect(
-                $"Could not prepare the mount point '{mountPoint}': {ex.Message}"));
+            return Result.Failure(DriveErrors.FailedToConnect(MountErrors.MountPointNotPrepared(mountPoint, ex.Message)));
         }
 
         var url = new NSUrl(UrlFor(drive, route.Host));
@@ -288,13 +287,13 @@ internal sealed class MacNasConnector : INasConnector
         string letter,
         Func<Result> work,
         Func<Result> timeoutError,
-        Func<string, Result> failure,
+        Func<Error, Result> failure,
         CancellationToken cancellationToken,
         bool reportsMount = false)
     {
         if (cancellationToken.IsCancellationRequested)
         {
-            return failure("Operation canceled by user.");
+            return failure(MountErrors.Canceled);
         }
 
         Task<Result> task = Task.Run(work, CancellationToken.None);
@@ -321,11 +320,11 @@ internal sealed class MacNasConnector : INasConnector
                 TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default);
 
-            return failure("Operation canceled by user.");
+            return failure(MountErrors.Canceled);
         }
         catch (Exception ex)
         {
-            return failure($"Unexpected error: {ex.Message}");
+            return failure(MountErrors.Unexpected(ex.Message));
         }
     }
 
@@ -357,25 +356,26 @@ internal sealed class MacNasConnector : INasConnector
         }
     }
 
-    private static string DescribeNetFsError(int code) => code switch
+    private static Error DescribeNetFsError(int code) => code switch
     {
-        Eacces => "Access denied. Check the username and password.",
-        Eauth => "Authentication failed: unknown user name or bad password.",
-        Ebusy => "That mount point is already in use.",
-        Enoent => "The share was not found on the server.",
-        Etimedout => "The server did not respond.",
-        Ehostdown => "The server is down or unreachable.",
-        Enetdown => "The network is not available.",
+        Eacces => MountErrors.AccessDenied,
+        Eauth => MountErrors.AuthenticationFailed,
+        Ebusy => MountErrors.MountPointBusy,
+        Enoent => MountErrors.ShareNotFound,
+        Etimedout => MountErrors.ServerNotResponding,
+        Ehostdown => MountErrors.ServerDown,
+        Enetdown => MountErrors.NetworkDown,
         _ => DescribeErrno(code),
     };
 
-    private static string DescribeErrno(int code)
+    private static Error DescribeErrno(int code)
     {
         IntPtr message = strerror(code);
+        string? text = message == IntPtr.Zero ? null : Marshal.PtrToStringUTF8(message);
 
-        return message == IntPtr.Zero
-            ? $"The operation failed (code {code})."
-            : Marshal.PtrToStringUTF8(message) ?? $"The operation failed (code {code}).";
+        return text is null
+            ? MountErrors.OperationFailed(code)
+            : MountErrors.System(text);
     }
 
     private const int MntForce = 0x00080000;

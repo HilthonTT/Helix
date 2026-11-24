@@ -53,9 +53,12 @@ Nothing here composes a sentence. Each step carries a `DiagnosticStep`, a
 `DiagnosticOutcome`, a `DiagnosticFinding` and at most one piece of data — a resolved name,
 a port, a letter — and `DiagnosticStepDisplay` builds the sentence from `AppResources` at
 display time, in the user's language, the same way `AuditlogDisplay` does. The one
-exception is a rejected credential, which shows the connector's own words, because the
-domain's error descriptions are not translated and paraphrasing "The network name cannot be
-found" into something vaguer would lose the only part that identifies the problem.
+exception is a rejected credential, which shows the connector's own reason rather than a
+diagnosis sentence, because paraphrasing "The network name cannot be found" into something
+vaguer would lose the only part that identifies the problem. `DiagnosticResult` carries that
+`Error`, and `DiagnosticStepDisplay` renders it through `ErrorText`, so the reason is still
+in the user's language. `Detail` keeps the English description for anything that has no
+`Error`.
 
 The report is a modal sheet, which is not a contradiction of the no-alerts rule: that rule
 is about announcing the *outcome of work the user asked for and watched happen*. This is a

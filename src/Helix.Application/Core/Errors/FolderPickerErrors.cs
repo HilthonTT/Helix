@@ -8,7 +8,7 @@ internal static class FolderPickerErrors
 
     public static readonly Error InvalidFolderPath = Error.Problem(
         "FolderPicker.InvalidFolderPath",
-        "This folder path is invalid, please choose a diffeent one.");
+        "This folder path is invalid, please choose a different one.");
 
     public static readonly Error FileAlreadyExists = Error.Problem(
         "FolderPicker.FileAlreadyExists",
@@ -20,9 +20,11 @@ internal static class FolderPickerErrors
 
     public static Error WriteFailed(string message) => Error.Problem(
         "FolderPicker.WriteFailed",
-        $"The file could not be written: {message}");
+        $"The file could not be written: {message}",
+        message);
 
     public static Error ReadFailed(string message) => Error.Problem(
         "FolderPicker.ReadFailed",
-        $"The file could not be read: {message}");
+        $"The file could not be read: {message}",
+        message);
 }

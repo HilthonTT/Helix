@@ -72,7 +72,7 @@ internal sealed class MountReconciler
                 return;
             }
 
-            Notifier.Retract($"{outcome.Letter}: {DriveErrors.ConnectionTimedOut.Description}");
+            Notifier.Retract(ErrorText.Line(outcome.Letter, DriveErrors.ConnectionTimedOut));
 
             Notifier.Success(string.Format(AppResources.DriveConnectedLate, outcome.Letter));
 

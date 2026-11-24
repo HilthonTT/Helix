@@ -4,11 +4,11 @@ public static class SettingsErrors
 {
     public static readonly Error NotFound = Error.NotFound(
         "Settings.NotFound",
-        "We've found no settings for you.");
+        "No settings were found for you.");
 
     public static readonly Error TimerCountMustBePositive = Error.Problem(
         "Settings.TimerCountMustBePositive",
-        "The timer count must a positive number.");
+        "The timer count must be a positive number.");
 
     public static readonly Error RetentionMustNotBeNegative = Error.Problem(
         "Settings.RetentionMustNotBeNegative",
@@ -17,7 +17,8 @@ public static class SettingsErrors
     public static readonly Error StorageAlertThresholdOutOfRange = Error.Problem(
         "Settings.StorageAlertThresholdOutOfRange",
         $"The low-space warning must be between 0 and {Settings.MaximumStorageAlertThresholdPercent} percent. " +
-        "Zero turns it off.");
+        "Zero turns it off.",
+        Settings.MaximumStorageAlertThresholdPercent);
 
     public static readonly Error IdleLockMustNotBeNegative = Error.Problem(
         "Settings.IdleLockMustNotBeNegative",
@@ -25,5 +26,6 @@ public static class SettingsErrors
 
     public static Error ShortcutUpdateFailed(string message) => Error.Problem(
         "Settings.ShortcutUpdateFailed",
-        $"Failed to update the startup/desktop shortcut: {message}");
+        $"Failed to update the startup/desktop shortcut: {message}",
+        message);
 }

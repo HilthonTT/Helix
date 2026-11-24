@@ -216,7 +216,7 @@ internal sealed class UpdateInstaller : IUpdateInstaller
 
             if (helper is null)
             {
-                return Result.Failure(UpdateErrors.InstallFailed("the helper process did not start"));
+                return Result.Failure(UpdateErrors.HelperNotStarted);
             }
 
             _logger.LogInformation("Handed the update swap to the helper; quitting to let it run.");

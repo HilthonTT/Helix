@@ -1229,4 +1229,334 @@
   <data name="ServerAlreadyAdded" xml:space="preserve">
     <value>sudah ditambahkan sebagai {0}</value>
   </data>
+  <data name="Error_Drive_NotFound" xml:space="preserve">
+    <value>Drive dengan Id '{0}' tidak ditemukan.</value>
+  </data>
+  <data name="Error_Drive_LetterNotUnique" xml:space="preserve">
+    <value>Drive dengan huruf '{0}' sudah ada.</value>
+  </data>
+  <data name="Error_Drive_FailedToConnect" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_FailedToDisconnect" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_SessionConflict" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_SharesNotListed" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Error_Drive_HostUnreachable" xml:space="preserve">
+    <value>'{0}' tidak dapat dijangkau dari jaringan ini.</value>
+  </data>
+  <data name="Error_Drive_AwayFromHomeNetwork" xml:space="preserve">
+    <value>Drive ini hanya tersambung ulang di '{0}', dan ini bukan jaringan tersebut.</value>
+  </data>
+  <data name="Error_Drive_AwayFromHomeNetwork_0" xml:space="preserve">
+    <value>Drive ini hanya tersambung ulang di jaringan asalnya, dan ini bukan jaringan tersebut.</value>
+  </data>
+  <data name="Error_Drive_ShareListingUnsupported" xml:space="preserve">
+    <value>Menampilkan daftar share server tidak didukung di platform ini.</value>
+  </data>
+  <data name="Error_Drive_NothingToCreate" xml:space="preserve">
+    <value>Pilih setidaknya satu share untuk ditambahkan.</value>
+  </data>
+  <data name="Error_Drive_DuplicateLetter" xml:space="preserve">
+    <value>Huruf drive '{0}' diberikan ke lebih dari satu share.</value>
+  </data>
+  <data name="Error_Drive_MountNotAvailable" xml:space="preserve">
+    <value>Drive itu tidak terpasang, jadi tidak ada yang bisa dibuka.</value>
+  </data>
+  <data name="Error_Drive_LetterNotFound" xml:space="preserve">
+    <value>Drive dengan huruf '{0}' tidak ditemukan.</value>
+  </data>
+  <data name="Error_Drive_LetterInUse" xml:space="preserve">
+    <value>Huruf drive '{0}' sudah dipakai di komputer ini. Pilih huruf yang masih kosong.</value>
+  </data>
+  <data name="Error_Drive_MacAddressNotFound" xml:space="preserve">
+    <value>Alamat perangkat keras '{0}' tidak dapat dibaca. Alamat itu hanya menjawab di jaringan ini, selama perangkat menyala.</value>
+  </data>
+  <data name="Error_Drive_InvalidRemoteHost" xml:space="preserve">
+    <value>Alamat saat di luar rumah harus berupa alamat IP atau nama host, misalnya nas.example.ts.net.</value>
+  </data>
+  <data name="Error_Drive_UnknownProtocol" xml:space="preserve">
+    <value>Helix tidak dapat memasang protokol itu. Pilih SMB, WebDAV, atau NFS.</value>
+  </data>
+  <data name="Error_Drive_InvalidPort" xml:space="preserve">
+    <value>Port harus berupa angka dari 1 sampai 65535.</value>
+  </data>
+  <data name="Error_Drive_NotAMacAddress" xml:space="preserve">
+    <value>Itu bukan alamat perangkat keras. Diharapkan enam pasang digit heksadesimal, misalnya 1a-2b-3c-4d-5e-6f.</value>
+  </data>
+  <data name="Error_Drive_NoMacAddress" xml:space="preserve">
+    <value>Drive ini tidak memiliki alamat perangkat keras, jadi tidak ada yang bisa dibangunkan.</value>
+  </data>
+  <data name="Error_Drive_WakeNotSent" xml:space="preserve">
+    <value>Paket bangun tidak dapat dikirim dari komputer ini.</value>
+  </data>
+  <data name="Error_Drive_NotALetter" xml:space="preserve">
+    <value>Huruf drive harus berupa satu karakter.</value>
+  </data>
+  <data name="Error_Drive_NoDrivesFound" xml:space="preserve">
+    <value>Tidak ada drive yang ditemukan. Buat drive terlebih dahulu.</value>
+  </data>
+  <data name="Error_Mount_Canceled" xml:space="preserve">
+    <value>Operasi dibatalkan.</value>
+  </data>
+  <data name="Error_Mount_Unexpected" xml:space="preserve">
+    <value>Kesalahan tak terduga: {0}</value>
+  </data>
+  <data name="Error_Mount_OperationFailed" xml:space="preserve">
+    <value>Operasi gagal (kode {0}).</value>
+  </data>
+  <data name="Error_Mount_TimedOut" xml:space="preserve">
+    <value>Waktu koneksi habis.</value>
+  </data>
+  <data name="Error_Mount_DisconnectTimedOut" xml:space="preserve">
+    <value>Waktu pemutusan habis.</value>
+  </data>
+  <data name="Error_Mount_AccessDenied" xml:space="preserve">
+    <value>Akses ditolak. Periksa nama pengguna dan kata sandi.</value>
+  </data>
+  <data name="Error_Mount_LetterAlreadyAssigned" xml:space="preserve">
+    <value>Huruf drive itu sudah dipakai.</value>
+  </data>
+  <data name="Error_Mount_BadResourceType" xml:space="preserve">
+    <value>Jenis sumber daya jaringan tidak benar.</value>
+  </data>
+  <data name="Error_Mount_NetworkPathNotFound" xml:space="preserve">
+    <value>Jalur jaringan tidak ditemukan.</value>
+  </data>
+  <data name="Error_Mount_NetworkNameNotFound" xml:space="preserve">
+    <value>Nama jaringan tidak ditemukan.</value>
+  </data>
+  <data name="Error_Mount_PasswordIncorrect" xml:space="preserve">
+    <value>Kata sandi salah.</value>
+  </data>
+  <data name="Error_Mount_LogonFailure" xml:space="preserve">
+    <value>Gagal masuk: nama pengguna tidak dikenal atau kata sandi salah.</value>
+  </data>
+  <data name="Error_Mount_NoNetwork" xml:space="preserve">
+    <value>Jaringan tidak ada atau belum dimulai.</value>
+  </data>
+  <data name="Error_Mount_NotConnected" xml:space="preserve">
+    <value>Perangkat saat ini tidak tersambung.</value>
+  </data>
+  <data name="Error_Mount_CredentialConflict" xml:space="preserve">
+    <value>Windows sudah masuk ke server ini dengan kredensial lain. Putuskan setiap drive dan jendela Explorer yang memakainya, atau keluar dari Windows, lalu coba lagi.</value>
+  </data>
+  <data name="Error_Mount_NfsClientMissing" xml:space="preserve">
+    <value>Client for NFS milik Windows belum terpasang. Aktifkan "Services for NFS" di Windows Features, lalu coba lagi.</value>
+  </data>
+  <data name="Error_Mount_WebDavClientStopped" xml:space="preserve">
+    <value>Klien WebDAV Windows tidak berjalan. Mulai layanan "WebClient", lalu coba lagi.</value>
+  </data>
+  <data name="Error_Mount_AuthenticationFailed" xml:space="preserve">
+    <value>Autentikasi gagal: nama pengguna tidak dikenal atau kata sandi salah.</value>
+  </data>
+  <data name="Error_Mount_MountPointBusy" xml:space="preserve">
+    <value>Titik pasang itu sudah dipakai.</value>
+  </data>
+  <data name="Error_Mount_ShareNotFound" xml:space="preserve">
+    <value>Share tidak ditemukan di server.</value>
+  </data>
+  <data name="Error_Mount_ServerNotResponding" xml:space="preserve">
+    <value>Server tidak merespons.</value>
+  </data>
+  <data name="Error_Mount_ServerDown" xml:space="preserve">
+    <value>Server mati atau tidak dapat dijangkau.</value>
+  </data>
+  <data name="Error_Mount_NetworkDown" xml:space="preserve">
+    <value>Jaringan tidak tersedia.</value>
+  </data>
+  <data name="Error_Mount_MountPointNotPrepared" xml:space="preserve">
+    <value>Tidak dapat menyiapkan titik pasang '{0}': {1}</value>
+  </data>
+  <data name="Error_User_NotFound" xml:space="preserve">
+    <value>Pengguna tidak ditemukan.</value>
+  </data>
+  <data name="Error_Authentication_InvalidUsernameOrPassword" xml:space="preserve">
+    <value>Nama pengguna atau kata sandi salah.</value>
+  </data>
+  <data name="Error_Authentication_PasswordsDoNotMatch" xml:space="preserve">
+    <value>Kata sandi tidak cocok.</value>
+  </data>
+  <data name="Error_Authentication_PasswordTooShort" xml:space="preserve">
+    <value>Kata sandi minimal harus 8 karakter.</value>
+  </data>
+  <data name="Error_Authentication_UsernameNotUnique" xml:space="preserve">
+    <value>Nama pengguna itu sudah dipakai.</value>
+  </data>
+  <data name="Error_Authentication_InvalidPermissions" xml:space="preserve">
+    <value>Anda harus masuk untuk melakukan itu.</value>
+  </data>
+  <data name="Error_Authentication_NewPasswordsDoNotMatch" xml:space="preserve">
+    <value>Kata sandi baru tidak cocok.</value>
+  </data>
+  <data name="Error_Authentication_InvalidUsernameOrRecoveryKey" xml:space="preserve">
+    <value>Nama pengguna atau kunci pemulihan salah.</value>
+  </data>
+  <data name="Error_DriveGroup_NotFound" xml:space="preserve">
+    <value>Grup dengan Id '{0}' tidak ditemukan.</value>
+  </data>
+  <data name="Error_DriveGroup_NameNotUnique" xml:space="preserve">
+    <value>Grup bernama '{0}' sudah ada.</value>
+  </data>
+  <data name="Error_DriveGroup_NameMissing" xml:space="preserve">
+    <value>Grup harus memiliki nama.</value>
+  </data>
+  <data name="Error_DriveGroup_NoDrivesSelected" xml:space="preserve">
+    <value>Pilih setidaknya satu drive untuk grup ini.</value>
+  </data>
+  <data name="Error_DriveGroup_NoMembers" xml:space="preserve">
+    <value>Grup '{0}' tidak lagi berisi drive. Edit atau hapus grup itu.</value>
+  </data>
+  <data name="Error_DriveGroup_NoGroupsFound" xml:space="preserve">
+    <value>Belum ada grup yang dibuat.</value>
+  </data>
+  <data name="Error_Schedule_NotFound" xml:space="preserve">
+    <value>Jadwal dengan Id '{0}' tidak ditemukan.</value>
+  </data>
+  <data name="Error_Schedule_NoDaysSelected" xml:space="preserve">
+    <value>Pilih setidaknya satu hari untuk jadwal ini.</value>
+  </data>
+  <data name="Error_Schedule_UnknownAction" xml:space="preserve">
+    <value>Jadwal hanya dapat menyambungkan atau memutuskan.</value>
+  </data>
+  <data name="Error_Settings_NotFound" xml:space="preserve">
+    <value>Tidak ada pengaturan yang ditemukan untuk Anda.</value>
+  </data>
+  <data name="Error_Settings_TimerCountMustBePositive" xml:space="preserve">
+    <value>Nilai timer harus berupa angka positif.</value>
+  </data>
+  <data name="Error_Settings_RetentionMustNotBeNegative" xml:space="preserve">
+    <value>Masa simpan log audit harus nol hari atau lebih. Nol menyimpan semua entri.</value>
+  </data>
+  <data name="Error_Settings_StorageAlertThresholdOutOfRange" xml:space="preserve">
+    <value>Peringatan ruang hampir penuh harus antara 0 dan {0} persen. Nol mematikannya.</value>
+  </data>
+  <data name="Error_Settings_IdleLockMustNotBeNegative" xml:space="preserve">
+    <value>Kunci saat menganggur harus nol menit atau lebih. Nol tidak pernah mengunci.</value>
+  </data>
+  <data name="Error_Settings_ShortcutUpdateFailed" xml:space="preserve">
+    <value>Gagal memperbarui pintasan startup/desktop: {0}</value>
+  </data>
+  <data name="Error_Auditlog_NothingToExport" xml:space="preserve">
+    <value>Belum ada riwayat untuk diekspor.</value>
+  </data>
+  <data name="Error_Diagnostics_NoLogs" xml:space="preserve">
+    <value>Belum ada berkas log untuk diekspor.</value>
+  </data>
+  <data name="Error_Diagnostics_InvalidTargetDirectory" xml:space="preserve">
+    <value>Jalur folder itu tidak valid. Pilih folder lain.</value>
+  </data>
+  <data name="Error_Diagnostics_ExportCancelled" xml:space="preserve">
+    <value>Ekspor diagnostik dibatalkan.</value>
+  </data>
+  <data name="Error_Diagnostics_ExportNotPermitted" xml:space="preserve">
+    <value>Diagnostik tidak dapat diekspor: Helix tidak diizinkan menulis ke folder itu.</value>
+  </data>
+  <data name="Error_Diagnostics_ExportFailed" xml:space="preserve">
+    <value>Diagnostik tidak dapat diekspor: {0}</value>
+  </data>
+  <data name="Error_Update_Unreachable" xml:space="preserve">
+    <value>Tidak dapat menghubungi GitHub untuk memeriksa pembaruan. Periksa koneksi internet Anda, lalu coba lagi.</value>
+  </data>
+  <data name="Error_Update_NoReleases" xml:space="preserve">
+    <value>Tidak ditemukan rilis yang diterbitkan untuk dibandingkan.</value>
+  </data>
+  <data name="Error_Update_RateLimited" xml:space="preserve">
+    <value>GitHub sedang membatasi pemeriksaan pembaruan. Coba lagi nanti.</value>
+  </data>
+  <data name="Error_Update_UnexpectedResponse" xml:space="preserve">
+    <value>GitHub menjawab pemeriksaan pembaruan dengan status tak terduga ({0}).</value>
+  </data>
+  <data name="Error_Update_NoAsset" xml:space="preserve">
+    <value>Rilis ini tidak memiliki unduhan untuk komputer ini. Buka halaman rilis untuk mengunduhnya secara manual.</value>
+  </data>
+  <data name="Error_Update_DownloadFailed" xml:space="preserve">
+    <value>Pembaruan tidak dapat diunduh. Periksa koneksi internet Anda, lalu coba lagi.</value>
+  </data>
+  <data name="Error_Update_UnreadableDownload" xml:space="preserve">
+    <value>Pembaruan yang diunduh tidak dapat dibaca. Tidak ada yang diubah; silakan coba lagi.</value>
+  </data>
+  <data name="Error_Update_DownloadNotHelix" xml:space="preserve">
+    <value>Pembaruan yang diunduh tidak tampak seperti Helix, jadi tidak dipasang.</value>
+  </data>
+  <data name="Error_Update_DownloadCorrupt" xml:space="preserve">
+    <value>Pembaruan yang diunduh tidak cocok dengan checksum yang diterbitkan GitHub, jadi tidak dipasang.</value>
+  </data>
+  <data name="Error_Update_SignatureMissing" xml:space="preserve">
+    <value>Rilis ini tidak ditandatangani, dan build Helix ini hanya memasang pembaruan yang ditandatangani. Buka halaman rilis untuk mengunduhnya secara manual.</value>
+  </data>
+  <data name="Error_Update_SignatureInvalid" xml:space="preserve">
+    <value>Tanda tangan pada pembaruan yang diunduh tidak cocok, jadi tidak dipasang. Pembaruan itu tidak dibuat oleh penerbit Helix.</value>
+  </data>
+  <data name="Error_Update_NotWritable" xml:space="preserve">
+    <value>Helix tidak dapat mengganti berkasnya sendiri di lokasi pemasangannya. Perbarui secara manual, atau pindahkan ke lokasi milik Anda.</value>
+  </data>
+  <data name="Error_Update_UnsafeInstallLocation" xml:space="preserve">
+    <value>Helix berjalan dari folder yang juga berisi berkas lain, jadi tidak dapat mengganti folder itu dengan aman. Pindahkan ke foldernya sendiri, lalu coba lagi.</value>
+  </data>
+  <data name="Error_Update_HelperNotStarted" xml:space="preserve">
+    <value>Pembaruan tidak dapat dimulai: proses pembantu tidak berjalan.</value>
+  </data>
+  <data name="Error_Update_InstallFailed" xml:space="preserve">
+    <value>Pembaruan tidak dapat dimulai: {0}</value>
+  </data>
+  <data name="Error_Update_UnreadableRelease" xml:space="preserve">
+    <value>Rilis terbaru tidak dapat dibaca. Mungkin rilis itu tidak diberi tag nomor versi.</value>
+  </data>
+  <data name="Error_FolderPicker_Cancelled" xml:space="preserve">
+    <value>Anda membatalkan operasi ini.</value>
+  </data>
+  <data name="Error_FolderPicker_InvalidFolderPath" xml:space="preserve">
+    <value>Jalur folder ini tidak valid. Pilih folder lain.</value>
+  </data>
+  <data name="Error_FolderPicker_FileAlreadyExists" xml:space="preserve">
+    <value>Berkas sudah ada. Hapus terlebih dahulu.</value>
+  </data>
+  <data name="Error_FolderPicker_UnauthorizedFileAccess" xml:space="preserve">
+    <value>Anda tidak memiliki izin untuk mengakses berkas atau folder ini. Periksa izin Anda, lalu coba lagi.</value>
+  </data>
+  <data name="Error_FolderPicker_WriteFailed" xml:space="preserve">
+    <value>Berkas tidak dapat ditulis: {0}</value>
+  </data>
+  <data name="Error_FolderPicker_ReadFailed" xml:space="preserve">
+    <value>Berkas tidak dapat dibaca: {0}</value>
+  </data>
+  <data name="Error_Json_Invalid" xml:space="preserve">
+    <value>Berkas bukan JSON yang valid.</value>
+  </data>
+  <data name="Error_Vault_PassphraseMissing" xml:space="preserve">
+    <value>Frasa sandi diperlukan untuk mengenkripsi atau mendekripsi ekspor ini.</value>
+  </data>
+  <data name="Error_Vault_PassphraseTooShort" xml:space="preserve">
+    <value>Frasa sandi minimal harus 8 karakter.</value>
+  </data>
+  <data name="Error_Vault_TooLarge" xml:space="preserve">
+    <value>Berkas ini terlalu besar untuk menjadi vault Helix.</value>
+  </data>
+  <data name="Error_Vault_PassphraseMismatch" xml:space="preserve">
+    <value>Kedua frasa sandi yang dimasukkan tidak cocok.</value>
+  </data>
+  <data name="Error_Vault_DecryptFailed" xml:space="preserve">
+    <value>Frasa sandi salah atau berkas vault rusak.</value>
+  </data>
+  <data name="Error_Vault_UnsupportedVersion" xml:space="preserve">
+    <value>Berkas vault ini dibuat oleh versi Helix yang tidak didukung.</value>
+  </data>
+  <data name="Error_Vault_InvalidDriveData" xml:space="preserve">
+    <value>Vault berisi entri drive yang tidak valid dan tidak dapat diimpor.</value>
+  </data>
+  <data name="Error_Vault_NothingToImport" xml:space="preserve">
+    <value>Tidak ada yang diimpor: semua isi berkas ini sudah ada, atau huruf drive-nya sudah dipetakan ke hal lain.</value>
+  </data>
+  <data name="Error_Validation_MissingFields" xml:space="preserve">
+    <value>Satu atau beberapa kolom wajib belum diisi. Pastikan semua informasi wajib sudah diisi.</value>
+  </data>
+  <data name="Error_Validation_InvalidHost" xml:space="preserve">
+    <value>Alamat harus berupa alamat IP (misalnya 192.168.0.10) atau nama host (misalnya nas.local).</value>
+  </data>
 </root>

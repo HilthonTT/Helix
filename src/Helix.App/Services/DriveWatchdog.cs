@@ -690,7 +690,7 @@ internal sealed class DriveWatchdog
     {
         MainThread.BeginInvokeOnMainThread(() =>
             WeakReferenceMessenger.Default.Send(
-                new DriveAttemptFailedMessage(driveId, error.Code, error.Description)));
+                new DriveAttemptFailedMessage(driveId, error)));
     }
 
     private bool HasNetwork()

@@ -34,11 +34,11 @@ internal sealed class WindowsNasConnector(
                     drive.Letter,
                     () => Connect(drive, route),
                     timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
-                    failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                    failure: reason => Result.Failure(DriveErrors.FailedToConnect(reason)),
                     cancellationToken,
                     started,
                     reportsMount: true),
-                failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                failure: reason => Result.Failure(DriveErrors.FailedToConnect(reason)),
                 cancellationToken),
             cancellationToken);
 
@@ -47,7 +47,7 @@ internal sealed class WindowsNasConnector(
             drive.Letter,
             () => Disconnect(drive),
             timeoutError: () => Result.Failure(DriveErrors.DisconnectionTimedOut),
-            failure: message => Result.Failure(DriveErrors.FailedToDisconnect(message)),
+            failure: reason => Result.Failure(DriveErrors.FailedToDisconnect(reason)),
             cancellationToken);
 
     public Task<Result> TestAsync(Drive drive, CancellationToken cancellationToken = default) =>
@@ -61,10 +61,10 @@ internal sealed class WindowsNasConnector(
                     drive.Letter,
                     () => Test(drive, route),
                     timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
-                    failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                    failure: reason => Result.Failure(DriveErrors.FailedToConnect(reason)),
                     cancellationToken,
                     started),
-                failure: message => Result.Failure(DriveErrors.FailedToConnect(message)),
+                failure: reason => Result.Failure(DriveErrors.FailedToConnect(reason)),
                 cancellationToken),
             cancellationToken);
 
@@ -235,7 +235,7 @@ internal sealed class WindowsNasConnector(
         }
         catch (OperationCanceledException)
         {
-            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed("Operation canceled by user."));
+            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed(MountErrors.Canceled));
         }
 
         Task<Result<IReadOnlyList<string>>> listing = Task.Run(
@@ -252,11 +252,11 @@ internal sealed class WindowsNasConnector(
         }
         catch (OperationCanceledException)
         {
-            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed("Operation canceled by user."));
+            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed(MountErrors.Canceled));
         }
         catch (Exception ex)
         {
-            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed($"Unexpected error: {ex.Message}"));
+            return Result.Failure<IReadOnlyList<string>>(DriveErrors.SharesNotListed(MountErrors.Unexpected(ex.Message)));
         }
         finally
         {
@@ -449,7 +449,7 @@ internal sealed class WindowsNasConnector(
         }
         catch (OperationCanceledException)
         {
-            return Result.Failure(DriveErrors.FailedToConnect("Operation canceled by user."));
+            return Result.Failure(DriveErrors.FailedToConnect(MountErrors.Canceled));
         }
 
         return route.IsSuccess
@@ -566,7 +566,7 @@ internal sealed class WindowsNasConnector(
                 logger.LogWarning(
                     "Drive {Letter}: would not mount with its own credentials — {Reason}",
                     drive.Letter,
-                    DescribeWNetError(retry));
+                    DescribeWNetError(retry).Description);
 
                 return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(retry)));
             }
@@ -593,7 +593,7 @@ internal sealed class WindowsNasConnector(
             logger.LogWarning(
                 "Drive {Letter}: mounting on the existing session failed — {Reason}",
                 drive.Letter,
-                DescribeWNetError(reuse));
+                DescribeWNetError(reuse).Description);
 
             return Result.Failure(DriveErrors.FailedToConnect(DescribeWNetError(reuse)));
         }
@@ -601,7 +601,7 @@ internal sealed class WindowsNasConnector(
         logger.LogWarning(
             "Drive {Letter}: the session its server is using would not take the mount — {Reason}",
             drive.Letter,
-            DescribeWNetError(reuse));
+            DescribeWNetError(reuse).Description);
 
         Result? alternate = TryAlternateSpelling(drive, local, host, flags);
         if (alternate is not null)
@@ -827,7 +827,7 @@ internal sealed class WindowsNasConnector(
         Drive drive,
         DriveRoute route,
         Func<Action<Task>, Task<Result>> work,
-        Func<string, Result> failure,
+        Func<Error, Result> failure,
         CancellationToken cancellationToken)
     {
         string gateHost = drive.ConnectByHostname
@@ -844,7 +844,7 @@ internal sealed class WindowsNasConnector(
         }
         catch (OperationCanceledException)
         {
-            return failure("Operation canceled by user.");
+            return failure(MountErrors.Canceled);
         }
 
         Task completion = Task.CompletedTask;
@@ -870,14 +870,14 @@ internal sealed class WindowsNasConnector(
         string letter,
         Func<Result> work,
         Func<Result> timeoutError,
-        Func<string, Result> failure,
+        Func<Error, Result> failure,
         CancellationToken cancellationToken,
         Action<Task>? onStarted = null,
         bool reportsMount = false)
     {
         if (cancellationToken.IsCancellationRequested)
         {
-            return failure("Operation canceled by user.");
+            return failure(MountErrors.Canceled);
         }
 
         Task<Result> task = Task.Run(work, CancellationToken.None);
@@ -905,11 +905,11 @@ internal sealed class WindowsNasConnector(
                 TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default);
 
-            return failure("Operation canceled by user.");
+            return failure(MountErrors.Canceled);
         }
         catch (Exception ex)
         {
-            return failure($"Unexpected error: {ex.Message}");
+            return failure(MountErrors.Unexpected(ex.Message));
         }
     }
 
@@ -941,30 +941,26 @@ internal sealed class WindowsNasConnector(
         }
     }
 
-    private static string DescribeWNetError(int code, DriveProtocol protocol) => (code, protocol) switch
+    private static Error DescribeWNetError(int code, DriveProtocol protocol) => (code, protocol) switch
     {
-        (ERROR_BAD_PROVIDER or ERROR_NO_NET_OR_BAD_PATH, DriveProtocol.Nfs) =>
-            "Windows' Client for NFS is not installed. Turn on \"Services for NFS\" under Windows Features and try again.",
-        (ERROR_BAD_PROVIDER or ERROR_NO_NET_OR_BAD_PATH, DriveProtocol.WebDav) =>
-            "Windows' WebDAV client is not running. Start the \"WebClient\" service and try again.",
+        (ERROR_BAD_PROVIDER or ERROR_NO_NET_OR_BAD_PATH, DriveProtocol.Nfs) => MountErrors.NfsClientMissing,
+        (ERROR_BAD_PROVIDER or ERROR_NO_NET_OR_BAD_PATH, DriveProtocol.WebDav) => MountErrors.WebDavClientStopped,
         _ => DescribeWNetError(code),
     };
 
-    private static string DescribeWNetError(int code) => code switch
+    private static Error DescribeWNetError(int code) => code switch
     {
-        ERROR_ACCESS_DENIED => "Access denied. Check the username and password.",
-        ERROR_ALREADY_ASSIGNED => "That drive letter is already in use.",
-        ERROR_BAD_DEV_TYPE => "The network resource type is not correct.",
-        ERROR_BAD_NETPATH => "The network path was not found.",
-        ERROR_BAD_NET_NAME => "The network name cannot be found.",
-        ERROR_INVALID_PASSWORD => "The password is incorrect.",
-        ERROR_LOGON_FAILURE => "Logon failure: unknown user name or bad password.",
-        ERROR_NO_NETWORK => "The network is not present or not started.",
-        ERROR_NOT_CONNECTED => "The device is not currently connected.",
-        ERROR_SESSION_CREDENTIAL_CONFLICT =>
-            "Windows is already signed in to this server with different credentials. Disconnect " +
-            "every drive and Explorer window using it, or sign out of Windows, and try again.",
-        _ => new Win32Exception(code).Message,
+        ERROR_ACCESS_DENIED => MountErrors.AccessDenied,
+        ERROR_ALREADY_ASSIGNED => MountErrors.LetterAlreadyAssigned,
+        ERROR_BAD_DEV_TYPE => MountErrors.BadResourceType,
+        ERROR_BAD_NETPATH => MountErrors.NetworkPathNotFound,
+        ERROR_BAD_NET_NAME => MountErrors.NetworkNameNotFound,
+        ERROR_INVALID_PASSWORD => MountErrors.PasswordIncorrect,
+        ERROR_LOGON_FAILURE => MountErrors.LogonFailure,
+        ERROR_NO_NETWORK => MountErrors.NoNetwork,
+        ERROR_NOT_CONNECTED => MountErrors.NotConnected,
+        ERROR_SESSION_CREDENTIAL_CONFLICT => MountErrors.CredentialConflict,
+        _ => MountErrors.System(new Win32Exception(code).Message),
     };
 
     private const uint RESOURCETYPE_DISK = 0x00000001;
