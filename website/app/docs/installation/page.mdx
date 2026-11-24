@@ -31,6 +31,10 @@ The archives are not code-signed, so SmartScreen may warn on the first launch. C
 
 ## macOS
 
+<Callout type="warn">
+Releases from 2.4.0 onwards have no macOS download yet. The .NET 11 Mac toolchain needs a newer Xcode than GitHub's build machines have. Use the macOS zip from [2.3.6](https://github.com/HilthonTT/Helix/releases/tag/v2.3.6), the last release that had one, or build from source. [Platform support](/docs/platforms/) explains why.
+</Callout>
+
 Download `Helix-<tag>-macos.zip`, unzip it and drag `Helix.app` to `/Applications`.
 
 The bundle is **unsigned and not notarized**, so Gatekeeper refuses the first launch. Either right-click the app, choose **Open** and confirm, or clear the quarantine flag:
@@ -59,7 +63,7 @@ On macOS the same files live in the app's data directory under your user Library
 
 Settings has a **Check for updates** button, and Helix checks once each time you sign in; when a newer release exists, a badge appears in the sidebar.
 
-Choosing **Download and install** downloads the archive for your machine, checks it against the SHA-256 digest GitHub publishes, unpacks it and confirms it contains Helix — all while the app keeps running. **Install and restart** then closes Helix, swaps the new version in and starts it again. If anything fails mid-swap, the previous version is put back.
+Choosing **Download and install** downloads the archive for your machine, checks it against the SHA-256 digest GitHub publishes, unpacks it and confirms it contains Helix — all while the app keeps running. A build that carries the project's release-signing key also checks the archive's signature, and refuses an update that is unsigned or signed by anyone else. [Releasing](/docs/releasing/) covers how releases are signed. **Install and restart** then closes Helix, swaps the new version in and starts it again. If anything fails mid-swap, the previous version is put back.
 
 - Pre-releases are never offered.
 - Your drives, settings and audit log are kept.
