@@ -412,7 +412,7 @@ internal sealed class TrayIconService
 
         _logger.LogWarning("A tray action failed: {Reason}", result.Error.Code);
 
-        _trayIcon.Notify(AppInfo.Current.Name, result.Error.Description);
+        _trayIcon.Notify(AppInfo.Current.Name, ErrorText.For(result.Error));
     }
 
     private async Task ToggleDriveAsync(string rawDriveId)

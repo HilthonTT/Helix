@@ -115,7 +115,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
                     WeakReferenceMessenger.Default.Send(new NotifyDriveConnectivityMessage(drive.Id));
                 }
 
-                Notifier.Error($"{drive.Letter}: {result.Error.Description}");
+                Notifier.Error(ErrorText.Line(drive.Letter, result.Error));
                 return;
             }
 
@@ -202,7 +202,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
 
             if (result.IsFailure)
             {
-                Notifier.Error($"{drive.Letter}: {result.Error.Description}");
+                Notifier.Error(ErrorText.Line(drive.Letter, result.Error));
                 return;
             }
 

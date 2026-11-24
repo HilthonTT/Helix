@@ -146,7 +146,8 @@ public sealed class DiagnoseDrive(
             DiagnosticStep.ShareAndCredentials,
             DiagnosticOutcome.Failed,
             finding,
-            test.Error.Description);
+            test.Error.Description,
+            test.Error);
     }
 
     private DiagnosticResult LetterAvailability(Drive drive)

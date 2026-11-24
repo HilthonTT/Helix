@@ -16,7 +16,8 @@ public static class UpdateErrors
 
     public static Error UnexpectedResponse(int statusCode) => Error.Problem(
         "Update.UnexpectedResponse",
-        $"GitHub answered the update check with an unexpected status ({statusCode}).");
+        $"GitHub answered the update check with an unexpected status ({statusCode}).",
+        statusCode);
 
     public static readonly Error NoAsset = Error.NotFound(
         "Update.NoAsset",
@@ -54,9 +55,14 @@ public static class UpdateErrors
         "Update.UnsafeInstallLocation",
         "Helix is running from a folder it shares with other files, so it cannot replace that folder safely. Move it into a folder of its own and try again.");
 
+    public static readonly Error HelperNotStarted = Error.Problem(
+        "Update.HelperNotStarted",
+        "The update could not be started: the helper process did not start.");
+
     public static Error InstallFailed(string message) => Error.Problem(
         "Update.InstallFailed",
-        $"The update could not be started: {message}");
+        $"The update could not be started: {message}",
+        message);
 
     public static readonly Error UnreadableRelease = Error.Problem(
         "Update.UnreadableRelease",

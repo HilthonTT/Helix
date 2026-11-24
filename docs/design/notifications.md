@@ -66,6 +66,45 @@ about to be removed and restarting it would lose the new message.
 Every string either side of this is in `AppResources`. The app is translated into five
 languages and was still saying "Something went wrong!" in English at eleven call sites.
 
+## Error text is translated at display time
+
+The domain and application layers cannot reach `AppResources`, so an `Error` carries an
+English `Description` plus its **`Arguments`** — the letter, host, group name or status code
+the sentence names. `ErrorText.For(error)` in `Helix.App/Localization` looks up
+`Error_<Code>` (dots become underscores, so `Drive.LetterInUse` reads `Error_Drive_LetterInUse`)
+and formats it with those arguments in the current culture. Everything that puts an error in
+front of the user goes through it: `Notifier.Error(Error)`, the drive row's failure line, the
+refused pill, the tray balloon, hotkey and schedule reports, and the diagnosis sheet. The
+English `Description` is still what logs, the audit trail and the command-line replies use.
+
+Three rules keep that honest:
+
+- **Every new error code gets an `Error_` key in all six `.resx` files.** A code with no key
+  falls back to the English description, which is the bug this replaced: about a hundred
+  sentences shown in English to a German user. Only `Mount.System` and `Drive.MountNotOpened`
+  are left without one on purpose; they pass on an operating system message, which Windows and
+  macOS have already translated.
+- **A connector's reason is an `Error`, not a string.** `WNetAddConnection2` and `NetFS` codes
+  map to `MountErrors` (`Mount.AccessDenied`, `Mount.NfsClientMissing`, …), and
+  `DriveErrors.FailedToConnect(reason)` keeps the reason as its argument. A `{0}` key for
+  `Drive.FailedToConnect` then renders the translated reason; `ErrorText` translates any
+  `Error` it finds among the arguments.
+- **Batch failures keep their structure.** "Connect all" and group connects return
+  `FailedToConnect(IReadOnlyList<DriveFailure>)` rather than a pre-joined string, so each
+  line is rendered as `"{Letter}: {translated reason}"` by `ErrorText.Line`. That line is the
+  unit `Notifier.Retract` matches, so `MountReconciler` retracts
+  `ErrorText.Line(letter, DriveErrors.ConnectionTimedOut)`, the same rendering. A retraction
+  built from the English description would never match a translated banner.
+
+An error whose wording depends on whether an argument exists uses a key suffixed with the
+argument count: `AwayFromHomeNetwork` without a network name reads `Error_Drive_AwayFromHomeNetwork_0`.
+`ErrorText` tries the suffixed key before the plain one.
+
+`Error` equality ignores `Arguments`, comparing code, description and type only. The
+arguments are already in the description, and handlers compare a result with
+`DriveErrors.ConnectionTimedOut` or a fresh `DriveErrors.NotFound(id)`; an array compared by
+reference would have broken both.
+
 A banner can also be **taken back**. `Notifier.Retract` names one line of banner text and
 `NotificationHost` removes it: a banner that was only that line is dismissed, and one
 carrying several — the aggregated failures of a "connect all" — is rewritten without it,

@@ -4,4 +4,5 @@ public sealed record DiagnosticResult(
     DiagnosticStep Step,
     DiagnosticOutcome Outcome,
     DiagnosticFinding Finding,
-    string? Detail = null);
+    string? Detail = null,
+    Error? Error = null);

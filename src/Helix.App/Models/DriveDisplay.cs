@@ -144,7 +144,7 @@ internal sealed partial class DriveDisplay : ObservableObject
             return;
         }
 
-        MarkOffline(DriveOfflineReason.Refused, error.Description);
+        MarkOffline(DriveOfflineReason.Refused, ErrorText.For(error));
     }
 
     partial void OnConnectedChanged(bool value)

@@ -174,6 +174,11 @@ Each block is the short form; the linked doc has the why.
   Modals are only for questions (delete group, install update, passphrase, unmount confirmation)
   and documents (the diagnosis sheet).
 - A failure line about a drive is `"{Letter}: {description}"` — that is the unit `Notifier.Retract` removes.
+  Build it with `ErrorText.Line`, never from `Error.Description`.
+- Show an `Error` to the user through `ErrorText.For` (or `Notifier.Error(Error)`); `Description` is
+  English, for logs and the command line. **A new error code needs an `Error_<Code>` key in all six
+  `.resx` files** and carries its values as `Arguments`; `ErrorResourceTests` enforces both.
+  Connector reasons are `MountErrors`, not strings.
 - Tray-originated actions report through the tray balloon, falling back to the banner.
 
 **Mounting and the connectors** (`platform.md`, `connectivity.md`)

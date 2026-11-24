@@ -155,7 +155,7 @@ internal sealed class ScheduleService
 
         string title = string.Format(AppResources.ScheduleRunFailed, ScheduleText.Title(run.Action, run.GroupName));
 
-        Tell($"{title}{Environment.NewLine}{run.Outcome.Error.Description}", failed: true);
+        Tell($"{title}{Environment.NewLine}{ErrorText.For(run.Outcome.Error)}", failed: true);
     }
 
     private void Tell(string message, bool failed)

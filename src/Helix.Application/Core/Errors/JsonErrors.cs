@@ -3,7 +3,7 @@
 public static class JsonErrors
 {
     public static readonly Error Invalid = Error.Problem(
-        "Json.Invalid", "Your json format is invalid.");
+        "Json.Invalid", "The file is not valid JSON.");
 
     public static readonly Error PassphraseMissing = Error.Problem(
         "Vault.PassphraseMissing", "A passphrase is required to encrypt or decrypt this export.");

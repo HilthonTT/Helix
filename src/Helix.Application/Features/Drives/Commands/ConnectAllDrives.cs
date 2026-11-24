@@ -58,14 +58,14 @@ public sealed class ConnectAllDrives(
         Result[] results = await Task.WhenAll(
             disconnectedDrives.Select(drive => nasConnector.ConnectAsync(drive, cancellationToken)));
 
-        List<string> failures = [];
+        List<DriveFailure> failures = [];
         bool anyConnected = false;
 
         for (int i = 0; i < results.Length; i++)
         {
             if (results[i].IsFailure && !DriveMountBatch.SettledLate(disconnectedDrives[i], results[i], nasConnector))
             {
-                failures.Add($"{disconnectedDrives[i].Letter}: {results[i].Error.Description}");
+                failures.Add(new DriveFailure(disconnectedDrives[i].Letter, results[i].Error));
                 continue;
             }
 
@@ -80,6 +80,6 @@ public sealed class ConnectAllDrives(
 
         return failures.Count == 0
             ? Result.Success()
-            : Result.Failure(DriveErrors.FailedToConnect(string.Join(Environment.NewLine, failures)));
+            : Result.Failure(DriveErrors.FailedToConnect(failures));
     }
 }

@@ -10,7 +10,16 @@ public static class DiagnosticsErrors
         "Diagnostics.InvalidTargetDirectory",
         "That folder path is not valid, please choose a different one.");
 
+    public static readonly Error ExportCancelled = Error.Problem(
+        "Diagnostics.ExportCancelled",
+        "The diagnostics export was cancelled.");
+
+    public static readonly Error ExportNotPermitted = Error.Problem(
+        "Diagnostics.ExportNotPermitted",
+        "The diagnostics could not be exported: Helix is not allowed to write to that folder.");
+
     public static Error ExportFailed(string message) => Error.Problem(
         "Diagnostics.ExportFailed",
-        $"The diagnostics could not be exported: {message}");
+        $"The diagnostics could not be exported: {message}",
+        message);
 }

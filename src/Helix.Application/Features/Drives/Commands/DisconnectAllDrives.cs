@@ -42,17 +42,17 @@ public sealed class DisconnectAllDrives(
         Result[] results = await Task.WhenAll(
             connectedDrives.Select(drive => nasConnector.DisconnectAsync(drive, cancellationToken)));
 
-        List<string> failures = [];
+        List<DriveFailure> failures = [];
         for (int i = 0; i < results.Length; i++)
         {
             if (results[i].IsFailure)
             {
-                failures.Add($"{connectedDrives[i].Letter}: {results[i].Error.Description}");
+                failures.Add(new DriveFailure(connectedDrives[i].Letter, results[i].Error));
             }
         }
 
         return failures.Count == 0
             ? Result.Success()
-            : Result.Failure(DriveErrors.FailedToDisconnect(string.Join(Environment.NewLine, failures)));
+            : Result.Failure(DriveErrors.FailedToDisconnect(failures));
     }
 }

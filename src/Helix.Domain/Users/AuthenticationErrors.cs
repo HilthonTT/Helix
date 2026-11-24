@@ -4,11 +4,11 @@ public static class AuthenticationErrors
 {
     public static readonly Error InvalidUsernameOrPassword = Error.Problem(
         "Authentication.InvalidUsernameOrPassword",
-        "The specified username or password are incorrect.");
+        "The username or password is incorrect.");
 
     public static readonly Error PasswordsDoNotMatch = Error.Problem(
         "Authentication.PasswordsDoNotMatch",
-        "The specified passwords do not match.");
+        "The passwords do not match.");
 
     public static readonly Error PasswordTooShort = Error.Problem(
         "Authentication.PasswordTooShort",
@@ -16,17 +16,17 @@ public static class AuthenticationErrors
 
     public static readonly Error UsernameNotUnique = Error.Problem(
         "Authentication.UsernameNotUnique",
-        "The specified username is not unique.");
+        "That username is already taken.");
 
     public static readonly Error InvalidPermissions = Error.Problem(
         "Authentication.InvalidPermissions",
-        "You lack the permission to create a drive.");
+        "You need to be signed in to do that.");
 
     public static readonly Error NewPasswordsDoNotMatch = Error.Problem(
         "Authentication.NewPasswordsDoNotMatch",
-        "Your new specified passwords do not match.");
+        "The new passwords do not match.");
 
     public static readonly Error InvalidUsernameOrRecoveryKey = Error.Problem(
         "Authentication.InvalidUsernameOrRecoveryKey",
-        "The specified username or recovery key are incorrect.");
+        "The username or recovery key is incorrect.");
 }

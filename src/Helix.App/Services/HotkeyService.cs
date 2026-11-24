@@ -120,7 +120,7 @@ internal sealed class HotkeyService
             {
                 _logger.LogWarning("A global shortcut failed: {Reason}", result.Error.Code);
 
-                Tell(result.Error.Description, failed: true);
+                Tell(ErrorText.For(result.Error), failed: true);
 
                 return;
             }

@@ -4,25 +4,38 @@ public static class DriveErrors
 {
     public static Error NotFound(Guid id) => Error.NotFound(
         "Drive.NotFound",
-        $"The drive with the specified Id = '{id}' was not found.");
+        $"The drive with the specified Id = '{id}' was not found.",
+        id);
 
     public static Error LetterNotUnique(string letter) => Error.Conflict(
         "Drive.LetterNotUnique",
-        $"A drive with the letter = '{letter}' already exists.");
+        $"A drive with the letter = '{letter}' already exists.",
+        letter);
 
-    public static Error FailedToConnect(string message) => Error.Problem("Drive.FailedToConnect", message);
+    public static Error FailedToConnect(string message) => Error.Problem(FailedToConnectCode, message, message);
+
+    public static Error FailedToConnect(Error reason) => Error.Problem(FailedToConnectCode, reason.Description, reason);
+
+    public static Error FailedToConnect(IReadOnlyList<DriveFailure> failures) =>
+        Error.Problem(FailedToConnectCode, Describe(failures), failures);
+
+    public const string FailedToConnectCode = "Drive.FailedToConnect";
 
     public static Error HostUnreachable(string host) => Error.Problem(
         HostUnreachableCode,
-        $"'{host}' could not be reached from this network.");
+        $"'{host}' could not be reached from this network.",
+        host);
 
     public const string HostUnreachableCode = "Drive.HostUnreachable";
 
-    public static Error AwayFromHomeNetwork(string? networkName) => Error.Problem(
-        AwayFromHomeNetworkCode,
-        networkName is null
-            ? "This drive only reconnects on its home network, and this is not it."
-            : $"This drive only reconnects on '{networkName}', and this is not it.");
+    public static Error AwayFromHomeNetwork(string? networkName) => networkName is null
+        ? Error.Problem(
+            AwayFromHomeNetworkCode,
+            "This drive only reconnects on its home network, and this is not it.")
+        : Error.Problem(
+            AwayFromHomeNetworkCode,
+            $"This drive only reconnects on '{networkName}', and this is not it.",
+            networkName);
 
     public const string AwayFromHomeNetworkCode = "Drive.AwayFromHomeNetwork";
 
@@ -30,7 +43,11 @@ public static class DriveErrors
         "Drive.ShareListingUnsupported",
         "Listing a server's shares is not supported on this platform.");
 
-    public static Error SharesNotListed(string message) => Error.Problem("Drive.SharesNotListed", message);
+    public static Error SharesNotListed(string message) => Error.Problem(SharesNotListedCode, message, message);
+
+    public static Error SharesNotListed(Error reason) => Error.Problem(SharesNotListedCode, reason.Description, reason);
+
+    public const string SharesNotListedCode = "Drive.SharesNotListed";
 
     public static readonly Error NothingToCreate = Error.Problem(
         "Drive.NothingToCreate",
@@ -38,35 +55,48 @@ public static class DriveErrors
 
     public static Error DuplicateLetter(string letter) => Error.Conflict(
         "Drive.DuplicateLetter",
-        $"The drive letter '{letter}' was given to more than one share.");
+        $"The drive letter '{letter}' was given to more than one share.",
+        letter);
 
-    public static Error SessionConflict(string message) => Error.Conflict(SessionConflictCode, message);
+    public static Error SessionConflict(string message) => Error.Conflict(SessionConflictCode, message, message);
+
+    public static Error SessionConflict(Error reason) => Error.Conflict(SessionConflictCode, reason.Description, reason);
 
     public const string SessionConflictCode = "Drive.SessionConflict";
 
-    public static Error FailedToDisconnect(string message) => Error.Problem("Drive.FailedToDisconnect", message);
+    public static Error FailedToDisconnect(string message) => Error.Problem(FailedToDisconnectCode, message, message);
 
-    public static readonly Error ConnectionTimedOut = FailedToConnect("Connection timed out.");
+    public static Error FailedToDisconnect(Error reason) => Error.Problem(FailedToDisconnectCode, reason.Description, reason);
 
-    public static readonly Error DisconnectionTimedOut = FailedToDisconnect("Disconnection timed out.");
+    public static Error FailedToDisconnect(IReadOnlyList<DriveFailure> failures) =>
+        Error.Problem(FailedToDisconnectCode, Describe(failures), failures);
+
+    public const string FailedToDisconnectCode = "Drive.FailedToDisconnect";
+
+    public static readonly Error ConnectionTimedOut = FailedToConnect(MountErrors.TimedOut);
+
+    public static readonly Error DisconnectionTimedOut = FailedToDisconnect(MountErrors.DisconnectTimedOut);
 
     public static readonly Error MountNotAvailable = Error.NotFound(
         "Drive.MountNotAvailable",
         "That drive is not mounted, so there is nothing to open.");
 
-    public static Error MountNotOpened(string message) => Error.Problem("Drive.MountNotOpened", message);
+    public static Error MountNotOpened(string message) => Error.Problem("Drive.MountNotOpened", message, message);
 
     public static Error LetterNotFound(string letter) => Error.NotFound(
         "Drive.LetterNotFound",
-        $"The drive with the letter = '{letter}' was not found.");
+        $"The drive with the letter = '{letter}' was not found.",
+        letter);
 
     public static Error LetterInUse(string letter) => Error.Conflict(
         "Drive.LetterInUse",
-        $"The drive letter '{letter}' is already in use on this computer. Choose a free one.");
+        $"The drive letter '{letter}' is already in use on this computer. Choose a free one.",
+        letter);
 
     public static Error MacAddressNotFound(string host) => Error.NotFound(
         "Drive.MacAddressNotFound",
-        $"The hardware address of '{host}' could not be read. It answers only on this network, while it is awake.");
+        $"The hardware address of '{host}' could not be read. It answers only on this network, while it is awake.",
+        host);
 
     public static readonly Error InvalidRemoteHost = Error.Problem(
         "Drive.InvalidRemoteHost",
@@ -94,9 +124,12 @@ public static class DriveErrors
 
     public static readonly Error NotALetter = Error.Problem(
         "Drive.NotALetter",
-        "The 'letter' you've provided is not a single character.");
+        "The drive letter must be a single character.");
 
     public static readonly Error NoDrivesFound = Error.NotFound(
         "Drive.NoDrivesFound",
         "No drives have been found, please create some first.");
+
+    private static string Describe(IReadOnlyList<DriveFailure> failures) =>
+        string.Join(Environment.NewLine, failures);
 }

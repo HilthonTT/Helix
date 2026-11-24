@@ -4,7 +4,8 @@ public static class ScheduleErrors
 {
     public static Error NotFound(Guid id) => Error.NotFound(
         "Schedule.NotFound",
-        $"The schedule with the specified Id = '{id}' was not found.");
+        $"The schedule with the specified Id = '{id}' was not found.",
+        id);
 
     public static readonly Error NoDaysSelected = Error.Problem(
         "Schedule.NoDaysSelected",
