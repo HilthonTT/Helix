@@ -69,6 +69,8 @@ internal sealed class MacNasConnector : INasConnector
 
     public string GetMountPath(string letter) => MountPointFor(letter);
 
+    public string GetRemotePath(Drive drive) => UrlFor(drive, drive.Host);
+
     public bool IsMountedFrom(Drive drive) => IsConnected(drive.Letter);
 
     public bool IsLiveFrom(Drive drive) => IsMountedFrom(drive);

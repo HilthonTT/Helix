@@ -18,6 +18,8 @@ public interface INasConnector
 
     string GetMountPath(string letter);
 
+    string GetRemotePath(Drive drive);
+
     HashSet<string> GetConnectedLetters();
 
     HashSet<string> GetLiveLetters();

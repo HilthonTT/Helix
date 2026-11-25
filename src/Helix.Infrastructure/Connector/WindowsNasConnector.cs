@@ -70,6 +70,8 @@ internal sealed class WindowsNasConnector(
 
     public string GetMountPath(string letter) => $"{letter.Trim().ToUpperInvariant()}:\\";
 
+    public string GetRemotePath(Drive drive) => RemoteFor(drive, ToUncHost(drive.Host));
+
     public int? CountOpenHandles(string letter)
     {
         string localName = $"{letter.Trim().ToUpperInvariant()}:";

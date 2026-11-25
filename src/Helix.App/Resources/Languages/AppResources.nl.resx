@@ -1559,4 +1559,10 @@
   <data name="Error_Validation_InvalidHost" xml:space="preserve">
     <value>Het adres moet een IP-adres (bijvoorbeeld 192.168.0.10) of een hostnaam (bijvoorbeeld nas.local) zijn.</value>
   </data>
+  <data name="CopyPath" xml:space="preserve">
+    <value>Pad kopiëren</value>
+  </data>
+  <data name="PathCopied" xml:space="preserve">
+    <value>{0} gekopieerd</value>
+  </data>
 </root>

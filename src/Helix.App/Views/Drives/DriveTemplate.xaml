@@ -21,6 +21,7 @@
                 <MenuFlyoutItem Text="{l10n:Translate OpenInFileManager}"
                                 IsEnabled="{Binding Connected}"
                                 Clicked="HandleOpen"/>
+                <MenuFlyoutItem Text="{l10n:Translate CopyPath}" Clicked="HandleCopyPath"/>
                 <MenuFlyoutItem Text="{l10n:Translate DiagnoseDrive}" Clicked="HandleDiagnose"/>
                 <MenuFlyoutItem Text="{l10n:Translate WakeDrive}"
                                 IsEnabled="{Binding CanWake}"

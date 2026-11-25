@@ -1559,4 +1559,10 @@
   <data name="Error_Validation_InvalidHost" xml:space="preserve">
     <value>アドレスは IP アドレス (例: 192.168.0.10) またはホスト名 (例: nas.local) にしてください。</value>
   </data>
+  <data name="CopyPath" xml:space="preserve">
+    <value>パスをコピー</value>
+  </data>
+  <data name="PathCopied" xml:space="preserve">
+    <value>{0} をコピーしました</value>
+  </data>
 </root>

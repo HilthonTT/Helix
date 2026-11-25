@@ -1559,4 +1559,10 @@
   <data name="Error_Validation_InvalidHost" xml:space="preserve">
     <value>Alamat harus berupa alamat IP (misalnya 192.168.0.10) atau nama host (misalnya nas.local).</value>
   </data>
+  <data name="CopyPath" xml:space="preserve">
+    <value>Salin jalur</value>
+  </data>
+  <data name="PathCopied" xml:space="preserve">
+    <value>{0} disalin</value>
+  </data>
 </root>

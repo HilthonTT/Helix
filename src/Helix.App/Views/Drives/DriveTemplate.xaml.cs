@@ -5,6 +5,8 @@ using Helix.App.Resources.Languages;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Desktop;
 using Helix.Application.Features.Drives.Commands;
+using Helix.Application.Features.Drives.Queries;
+using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 using Helix.App.Services;
 using Helix.App.Behaviors;
@@ -171,6 +173,38 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         if (result.IsFailure)
         {
             Notifier.Error(result.Error);
+        }
+    }
+
+    private void HandleCopyPath(object? sender, EventArgs e) => CopyPath();
+
+    private async void CopyPath()
+    {
+        if (BindingContext is not DriveDisplay drive)
+        {
+            return;
+        }
+
+        try
+        {
+            Result<Drive> result = await ScopedHandler.HandleAsync(
+                (GetDriveById h) => h.Handle(new GetDriveById.Request(drive.Id)));
+
+            if (result.IsFailure)
+            {
+                Notifier.Error(ErrorText.Line(drive.Letter, result.Error));
+                return;
+            }
+
+            string path = _nasConnector.GetRemotePath(result.Value);
+
+            await Clipboard.Default.SetTextAsync(path);
+
+            Notifier.Success(string.Format(AppResources.PathCopied, path));
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<DriveTemplate>().LogWarning(ex, "Copying the path of drive {Letter}: failed.", drive.Letter);
         }
     }
 

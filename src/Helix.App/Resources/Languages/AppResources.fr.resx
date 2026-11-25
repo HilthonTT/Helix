@@ -1559,4 +1559,10 @@
   <data name="Error_Validation_InvalidHost" xml:space="preserve">
     <value>L'adresse doit être une adresse IP (par exemple 192.168.0.10) ou un nom d'hôte (par exemple nas.local).</value>
   </data>
+  <data name="CopyPath" xml:space="preserve">
+    <value>Copier le chemin</value>
+  </data>
+  <data name="PathCopied" xml:space="preserve">
+    <value>{0} copié</value>
+  </data>
 </root>

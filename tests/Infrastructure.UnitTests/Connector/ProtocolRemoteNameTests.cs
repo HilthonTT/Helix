@@ -1,6 +1,9 @@
 ﻿using FluentAssertions;
+using Helix.Application.Abstractions.Connector;
 using Helix.Domain.Drives;
 using Helix.Infrastructure.Connector;
+using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
 
 namespace Infrastructure.UnitTests.Connector;
 
@@ -46,6 +49,20 @@ public sealed class ProtocolRemoteNameTests
     public void RemoteFor_Should_TurnAnNfsExportIntoAUncPath()
     {
         WindowsNasConnector.RemoteFor(Nfs("/volume1/media"), "nas.local").Should().Be(@"\\nas.local\volume1\media");
+    }
+
+    [Fact]
+    public void GetRemotePath_Should_UseTheDrivesOwnHost()
+    {
+        Drive drive = Smb("Media");
+        drive.ReachAwayAt("nas.example.com");
+
+        var connector = new WindowsNasConnector(
+            NullLogger<WindowsNasConnector>.Instance,
+            Substitute.For<IHostReachability>(),
+            Substitute.For<IDriveRouter>());
+
+        connector.GetRemotePath(drive).Should().Be(@"\\nas.local\Media");
     }
 
     [Fact]

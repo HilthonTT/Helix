@@ -4557,5 +4557,23 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("Error_Validation_InvalidHost", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy path.
+        /// </summary>
+        internal static string CopyPath {
+            get {
+                return ResourceManager.GetString("CopyPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copied {0}.
+        /// </summary>
+        internal static string PathCopied {
+            get {
+                return ResourceManager.GetString("PathCopied", resourceCulture);
+            }
+        }
     }
 }

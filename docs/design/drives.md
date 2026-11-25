@@ -237,6 +237,14 @@ drive's server, credentials, switches and home network filled in and the share l
 the second drive on a NAS is the common case and it is everything but the share. It is the
 natural partner of the browser.
 
+**Copy path** — also on the row's right-click menu — puts the drive's remote address on the
+clipboard: the UNC path Windows mounts (`\\nas.local\Media`, `\\nas.local@SSL@5006\dav` for
+WebDAV) or the URL macOS mounts (`smb://`, `https://`, `nfs://`). It comes from
+`INasConnector.GetRemotePath`, which reuses the same builder the connector mounts with, so
+the copied text is exactly what Explorer or Finder would accept. It always uses the drive's
+own `Host`, never the away address or whatever `IDriveRouter` would pick right now: a pasted
+path should mean the same thing tomorrow. It works whether the drive is connected or not.
+
 **Adopting existing mappings** lists the letters mapped on this machine that no Helix drive
 claims (`GetUnmanagedMappings` over `INasConnector.GetMappedShares`, which on Windows asks
 `WNetGetConnection` for every letter, remembered-but-unavailable ones included) and turns
