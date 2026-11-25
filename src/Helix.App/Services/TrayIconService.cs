@@ -189,15 +189,7 @@ internal sealed class TrayIconService
         _trayIcon.Notify(AppInfo.Current.Name, AppResources.TrayStillRunning);
     }
 
-    public void Notify(string title, string message)
-    {
-        if (!_running)
-        {
-            return;
-        }
-
-        _trayIcon.Notify(title, message);
-    }
+    public bool Notify(string title, string message) => _running && _trayIcon.Notify(title, message);
 
     public async Task RefreshAsync()
     {
@@ -412,7 +404,12 @@ internal sealed class TrayIconService
 
         _logger.LogWarning("A tray action failed: {Reason}", result.Error.Code);
 
-        _trayIcon.Notify(AppInfo.Current.Name, ErrorText.For(result.Error));
+        string message = ErrorText.For(result.Error);
+
+        if (!_trayIcon.Notify(AppInfo.Current.Name, message))
+        {
+            Notifier.Error(message);
+        }
     }
 
     private async Task ToggleDriveAsync(string rawDriveId)

@@ -139,9 +139,8 @@ internal sealed class HotkeyService
 
     private void Tell(string message, bool failed)
     {
-        if (_tray.IsRunning)
+        if (_tray.Notify(AppInfo.Current.Name, message))
         {
-            _tray.Notify(AppInfo.Current.Name, message);
             return;
         }
 

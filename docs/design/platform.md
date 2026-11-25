@@ -82,6 +82,14 @@ so the figure does not flicker as parallel probes finish in a different order.
 
 Do not "simplify" the dashboard total back into a sum over drive letters.
 
+`MacStorageProbe` measures `~/Helix Drives/<X>` only while that path is a **mount point**
+(listed by `DriveInfo.GetDrives()`, the same test `MacNasConnector.GetConnectedLetters`
+uses). On Unix `DriveInfo` on a plain folder reports whichever filesystem holds it, and the
+connector leaves the folder behind on unmount, so a share that dropped between "is it up?"
+and the measurement was recorded as the Mac's own SSD — a fake volume in the history and a
+low-space warning about the wrong disk. Windows needs no such check: `Z:\` does not exist
+once the mapping is gone.
+
 Both connectors take the NAS password as a separate credential argument rather than
 putting it in a command line — do not "simplify" either into a `net.exe` or
 `mount_smbfs //user:pass@host` shell-out.
@@ -173,7 +181,16 @@ That normal case reaches the BCL as an **exception**: `Dns.GetHostEntry` throws
 for a name that does not resolve. Both are caught where they are raised, so "nothing" is a
 return value rather than something for the blanket `catch` in `Within` to mop up — which
 matters now that the drive diagnosis calls this on the ordinary path rather than only on a
-credential conflict. A lookup that outlives its 1.5s cap is abandoned, and its exception is
+credential conflict. Only **`HostNotFound` and `NoData`** count as that answer. Any other
+`SocketException` (no network yet, DNS server unreachable, `TryAgain`) is not an answer and
+falls through to `Within`, which treats it like a timeout: remembered for a minute, then
+asked again. Caching those for the session meant a Helix started at logon before Wi-Fi was
+up never recognised a remembered `\\NAS\share` as its drive's own until restart.
+
+`TryAlternateSpelling` runs on the **home route only**. On the away route `host` is
+`RemoteHost`, `MountedFrom` recognises the other spelling of `Host` but not of `RemoteHost`,
+and a mount it made there read as not this drive's — disconnected row, `LetterInUse` on
+disconnect. The away address is used as typed, here as everywhere. A lookup that outlives its 1.5s cap is abandoned, and its exception is
 observed on the way past: an abandoned task that faults with nobody watching is an
 `UnobservedTaskException` raised from the finalizer, minutes later, with no way to tell
 what asked for it.
@@ -206,6 +223,14 @@ treats as "no tray". Apple does not promise any of this from Catalyst, which is 
 not shipping a separate AppKit bundle; a macOS release that breaks it degrades to no menu
 bar icon rather than to a crash. The balloon's equivalent is a Notification Center post,
 permission for which is asked the first time there is something to say.
+
+`ITrayIcon.Notify` returns whether the message was actually handed to the shell, and every
+caller falls back to the banner when it returns false — "the tray is running" is not "the
+user will see it". On macOS the answer is false while the permission prompt is still open,
+after the user declined, and for the message that triggered the prompt (it goes to the
+banner rather than being posted later, so it can never appear twice). Before this, a Mac
+user who declined notifications lost every low-space alert, schedule result and hotkey
+outcome silently, and the alert service then marked the volume as already warned.
 
 `ITrayIcon` renders labels and reports which one was clicked, and knows nothing about
 drives. Deciding what the menu says and what a click means is `TrayIconService`'s job in

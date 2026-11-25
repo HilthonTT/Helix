@@ -159,6 +159,9 @@ public sealed partial class EstateStatus : ObservableObject
         WeakReferenceMessenger.Default.Register<EstateStatus, DriveDeletedMessage>(
             this, (r, m) => _ = r.RefreshAsync());
 
+        WeakReferenceMessenger.Default.Register<EstateStatus, DriveUpdatedMessage>(
+            this, (r, m) => _ = r.RefreshAsync());
+
         WeakReferenceMessenger.Default.Register<EstateStatus, StorageAlertsChangedMessage>(
             this, (r, m) => MainThread.BeginInvokeOnMainThread(() => r.HasLowSpace = m.VolumeCount > 0));
     }

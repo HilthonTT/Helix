@@ -160,9 +160,8 @@ internal sealed class ScheduleService
 
     private void Tell(string message, bool failed)
     {
-        if (_tray.IsRunning)
+        if (_tray.Notify(AppResources.ScheduleNotification, message))
         {
-            _tray.Notify(AppResources.ScheduleNotification, message);
             return;
         }
 

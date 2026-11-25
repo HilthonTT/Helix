@@ -102,11 +102,11 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         }
     }
 
-    public void Notify(string title, string message)
+    public bool Notify(string title, string message)
     {
         if (_windowHandle == IntPtr.Zero || !_iconAdded)
         {
-            return;
+            return false;
         }
 
         NOTIFYICONDATAW data = CreateIconData();
@@ -118,7 +118,10 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
         if (!Shell_NotifyIconW(NIM_MODIFY, ref data))
         {
             _logger.LogWarning("The shell rejected a tray notification.");
+            return false;
         }
+
+        return true;
     }
 
     public void Hide()

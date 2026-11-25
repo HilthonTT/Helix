@@ -23,7 +23,7 @@ public interface ITrayIcon
 
     void SetMenu(IReadOnlyList<TrayMenuItem> items);
 
-    void Notify(string title, string message);
+    bool Notify(string title, string message);
 
     void Hide();
 }

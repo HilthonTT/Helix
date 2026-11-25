@@ -64,6 +64,15 @@ disconnect or a late `Test` is logged and nothing more, because nothing was clai
 drive that a later success would contradict. A late mount that fails is not reported
 either: the failure banner already says so.
 
+The reconciler also takes and releases an `IDriveMonitor.Suppress` on the letter the moment a
+late mount lands. The connect's own suppression ended when the timeout answered, and that
+release re-seeded the letter as **down**; the next poll then saw down→up and the tray fired a
+"reconnected" toast per drive on top of the "connected late" banner — the startup toast flood
+the suppression section below exists to prevent. Re-seeding as up closes it. The cost is that
+an unattended `ReconnectDrive` that times out and then lands is announced by the banner rather
+than the toast; the connector cannot tell the two callers apart, and the banner was already
+being shown.
+
 `MarkDriveConnected` is addressed by **letter**, because a letter is all the connector
 knows, and it refuses unless `IsLiveFrom` still says that letter points at that drive's
 share — the mount may have been taken down again in the thirty seconds it took to arrive,

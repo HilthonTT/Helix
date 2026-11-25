@@ -88,6 +88,23 @@ public sealed class GetStorageHistoryTests
     }
 
     [Fact]
+    public async Task Handle_Should_KeepTheReadings_ButNotForecast_AVolumeNoLongerMeasured()
+    {
+        GivenSamples(
+            90,
+            Sample(25, 12 * Tb),
+            Sample(15, 11 * Tb),
+            Sample(GetStorageForecasts.StaleAfterDays + 1, 10 * Tb));
+
+        Result<List<VolumeHistory>> result = await _handler.Handle(new GetStorageHistory.Request(90));
+
+        VolumeHistory volume = result.Value.Single();
+        volume.Points.Should().HaveCount(3);
+        volume.BytesPerDay.Should().BeNull();
+        volume.DaysUntilFull.Should().BeNull();
+    }
+
+    [Fact]
     public async Task Handle_Should_ClampTheRange()
     {
         GivenSamples(GetStorageHistory.MaximumDays);

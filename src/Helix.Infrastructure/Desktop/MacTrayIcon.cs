@@ -91,7 +91,7 @@ internal sealed class MacTrayIcon : ITrayIcon
         });
     }
 
-    public void Notify(string title, string message)
+    public bool Notify(string title, string message)
     {
         try
         {
@@ -118,25 +118,28 @@ internal sealed class MacTrayIcon : ITrayIcon
                         if (!granted)
                         {
                             _logger.LogInformation(
-                                "Notifications are not allowed for Helix; tray messages will not be shown. {Reason}",
+                                "Notifications are not allowed for Helix; tray messages fall back to the banner. {Reason}",
                                 error?.LocalizedDescription);
-                            return;
                         }
-
-                        Post(center, title, message);
                     });
 
-                return;
+                return false;
             }
 
-            if (_notificationsAllowed)
+            if (!_notificationsAllowed)
             {
-                Post(center, title, message);
+                return false;
             }
+
+            Post(center, title, message);
+
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Could not post a notification.");
+
+            return false;
         }
     }
 

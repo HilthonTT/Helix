@@ -92,7 +92,11 @@ internal static class HostSpelling
         {
             return lookup();
         }
-        catch (Exception ex) when (ex is SocketException or ArgumentException)
+        catch (SocketException ex) when (ex.SocketErrorCode is SocketError.HostNotFound or SocketError.NoData)
+        {
+            return null;
+        }
+        catch (ArgumentException)
         {
             return null;
         }

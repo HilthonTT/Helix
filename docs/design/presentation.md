@@ -232,7 +232,7 @@ does not swallow keys, so another application bound to the same chord still gets
 the lock exists to stop someone at an unattended keyboard, and "disconnect every drive" is
 exactly what it should stop. Like the tray's own "disconnect all" it does not confirm: the
 point is that the window is not in front. The outcome goes to the tray balloon when the icon
-is up and to the banner otherwise, and a repeat while one is running is ignored rather than
+is up and the balloon was accepted, and to the banner otherwise (see `platform.md`), and a repeat while one is running is ignored rather than
 queued, since a held key auto-repeats.
 
 ## The command line
@@ -283,7 +283,10 @@ status are harmless enough to run unasked. Control characters are stripped from 
 so a crafted one cannot forge the pipe's field separators. Whatever a link's target puts into
 its answer (an unknown verb, a drive or group that does not exist) is cut to 32 characters
 (`CommandListener.Echo`) before it reaches the balloon, so a web page cannot write a
-sentence of its choosing into a notification that carries Helix's name.
+sentence of its choosing into a notification that carries Helix's name — and the same cut
+applies to the disconnect confirmation, which is a modal with Helix's own title and more
+convincing than a balloon. A failed link is answered through `ErrorText.For`, like any other
+result shown to a user; only the command line gets `Error.Description`.
 
 The answer goes to the parent console through `AttachConsole`, success on stdout and failure
 on stderr, and the exit code is 0 or 1. Helix is a GUI executable, so **PowerShell and cmd do

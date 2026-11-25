@@ -53,8 +53,12 @@ public sealed class GetStorageHistory(
             List<StorageSample> ordered = [.. volume.OrderBy(s => s.Day)];
             StorageSample latest = ordered[^1];
 
-            double? bytesPerDay = StorageTrend.BytesPerDay(
-                [.. ordered.Where(s => s.Day >= trendStart).Select(s => (s.Day, s.FreeBytes))]);
+            bool stale = today.DayNumber - latest.Day.DayNumber > GetStorageForecasts.StaleAfterDays;
+
+            double? bytesPerDay = stale
+                ? null
+                : StorageTrend.BytesPerDay(
+                    [.. ordered.Where(s => s.Day >= trendStart).Select(s => (s.Day, s.FreeBytes))]);
 
             volumes.Add(new VolumeHistory(
                 volume.Key,

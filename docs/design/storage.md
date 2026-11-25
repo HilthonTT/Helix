@@ -54,7 +54,11 @@ writes: one series per volume, oldest first, for 30 days, 90 days or a year. The
 volume that was grown reads as a step rather than a cliff. The caption's trend is fitted over
 the **last 30 days** whatever range is shown, the same window `GetStorageForecasts` uses, so
 the page and the dashboard tile cannot disagree about when a pool fills; a year of history is
-for looking at, not for extrapolating from. Volumes filling soonest come first.
+for looking at, not for extrapolating from. Volumes filling soonest come first. A volume
+whose latest sample is older than `GetStorageForecasts.StaleAfterDays` keeps its series but
+gets **no trend and no days-until-full**, exactly as the tile drops it: a volume that was
+grown (new total size, so a new id) or whose drives stopped being sampled would otherwise
+be forecast from days-old free space and sorted to the top as filling soonest.
 
 **Drive reliability** is `GetEstateReliability`: one audit-log read for the window rather than
 a query per drive, grouped by drive id and summarized by `Core/Drives/ReliabilitySummary`,

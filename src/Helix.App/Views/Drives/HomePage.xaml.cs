@@ -2,6 +2,7 @@
 using Helix.App.Messaging.DriveGroups;
 using Helix.App.Messaging.Drives;
 using Helix.App.Messaging.Schedules;
+using Helix.App.Resources.Languages;
 using Helix.App.Services;
 using Helix.App.Theming;
 using Helix.App.ViewModels.Drives;
@@ -310,9 +311,20 @@ public sealed partial class HomePage : ContentPage
 
     private async void Preferences_Clicked(object? sender, EventArgs e)
     {
-        if (_viewModel.GoToSettingsCommand.CanExecute(null))
+        if (!_viewModel.GoToSettingsCommand.CanExecute(null))
+        {
+            return;
+        }
+
+        try
         {
             await _viewModel.GoToSettingsCommand.ExecuteAsync(null);
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<HomePage>().LogError(ex, "Opening the settings failed.");
+
+            Notifier.Error(AppResources.UnexpectedError);
         }
     }
 

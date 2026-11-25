@@ -605,7 +605,7 @@ internal sealed class WindowsNasConnector(
             drive.Letter,
             DescribeWNetError(reuse).Description);
 
-        Result? alternate = TryAlternateSpelling(drive, local, host, flags);
+        Result? alternate = route.IsRemote ? null : TryAlternateSpelling(drive, local, host, flags);
         if (alternate is not null)
         {
             return alternate;

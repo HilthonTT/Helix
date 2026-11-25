@@ -11,13 +11,15 @@ namespace Helix.App.Services;
 internal sealed class MountReconciler
 {
     private readonly INasConnector _nasConnector;
+    private readonly IDriveMonitor _driveMonitor;
     private readonly ILogger<MountReconciler> _logger;
 
     private bool _subscribed;
 
-    public MountReconciler(INasConnector nasConnector, ILogger<MountReconciler> logger)
+    public MountReconciler(INasConnector nasConnector, IDriveMonitor driveMonitor, ILogger<MountReconciler> logger)
     {
         _nasConnector = nasConnector;
+        _driveMonitor = driveMonitor;
         _logger = logger;
     }
 
@@ -50,6 +52,15 @@ internal sealed class MountReconciler
         if (!outcome.IsMounted)
         {
             return;
+        }
+
+        try
+        {
+            _driveMonitor.Suppress([outcome.Letter]).Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Drive {Letter}: the monitor could not be re-seeded after a late mount.", outcome.Letter);
         }
 
         _ = ReconcileAsync(outcome);

@@ -127,9 +127,8 @@ internal sealed class CommandListener
 
         TrayIconService tray = App.ServiceProvider.GetRequiredService<TrayIconService>();
 
-        if (tray.IsRunning)
+        if (tray.Notify(AppInfo.Current.Name, message))
         {
-            tray.Notify(AppInfo.Current.Name, message);
             return;
         }
 
@@ -280,9 +279,11 @@ internal sealed class CommandListener
         {
             CommandVerb.Status => await StatusAsync(link),
             CommandVerb.ConnectAll => Report(
+                link,
                 await ScopedHandler.HandleAsync((ConnectAllDrives h) => h.Handle()),
                 Say(link, "Every drive is connected.", AppResources.HotkeyConnectedAll)),
             CommandVerb.DisconnectAll => Report(
+                link,
                 await ScopedHandler.HandleAsync((DisconnectAllDrives h) => h.Handle()),
                 Say(link, "Every drive is disconnected.", AppResources.HotkeyDisconnectedAll)),
             CommandVerb.Connect => await OnDriveAsync(request.Target, link, ConnectAsync),
@@ -326,8 +327,8 @@ internal sealed class CommandListener
             string question = request.Verb switch
             {
                 CommandVerb.DisconnectAll => AppResources.LinkConfirmDisconnectAll,
-                CommandVerb.Disconnect => string.Format(AppResources.LinkConfirmDisconnect, request.Target),
-                CommandVerb.DisconnectGroup => string.Format(AppResources.LinkConfirmDisconnectGroup, request.Target),
+                CommandVerb.Disconnect => string.Format(AppResources.LinkConfirmDisconnect, Echo(request.Target)),
+                CommandVerb.DisconnectGroup => string.Format(AppResources.LinkConfirmDisconnectGroup, Echo(request.Target)),
                 _ => AppResources.LinkConfirmQuit,
             };
 
@@ -345,7 +346,7 @@ internal sealed class CommandListener
         Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
         if (drives.IsFailure)
         {
-            return (false, drives.Error.Description);
+            return (false, FailureText(link, drives.Error));
         }
 
         if (drives.Value.Count == 0)
@@ -377,7 +378,7 @@ internal sealed class CommandListener
         Result<List<Drive>> drives = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
         if (drives.IsFailure)
         {
-            return (false, drives.Error.Description);
+            return (false, FailureText(link, drives.Error));
         }
 
         string wanted = target.Trim().TrimEnd(':', '\\');
@@ -413,7 +414,7 @@ internal sealed class CommandListener
 
         Announce(drive.Id);
 
-        return Report(result, Say(link, $"{drive.Letter}: is connected.", string.Format(AppResources.LinkConnected, $"{drive.Letter}:")));
+        return Report(link, result, Say(link, $"{drive.Letter}: is connected.", string.Format(AppResources.LinkConnected, $"{drive.Letter}:")));
     }
 
     private static async Task<(bool, string)> DisconnectAsync(Drive drive, bool link)
@@ -422,14 +423,14 @@ internal sealed class CommandListener
 
         Announce(drive.Id);
 
-        return Report(result, Say(link, $"{drive.Letter}: is disconnected.", string.Format(AppResources.LinkDisconnected, $"{drive.Letter}:")));
+        return Report(link, result, Say(link, $"{drive.Letter}: is disconnected.", string.Format(AppResources.LinkDisconnected, $"{drive.Letter}:")));
     }
 
     private static async Task<(bool, string)> WakeAsync(Drive drive, bool link)
     {
         Result result = await ScopedHandler.HandleAsync((WakeDrive h) => h.Handle(new WakeDrive.Request(drive.Id)));
 
-        return Report(result, Say(link, $"A wake-up packet was sent for {drive.Letter}:.", string.Format(AppResources.WakeSent, drive.Name)));
+        return Report(link, result, Say(link, $"A wake-up packet was sent for {drive.Letter}:.", string.Format(AppResources.WakeSent, drive.Name)));
     }
 
     private static async Task<(bool, string)> OnGroupAsync(string target, bool link, bool disconnect)
@@ -437,7 +438,7 @@ internal sealed class CommandListener
         Result<List<DriveGroup>> groups = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
         if (groups.IsFailure)
         {
-            return (false, groups.Error.Description);
+            return (false, FailureText(link, groups.Error));
         }
 
         DriveGroup? group = groups.Value.FirstOrDefault(g => string.Equals(g.Name, target.Trim(), StringComparison.OrdinalIgnoreCase));
@@ -453,11 +454,13 @@ internal sealed class CommandListener
             ? Say(link, $"'{group.Name}' is disconnected.", string.Format(AppResources.LinkDisconnected, group.Name))
             : Say(link, $"'{group.Name}' is connected.", string.Format(AppResources.LinkConnected, group.Name));
 
-        return Report(result, success);
+        return Report(link, result, success);
     }
 
-    private static (bool, string) Report(Result result, string success) =>
-        result.IsSuccess ? (true, success) : (false, result.Error.Description);
+    private static (bool, string) Report(bool link, Result result, string success) =>
+        result.IsSuccess ? (true, success) : (false, FailureText(link, result.Error));
+
+    private static string FailureText(bool link, Error error) => link ? ErrorText.For(error) : error.Description;
 
     private static void Announce(Guid driveId) =>
         MainThread.BeginInvokeOnMainThread(() =>

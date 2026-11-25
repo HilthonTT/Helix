@@ -136,11 +136,7 @@ internal sealed class StorageAlertService
 
             string message = string.Format(AppResources.TrayStorageLowMessage, names, alert.FreePercent);
 
-            if (_tray.IsRunning)
-            {
-                _tray.Notify(AppResources.TrayStorageLow, message);
-            }
-            else
+            if (!_tray.Notify(AppResources.TrayStorageLow, message))
             {
                 Notifier.Warning(message);
             }
