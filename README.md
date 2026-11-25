@@ -26,6 +26,9 @@ Helix maps SMB, WebDAV and NFS shares to drive letters (or folders on macOS), wa
 and brings them back when they drop — after sleep, on a new network, or when the NAS wakes
 up. When a drive will not connect, a four-step check tells you why.
 
+It works with any SMB, WebDAV or NFS server: Synology, QNAP, TrueNAS, Unraid, a Raspberry Pi
+running Samba, or a plain Windows share.
+
 - **Connect** one drive, a ticked selection, a saved group or everything, from the window,
   the tray, a global shortcut, a schedule or the command line.
 - **Reconnect** unattended: a watchdog, Wake-on-LAN for a sleeping NAS, a home-network pin
@@ -71,6 +74,13 @@ dotnet test Helix.slnx
 [Development](https://hilthontt.github.io/Helix/docs/development/) and
 [Architecture](https://hilthontt.github.io/Helix/docs/architecture/) pages cover the rest,
 and [CONTRIBUTING.md](CONTRIBUTING.md) the pull request checklist.
+
+## Community
+
+Questions, ideas and setups are welcome in
+[Discussions](https://github.com/HilthonTT/Helix/discussions); bugs go in
+[Issues](https://github.com/HilthonTT/Helix/issues). If Helix keeps your drives connected,
+a ⭐ helps other people find it.
 
 ## License
 
