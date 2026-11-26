@@ -30,7 +30,7 @@
                          HeightRequest="-1"
                          VerticalOptions="Fill"/>
 
-                <Grid RowDefinitions="Auto,Auto,*,Auto,Auto,Auto"
+                <Grid RowDefinitions="Auto,Auto,*,Auto,Auto"
                       RadioButtonGroup.GroupName="Menu"
                       RadioButtonGroup.SelectedValue="{Binding SelectedRoute}">
 
@@ -55,10 +55,6 @@
                                 <Setter Property="ControlTemplate" Value="{StaticResource NavItemTemplate}"/>
                             </Style>
                         </VerticalStackLayout.Resources>
-
-                        <Label Text="{l10n:Translate Menu}"
-                               Style="{StaticResource Overline}"
-                               Margin="26,0,0,8"/>
 
                         <controls:NavItem Value="dashboard"
                                           Glyph="{x:Static icons:IconFont.ThLarge}"
@@ -224,74 +220,63 @@
 
                     <Border Grid.Row="3"
                             Style="{StaticResource CardInset}"
-                            Margin="16,0,16,10"
-                            Padding="14,12">
-                        <HorizontalStackLayout Spacing="10">
-                            <Label Text="{x:Static icons:IconFont.UserCircle}"
-                                   Style="{StaticResource IconLg}"
-                                   TextColor="{DynamicResource Accent}"
-                                   VerticalOptions="Center"/>
-                            <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                            Margin="16,0,16,4"
+                            Padding="10,10,8,10">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                            <Border WidthRequest="34"
+                                    HeightRequest="34"
+                                    Background="{DynamicResource AccentWashBrush}"
+                                    Stroke="Transparent"
+                                    StrokeThickness="0"
+                                    StrokeShape="{RoundRectangle CornerRadius=999}"
+                                    VerticalOptions="Center">
+                                <Label Text="{Binding UserInitial}"
+                                       FontFamily="{StaticResource FontSemibold}"
+                                       FontSize="14"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="{DynamicResource Accent}"/>
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
                                 <Label Text="{Binding Username}"
                                        Style="{StaticResource Title3}"
                                        LineBreakMode="TailTruncation"
                                        MaxLines="1"/>
                                 <Label Text="{l10n:Translate SignedIn}" Style="{StaticResource Faint}"/>
                             </VerticalStackLayout>
-                        </HorizontalStackLayout>
+
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource RowAction}"
+                                    ToolTipProperties.Text="{l10n:Translate LockNow}"
+                                    SemanticProperties.Description="{l10n:Translate LockNow}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnLockNow"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="{x:Static icons:IconFont.Lock}"
+                                       Style="{StaticResource IconSm}"
+                                       FontSize="13"
+                                       InputTransparent="True"
+                                       TextColor="{DynamicResource TextMuted}"/>
+                            </Border>
+
+                            <Border Grid.Column="3"
+                                    Style="{StaticResource RowAction}"
+                                    ToolTipProperties.Text="{l10n:Translate Logout}"
+                                    SemanticProperties.Description="{l10n:Translate Logout}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnLogout"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="{x:Static icons:IconFont.SignOutAlt}"
+                                       Style="{StaticResource IconSm}"
+                                       FontSize="13"
+                                       InputTransparent="True"
+                                       TextColor="{DynamicResource TextMuted}"/>
+                            </Border>
+                        </Grid>
                     </Border>
 
-                    <VerticalStackLayout Grid.Row="4" Spacing="2">
-                        <Border Margin="16,0,16,0"
-                                Padding="14,11"
-                                Background="Transparent"
-                                Stroke="Transparent"
-                                StrokeThickness="0"
-                                StrokeShape="{RoundRectangle CornerRadius=11}"
-                                ToolTipProperties.Text="{l10n:Translate LockNow}"
-                                behaviors:Hover.Cursor="True"
-                                behaviors:Hover.Background="{DynamicResource SurfaceHover}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnLockNow"/>
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="12" InputTransparent="True">
-                                <Label Text="{x:Static icons:IconFont.Lock}"
-                                       Style="{StaticResource Icon}"
-                                       FontSize="15"
-                                       WidthRequest="20"
-                                       TextColor="{DynamicResource TextMuted}"/>
-                                <Label Text="{l10n:Translate LockNow}"
-                                       Style="{StaticResource Muted}"
-                                       VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
-                        </Border>
-
-                        <Border Margin="16,0,16,4"
-                                Padding="14,11"
-                                Background="Transparent"
-                                Stroke="Transparent"
-                                StrokeThickness="0"
-                                StrokeShape="{RoundRectangle CornerRadius=11}"
-                                ToolTipProperties.Text="{l10n:Translate Logout}"
-                                behaviors:Hover.Cursor="True"
-                                behaviors:Hover.Background="{DynamicResource SurfaceHover}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnLogout"/>
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="12" InputTransparent="True">
-                                <Label Text="{x:Static icons:IconFont.SignOutAlt}"
-                                       Style="{StaticResource Icon}"
-                                       FontSize="15"
-                                       WidthRequest="20"
-                                       TextColor="{DynamicResource TextMuted}"/>
-                                <Label Text="{l10n:Translate Logout}"
-                                       Style="{StaticResource Muted}"
-                                       VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
-                        </Border>
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Grid.Row="5" Spacing="12" Margin="20,8,16,18">
+                    <VerticalStackLayout Grid.Row="4" Spacing="12" Margin="20,8,16,18">
 
                         <BoxView Style="{StaticResource Divider}" HorizontalOptions="Fill"/>
 

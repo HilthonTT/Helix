@@ -294,6 +294,32 @@
         <Setter Property="behaviors:Hover.Cursor" Value="True"/>
     </Style>
 
+    <Style x:Key="HeaderIconButton" TargetType="Border" BasedOn="{StaticResource IconChip}">
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaisedBrush}"/>
+        <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=10}"/>
+        <Setter Property="WidthRequest" Value="42"/>
+        <Setter Property="HeightRequest" Value="42"/>
+    </Style>
+
+    <Style x:Key="RowAction" TargetType="Border" BasedOn="{StaticResource IconHit}">
+        <Setter Property="WidthRequest" Value="32"/>
+        <Setter Property="HeightRequest" Value="32"/>
+        <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=9}"/>
+    </Style>
+
+    <Style x:Key="LegendDot" TargetType="Border">
+        <Setter Property="WidthRequest" Value="8"/>
+        <Setter Property="HeightRequest" Value="8"/>
+        <Setter Property="Stroke" Value="Transparent"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape" Value="{RoundRectangle CornerRadius=999}"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+
+    <Style x:Key="SectionHeader" TargetType="Label" BasedOn="{StaticResource Overline}">
+        <Setter Property="TextColor" Value="{DynamicResource Accent}"/>
+    </Style>
+
     <Style x:Key="Sheet" TargetType="Border">
         <Setter Property="Background"
                 Value="{DynamicResource SurfaceBrush}"/>

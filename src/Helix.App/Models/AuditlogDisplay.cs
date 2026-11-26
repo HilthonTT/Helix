@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Helix.App.Icons;
 using Helix.App.Resources.Languages;
 using Helix.Domain.Auditlogs;
 
@@ -33,7 +34,31 @@ internal sealed partial class AuditlogDisplay : ObservableObject
     [ObservableProperty]
     public partial DateTime? ModifiedOnUtc { get; set; }
 
-    public string Timestamp => CreatedOnUtc.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+    public string Timestamp => DateTime.SpecifyKind(CreatedOnUtc, DateTimeKind.Utc)
+        .ToLocalTime()
+        .ToString("yyyy-MM-dd HH:mm:ss");
+
+    public string UtcTimestamp => CreatedOnUtc.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+
+    public string Glyph => Action switch
+    {
+        AuditAction.DriveCreated => IconFont.Plus,
+        AuditAction.DriveUpdated => IconFont.PencilAlt,
+        AuditAction.DriveDeleted => IconFont.Trash,
+        AuditAction.DriveDisconnected => IconFont.Unlink,
+        AuditAction.DriveReconnected => IconFont.Link,
+        AuditAction.DriveReconnectFailed => IconFont.ExclamationCircle,
+        _ => IconFont.Circle,
+    };
+
+    public string Tone => Action switch
+    {
+        AuditAction.DriveCreated => "success",
+        AuditAction.DriveDeleted or AuditAction.DriveReconnectFailed => "danger",
+        AuditAction.DriveDisconnected => "warning",
+        AuditAction.DriveReconnected => "success",
+        _ => "neutral",
+    };
 
     public string Description => Render();
 

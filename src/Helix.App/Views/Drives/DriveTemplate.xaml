@@ -219,12 +219,13 @@
             </Grid>
 
             <HorizontalStackLayout Grid.Column="5"
-                                   Spacing="8"
+                                   Spacing="4"
                                    HorizontalOptions="End"
                                    VerticalOptions="Center">
-                <Border Style="{StaticResource IconChip}"
+                <Border Style="{StaticResource RowAction}"
                         IsVisible="{Binding Connected}"
-                        ToolTipProperties.Text="{l10n:Translate OpenInFileManager}">
+                        ToolTipProperties.Text="{l10n:Translate OpenInFileManager}"
+                        SemanticProperties.Description="{l10n:Translate OpenInFileManager}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="HandleOpen"/>
                     </Border.GestureRecognizers>
@@ -234,8 +235,9 @@
                            TextColor="{DynamicResource TextMuted}"/>
                 </Border>
 
-                <Border Style="{StaticResource IconChip}"
-                        ToolTipProperties.Text="{l10n:Translate DiagnoseDrive}">
+                <Border Style="{StaticResource RowAction}"
+                        ToolTipProperties.Text="{l10n:Translate DiagnoseDrive}"
+                        SemanticProperties.Description="{l10n:Translate DiagnoseDrive}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="HandleDiagnose"/>
                     </Border.GestureRecognizers>
@@ -245,8 +247,9 @@
                            TextColor="{DynamicResource TextMuted}"/>
                 </Border>
 
-                <Border Style="{StaticResource IconChip}"
-                        ToolTipProperties.Text="{l10n:Translate UpdateDrive}">
+                <Border Style="{StaticResource RowAction}"
+                        ToolTipProperties.Text="{l10n:Translate UpdateDrive}"
+                        SemanticProperties.Description="{l10n:Translate UpdateDrive}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="HandleUpdate"/>
                     </Border.GestureRecognizers>
@@ -256,15 +259,16 @@
                            TextColor="{DynamicResource TextMuted}"/>
                 </Border>
 
-                <Border Style="{StaticResource IconChip}"
-                        ToolTipProperties.Text="{l10n:Translate DeleteDrive}">
+                <Border Style="{StaticResource RowAction}"
+                        ToolTipProperties.Text="{l10n:Translate DeleteDrive}"
+                        SemanticProperties.Description="{l10n:Translate DeleteDrive}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="HandleDelete"/>
                     </Border.GestureRecognizers>
                     <Label Text="{x:Static icons:IconFont.Trash}"
                            Style="{StaticResource IconSm}"
                            InputTransparent="True"
-                           TextColor="{DynamicResource Danger}"/>
+                           TextColor="{DynamicResource TextMuted}"/>
                 </Border>
             </HorizontalStackLayout>
 

@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:system="clr-namespace:System;assembly=netstandard"
              xmlns:vm="clr-namespace:Helix.App.ViewModels.Settings"
              xmlns:controls="clr-namespace:Helix.App.Controls"
              xmlns:behaviors="clr-namespace:Helix.App.Behaviors"
@@ -22,414 +21,421 @@
 
     <Grid>
 
-        <Grid RowDefinitions="Auto,*"
-              ColumnDefinitions="300,*"
-              ColumnSpacing="20"
+        <Grid RowDefinitions="Auto,Auto,*"
               RowSpacing="20"
               Padding="28,24">
 
-            <VerticalStackLayout Grid.ColumnSpan="2" Spacing="2">
+            <VerticalStackLayout Spacing="2">
                 <Label Text="{l10n:Translate Settings}" Style="{StaticResource Display}"/>
-                <Label Style="{StaticResource Muted}"
-                       Text="{Binding Source={x:Static l10n:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=l10n:LocalizationResourceManager}"/>
+                <Label Text="{l10n:Translate SettingsSubtitle}" Style="{StaticResource Muted}"/>
             </VerticalStackLayout>
 
-            <Border Grid.Row="1" Style="{StaticResource Card}" VerticalOptions="Start">
-                <VerticalStackLayout Padding="8,10"
-                                     Spacing="2"
-                                     RadioButtonGroup.GroupName="Sections"
-                                     RadioButtonGroup.SelectedValue="{Binding CurrentSection, Mode=TwoWay}">
-                    <VerticalStackLayout.Resources>
-                        <Style TargetType="controls:NavItem">
-                            <Setter Property="ControlTemplate" Value="{StaticResource NavSectionTemplate}"/>
-                        </Style>
-                    </VerticalStackLayout.Resources>
+            <HorizontalStackLayout Grid.Row="1"
+                                   Spacing="8"
+                                   RadioButtonGroup.GroupName="Sections"
+                                   RadioButtonGroup.SelectedValue="{Binding CurrentSection, Mode=TwoWay}">
+                <RadioButton Value="account"
+                             Content="{l10n:Translate AccountInformation}"
+                             ControlTemplate="{StaticResource SegmentTemplate}"/>
+                <RadioButton Value="preferences"
+                             Content="{l10n:Translate Preferences}"
+                             ControlTemplate="{StaticResource SegmentTemplate}"/>
+            </HorizontalStackLayout>
 
-                    <controls:NavItem Value="account"
-                                      Glyph="{x:Static icons:IconFont.UserCircle}"
-                                      Content="{l10n:Translate AccountInformation}"
-                                      Description="{l10n:Translate ChangeYourAccountInfo}"
-                                      IsChecked="True"/>
-
-                    <controls:NavItem Value="settings"
-                                      Glyph="{x:Static icons:IconFont.SlidersH}"
-                                      Content="{l10n:Translate Preferences}"
-                                      Description="{l10n:Translate ManageYourPreferences}"/>
-                </VerticalStackLayout>
-            </Border>
-
-            <ScrollView Grid.Row="1" Grid.Column="1">
-                <Grid>
-                    <Border Style="{StaticResource Card}" VerticalOptions="Start" IsVisible="False">
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="account">
+            <ScrollView Grid.Row="2">
+                <Grid MaximumWidthRequest="920" HorizontalOptions="Start" Padding="0,0,12,8">
+                    <VerticalStackLayout Spacing="16" IsVisible="False">
+                        <VerticalStackLayout.Triggers>
+                            <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding CurrentSection}" Value="account">
                                 <Setter Property="IsVisible" Value="True"/>
                             </DataTrigger>
-                            <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="{x:Static system:String.Empty}">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Border.Triggers>
+                        </VerticalStackLayout.Triggers>
 
-                        <VerticalStackLayout Padding="24" Spacing="18">
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="{l10n:Translate AccountInformation}" Style="{StaticResource Title1}"/>
-                                <Label Text="{l10n:Translate ChangeYourAccountInfo}" Style="{StaticResource Caption}"/>
-                            </VerticalStackLayout>
+                            <Border Style="{StaticResource Card}">
+                                <VerticalStackLayout Padding="24,20" Spacing="16">
+                                        <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate UsernameField}" Style="{StaticResource Caption}"/>
+                                            <Label Text="{Binding Username}" Style="{StaticResource Title2}"/>
+                                        </VerticalStackLayout>
 
-                            <BoxView Style="{StaticResource Divider}"/>
+                                        <Border Grid.Column="1"
+                                                Style="{StaticResource IconChip}"
+                                                IsEnabled="{Binding IsNotBusy}"
+                                                ToolTipProperties.Text="{l10n:Translate UpdateYourUsername}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding EditUsernameCommand}"/>
+                                            </Border.GestureRecognizers>
+                                            <Label Text="{x:Static icons:IconFont.PencilAlt}"
+                                                   Style="{StaticResource IconSm}"
+                                                   InputTransparent="True"
+                                                   TextColor="{DynamicResource TextMuted}"/>
+                                        </Border>
+                                    </Grid>
 
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate UsernameField}" Style="{StaticResource Caption}"/>
-                                    <Label Text="{Binding Username}" Style="{StaticResource Title2}"/>
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate PasswordField}" Style="{StaticResource Caption}"/>
+                                            <Label Text="••••••••" Style="{StaticResource Title2}"/>
+                                        </VerticalStackLayout>
+
+                                        <Border Grid.Column="1"
+                                                Style="{StaticResource IconChip}"
+                                                IsEnabled="{Binding IsNotBusy}"
+                                                ToolTipProperties.Text="{l10n:Translate UpdatePassword}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding EditPasswordCommand}"/>
+                                            </Border.GestureRecognizers>
+                                            <Label Text="{x:Static icons:IconFont.PencilAlt}"
+                                                   Style="{StaticResource IconSm}"
+                                                   InputTransparent="True"
+                                                   TextColor="{DynamicResource TextMuted}"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate RecoveryKey}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate RecoveryKeyDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+
+                                        <Border Grid.Column="1"
+                                                Style="{StaticResource IconChip}"
+                                                IsEnabled="{Binding IsNotBusy}"
+                                                ToolTipProperties.Text="{l10n:Translate CreateRecoveryKey}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding CreateRecoveryKeyCommand}"/>
+                                            </Border.GestureRecognizers>
+                                            <Label Text="{x:Static icons:IconFont.Key}"
+                                                   Style="{StaticResource IconSm}"
+                                                   InputTransparent="True"
+                                                   TextColor="{DynamicResource TextMuted}"/>
+                                        </Border>
+                                    </Grid>
                                 </VerticalStackLayout>
+                            </Border>
+                    </VerticalStackLayout>
 
-                                <Border Grid.Column="1"
-                                        Style="{StaticResource IconChip}"
-                                        IsEnabled="{Binding IsNotBusy}"
-                                        ToolTipProperties.Text="{l10n:Translate UpdateYourUsername}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding EditUsernameCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <Label Text="{x:Static icons:IconFont.PencilAlt}"
-                                           Style="{StaticResource IconSm}"
-                                           InputTransparent="True"
-                                           TextColor="{DynamicResource TextMuted}"/>
-                                </Border>
-                            </Grid>
-
-                            <BoxView Style="{StaticResource Divider}"/>
-
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate PasswordField}" Style="{StaticResource Caption}"/>
-                                    <Label Text="••••••••" Style="{StaticResource Title2}"/>
-                                </VerticalStackLayout>
-
-                                <Border Grid.Column="1"
-                                        Style="{StaticResource IconChip}"
-                                        IsEnabled="{Binding IsNotBusy}"
-                                        ToolTipProperties.Text="{l10n:Translate UpdatePassword}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding EditPasswordCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <Label Text="{x:Static icons:IconFont.PencilAlt}"
-                                           Style="{StaticResource IconSm}"
-                                           InputTransparent="True"
-                                           TextColor="{DynamicResource TextMuted}"/>
-                                </Border>
-                            </Grid>
-
-                            <BoxView Style="{StaticResource Divider}"/>
-
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate RecoveryKey}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate RecoveryKeyDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-
-                                <Border Grid.Column="1"
-                                        Style="{StaticResource IconChip}"
-                                        IsEnabled="{Binding IsNotBusy}"
-                                        ToolTipProperties.Text="{l10n:Translate CreateRecoveryKey}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding CreateRecoveryKeyCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <Label Text="{x:Static icons:IconFont.Key}"
-                                           Style="{StaticResource IconSm}"
-                                           InputTransparent="True"
-                                           TextColor="{DynamicResource TextMuted}"/>
-                                </Border>
-                            </Grid>
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <Border Style="{StaticResource Card}" VerticalOptions="Start" IsVisible="False">
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="settings">
+                    <VerticalStackLayout Spacing="16" IsVisible="False">
+                        <VerticalStackLayout.Triggers>
+                            <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding CurrentSection}" Value="preferences">
                                 <Setter Property="IsVisible" Value="True"/>
                             </DataTrigger>
-                            <DataTrigger TargetType="Border" Binding="{Binding CurrentSection}" Value="{x:Static system:String.Empty}">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Border.Triggers>
+                        </VerticalStackLayout.Triggers>
 
-                        <VerticalStackLayout Padding="24" Spacing="18">
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="{l10n:Translate Preferences}" Style="{StaticResource Title1}"/>
-                                <Label Text="{l10n:Translate ManageYourPreferences}" Style="{StaticResource Caption}"/>
-                            </VerticalStackLayout>
+                            <Border Style="{StaticResource Card}">
+                                <VerticalStackLayout Padding="24,20" Spacing="16">
+                                    <Label Text="{l10n:Translate SettingsSectionStartup}" Style="{StaticResource SectionHeader}"/>
 
-                            <BoxView Style="{StaticResource Divider}"/>
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate AutoConnectDrivesOnLaunch}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate AutoConnectDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <Switch Grid.Column="1"
+                                                VerticalOptions="Center"
+                                                IsToggled="{Binding Settings.AutoConnect}"
+                                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
 
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate AutoConnectDrivesOnLaunch}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate AutoConnectDescription}" Style="{StaticResource Caption}"/>
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate SetOnStartup}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate SetOnStartupDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <Switch Grid.Column="1"
+                                                VerticalOptions="Center"
+                                                IsToggled="{Binding Settings.SetOnStartup}"
+                                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate SetDesktopShortcut}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate SetDesktopShortcutDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <Switch Grid.Column="1"
+                                                VerticalOptions="Center"
+                                                IsToggled="{Binding Settings.SetDesktopShortcut}"
+                                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate AutoMinimizeApp}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate AutoMinimizeDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <Switch Grid.Column="1"
+                                                VerticalOptions="Center"
+                                                IsToggled="{Binding Settings.AutoMinimize}"
+                                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}" IsVisible="{Binding SupportsTray}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate CloseToTray}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate CloseToTrayDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <Switch Grid.Column="1"
+                                                VerticalOptions="Center"
+                                                IsToggled="{Binding Settings.CloseToTray}"
+                                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}" IsVisible="{Binding SupportsTray}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate NotifyOnMinimizeToTray}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate NotifyOnMinimizeToTrayDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <Switch Grid.Column="1"
+                                                VerticalOptions="Center"
+                                                IsToggled="{Binding Settings.NotifyOnMinimizeToTray}"
+                                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate GlobalHotkeys}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate GlobalHotkeysDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <Switch Grid.Column="1"
+                                                VerticalOptions="Center"
+                                                IsToggled="{Binding Settings.GlobalHotkeys}"
+                                                IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
                                 </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding Settings.AutoConnect}"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
+                            </Border>
 
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate AutoMinimizeApp}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate AutoMinimizeDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding Settings.AutoMinimize}"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
+                            <Border Style="{StaticResource Card}">
+                                <VerticalStackLayout Padding="24,20" Spacing="16">
+                                    <Label Text="{l10n:Translate SettingsSectionAppearance}" Style="{StaticResource SectionHeader}"/>
 
-                            <Grid Style="{StaticResource PreferenceRow}" IsVisible="{Binding SupportsTray}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate CloseToTray}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate CloseToTrayDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding Settings.CloseToTray}"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
+                                    <VerticalStackLayout Spacing="14">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate Theme}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate ThemeDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
 
-                            <Grid Style="{StaticResource PreferenceRow}" IsVisible="{Binding SupportsTray}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate NotifyOnMinimizeToTray}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate NotifyOnMinimizeToTrayDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding Settings.NotifyOnMinimizeToTray}"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
+                                        <controls:HorizontalWrapLayout Spacing="10" BindableLayout.ItemsSource="{Binding Themes}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="models:ThemeOptionDisplay">
+                                                    <Border WidthRequest="116"
+                                                            Padding="6"
+                                                            Background="Transparent"
+                                                            Stroke="{DynamicResource BorderBrush}"
+                                                            StrokeThickness="2"
+                                                            StrokeShape="{RoundRectangle CornerRadius=12}"
+                                                            SemanticProperties.Description="{Binding Name}"
+                                                            ToolTipProperties.Text="{Binding Name}"
+                                                            behaviors:Hover.Cursor="True"
+                                                            behaviors:Hover.Background="{DynamicResource SurfaceHover}">
+                                                        <Border.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="Stroke" Value="{DynamicResource AccentBrush}"/>
+                                                            </DataTrigger>
+                                                        </Border.Triggers>
+                                                        <Border.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=SelectThemeCommand, x:DataType=vm:SettingsViewModel}"
+                                                                                  CommandParameter="{Binding .}"/>
+                                                        </Border.GestureRecognizers>
 
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate GlobalHotkeys}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate GlobalHotkeysDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding Settings.GlobalHotkeys}"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
-
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate SetOnStartup}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate SetOnStartupDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding Settings.SetOnStartup}"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
-
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate SetDesktopShortcut}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate SetDesktopShortcutDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-                                <Switch Grid.Column="1"
-                                        VerticalOptions="Center"
-                                        IsToggled="{Binding Settings.SetDesktopShortcut}"
-                                        IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
-
-                            <BoxView Style="{StaticResource Divider}"/>
-
-                            <VerticalStackLayout Spacing="14">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate Theme}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate ThemeDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-
-                                <controls:HorizontalWrapLayout Spacing="10" BindableLayout.ItemsSource="{Binding Themes}">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate x:DataType="models:ThemeOptionDisplay">
-                                            <Border WidthRequest="116"
-                                                    Padding="6"
-                                                    Background="Transparent"
-                                                    Stroke="{DynamicResource BorderBrush}"
-                                                    StrokeThickness="2"
-                                                    StrokeShape="{RoundRectangle CornerRadius=12}"
-                                                    SemanticProperties.Description="{Binding Name}"
-                                                    ToolTipProperties.Text="{Binding Name}"
-                                                    behaviors:Hover.Cursor="True"
-                                                    behaviors:Hover.Background="{DynamicResource SurfaceHover}">
-                                                <Border.Triggers>
-                                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                                        <Setter Property="Stroke" Value="{DynamicResource AccentBrush}"/>
-                                                    </DataTrigger>
-                                                </Border.Triggers>
-                                                <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=SelectThemeCommand, x:DataType=vm:SettingsViewModel}"
-                                                                          CommandParameter="{Binding .}"/>
-                                                </Border.GestureRecognizers>
-
-                                                <VerticalStackLayout Spacing="8" InputTransparent="True">
-                                                    <Border HeightRequest="58"
-                                                            Padding="8"
-                                                            Background="{Binding CanvasBrush}"
-                                                            StrokeThickness="0"
-                                                            StrokeShape="{RoundRectangle CornerRadius=8}">
-                                                        <Grid RowDefinitions="*,Auto" RowSpacing="6">
-                                                            <Border Background="{Binding SurfaceBrush}"
+                                                        <VerticalStackLayout Spacing="8" InputTransparent="True">
+                                                            <Border HeightRequest="58"
+                                                                    Padding="8"
+                                                                    Background="{Binding CanvasBrush}"
                                                                     StrokeThickness="0"
-                                                                    StrokeShape="{RoundRectangle CornerRadius=4}"/>
-                                                            <HorizontalStackLayout Grid.Row="1" Spacing="4">
-                                                                <Border WidthRequest="26"
-                                                                        HeightRequest="8"
-                                                                        Background="{Binding AccentBrush}"
-                                                                        StrokeThickness="0"
-                                                                        StrokeShape="{RoundRectangle CornerRadius=4}"/>
-                                                                <Border WidthRequest="8"
-                                                                        HeightRequest="8"
-                                                                        Background="{Binding SoftBrush}"
-                                                                        StrokeThickness="0"
-                                                                        StrokeShape="{RoundRectangle CornerRadius=4}"/>
-                                                            </HorizontalStackLayout>
-                                                        </Grid>
+                                                                    StrokeShape="{RoundRectangle CornerRadius=8}">
+                                                                <Grid RowDefinitions="*,Auto" RowSpacing="6">
+                                                                    <Border Background="{Binding SurfaceBrush}"
+                                                                            StrokeThickness="0"
+                                                                            StrokeShape="{RoundRectangle CornerRadius=4}"/>
+                                                                    <HorizontalStackLayout Grid.Row="1" Spacing="4">
+                                                                        <Border WidthRequest="26"
+                                                                                HeightRequest="8"
+                                                                                Background="{Binding AccentBrush}"
+                                                                                StrokeThickness="0"
+                                                                                StrokeShape="{RoundRectangle CornerRadius=4}"/>
+                                                                        <Border WidthRequest="8"
+                                                                                HeightRequest="8"
+                                                                                Background="{Binding SoftBrush}"
+                                                                                StrokeThickness="0"
+                                                                                StrokeShape="{RoundRectangle CornerRadius=4}"/>
+                                                                    </HorizontalStackLayout>
+                                                                </Grid>
+                                                            </Border>
+
+                                                            <Grid ColumnDefinitions="*,Auto" Margin="4,0,4,2">
+                                                                <Label Text="{Binding Name}"
+                                                                       FontSize="13"
+                                                                       LineBreakMode="TailTruncation"
+                                                                       MaxLines="1"/>
+                                                                <Label Grid.Column="1"
+                                                                       Text="{x:Static icons:IconFont.Check}"
+                                                                       Style="{StaticResource IconSm}"
+                                                                       TextColor="{DynamicResource Accent}"
+                                                                       IsVisible="{Binding IsSelected}"/>
+                                                            </Grid>
+                                                        </VerticalStackLayout>
                                                     </Border>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </controls:HorizontalWrapLayout>
+                                    </VerticalStackLayout>
 
-                                                    <Grid ColumnDefinitions="*,Auto" Margin="4,0,4,2">
-                                                        <Label Text="{Binding Name}"
-                                                               FontSize="13"
-                                                               LineBreakMode="TailTruncation"
-                                                               MaxLines="1"/>
-                                                        <Label Grid.Column="1"
-                                                               Text="{x:Static icons:IconFont.Check}"
-                                                               Style="{StaticResource IconSm}"
-                                                               TextColor="{DynamicResource Accent}"
-                                                               IsVisible="{Binding IsSelected}"/>
-                                                    </Grid>
-                                                </VerticalStackLayout>
-                                            </Border>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
-                                </controls:HorizontalWrapLayout>
-                            </VerticalStackLayout>
+                                    <BoxView Style="{StaticResource Divider}"/>
 
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate Languages}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate LanguageDescription}" Style="{StaticResource Caption}"/>
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate Languages}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate LanguageDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
+                                            <Picker Margin="8,0"
+                                                    BackgroundColor="Transparent"
+                                                    IsEnabled="{Binding Settings.IsNotBusy}"
+                                                    ItemsSource="{Binding Languages}"
+                                                    SelectedItem="{Binding SelectedLanguage}"/>
+                                        </Border>
+                                    </Grid>
                                 </VerticalStackLayout>
-                                <Border Grid.Column="1" Style="{StaticResource Field}" WidthRequest="200" VerticalOptions="Center">
-                                    <Picker Margin="8,0"
-                                            BackgroundColor="Transparent"
-                                            IsEnabled="{Binding Settings.IsNotBusy}"
-                                            ItemsSource="{Binding Languages}"
-                                            SelectedItem="{Binding SelectedLanguage}"/>
-                                </Border>
-                            </Grid>
+                            </Border>
 
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate TimerCountInSeconds}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate TimerCountDescription}" Style="{StaticResource Caption}"/>
+                            <Border Style="{StaticResource Card}">
+                                <VerticalStackLayout Padding="24,20" Spacing="16">
+                                    <Label Text="{l10n:Translate SettingsSectionLimits}" Style="{StaticResource SectionHeader}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate TimerCountInSeconds}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate TimerCountDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <controls:NumberField Grid.Column="1"
+                                                              WidthRequest="200"
+                                                              VerticalOptions="Center"
+                                                              Value="{Binding Settings.TimerCount}"
+                                                              Minimum="1"
+                                                              Maximum="3600"
+                                                              Step="1"
+                                                              Unit="{l10n:Translate UnitSeconds}"
+                                                              IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate AuditlogRetention}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate AuditlogRetentionDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <controls:NumberField Grid.Column="1"
+                                                              WidthRequest="200"
+                                                              VerticalOptions="Center"
+                                                              Value="{Binding Settings.AuditlogRetentionDays}"
+                                                              Minimum="0"
+                                                              Maximum="3650"
+                                                              Step="10"
+                                                              Unit="{l10n:Translate UnitDays}"
+                                                              OffText="{l10n:Translate RetentionKeepEverything}"
+                                                              IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate StorageAlertThreshold}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate StorageAlertThresholdDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <controls:NumberField Grid.Column="1"
+                                                              WidthRequest="200"
+                                                              VerticalOptions="Center"
+                                                              Value="{Binding Settings.StorageAlertThresholdPercent}"
+                                                              Minimum="0"
+                                                              Maximum="{Binding MaximumStorageAlertThresholdPercent}"
+                                                              Step="1"
+                                                              Unit="{l10n:Translate UnitPercent}"
+                                                              OffText="{l10n:Translate StorageAlertOff}"
+                                                              IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate IdleLock}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate IdleLockDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <controls:NumberField Grid.Column="1"
+                                                              WidthRequest="200"
+                                                              VerticalOptions="Center"
+                                                              Value="{Binding Settings.IdleLockMinutes}"
+                                                              Minimum="0"
+                                                              Maximum="1440"
+                                                              Step="5"
+                                                              Unit="{l10n:Translate UnitMinutes}"
+                                                              OffText="{l10n:Translate IdleLockNever}"
+                                                              IsEnabled="{Binding Settings.IsNotBusy}"/>
+                                    </Grid>
                                 </VerticalStackLayout>
-                                <controls:NumberField Grid.Column="1"
-                                                      WidthRequest="200"
-                                                      VerticalOptions="Center"
-                                                      Value="{Binding Settings.TimerCount}"
-                                                      Minimum="1"
-                                                      Maximum="3600"
-                                                      Step="1"
-                                                      Unit="{l10n:Translate UnitSeconds}"
-                                                      IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
+                            </Border>
 
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate AuditlogRetention}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate AuditlogRetentionDescription}" Style="{StaticResource Caption}"/>
+                            <Border Style="{StaticResource Card}">
+                                <VerticalStackLayout Padding="24,20" Spacing="16">
+                                    <Label Text="{l10n:Translate SettingsSectionMaintenance}" Style="{StaticResource SectionHeader}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate ExportDiagnostics}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate ExportDiagnosticsDescription}" Style="{StaticResource Caption}"/>
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1"
+                                                Style="{StaticResource ButtonSecondary}"
+                                                WidthRequest="200"
+                                                VerticalOptions="Center"
+                                                Text="{l10n:Translate Export}"
+                                                Command="{Binding ExportDiagnosticsCommand}"
+                                                IsEnabled="{Binding IsNotBusy}"/>
+                                    </Grid>
+
+                                    <BoxView Style="{StaticResource Divider}"/>
+
+                                    <Grid Style="{StaticResource PreferenceRow}">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{l10n:Translate Updates}" Style="{StaticResource Title3}"/>
+                                            <Label Text="{l10n:Translate UpdatesDescription}" Style="{StaticResource Caption}"/>
+
+                                            <Label Text="{Binding UpdateStatus}"
+                                                   Style="{StaticResource Caption}"
+                                                   FontFamily="{StaticResource FontMono}"
+                                                   IsVisible="{Binding HasUpdateStatus}"/>
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1"
+                                                Style="{StaticResource ButtonSecondary}"
+                                                WidthRequest="200"
+                                                VerticalOptions="Center"
+                                                Text="{l10n:Translate CheckForUpdates}"
+                                                Command="{Binding CheckForUpdatesCommand}"
+                                                IsEnabled="{Binding IsNotBusy}"/>
+                                    </Grid>
                                 </VerticalStackLayout>
-                                <controls:NumberField Grid.Column="1"
-                                                      WidthRequest="200"
-                                                      VerticalOptions="Center"
-                                                      Value="{Binding Settings.AuditlogRetentionDays}"
-                                                      Minimum="0"
-                                                      Maximum="3650"
-                                                      Step="10"
-                                                      Unit="{l10n:Translate UnitDays}"
-                                                      OffText="{l10n:Translate RetentionKeepEverything}"
-                                                      IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
-
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate StorageAlertThreshold}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate StorageAlertThresholdDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-                                <controls:NumberField Grid.Column="1"
-                                                      WidthRequest="200"
-                                                      VerticalOptions="Center"
-                                                      Value="{Binding Settings.StorageAlertThresholdPercent}"
-                                                      Minimum="0"
-                                                      Maximum="{Binding MaximumStorageAlertThresholdPercent}"
-                                                      Step="1"
-                                                      Unit="{l10n:Translate UnitPercent}"
-                                                      OffText="{l10n:Translate StorageAlertOff}"
-                                                      IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
-
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate IdleLock}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate IdleLockDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-                                <controls:NumberField Grid.Column="1"
-                                                      WidthRequest="200"
-                                                      VerticalOptions="Center"
-                                                      Value="{Binding Settings.IdleLockMinutes}"
-                                                      Minimum="0"
-                                                      Maximum="1440"
-                                                      Step="5"
-                                                      Unit="{l10n:Translate UnitMinutes}"
-                                                      OffText="{l10n:Translate IdleLockNever}"
-                                                      IsEnabled="{Binding Settings.IsNotBusy}"/>
-                            </Grid>
-
-                            <BoxView Style="{StaticResource Divider}"/>
-
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate ExportDiagnostics}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate ExportDiagnosticsDescription}" Style="{StaticResource Caption}"/>
-                                </VerticalStackLayout>
-                                <Button Grid.Column="1"
-                                        Style="{StaticResource ButtonSecondary}"
-                                        WidthRequest="200"
-                                        VerticalOptions="Center"
-                                        Text="{l10n:Translate Export}"
-                                        Command="{Binding ExportDiagnosticsCommand}"
-                                        IsEnabled="{Binding IsNotBusy}"/>
-                            </Grid>
-
-                            <Grid Style="{StaticResource PreferenceRow}">
-                                <VerticalStackLayout Spacing="2">
-                                    <Label Text="{l10n:Translate Updates}" Style="{StaticResource Title3}"/>
-                                    <Label Text="{l10n:Translate UpdatesDescription}" Style="{StaticResource Caption}"/>
-
-                                    <Label Text="{Binding UpdateStatus}"
-                                           Style="{StaticResource Caption}"
-                                           FontFamily="{StaticResource FontMono}"
-                                           IsVisible="{Binding HasUpdateStatus}"/>
-                                </VerticalStackLayout>
-                                <Button Grid.Column="1"
-                                        Style="{StaticResource ButtonSecondary}"
-                                        WidthRequest="200"
-                                        VerticalOptions="Center"
-                                        Text="{l10n:Translate CheckForUpdates}"
-                                        Command="{Binding CheckForUpdatesCommand}"
-                                        IsEnabled="{Binding IsNotBusy}"/>
-                            </Grid>
-                        </VerticalStackLayout>
-                    </Border>
+                            </Border>
+                    </VerticalStackLayout>
                 </Grid>
             </ScrollView>
 

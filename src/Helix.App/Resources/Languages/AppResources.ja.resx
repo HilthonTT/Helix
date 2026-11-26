@@ -1565,4 +1565,25 @@
   <data name="PathCopied" xml:space="preserve">
     <value>{0} をコピーしました</value>
   </data>
+  <data name="SettingsSubtitle" xml:space="preserve">
+    <value>アカウントと Helix の動作。</value>
+  </data>
+  <data name="AuditlogsSubtitle" xml:space="preserve">
+    <value>すべての変更と再接続の記録。</value>
+  </data>
+  <data name="InsightsSubtitle" xml:space="preserve">
+    <value>ストレージの推移と接続の信頼性。</value>
+  </data>
+  <data name="SettingsSectionStartup" xml:space="preserve">
+    <value>起動とウィンドウ</value>
+  </data>
+  <data name="SettingsSectionAppearance" xml:space="preserve">
+    <value>外観</value>
+  </data>
+  <data name="SettingsSectionLimits" xml:space="preserve">
+    <value>タイマーと制限</value>
+  </data>
+  <data name="SettingsSectionMaintenance" xml:space="preserve">
+    <value>メンテナンス</value>
+  </data>
 </root>

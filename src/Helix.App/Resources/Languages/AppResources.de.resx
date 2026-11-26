@@ -1565,4 +1565,25 @@
   <data name="PathCopied" xml:space="preserve">
     <value>{0} kopiert</value>
   </data>
+  <data name="SettingsSubtitle" xml:space="preserve">
+    <value>Ihr Konto und wie sich Helix verhält.</value>
+  </data>
+  <data name="AuditlogsSubtitle" xml:space="preserve">
+    <value>Ein Protokoll aller Änderungen und Wiederverbindungen.</value>
+  </data>
+  <data name="InsightsSubtitle" xml:space="preserve">
+    <value>Speichertrends und Verbindungszuverlässigkeit.</value>
+  </data>
+  <data name="SettingsSectionStartup" xml:space="preserve">
+    <value>Start &amp; Fenster</value>
+  </data>
+  <data name="SettingsSectionAppearance" xml:space="preserve">
+    <value>Darstellung</value>
+  </data>
+  <data name="SettingsSectionLimits" xml:space="preserve">
+    <value>Timer &amp; Grenzwerte</value>
+  </data>
+  <data name="SettingsSectionMaintenance" xml:space="preserve">
+    <value>Wartung</value>
+  </data>
 </root>

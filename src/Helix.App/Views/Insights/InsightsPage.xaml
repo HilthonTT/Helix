@@ -24,8 +24,7 @@
 
                 <VerticalStackLayout Spacing="2">
                     <Label Text="{l10n:Translate Insights}" Style="{StaticResource Display}"/>
-                    <Label Style="{StaticResource Muted}"
-                           Text="{Binding Source={x:Static l10n:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=l10n:LocalizationResourceManager}"/>
+                    <Label Text="{l10n:Translate InsightsSubtitle}" Style="{StaticResource Muted}"/>
                 </VerticalStackLayout>
 
                 <Border Style="{StaticResource Card}">

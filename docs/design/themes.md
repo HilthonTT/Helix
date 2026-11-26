@@ -16,7 +16,7 @@ picked at runtime would have repainted nothing. The tokens are written into
 `Application.Resources` by `Theming/ThemeSwitcher` from a `ThemePalette` record, and every
 bound property follows. **A new color goes into `ThemePalette` and every palette, and is
 referenced as `{DynamicResource Name}`.** C# that builds views does the same with
-`SetDynamicResource` (`NotificationHost`, `NumberField`); code that needs a value rather
+`SetDynamicResource` (`NotificationHost`, `NumberField`, `Meter`); code that needs a value rather
 than a binding — the dashboard donut — reads `ThemeSwitcher.Palette` and redraws on
 `ThemeSwitcher.Changed`. The donut is otherwise only rebuilt when the connected count changes:
 it animates on every rebuild, and rebuilding it on every status message replayed the

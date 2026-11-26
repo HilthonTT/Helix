@@ -226,30 +226,19 @@ public sealed partial class HomePage : ContentPage
 
     private void UpdateChart()
     {
+        ThemePalette palette = ThemeSwitcher.Palette;
         int connected = _viewModel.ConnectedCount;
         int disconnected = _viewModel.DisconnectedCount;
 
         ChartEntry[] entries = connected + disconnected == 0
-            ? BuildEntries(0, 1)
-            : BuildEntries(connected, disconnected);
+            ? [new ChartEntry(1) { Color = palette.BorderStrong.ToSKColor() }]
+            :
+            [
+                new ChartEntry(connected) { Color = palette.Success.ToSKColor() },
+                new ChartEntry(disconnected) { Color = palette.Danger.ToSKColor() }
+            ];
 
-        chart.Chart = CreateDonutChart(entries);
-    }
-
-    private static ChartEntry[] BuildEntries(int connected, int disconnected)
-    {
-        ThemePalette palette = ThemeSwitcher.Palette;
-
-        return
-        [
-            new ChartEntry(connected) { Color = palette.Success.ToSKColor() },
-            new ChartEntry(disconnected) { Color = palette.Danger.ToSKColor() }
-        ];
-    }
-
-    private static DonutChart CreateDonutChart(ChartEntry[] entries)
-    {
-        return new DonutChart
+        chart.Chart = new DonutChart
         {
             Entries = entries,
             IsAnimated = true,

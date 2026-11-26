@@ -18,8 +18,7 @@
 
             <VerticalStackLayout Spacing="2">
                 <Label Text="{l10n:Translate Auditlogs}" Style="{StaticResource Display}"/>
-                <Label Style="{StaticResource Muted}"
-                       Text="{Binding Source={x:Static l10n:LocalizationResourceManager.Instance}, Path=CurrentDate, x:DataType=l10n:LocalizationResourceManager}"/>
+                <Label Text="{l10n:Translate AuditlogsSubtitle}" Style="{StaticResource Muted}"/>
             </VerticalStackLayout>
 
             <Border Grid.Row="1" Style="{StaticResource Card}">
@@ -91,7 +90,7 @@
                                          Spacing="10"
                                          IsVisible="{Binding Auditlogs.Count, Converter={StaticResource CountToBoolConverter}}">
                         <Grid ColumnDefinitions="Auto,*,200" ColumnSpacing="14" Padding="12,0">
-                            <Label Text=" " Style="{StaticResource Overline}" WidthRequest="7"/>
+                            <Label Text=" " Style="{StaticResource Overline}" WidthRequest="28"/>
                             <Label Grid.Column="1" Text="{l10n:Translate Message}" Style="{StaticResource Overline}"/>
                             <HorizontalStackLayout Grid.Column="2"
                                                    Spacing="5"

@@ -1565,4 +1565,25 @@
   <data name="PathCopied" xml:space="preserve">
     <value>{0} disalin</value>
   </data>
+  <data name="SettingsSubtitle" xml:space="preserve">
+    <value>Akun Anda dan perilaku Helix.</value>
+  </data>
+  <data name="AuditlogsSubtitle" xml:space="preserve">
+    <value>Catatan setiap perubahan dan penyambungan ulang.</value>
+  </data>
+  <data name="InsightsSubtitle" xml:space="preserve">
+    <value>Tren penyimpanan dan keandalan koneksi.</value>
+  </data>
+  <data name="SettingsSectionStartup" xml:space="preserve">
+    <value>Startup &amp; jendela</value>
+  </data>
+  <data name="SettingsSectionAppearance" xml:space="preserve">
+    <value>Tampilan</value>
+  </data>
+  <data name="SettingsSectionLimits" xml:space="preserve">
+    <value>Timer &amp; batas</value>
+  </data>
+  <data name="SettingsSectionMaintenance" xml:space="preserve">
+    <value>Pemeliharaan</value>
+  </data>
 </root>

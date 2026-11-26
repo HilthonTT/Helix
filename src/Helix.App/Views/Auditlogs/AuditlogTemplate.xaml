@@ -2,30 +2,53 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Helix.App.Models"
-             xmlns:icons="clr-namespace:Helix.App.Icons"
              x:DataType="models:AuditlogDisplay"
              x:Class="Helix.App.Views.Auditlogs.AuditlogTemplate">
 
     <Border Style="{StaticResource Row}">
         <Grid ColumnDefinitions="Auto,*,200" ColumnSpacing="14">
-            <Label Text="{x:Static icons:IconFont.Circle}"
-                   Style="{StaticResource IconSm}"
-                   FontSize="7"
-                   VerticalOptions="Center"
-                   TextColor="{DynamicResource Accent}"/>
+            <Border WidthRequest="28"
+                    HeightRequest="28"
+                    Stroke="Transparent"
+                    StrokeThickness="0"
+                    StrokeShape="{RoundRectangle CornerRadius=8}"
+                    Background="{DynamicResource SurfaceAltBrush}"
+                    VerticalOptions="Center">
+                <Label Text="{Binding Glyph}"
+                       Style="{StaticResource IconSm}"
+                       FontSize="11"
+                       TextColor="{DynamicResource TextMuted}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Tone}" Value="accent">
+                            <Setter Property="TextColor" Value="{DynamicResource Accent}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding Tone}" Value="success">
+                            <Setter Property="TextColor" Value="{DynamicResource Success}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding Tone}" Value="warning">
+                            <Setter Property="TextColor" Value="{DynamicResource Warning}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding Tone}" Value="danger">
+                            <Setter Property="TextColor" Value="{DynamicResource Danger}"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </Border>
 
             <Label Grid.Column="1"
                    Text="{Binding Description}"
                    VerticalOptions="Center"
                    LineBreakMode="TailTruncation"
-                   MaxLines="1"/>
+                   MaxLines="1"
+                   ToolTipProperties.Text="{Binding Description}"/>
 
             <Label Grid.Column="2"
                    Text="{Binding Timestamp}"
                    Style="{StaticResource Caption}"
                    FontFamily="{StaticResource FontMono}"
                    HorizontalTextAlignment="End"
-                   VerticalOptions="Center"/>
+                   VerticalOptions="Center"
+                   ToolTipProperties.Text="{Binding UtcTimestamp}"/>
         </Grid>
     </Border>
 

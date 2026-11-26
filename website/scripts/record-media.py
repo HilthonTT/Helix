@@ -123,6 +123,22 @@ def find(name=None, ctype=None, idx=0, timeout=10):
         time.sleep(0.3)
 
 
+def scroll_to(name, ctype=None, steps=12):
+    """Scrolls the page under the window's centre until the control is on screen."""
+    r = win().rectangle()
+    centre = ((r.left + r.right) // 2, (r.top + r.bottom) // 2)
+    for _ in range(steps):
+        try:
+            box = find(name, ctype, timeout=1).rectangle()
+            if box.top >= r.top and box.bottom <= r.bottom - 40:
+                break
+        except LookupError:
+            pass
+        mouse.scroll(coords=centre, wheel_dist=-3)
+        time.sleep(0.4)
+    return find(name, ctype)
+
+
 def invoke(control):
     try:
         control.invoke()
@@ -258,7 +274,7 @@ def main():
 
     with Recorder() as r:
         time.sleep(1)
-        find("", "Text").click_input()
+        find("Diagnose").click_input()
         time.sleep(9)
     save_gif(r.frames, "diagnose.gif", hold_last=2.5)
     save_png(r.frames[-1], "diagnose.png")
@@ -307,8 +323,7 @@ def main():
     find("Preferences", "RadioButton").click_input()
     time.sleep(2)
     snap("settings.png")
-    r = find("Theme", "Text").rectangle()
-    mouse.scroll(coords=(r.left + 400, 700), wheel_dist=-6)
+    scroll_to("Glacier", "Pane")
     time.sleep(1.5)
     with Recorder() as rec:
         time.sleep(1.2)
@@ -321,7 +336,7 @@ def main():
     find("Dashboard", "RadioButton").click_input()
     time.sleep(3)
     snap("dashboard.png")
-    find("Logout", "Text").click_input()
+    find("Logout").click_input()
     time.sleep(3)
     snap("sign-in.png")
 

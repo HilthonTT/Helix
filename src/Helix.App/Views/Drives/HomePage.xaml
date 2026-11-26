@@ -63,7 +63,7 @@
 
     <Grid>
 
-        <Grid RowDefinitions="Auto,*"
+        <Grid RowDefinitions="Auto,Auto,Auto,*"
               ColumnDefinitions="*,320"
               RowSpacing="20"
               ColumnSpacing="20"
@@ -124,174 +124,229 @@
                         </HorizontalStackLayout>
                     </Border>
 
-                    <Button Text="{l10n:Translate ImportDrives}"
-                            Style="{StaticResource ButtonSecondary}"
-                            Command="{Binding ImportDrivesCommand}"/>
+                    <Border Style="{StaticResource HeaderIconButton}"
+                            ToolTipProperties.Text="{l10n:Translate ImportDrives}"
+                            SemanticProperties.Description="{l10n:Translate ImportDrives}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ImportDrivesCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="{x:Static icons:IconFont.FileImport}"
+                               Style="{StaticResource Icon}"
+                               InputTransparent="True"
+                               TextColor="{DynamicResource TextMuted}"/>
+                    </Border>
 
-                    <Button Text="{l10n:Translate ExportDrives}"
-                            Style="{StaticResource ButtonSecondary}"
-                            Command="{Binding ExportDrivesCommand}"/>
+                    <Border Style="{StaticResource HeaderIconButton}"
+                            ToolTipProperties.Text="{l10n:Translate ExportDrives}"
+                            SemanticProperties.Description="{l10n:Translate ExportDrives}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ExportDrivesCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="{x:Static icons:IconFont.FileExport}"
+                               Style="{StaticResource Icon}"
+                               InputTransparent="True"
+                               TextColor="{DynamicResource TextMuted}"/>
+                    </Border>
 
                     <Button Text="{l10n:Translate AddDrive}"
                             Command="{Binding OpenCreateDriveModalCommand}"
-                            ToolTipProperties.Text="Ctrl+A"/>
+                            ToolTipProperties.Text="Ctrl+A">
+                        <Button.ImageSource>
+                            <FontImageSource Glyph="{x:Static icons:IconFont.Plus}"
+                                             FontFamily="{StaticResource FontIcon}"
+                                             Size="12"
+                                             Color="{StaticResource OnAccent}"/>
+                        </Button.ImageSource>
+                    </Button>
                 </HorizontalStackLayout>
             </Grid>
 
-            <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" RowSpacing="20">
+            <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="16">
 
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-
-                    <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18">
-                        <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
-                            <HorizontalStackLayout Spacing="12">
-                                <Border Style="{StaticResource IconTile}">
-                                    <Label Text="{x:Static icons:IconFont.Database}"
-                                           Style="{StaticResource Icon}"
-                                           TextColor="{DynamicResource AccentSoft}"/>
-                                </Border>
-                                <Label Text="{l10n:Translate StorageUsage}"
-                                       Style="{StaticResource Overline}"
-                                       VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
-
-                            <Label Grid.Row="1"
-                                   Text="{Binding TotalStorage}"
-                                   Style="{StaticResource Metric}"
+                <Border Style="{StaticResource Card}" Padding="20,16">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border Style="{StaticResource IconTile}" WidthRequest="34" HeightRequest="34">
+                                <Label Text="{x:Static icons:IconFont.Plug}"
+                                       Style="{StaticResource IconSm}"
+                                       FontSize="14"
+                                       TextColor="{DynamicResource Success}"/>
+                            </Border>
+                            <Label Grid.Column="1"
+                                   Text="{l10n:Translate Connection}"
+                                   Style="{StaticResource Overline}"
                                    VerticalOptions="Center"/>
-
-                            <Label Grid.Row="2"
-                                   Text="{l10n:Translate TotalStorageOfNas}"
-                                   Style="{StaticResource Caption}"/>
-
-                            <Label Grid.Row="3"
-                                   Text="{Binding StorageForecastText}"
-                                   Style="{StaticResource Caption}"
-                                   ToolTipProperties.Text="{Binding StorageForecastDetail}"
-                                   IsVisible="{Binding HasStorageForecast}"/>
+                            <HorizontalStackLayout Grid.Column="2" Spacing="14" VerticalOptions="Center">
+                                <HorizontalStackLayout Spacing="6" ToolTipProperties.Text="{l10n:Translate Connected}">
+                                    <Border Style="{StaticResource LegendDot}" Background="{DynamicResource Success}"/>
+                                    <Label Text="{Binding ConnectedCount}"
+                                           Style="{StaticResource Caption}"
+                                           FontFamily="{StaticResource FontMonoBold}"
+                                           VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="6" ToolTipProperties.Text="{l10n:Translate Disconnected}">
+                                    <Border Style="{StaticResource LegendDot}" Background="{DynamicResource Danger}"/>
+                                    <Label Text="{Binding DisconnectedCount}"
+                                           Style="{StaticResource Caption}"
+                                           FontFamily="{StaticResource FontMonoBold}"
+                                           VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </HorizontalStackLayout>
                         </Grid>
-                    </Border>
 
-                    <Border Grid.Column="1" Style="{StaticResource Card}" Padding="18">
-                        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
-                            <HorizontalStackLayout Spacing="12">
-                                <Border Style="{StaticResource IconTile}">
-                                    <Label Text="{x:Static icons:IconFont.Plug}"
-                                           Style="{StaticResource Icon}"
-                                           TextColor="{DynamicResource Accent}"/>
-                                </Border>
-                                <Label Text="{l10n:Translate Connection}"
-                                       Style="{StaticResource Overline}"
-                                       VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
-
-                            <Label Grid.Row="1"
-                                   Text="{Binding TotalConnected}"
-                                   Style="{StaticResource Metric}"
-                                   VerticalOptions="Center"/>
-
-                            <Label Grid.Row="2"
+                        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="0,4,0,0">
+                            <Label Text="{Binding TotalConnected}" Style="{StaticResource Metric}"/>
+                            <Label Grid.Column="1"
                                    Text="{l10n:Translate TotalConnectedDrives}"
-                                   Style="{StaticResource Caption}"/>
+                                   Style="{StaticResource Caption}"
+                                   HorizontalTextAlignment="End"
+                                   VerticalOptions="End"
+                                   LineBreakMode="TailTruncation"
+                                   MaxLines="1"/>
                         </Grid>
-                    </Border>
 
-                </Grid>
-
-                <Border Grid.Row="1"
-                        Style="{StaticResource Card}"
-                        Padding="20,14"
-                        IsVisible="{Binding DriveGroups.Count, Converter={StaticResource CountToBoolConverter}}">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
-                        <Label Text="{l10n:Translate DriveGroups}"
-                               Style="{StaticResource Overline}"
-                               VerticalOptions="Center"/>
-
-                        <controls:HorizontalWrapLayout Grid.Column="1"
-                                                       Spacing="8"
-                                                       BindableLayout.ItemsSource="{Binding DriveGroups}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="models:DriveGroupDisplay">
-                                    <views:DriveGroupTemplate BindingContext="{Binding .}"/>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </controls:HorizontalWrapLayout>
+                        <controls:Meter Grid.Row="2"
+                                        FillKey="Success"
+                                        Progress="{Binding ConnectedFraction}"/>
                     </Grid>
                 </Border>
 
-                <Border x:Name="DriveCard" Grid.Row="2" Style="{StaticResource Card}">
-                    <Grid RowDefinitions="Auto,Auto,*" Padding="20">
-
-                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,16">
-                            <Label Text="{l10n:Translate YourDrives}"
-                                   Style="{StaticResource Title1}"
+                <Border Grid.Column="1" Style="{StaticResource Card}" Padding="20,16">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Border Style="{StaticResource IconTile}" WidthRequest="34" HeightRequest="34">
+                                <Label Text="{x:Static icons:IconFont.Database}"
+                                       Style="{StaticResource IconSm}"
+                                       FontSize="14"
+                                       TextColor="{DynamicResource AccentSoft}"/>
+                            </Border>
+                            <Label Grid.Column="1"
+                                   Text="{l10n:Translate StorageUsage}"
+                                   Style="{StaticResource Overline}"
                                    VerticalOptions="Center"/>
+                        </Grid>
 
-                            <Border Grid.Column="1" Style="{StaticResource PillNeutral}" Padding="9,3">
-                                <Label Text="{Binding Drives.Count}"
-                                       Style="{StaticResource Caption}"
-                                       FontFamily="{StaticResource FontMonoBold}"/>
-                            </Border>
+                        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="0,4,0,0">
+                            <Label Text="{Binding TotalStorage}" Style="{StaticResource Metric}"/>
+                            <Label Grid.Column="1"
+                                   Text="{l10n:Translate TotalStorageOfNas}"
+                                   Style="{StaticResource Caption}"
+                                   HorizontalTextAlignment="End"
+                                   VerticalOptions="End"
+                                   LineBreakMode="TailTruncation"
+                                   MaxLines="1"/>
+                        </Grid>
 
-                            <Border Grid.Column="2"
-                                    Style="{StaticResource Pill}"
-                                    Padding="10,3"
-                                    HorizontalOptions="Start"
-                                    Margin="4,0,0,0"
-                                    Background="{DynamicResource AccentWashBrush}"
-                                    IsVisible="{Binding HasSelection}">
-                                <Label Text="{Binding SelectionSummary}"
-                                       Style="{StaticResource BrandText}"
-                                       FontSize="12"/>
-                            </Border>
+                        <controls:Meter Grid.Row="2"
+                                        FillKey="Accent"
+                                        Progress="{Binding StorageFraction}"/>
 
-                            <Border Grid.Column="4"
-                                    Style="{StaticResource Field}"
-                                    MaximumWidthRequest="300"
-                                    HorizontalOptions="End"
-                                    VerticalOptions="Center">
-                                <Grid ColumnDefinitions="Auto,*,Auto">
-                                    <Label Text="{x:Static icons:IconFont.Search}"
-                                           Style="{StaticResource IconSm}"
-                                           Margin="12,0,0,0"
-                                           VerticalOptions="Center"
-                                           TextColor="{DynamicResource TextFaint}"/>
+                        <Label Grid.Row="3"
+                               Text="{Binding StorageForecastText}"
+                               Style="{StaticResource Caption}"
+                               ToolTipProperties.Text="{Binding StorageForecastDetail}"
+                               IsVisible="{Binding HasStorageForecast}"/>
+                    </Grid>
+                </Border>
 
-                                    <Entry x:Name="DriveSearch"
-                                           Grid.Column="1"
-                                           Margin="8,0,10,0"
-                                           Placeholder="{l10n:Translate SearchDrives}"
-                                           Text="{Binding SearchTerm}"/>
+            </Grid>
 
-                                    <Border Grid.Column="2"
-                                            Style="{StaticResource IconHit}"
-                                            Margin="0,0,8,0"
-                                            IsVisible="{Binding HasSearchTerm}"
-                                            ToolTipProperties.Text="{l10n:Translate ClearSearch}">
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding ClearSearchCommand}"/>
-                                        </Border.GestureRecognizers>
-                                        <Label Text="{x:Static icons:IconFont.Times}"
-                                               Style="{StaticResource IconSm}"
-                                               FontSize="12"
-                                               InputTransparent="True"
-                                               HorizontalOptions="Center"
-                                               VerticalOptions="Center"
-                                               TextColor="{DynamicResource TextMuted}"/>
-                                    </Border>
-                                </Grid>
-                            </Border>
+            <Border Grid.Row="2"
+                    Style="{StaticResource Card}"
+                    Padding="20,14"
+                    IsVisible="{Binding DriveGroups.Count, Converter={StaticResource CountToBoolConverter}}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                    <Label Text="{l10n:Translate DriveGroups}"
+                           Style="{StaticResource Overline}"
+                           VerticalOptions="Center"/>
 
-                            <ActivityIndicator Grid.Column="3"
-                                               HorizontalOptions="Start"
-                                               VerticalOptions="Center"
-                                               WidthRequest="18"
-                                               HeightRequest="18"
-                                               IsRunning="{Binding IsBusy}"
-                                               IsVisible="{Binding IsBusy}"/>
-
-                            <HorizontalStackLayout Grid.Column="5"
+                    <controls:HorizontalWrapLayout Grid.Column="1"
                                                    Spacing="8"
+                                                   BindableLayout.ItemsSource="{Binding DriveGroups}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:DriveGroupDisplay">
+                                <views:DriveGroupTemplate BindingContext="{Binding .}"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </controls:HorizontalWrapLayout>
+                </Grid>
+            </Border>
+
+            <Border x:Name="DriveCard" Grid.Row="3" Style="{StaticResource Card}">
+                <Grid RowDefinitions="Auto,Auto,*" Padding="20">
+
+                    <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,16">
+                        <Label Text="{l10n:Translate YourDrives}"
+                               Style="{StaticResource Title1}"
+                               VerticalOptions="Center"/>
+
+                        <Border Grid.Column="1" Style="{StaticResource PillNeutral}" Padding="9,3">
+                            <Label Text="{Binding Drives.Count}"
+                                   Style="{StaticResource Caption}"
+                                   FontFamily="{StaticResource FontMonoBold}"/>
+                        </Border>
+
+                        <Border Grid.Column="2"
+                                Style="{StaticResource Pill}"
+                                Padding="10,3"
+                                HorizontalOptions="Start"
+                                Margin="4,0,0,0"
+                                Background="{DynamicResource AccentWashBrush}"
+                                IsVisible="{Binding HasSelection}">
+                            <Label Text="{Binding SelectionSummary}"
+                                   Style="{StaticResource BrandText}"
+                                   FontSize="12"/>
+                        </Border>
+
+                        <Border Grid.Column="4"
+                                Style="{StaticResource Field}"
+                                MaximumWidthRequest="300"
+                                HorizontalOptions="End"
+                                VerticalOptions="Center"
+                                IsVisible="{Binding ShowNoDrives, Converter={StaticResource InvertedBoolConverter}}">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Label Text="{x:Static icons:IconFont.Search}"
+                                       Style="{StaticResource IconSm}"
+                                       Margin="12,0,0,0"
+                                       VerticalOptions="Center"
+                                       TextColor="{DynamicResource TextFaint}"/>
+
+                                <Entry x:Name="DriveSearch"
+                                       Grid.Column="1"
+                                       Margin="8,0,10,0"
+                                       Placeholder="{l10n:Translate SearchDrives}"
+                                       Text="{Binding SearchTerm}"/>
+
+                                <Border Grid.Column="2"
+                                        Style="{StaticResource IconHit}"
+                                        Margin="0,0,8,0"
+                                        IsVisible="{Binding HasSearchTerm}"
+                                        ToolTipProperties.Text="{l10n:Translate ClearSearch}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ClearSearchCommand}"/>
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{x:Static icons:IconFont.Times}"
+                                           Style="{StaticResource IconSm}"
+                                           FontSize="12"
+                                           InputTransparent="True"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           TextColor="{DynamicResource TextMuted}"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <ActivityIndicator Grid.Column="3"
+                                           HorizontalOptions="Start"
+                                           VerticalOptions="Center"
+                                           WidthRequest="18"
+                                           HeightRequest="18"
+                                           IsRunning="{Binding IsBusy}"
+                                           IsVisible="{Binding IsBusy}"/>
+
+                        <ContentView Grid.Column="5"
+                                     IsVisible="{Binding ShowNoDrives, Converter={StaticResource InvertedBoolConverter}}">
+                            <HorizontalStackLayout Spacing="8"
                                                    IsVisible="{Binding HasSelection, Converter={StaticResource InvertedBoolConverter}}">
                                 <Border Style="{StaticResource Chip}"
                                         IsEnabled="{Binding IsNotBusy}"
@@ -349,231 +404,231 @@
                                 </Border>
 
                             </HorizontalStackLayout>
+                        </ContentView>
 
-                            <HorizontalStackLayout Grid.Column="5"
-                                                   Spacing="8"
-                                                   IsVisible="{Binding HasSelection}">
-                                <Border Style="{StaticResource Chip}"
-                                        IsEnabled="{Binding IsNotBusy}"
-                                        Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding ConnectSelectedCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
-                                        <Label Text="{x:Static icons:IconFont.Link}"
-                                               Style="{StaticResource IconSm}"
-                                               TextColor="{DynamicResource Success}"/>
-                                        <Label Text="{l10n:Translate Connect}" FontSize="13" VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-                                </Border>
-
-                                <Border Style="{StaticResource Chip}"
-                                        IsEnabled="{Binding IsNotBusy}"
-                                        Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding DisconnectSelectedCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
-                                        <Label Text="{x:Static icons:IconFont.Unlink}"
-                                               Style="{StaticResource IconSm}"
-                                               TextColor="{DynamicResource Danger}"/>
-                                        <Label Text="{l10n:Translate Disconnect}" FontSize="13" VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-                                </Border>
-
-                                <Border Style="{StaticResource Chip}">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding ClearSelectionCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <HorizontalStackLayout Spacing="9" InputTransparent="True">
-                                        <Label Text="{x:Static icons:IconFont.Times}"
-                                               Style="{StaticResource IconSm}"
-                                               TextColor="{DynamicResource TextMuted}"/>
-                                        <Label Text="{l10n:Translate ClearSelection}" FontSize="13" VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-                                </Border>
-                            </HorizontalStackLayout>
-                        </Grid>
-
-                        <VerticalStackLayout Grid.Row="1"
-                                             Spacing="10"
-                                             IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
-                            <Grid ColumnSpacing="12" Padding="12,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="28"/>
-                                    <ColumnDefinition Width="52"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=StorageColumnWidth, x:DataType=common:DriveListLayout}"/>
-                                    <ColumnDefinition Width="140"/>
-                                    <ColumnDefinition Width="152"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Grid VerticalOptions="Center"
-                                      HorizontalOptions="Center"
-                                      ToolTipProperties.Text="{l10n:Translate SelectAll}">
-                                    <Grid.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding ToggleSelectAllCommand}"/>
-                                    </Grid.GestureRecognizers>
-
-                                    <Border Style="{StaticResource Tick}"
-                                            IsVisible="{Binding AllSelected, Converter={StaticResource InvertedBoolConverter}}"
-                                            behaviors:Hover.Cursor="True"/>
-
-                                    <Border Style="{StaticResource TickChecked}"
-                                            IsVisible="{Binding AllSelected}"
-                                            behaviors:Hover.Cursor="True">
-                                        <Label Text="{x:Static icons:IconFont.Check}"
-                                               FontFamily="{StaticResource FontIcon}"
-                                               FontSize="10"
-                                               InputTransparent="True"
-                                               HorizontalOptions="Center"
-                                               VerticalOptions="Center"
-                                               TextColor="{StaticResource OnAccent}"/>
-                                    </Border>
-                                </Grid>
-
-                                <HorizontalStackLayout Grid.Column="1"
-                                                       Spacing="5"
-                                                       behaviors:Hover.Cursor="True">
-                                    <HorizontalStackLayout.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding SortByCommand}"
-                                                              CommandParameter="{x:Static models:DriveSortField.Letter}"/>
-                                    </HorizontalStackLayout.GestureRecognizers>
-                                    <Label Text="{l10n:Translate Letter}" Style="{StaticResource Overline}"/>
-                                    <Label Text="{Binding SortGlyph}"
-                                           Style="{StaticResource Overline}"
-                                           FontFamily="{StaticResource FontIcon}"
-                                           IsVisible="{Binding SortedByLetter}"/>
+                        <HorizontalStackLayout Grid.Column="5"
+                                               Spacing="8"
+                                               IsVisible="{Binding HasSelection}">
+                            <Border Style="{StaticResource Chip}"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ConnectSelectedCommand}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                    <Label Text="{x:Static icons:IconFont.Link}"
+                                           Style="{StaticResource IconSm}"
+                                           TextColor="{DynamicResource Success}"/>
+                                    <Label Text="{l10n:Translate Connect}" FontSize="13" VerticalOptions="Center"/>
                                 </HorizontalStackLayout>
+                            </Border>
 
-                                <HorizontalStackLayout Grid.Column="2"
-                                                       Spacing="5"
-                                                       behaviors:Hover.Cursor="True">
-                                    <HorizontalStackLayout.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding SortByCommand}"
-                                                              CommandParameter="{x:Static models:DriveSortField.Name}"/>
-                                    </HorizontalStackLayout.GestureRecognizers>
-                                    <Label Text="{l10n:Translate Name}" Style="{StaticResource Overline}"/>
-                                    <Label Text="{Binding SortGlyph}"
-                                           Style="{StaticResource Overline}"
-                                           FontFamily="{StaticResource FontIcon}"
-                                           IsVisible="{Binding SortedByName}"/>
+                            <Border Style="{StaticResource Chip}"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    Opacity="{Binding IsBusy, Converter={StaticResource BoolToOpacityConverter}}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding DisconnectSelectedCommand}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                    <Label Text="{x:Static icons:IconFont.Unlink}"
+                                           Style="{StaticResource IconSm}"
+                                           TextColor="{DynamicResource Danger}"/>
+                                    <Label Text="{l10n:Translate Disconnect}" FontSize="13" VerticalOptions="Center"/>
                                 </HorizontalStackLayout>
+                            </Border>
 
-                                <Label Grid.Column="3"
-                                       Text="{l10n:Translate StorageUsage}"
-                                       Style="{StaticResource Overline}"
-                                       IsVisible="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=ShowStorage, x:DataType=common:DriveListLayout}"/>
-
-                                <HorizontalStackLayout Grid.Column="4"
-                                                       Spacing="5"
-                                                       behaviors:Hover.Cursor="True">
-                                    <HorizontalStackLayout.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding SortByCommand}"
-                                                              CommandParameter="{x:Static models:DriveSortField.Status}"/>
-                                    </HorizontalStackLayout.GestureRecognizers>
-                                    <Label Text="{l10n:Translate Status}" Style="{StaticResource Overline}"/>
-                                    <Label Text="{Binding SortGlyph}"
-                                           Style="{StaticResource Overline}"
-                                           FontFamily="{StaticResource FontIcon}"
-                                           IsVisible="{Binding SortedByStatus}"/>
+                            <Border Style="{StaticResource Chip}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ClearSelectionCommand}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="9" InputTransparent="True">
+                                    <Label Text="{x:Static icons:IconFont.Times}"
+                                           Style="{StaticResource IconSm}"
+                                           TextColor="{DynamicResource TextMuted}"/>
+                                    <Label Text="{l10n:Translate ClearSelection}" FontSize="13" VerticalOptions="Center"/>
                                 </HorizontalStackLayout>
+                            </Border>
+                        </HorizontalStackLayout>
+                    </Grid>
 
-                                <Label Grid.Column="5"
-                                       Text="{l10n:Translate Actions}"
-                                       Style="{StaticResource Overline}"
-                                       HorizontalTextAlignment="End"/>
+                    <VerticalStackLayout Grid.Row="1"
+                                         Spacing="10"
+                                         IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
+                        <Grid ColumnSpacing="12" Padding="12,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28"/>
+                                <ColumnDefinition Width="52"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=StorageColumnWidth, x:DataType=common:DriveListLayout}"/>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="152"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid VerticalOptions="Center"
+                                  HorizontalOptions="Center"
+                                  ToolTipProperties.Text="{l10n:Translate SelectAll}">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleSelectAllCommand}"/>
+                                </Grid.GestureRecognizers>
+
+                                <Border Style="{StaticResource Tick}"
+                                        IsVisible="{Binding AllSelected, Converter={StaticResource InvertedBoolConverter}}"
+                                        behaviors:Hover.Cursor="True"/>
+
+                                <Border Style="{StaticResource TickChecked}"
+                                        IsVisible="{Binding AllSelected}"
+                                        behaviors:Hover.Cursor="True">
+                                    <Label Text="{x:Static icons:IconFont.Check}"
+                                           FontFamily="{StaticResource FontIcon}"
+                                           FontSize="10"
+                                           InputTransparent="True"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           TextColor="{StaticResource OnAccent}"/>
+                                </Border>
                             </Grid>
 
-                            <BoxView Style="{StaticResource Divider}"/>
-                        </VerticalStackLayout>
-
-                        <CollectionView Grid.Row="2"
-                                        Margin="0,8,0,0"
-                                        ItemsSource="{Binding Drives}"
-                                        SelectionMode="None"
-                                        IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="2"/>
-                            </CollectionView.ItemsLayout>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="models:DriveDisplay">
-                                    <views:DriveTemplate/>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-
-                        <VerticalStackLayout Grid.Row="1"
-                                             Grid.RowSpan="2"
-                                             Spacing="10"
-                                             VerticalOptions="Center"
-                                             HorizontalOptions="Center"
-                                             IsVisible="{Binding ShowNoMatches}">
-                            <Border Style="{StaticResource IconTile}"
-                                    WidthRequest="56"
-                                    HeightRequest="56"
-                                    HorizontalOptions="Center">
-                                <Label Text="{x:Static icons:IconFont.Search}"
-                                       Style="{StaticResource IconLg}"
-                                       TextColor="{DynamicResource TextMuted}"/>
-                            </Border>
-
-                            <Label Text="{l10n:Translate NoDrivesMatchTitle}"
-                                   Style="{StaticResource Title2}"
-                                   HorizontalTextAlignment="Center"/>
-
-                            <Label Text="{l10n:Translate NoDrivesMatchMessage}"
-                                   Style="{StaticResource Caption}"
-                                   HorizontalTextAlignment="Center"
-                                   MaximumWidthRequest="360"/>
-
-                            <Button Text="{l10n:Translate ClearSearch}"
-                                    Style="{StaticResource ButtonSecondary}"
-                                    Margin="0,6,0,0"
-                                    HorizontalOptions="Center"
-                                    Command="{Binding ClearSearchCommand}"/>
-                        </VerticalStackLayout>
-
-                        <VerticalStackLayout Grid.Row="1"
-                                             Grid.RowSpan="2"
-                                             Spacing="10"
-                                             VerticalOptions="Center"
-                                             HorizontalOptions="Center"
-                                             IsVisible="{Binding ShowNoDrives}">
-                            <Border Style="{StaticResource IconTile}"
-                                    WidthRequest="56"
-                                    HeightRequest="56"
-                                    HorizontalOptions="Center">
-                                <Label Text="{x:Static icons:IconFont.Server}"
-                                       Style="{StaticResource IconLg}"
-                                       TextColor="{DynamicResource Accent}"/>
-                            </Border>
-
-                            <Label Text="{l10n:Translate NoDrivesTitle}"
-                                   Style="{StaticResource Title2}"
-                                   HorizontalTextAlignment="Center"/>
-
-                            <Label Text="{l10n:Translate NoDrivesMessage}"
-                                   Style="{StaticResource Caption}"
-                                   HorizontalTextAlignment="Center"
-                                   MaximumWidthRequest="360"/>
-
-                            <HorizontalStackLayout Spacing="10" Margin="0,6,0,0" HorizontalOptions="Center">
-                                <Button Text="{l10n:Translate AdoptMappings}"
-                                        Style="{StaticResource ButtonSecondary}"
-                                        IsVisible="{Binding SupportsAdoptingMappings}"
-                                        Command="{Binding OpenAdoptMappingsModalCommand}"/>
-
-                                <Button Text="{l10n:Translate AddDrive}"
-                                        Command="{Binding OpenCreateDriveModalCommand}"/>
+                            <HorizontalStackLayout Grid.Column="1"
+                                                   Spacing="5"
+                                                   behaviors:Hover.Cursor="True">
+                                <HorizontalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SortByCommand}"
+                                                          CommandParameter="{x:Static models:DriveSortField.Letter}"/>
+                                </HorizontalStackLayout.GestureRecognizers>
+                                <Label Text="{l10n:Translate Letter}" Style="{StaticResource Overline}"/>
+                                <Label Text="{Binding SortGlyph}"
+                                       Style="{StaticResource Overline}"
+                                       FontFamily="{StaticResource FontIcon}"
+                                       IsVisible="{Binding SortedByLetter}"/>
                             </HorizontalStackLayout>
-                        </VerticalStackLayout>
 
-                    </Grid>
-                </Border>
-            </Grid>
+                            <HorizontalStackLayout Grid.Column="2"
+                                                   Spacing="5"
+                                                   behaviors:Hover.Cursor="True">
+                                <HorizontalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SortByCommand}"
+                                                          CommandParameter="{x:Static models:DriveSortField.Name}"/>
+                                </HorizontalStackLayout.GestureRecognizers>
+                                <Label Text="{l10n:Translate Name}" Style="{StaticResource Overline}"/>
+                                <Label Text="{Binding SortGlyph}"
+                                       Style="{StaticResource Overline}"
+                                       FontFamily="{StaticResource FontIcon}"
+                                       IsVisible="{Binding SortedByName}"/>
+                            </HorizontalStackLayout>
 
-            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Card}">
+                            <Label Grid.Column="3"
+                                   Text="{l10n:Translate StorageUsage}"
+                                   Style="{StaticResource Overline}"
+                                   IsVisible="{Binding Source={x:Static common:DriveListLayout.Instance}, Path=ShowStorage, x:DataType=common:DriveListLayout}"/>
+
+                            <HorizontalStackLayout Grid.Column="4"
+                                                   Spacing="5"
+                                                   behaviors:Hover.Cursor="True">
+                                <HorizontalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SortByCommand}"
+                                                          CommandParameter="{x:Static models:DriveSortField.Status}"/>
+                                </HorizontalStackLayout.GestureRecognizers>
+                                <Label Text="{l10n:Translate Status}" Style="{StaticResource Overline}"/>
+                                <Label Text="{Binding SortGlyph}"
+                                       Style="{StaticResource Overline}"
+                                       FontFamily="{StaticResource FontIcon}"
+                                       IsVisible="{Binding SortedByStatus}"/>
+                            </HorizontalStackLayout>
+
+                            <Label Grid.Column="5"
+                                   Text="{l10n:Translate Actions}"
+                                   Style="{StaticResource Overline}"
+                                   HorizontalTextAlignment="End"/>
+                        </Grid>
+
+                        <BoxView Style="{StaticResource Divider}"/>
+                    </VerticalStackLayout>
+
+                    <CollectionView Grid.Row="2"
+                                    Margin="0,8,0,0"
+                                    ItemsSource="{Binding Drives}"
+                                    SelectionMode="None"
+                                    IsVisible="{Binding Drives.Count, Converter={StaticResource CountToBoolConverter}}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="2"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:DriveDisplay">
+                                <views:DriveTemplate/>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <VerticalStackLayout Grid.Row="1"
+                                         Grid.RowSpan="2"
+                                         Spacing="10"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="Center"
+                                         IsVisible="{Binding ShowNoMatches}">
+                        <Border Style="{StaticResource IconTile}"
+                                WidthRequest="56"
+                                HeightRequest="56"
+                                HorizontalOptions="Center">
+                            <Label Text="{x:Static icons:IconFont.Search}"
+                                   Style="{StaticResource IconLg}"
+                                   TextColor="{DynamicResource TextMuted}"/>
+                        </Border>
+
+                        <Label Text="{l10n:Translate NoDrivesMatchTitle}"
+                               Style="{StaticResource Title2}"
+                               HorizontalTextAlignment="Center"/>
+
+                        <Label Text="{l10n:Translate NoDrivesMatchMessage}"
+                               Style="{StaticResource Caption}"
+                               HorizontalTextAlignment="Center"
+                               MaximumWidthRequest="360"/>
+
+                        <Button Text="{l10n:Translate ClearSearch}"
+                                Style="{StaticResource ButtonSecondary}"
+                                Margin="0,6,0,0"
+                                HorizontalOptions="Center"
+                                Command="{Binding ClearSearchCommand}"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="1"
+                                         Grid.RowSpan="2"
+                                         Spacing="10"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="Center"
+                                         IsVisible="{Binding ShowNoDrives}">
+                        <Border Style="{StaticResource IconTile}"
+                                WidthRequest="56"
+                                HeightRequest="56"
+                                HorizontalOptions="Center">
+                            <Label Text="{x:Static icons:IconFont.Server}"
+                                   Style="{StaticResource IconLg}"
+                                   TextColor="{DynamicResource Accent}"/>
+                        </Border>
+
+                        <Label Text="{l10n:Translate NoDrivesTitle}"
+                               Style="{StaticResource Title2}"
+                               HorizontalTextAlignment="Center"/>
+
+                        <Label Text="{l10n:Translate NoDrivesMessage}"
+                               Style="{StaticResource Caption}"
+                               HorizontalTextAlignment="Center"
+                               MaximumWidthRequest="360"/>
+
+                        <HorizontalStackLayout Spacing="10" Margin="0,6,0,0" HorizontalOptions="Center">
+                            <Button Text="{l10n:Translate AdoptMappings}"
+                                    Style="{StaticResource ButtonSecondary}"
+                                    IsVisible="{Binding SupportsAdoptingMappings}"
+                                    Command="{Binding OpenAdoptMappingsModalCommand}"/>
+
+                            <Button Text="{l10n:Translate AddDrive}"
+                                    Command="{Binding OpenCreateDriveModalCommand}"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Style="{StaticResource Card}">
                 <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="20" RowSpacing="16">
                     <Label Text="{l10n:Translate Connectivity}" Style="{StaticResource Title1}"/>
 

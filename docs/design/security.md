@@ -89,7 +89,9 @@ The audit log page exports the whole history as CSV (`ExportAuditlogs`), oldest 
 the same `IFolderPicker` as the vault. The sentence column is composed by the presentation layer
 and handed in as `Request.Describe`, because the sentence is built from `AppResources` at
 display time and the Application layer has no business with resource files; the headers come
-in the same way. Times are UTC, as the page shows them. The file is UTF-8 **with** a BOM, which
+in the same way. Times in the file are UTC. The page shows local time, because that is the clock the user
+reads the rest of the machine by, with the UTC stamp in the row's tooltip so the two can
+be matched. The file is UTF-8 **with** a BOM, which
 is what makes Excel read the translated sentences as anything but mojibake.
 
 Every field is escaped, and a field starting with `=`, `+`, `-`, `@`, a tab or a carriage return

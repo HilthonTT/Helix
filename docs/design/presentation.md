@@ -112,7 +112,9 @@ does, with a progress bar under it: `SettingsViewModel` sends `UpdateProgressMes
 page that started it. An empty status puts the badge back to "Update available". A check that cannot reach GitHub is logged and nothing is shown — the
 user did not ask for it.
 
-**Lock** sits beside Logout. `IdleLockService.LockNowAsync` is deliberately independent of
+**Lock** sits beside Logout, both as icon buttons on the account card at the foot of the
+sidebar. They were two full-width rows of their own, and with the overview and the update
+badge below the groups that left the group list a sliver: two groups did not fit. `IdleLockService.LockNowAsync` is deliberately independent of
 the idle poller: the lock is offered whether or not the platform can report idle time, and
 whether or not `IdleLockMinutes` is set to never lock on its own. Before it, the only way to
 lock was to wait out the timer, and the alternative — signing out — stops the watchdog, the
@@ -150,6 +152,22 @@ window minimized from under the settings page — the thing the pause exists to 
 
 ## What the dashboard gives room to
 
+The connectivity donut keeps the right-hand column. With no drives it is drawn as one neutral
+ring in `BorderStrong`: it used to be a full ring in `Danger`, so the first thing a new install
+showed was "everything is disconnected". Each stat card also carries a `Controls/Meter` bar
+(connected share in `Success`, used share in `Accent`), and the connection card has the
+connected and disconnected counts as a small legend. The caption sits beside the number rather
+than under it, so the cards are short and the drive list — what the page is for — gets the
+height.
+
+Import and export are icon buttons beside **Add Drive** rather than buttons of equal weight:
+they are used once per machine, and they are also in the menu bar with Ctrl+I and Ctrl+E. The
+search box and the connect/disconnect-all chips are hidden while there are no drives, since
+there is nothing for them to act on and the empty state's own buttons are the way forward. The
+row actions are borderless icons that take a hover background; the delete icon is muted rather
+than red on every row, since it opens a confirmation sheet anyway and a column of red bins read
+as an error state.
+
 The stat row is **two cards, not three**. The auto-minimize countdown used to hold the
 third, level with how much storage the NAS has and how many drives are up — app chrome
 given the same weight as the two facts the page exists to report, and shown even to the
@@ -164,6 +182,18 @@ colon are the same in every locale, and the chip's icon and tooltip carry the me
 The drive row's second line is the **host and** the last-connected stamp. A name is
 whatever the user called it, so two drives on two different NASes were told apart only by
 that; the address is the thing they actually differ by.
+
+## The settings page layout
+
+Account and Preferences are a segmented tab bar above the content, not a 300px card of two
+entries beside it. The preferences are four cards — startup and window, appearance, timers and
+limits, maintenance — instead of one column of thirteen rows, and the content stops at 920px so
+a switch is not a screen's width away from the sentence describing it.
+
+The update badge in the sidebar sends `ShowUpdatesMessage`, and `SettingsViewModel` now switches
+to the Preferences tab before it runs the check. The page opens on Account, so the update's
+progress line used to be written to a tab nobody was looking at. The section values are
+`account` and `preferences`, matching `SettingsViewModel`'s constants.
 
 ## Numbers in the settings page
 

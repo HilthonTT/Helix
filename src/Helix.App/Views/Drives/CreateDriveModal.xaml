@@ -35,26 +35,26 @@
                 <VerticalStackLayout Spacing="14" Padding="24,4,24,20">
 
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="{l10n:Translate Letter}" Style="{StaticResource FieldLabel}"/>
+                        <Grid ColumnDefinitions="110,*" ColumnSpacing="12" RowDefinitions="Auto,Auto" RowSpacing="6">
+                            <Label Text="{l10n:Translate Letter}" Style="{StaticResource FieldLabel}"/>
+                            <Label Grid.Column="1" Text="{l10n:Translate Protocol}" Style="{StaticResource FieldLabel}"/>
 
-                        <Border Style="{StaticResource Field}">
-                            <Picker Margin="8,0"
-                                    BackgroundColor="Transparent"
-                                    ItemsSource="{Binding AvailableLetters}"
-                                    SelectedItem="{Binding Form.Letter}"
-                                    IsEnabled="{Binding IsNotBusy}"/>
-                        </Border>
-                    </VerticalStackLayout>
+                            <Border Grid.Row="1" Style="{StaticResource Field}">
+                                <Picker Margin="8,0"
+                                        BackgroundColor="Transparent"
+                                        ItemsSource="{Binding AvailableLetters}"
+                                        SelectedItem="{Binding Form.Letter}"
+                                        IsEnabled="{Binding IsNotBusy}"/>
+                            </Border>
 
-                    <VerticalStackLayout Spacing="6">
-                        <Label Text="{l10n:Translate Protocol}" Style="{StaticResource FieldLabel}"/>
-                        <Border Style="{StaticResource Field}">
-                            <Picker Margin="8,0"
-                                    BackgroundColor="Transparent"
-                                    ItemsSource="{Binding ProtocolNames}"
-                                    SelectedIndex="{Binding Form.ProtocolIndex}"
-                                    IsEnabled="{Binding IsNotBusy}"/>
-                        </Border>
+                            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Field}">
+                                <Picker Margin="8,0"
+                                        BackgroundColor="Transparent"
+                                        ItemsSource="{Binding ProtocolNames}"
+                                        SelectedIndex="{Binding Form.ProtocolIndex}"
+                                        IsEnabled="{Binding IsNotBusy}"/>
+                            </Border>
+                        </Grid>
                         <Label Text="{Binding Form.PathHint}"
                                Style="{StaticResource Caption}"
                                IsVisible="{Binding Form.IsSmb, Converter={StaticResource InvertedBoolConverter}}"/>

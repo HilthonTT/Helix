@@ -4575,5 +4575,68 @@ namespace Helix.App.Resources.Languages {
                 return ResourceManager.GetString("PathCopied", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Your account and how Helix behaves..
+        /// </summary>
+        internal static string SettingsSubtitle {
+            get {
+                return ResourceManager.GetString("SettingsSubtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A record of every change and reconnect..
+        /// </summary>
+        internal static string AuditlogsSubtitle {
+            get {
+                return ResourceManager.GetString("AuditlogsSubtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Storage trends and connection reliability..
+        /// </summary>
+        internal static string InsightsSubtitle {
+            get {
+                return ResourceManager.GetString("InsightsSubtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Startup &amp; window.
+        /// </summary>
+        internal static string SettingsSectionStartup {
+            get {
+                return ResourceManager.GetString("SettingsSectionStartup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Appearance.
+        /// </summary>
+        internal static string SettingsSectionAppearance {
+            get {
+                return ResourceManager.GetString("SettingsSectionAppearance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Timers &amp; limits.
+        /// </summary>
+        internal static string SettingsSectionLimits {
+            get {
+                return ResourceManager.GetString("SettingsSectionLimits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maintenance.
+        /// </summary>
+        internal static string SettingsSectionMaintenance {
+            get {
+                return ResourceManager.GetString("SettingsSectionMaintenance", resourceCulture);
+            }
+        }
     }
 }

@@ -379,6 +379,8 @@ internal sealed partial class SettingsViewModel : BaseViewModel
 
         WeakReferenceMessenger.Default.Register<ShowUpdatesMessage>(this, (r, m) =>
         {
+            CurrentSection = PreferencesSection;
+
             if (CheckForUpdatesCommand.CanExecute(null))
             {
                 CheckForUpdatesCommand.Execute(null);

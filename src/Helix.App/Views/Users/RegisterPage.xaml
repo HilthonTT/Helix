@@ -18,11 +18,23 @@
 
             <Grid Padding="48,32">
 
-                <Picker VerticalOptions="Start"
-                        HorizontalOptions="End"
-                        WidthRequest="150"
-                        ItemsSource="{Binding Languages}"
-                        SelectedItem="{Binding SelectedLanguage}"/>
+                <Border Style="{StaticResource Field}"
+                        HeightRequest="40"
+                        WidthRequest="170"
+                        VerticalOptions="Start"
+                        HorizontalOptions="End">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Label Text="{x:Static icons:IconFont.Globe}"
+                               Style="{StaticResource IconSm}"
+                               Margin="12,0,0,0"
+                               TextColor="{DynamicResource TextFaint}"/>
+                        <Picker Grid.Column="1"
+                                Margin="4,0,6,0"
+                                BackgroundColor="Transparent"
+                                ItemsSource="{Binding Languages}"
+                                SelectedItem="{Binding SelectedLanguage}"/>
+                    </Grid>
+                </Border>
 
                 <VerticalStackLayout VerticalOptions="Center"
                                      HorizontalOptions="Center"

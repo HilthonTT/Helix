@@ -152,10 +152,19 @@ internal sealed partial class HomeViewModel : BaseViewModel
     public partial string TotalConnected { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ConnectedFraction))]
     public partial int ConnectedCount { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ConnectedFraction))]
     public partial int DisconnectedCount { get; set; }
+
+    public double ConnectedFraction => ConnectedCount + DisconnectedCount == 0
+        ? 0
+        : (double)ConnectedCount / (ConnectedCount + DisconnectedCount);
+
+    [ObservableProperty]
+    public partial double StorageFraction { get; set; }
 
     [RelayCommand]
     private static void OpenCreateDriveModal()
@@ -733,9 +742,12 @@ internal sealed partial class HomeViewModel : BaseViewModel
 
         if (!measuredNothing)
         {
-            TotalStorage = StorageUsageHelper.FormatCombined(
-                volumes.Sum(volume => volume.UsedBytes),
-                volumes.Sum(volume => volume.TotalBytes));
+            long usedBytes = volumes.Sum(volume => volume.UsedBytes);
+            long totalBytes = volumes.Sum(volume => volume.TotalBytes);
+
+            StorageFraction = totalBytes <= 0 ? 0 : Math.Clamp((double)usedBytes / totalBytes, 0, 1);
+
+            TotalStorage = StorageUsageHelper.FormatCombined(usedBytes, totalBytes);
         }
     }
 

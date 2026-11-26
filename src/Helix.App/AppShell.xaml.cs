@@ -23,6 +23,7 @@ using Helix.Domain.DriveGroups;
 using Helix.Domain.Drives;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace Helix.App;
 
@@ -88,8 +89,13 @@ public sealed partial class AppShell : Shell
         {
             _username = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(UserInitial));
         }
     }
+
+    public string UserInitial => string.IsNullOrWhiteSpace(_username)
+        ? "?"
+        : StringInfo.GetNextTextElement(_username.Trim()).ToUpperInvariant();
 
     public EstateStatus Estate => _estate;
 
