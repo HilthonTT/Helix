@@ -159,7 +159,9 @@ public sealed partial class HomePage : ContentPage
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex.Message);
+            AppLog.For<HomePage>().LogError(ex, "Loading the home page failed.");
+
+            Notifier.Error(AppResources.UnexpectedError);
         }
         finally
         {

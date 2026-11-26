@@ -54,6 +54,7 @@ internal sealed partial class AuditlogDisplay : ObservableObject
     public string Tone => Action switch
     {
         AuditAction.DriveCreated => "success",
+        AuditAction.DriveUpdated => "accent",
         AuditAction.DriveDeleted or AuditAction.DriveReconnectFailed => "danger",
         AuditAction.DriveDisconnected => "warning",
         AuditAction.DriveReconnected => "success",

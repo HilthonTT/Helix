@@ -41,19 +41,19 @@ internal sealed partial class DeleteDriveViewModel : BaseViewModel
 
             var request = new DeleteDrive.Request(target.Id);
 
-            Result result = await ScopedHandler.HandleAsync((DeleteDrive h) => h.Handle(request));
+            Result result = await Task.Run(() => ScopedHandler.HandleAsync((DeleteDrive h) => h.Handle(request)));
             if (result.IsFailure)
             {
                 await DisplayErrorAsync(result.Error);
                 return;
             }
 
-            WeakReferenceMessenger.Default.Send(new DriveDeletedMessage(target.Id));
-
             if (ReferenceEquals(Drive, target))
             {
                 Close();
             }
+
+            WeakReferenceMessenger.Default.Send(new DriveDeletedMessage(target.Id));
         }
         finally
         {

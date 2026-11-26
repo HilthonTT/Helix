@@ -30,9 +30,9 @@ internal sealed class WindowsNasConnector(
             route => WithHostGateAsync(
                 drive,
                 route,
-                started => RunWithTimeoutAsync(
+                (host, started) => RunWithTimeoutAsync(
                     drive.Letter,
-                    () => Connect(drive, route),
+                    () => Connect(drive, route, host),
                     timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                     failure: reason => Result.Failure(DriveErrors.FailedToConnect(reason)),
                     cancellationToken,
@@ -57,9 +57,9 @@ internal sealed class WindowsNasConnector(
             route => WithHostGateAsync(
                 drive,
                 route,
-                started => RunWithTimeoutAsync(
+                (host, started) => RunWithTimeoutAsync(
                     drive.Letter,
-                    () => Test(drive, route),
+                    () => Test(drive, host),
                     timeoutError: () => Result.Failure(DriveErrors.ConnectionTimedOut),
                     failure: reason => Result.Failure(DriveErrors.FailedToConnect(reason)),
                     cancellationToken,
@@ -515,10 +515,9 @@ internal sealed class WindowsNasConnector(
         return letters;
     }
 
-    private Result Connect(Drive drive, DriveRoute route)
+    private Result Connect(Drive drive, DriveRoute route, string host)
     {
         string local = $"{drive.Letter.ToUpperInvariant()}:";
-        string host = EffectiveHostFor(drive, route);
         string remote = RemoteFor(drive, host);
         string? provider = ProviderFor(drive);
         string? username = CredentialOrNull(drive, drive.Username);
@@ -751,9 +750,8 @@ internal sealed class WindowsNasConnector(
             : Result.Failure(DriveErrors.FailedToDisconnect(DescribeWNetError(code)));
     }
 
-    private static Result Test(Drive drive, DriveRoute route)
+    private static Result Test(Drive drive, string host)
     {
-        string host = EffectiveHostFor(drive, route);
         string remoteName = RemoteFor(drive, host);
 
         if (drive.Protocol != DriveProtocol.Smb)
@@ -828,13 +826,13 @@ internal sealed class WindowsNasConnector(
     private async Task<Result> WithHostGateAsync(
         Drive drive,
         DriveRoute route,
-        Func<Action<Task>, Task<Result>> work,
+        Func<string, Action<Task>, Task<Result>> work,
         Func<Error, Result> failure,
         CancellationToken cancellationToken)
     {
         string gateHost = drive.ConnectByHostname
             ? await Task.Run(() => EffectiveHostFor(drive, route), CancellationToken.None)
-            : ToUncHost(route.Host);
+            : EffectiveHostFor(drive, route);
 
         HostGate gate = _hostGates.GetOrAdd(gateHost, _ => new HostGate(MountTimeoutMilliseconds));
 
@@ -853,7 +851,7 @@ internal sealed class WindowsNasConnector(
 
         try
         {
-            return await work(started => completion = started);
+            return await work(gateHost, started => completion = started);
         }
         finally
         {

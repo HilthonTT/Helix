@@ -1,4 +1,4 @@
-# Schedules
+﻿# Schedules
 
 Design rationale moved out of CLAUDE.md. Read before changing this area; update it when the reasoning changes.
 
@@ -30,6 +30,11 @@ minutes old** (`RunDueSchedules.Grace`). The grace is the design, not a toleranc
 `LastRunOnUtc` is stamped and saved **before** the drives are touched, so a run that fails,
 hangs or crashes the app is not retried every twenty seconds for the rest of its grace. A
 failed run is reported, not repeated; the watchdog and the user own it from there.
+
+Schedules due in the same pass run in order of occurrence, then of creation, then of id.
+`List.Sort` is not stable and the repository returns rows in no fixed order, so "disconnect
+all at 07:00" and "connect Office at 07:00" used to leave Office mounted or not at random; the
+one made later now always runs last.
 
 The changes of offset are handled in `Schedule.ToUtc`. A time the **spring-forward skips** runs
 at the end of the gap, found by stepping a minute at a time: offset changes are minute-aligned,

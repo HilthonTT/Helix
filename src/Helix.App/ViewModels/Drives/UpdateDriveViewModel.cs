@@ -29,6 +29,7 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
     }
 
     private List<Drive> _otherDrives = [];
+    private int _load;
     private string _originalUsername = string.Empty;
     private string _originalPassword = string.Empty;
 
@@ -225,13 +226,13 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
         WeakReferenceMessenger.Default.Send(new UpdateDriveMessage(false, Guid.Empty));
     }
 
-    private async Task LoadAvailableLettersAsync(Guid driveId)
+    private async Task LoadAvailableLettersAsync(Guid driveId, int load)
     {
         var request = new GetAvailableDriveLetters.Request(driveId);
 
         Result<List<string>> result = await Task.Run(() => ScopedHandler.HandleAsync(
             (GetAvailableDriveLetters h) => h.Handle(request)));
-        if (result.IsFailure)
+        if (result.IsFailure || load != _load)
         {
             return;
         }
@@ -248,7 +249,10 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 return;
             }
 
+            int load = ++_load;
+
             IsBusy = true;
+            HideSecrets = true;
             ApplyCredentialsToServer = false;
             _otherDrives = [];
             _originalUsername = string.Empty;
@@ -260,6 +264,11 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 var request = new GetDriveById.Request(m.DriveId);
 
                 Result<Drive> result = await Task.Run(() => ScopedHandler.HandleAsync((GetDriveById h) => h.Handle(request)));
+                if (load != _load)
+                {
+                    return;
+                }
+
                 if (result.IsFailure)
                 {
                     Close();
@@ -270,9 +279,18 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
                 _originalPassword = result.Value.Password;
 
                 Result<List<Drive>> drives = await Task.Run(() => ScopedHandler.HandleAsync((GetDrives h) => h.Handle()));
+                if (load != _load)
+                {
+                    return;
+                }
+
                 _otherDrives = drives.IsSuccess ? [.. drives.Value.Where(d => d.Id != m.DriveId)] : [];
 
-                await LoadAvailableLettersAsync(m.DriveId);
+                await LoadAvailableLettersAsync(m.DriveId, load);
+                if (load != _load)
+                {
+                    return;
+                }
 
                 Drive = new UpdateDriveModel(result.Value);
 
@@ -282,11 +300,17 @@ internal sealed partial class UpdateDriveViewModel : BaseViewModel
             {
                 AppLog.For<UpdateDriveViewModel>().LogError(ex, "Could not open the drive for editing.");
 
-                Close();
+                if (load == _load)
+                {
+                    Close();
+                }
             }
             finally
             {
-                IsBusy = false;
+                if (load == _load)
+                {
+                    IsBusy = false;
+                }
             }
         });
     }

@@ -1,5 +1,7 @@
+﻿using Helix.App.Resources.Languages;
 using Helix.App.Services;
 using Helix.App.ViewModels.Insights;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.App.Views.Insights;
 
@@ -27,7 +29,9 @@ public sealed partial class InsightsPage : ContentPage
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex.Message);
+            AppLog.For<InsightsPage>().LogError(ex, "Loading the insights failed.");
+
+            Notifier.Error(AppResources.UnexpectedError);
         }
     }
 }

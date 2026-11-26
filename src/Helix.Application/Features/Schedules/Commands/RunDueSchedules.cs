@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Data;
 using Helix.Application.Abstractions.Handlers;
@@ -53,7 +53,10 @@ public sealed class RunDueSchedules(
             return new List<ScheduleRun>();
         }
 
-        due.Sort((a, b) => a.Occurrence.CompareTo(b.Occurrence));
+        due = [.. due
+            .OrderBy(entry => entry.Occurrence)
+            .ThenBy(entry => entry.Schedule.CreatedOnUtc)
+            .ThenBy(entry => entry.Schedule.Id)];
 
         foreach ((Schedule schedule, DateTime occurrence) in due)
         {

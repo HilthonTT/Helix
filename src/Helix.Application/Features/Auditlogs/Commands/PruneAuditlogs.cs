@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Domain.Auditlogs;
 using Helix.Domain.Settings;
@@ -26,12 +26,15 @@ public sealed class PruneAuditlogs(
             return Result.Failure<int>(SettingsErrors.NotFound);
         }
 
-        if (settings.AuditlogRetentionDays <= 0)
+        DateTime utcNow = dateTimeProvider.UtcNow;
+
+        if (settings.AuditlogRetentionDays <= 0 ||
+            settings.AuditlogRetentionDays >= (utcNow - DateTime.MinValue).TotalDays)
         {
             return 0;
         }
 
-        DateTime cutoff = dateTimeProvider.UtcNow.AddDays(-settings.AuditlogRetentionDays);
+        DateTime cutoff = utcNow.AddDays(-settings.AuditlogRetentionDays);
 
         int removed = await auditlogRepository.DeleteOlderThanAsync(
             loggedInUser.UserId,

@@ -1,5 +1,6 @@
-using Helix.App.Resources.Languages;
+﻿using Helix.App.Resources.Languages;
 using Helix.App.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.App.Views.Users;
 
@@ -38,7 +39,9 @@ public sealed partial class RecoveryKeyPanel : ContentView
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex.Message);
+            AppLog.For<RecoveryKeyPanel>().LogError(ex, "Copying the recovery key failed.");
+
+            Notifier.Error(AppResources.UnexpectedError);
         }
     }
 }

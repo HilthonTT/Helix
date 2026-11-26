@@ -31,6 +31,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
         RegisterMessages();
     }
 
+    private int _load;
+
     [ObservableProperty]
     public partial CreateDriveModel Form { get; set; }
 
@@ -432,19 +434,26 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 return;
             }
 
+            int load = ++_load;
+
             try
             {
                 IsBusy = true;
+                HideSecrets = true;
 
                 Drive? template = m.TemplateDriveId is Guid templateId
                     ? await Task.Run(() => LoadTemplateAsync(templateId))
                     : null;
+                if (load != _load)
+                {
+                    return;
+                }
 
                 Form = template is null ? new() : CreateDriveModel.CopyOf(template);
 
                 NetworkPin.BeginLoad(template?.HomeNetworkId, template?.HomeNetworkName);
 
-                await LoadAvailableLettersAsync();
+                await LoadAvailableLettersAsync(load);
             }
             catch (Exception ex)
             {
@@ -452,7 +461,10 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
             }
             finally
             {
-                IsBusy = false;
+                if (load == _load)
+                {
+                    IsBusy = false;
+                }
             }
         });
     }
@@ -466,11 +478,11 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
         return result.IsSuccess ? result.Value : null;
     }
 
-    private async Task LoadAvailableLettersAsync()
+    private async Task LoadAvailableLettersAsync(int load)
     {
         Result<List<string>> result = await Task.Run(() => ScopedHandler.HandleAsync(
             (GetAvailableDriveLetters h) => h.Handle()));
-        if (result.IsFailure)
+        if (result.IsFailure || load != _load)
         {
             return;
         }

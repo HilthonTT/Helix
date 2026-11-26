@@ -181,7 +181,7 @@
                                                 IsEnabled="{Binding Settings.IsNotBusy}"/>
                                     </Grid>
 
-                                    <BoxView Style="{StaticResource Divider}"/>
+                                    <BoxView Style="{StaticResource Divider}" IsVisible="{Binding SupportsTray}"/>
 
                                     <Grid Style="{StaticResource PreferenceRow}" IsVisible="{Binding SupportsTray}">
                                         <VerticalStackLayout Spacing="2">
@@ -194,7 +194,7 @@
                                                 IsEnabled="{Binding Settings.IsNotBusy}"/>
                                     </Grid>
 
-                                    <BoxView Style="{StaticResource Divider}"/>
+                                    <BoxView Style="{StaticResource Divider}" IsVisible="{Binding SupportsTray}"/>
 
                                     <Grid Style="{StaticResource PreferenceRow}" IsVisible="{Binding SupportsTray}">
                                         <VerticalStackLayout Spacing="2">

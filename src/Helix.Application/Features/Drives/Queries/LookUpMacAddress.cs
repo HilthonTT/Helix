@@ -1,4 +1,4 @@
-using Helix.Application.Abstractions.Authentication;
+﻿using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Abstractions.Connector;
 using Helix.Application.Abstractions.Handlers;
 using Helix.Application.Core.Errors;
@@ -24,10 +24,12 @@ public sealed class LookUpMacAddress(ILoggedInUser loggedInUser, IWakeOnLan wake
             return Result.Failure<string>(ValidationErrors.InvalidHost);
         }
 
-        string? macAddress = await wakeOnLan.LookUpAsync(request.Host, cancellationToken);
+        string host = request.Host.Trim();
+
+        string? macAddress = await wakeOnLan.LookUpAsync(host, cancellationToken);
 
         return macAddress is null
-            ? Result.Failure<string>(DriveErrors.MacAddressNotFound(request.Host))
+            ? Result.Failure<string>(DriveErrors.MacAddressNotFound(host))
             : Result.Success(macAddress);
     }
 }

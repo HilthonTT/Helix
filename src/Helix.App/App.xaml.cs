@@ -53,7 +53,7 @@ public sealed partial class App : AppBase
 
             e.Handled = true;
 
-            Notifier.Error(e.Exception?.Message ?? AppResources.UnexpectedError);
+            Notifier.Error(AppResources.UnexpectedError);
         };
 #endif
     }

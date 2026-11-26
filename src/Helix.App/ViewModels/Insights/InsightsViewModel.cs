@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Helix.App.Models;
 using Helix.App.Resources.Languages;
@@ -15,6 +15,8 @@ namespace Helix.App.ViewModels.Insights;
 internal sealed partial class InsightsViewModel : BaseViewModel
 {
     private const int DefaultRangeDays = 90;
+
+    private int _historyRun;
 
     public InsightsViewModel()
     {
@@ -99,8 +101,7 @@ internal sealed partial class InsightsViewModel : BaseViewModel
     private async Task SetRangeAsync(string days)
     {
         if (!int.TryParse(days, NumberStyles.None, CultureInfo.InvariantCulture, out int value) ||
-            value == RangeDays ||
-            IsBusy)
+            value == RangeDays)
         {
             return;
         }
@@ -109,26 +110,27 @@ internal sealed partial class InsightsViewModel : BaseViewModel
 
         try
         {
-            IsBusy = true;
-
             await LoadHistoryAsync();
         }
         catch (Exception ex)
         {
             AppLog.For<InsightsViewModel>().LogError(ex, "Could not load the storage history.");
         }
-        finally
-        {
-            IsBusy = false;
-        }
     }
 
     private async Task LoadHistoryAsync()
     {
+        int run = ++_historyRun;
+
         var request = new GetStorageHistory.Request(RangeDays);
 
         Result<List<VolumeHistory>> result = await Task.Run(
             () => ScopedHandler.HandleAsync((GetStorageHistory h) => h.Handle(request)));
+
+        if (run != _historyRun)
+        {
+            return;
+        }
 
         if (result.IsFailure)
         {

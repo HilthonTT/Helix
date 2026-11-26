@@ -1,11 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Settings;
+using Helix.App.Resources.Languages;
+using Helix.App.Services;
 using Helix.Application.Features.Settings.Commands;
 using Helix.Application.Features.Settings.Queries;
 using Helix.Domain.Settings;
-using Helix.App.Resources.Languages;
-using Helix.App.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.App.Models;
 
@@ -364,7 +365,9 @@ internal sealed partial class SettingsDisplay : ObservableObject
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex.Message);
+            AppLog.For<SettingsDisplay>().LogError(ex, "Saving the settings failed.");
+
+            Notifier.Error(AppResources.UnexpectedError);
 
             return false;
         }

@@ -9,6 +9,7 @@ namespace Helix.Infrastructure.Time;
 internal sealed partial class CountdownService : ObservableObject, ICountdownService, IDisposable
 {
     private readonly Timer _countdownTimer;
+    private readonly Lock _gate = new();
     private readonly ILogger<CountdownService> _logger;
 
     public event EventHandler<int>? CountdownTick;
@@ -35,49 +36,77 @@ internal sealed partial class CountdownService : ObservableObject, ICountdownSer
             return;
         }
 
-        SecondsRemaining = initialSeconds;
+        lock (_gate)
+        {
+            SecondsRemaining = initialSeconds;
 
-        _countdownTimer.Stop();
-        _countdownTimer.Start();
+            _countdownTimer.Stop();
+            _countdownTimer.Start();
+        }
     }
 
     public void Stop()
     {
-        _countdownTimer.Stop();
+        lock (_gate)
+        {
+            _countdownTimer.Stop();
+        }
     }
 
     public void Reset(int newInitialSeconds = 0)
     {
-        Stop();
-        SecondsRemaining = newInitialSeconds;
+        lock (_gate)
+        {
+            _countdownTimer.Stop();
+            SecondsRemaining = newInitialSeconds;
+        }
     }
 
     public void Resume()
     {
-        if (SecondsRemaining > 0 && !_countdownTimer.Enabled)
+        lock (_gate)
         {
-            _countdownTimer.Start();
+            if (SecondsRemaining > 0 && !_countdownTimer.Enabled)
+            {
+                _countdownTimer.Start();
+            }
         }
     }
 
     internal void OnCountdownTick(object? sender, ElapsedEventArgs? e)
     {
-        if (!_countdownTimer.Enabled)
+        int? remaining = null;
+        bool finished;
+
+        lock (_gate)
         {
-            return;
+            if (!_countdownTimer.Enabled)
+            {
+                return;
+            }
+
+            if (SecondsRemaining > 0)
+            {
+                SecondsRemaining--;
+                remaining = SecondsRemaining;
+            }
+
+            finished = SecondsRemaining <= 0;
+            if (finished)
+            {
+                _countdownTimer.Stop();
+            }
         }
 
         try
         {
-            if (SecondsRemaining > 0)
+            if (remaining is int seconds)
             {
-                SecondsRemaining--;
-                CountdownTick?.Invoke(this, SecondsRemaining);
+                CountdownTick?.Invoke(this, seconds);
             }
 
-            if (SecondsRemaining <= 0)
+            if (finished)
             {
-                Stop();
                 CountdownFinished?.Invoke(this, EventArgs.Empty);
             }
         }

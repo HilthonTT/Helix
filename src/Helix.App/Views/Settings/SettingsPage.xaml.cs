@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Users;
+using Helix.App.Resources.Languages;
 using Helix.App.Services;
 using Helix.App.ViewModels.Settings;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.App.Views.Settings;
 
@@ -39,7 +41,9 @@ public sealed partial class SettingsPage : ContentPage
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex.Message);
+            AppLog.For<SettingsPage>().LogError(ex, "Loading the settings failed.");
+
+            Notifier.Error(AppResources.UnexpectedError);
         }
     }
 

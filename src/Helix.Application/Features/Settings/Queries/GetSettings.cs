@@ -28,7 +28,7 @@ public sealed class GetSettings(
             var settings = await GetOrCreateSettingsAsync(cancellationToken);
             if (settings is null)
             {
-                return Result.Failure<SettingsModel>(Error.NullValue);
+                return Result.Failure<SettingsModel>(SettingsErrors.NotFound);
             }
 
             return settings;

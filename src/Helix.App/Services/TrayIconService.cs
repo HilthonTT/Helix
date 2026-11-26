@@ -395,7 +395,7 @@ internal sealed class TrayIconService
         Report(await ScopedHandler.HandleAsync((ConnectDriveGroup h) => h.Handle(new ConnectDriveGroup.Request(groupId))));
     }
 
-    private void Report(Result result)
+    private void Report(Result result, string? letter = null)
     {
         if (result.IsSuccess)
         {
@@ -404,7 +404,9 @@ internal sealed class TrayIconService
 
         _logger.LogWarning("A tray action failed: {Reason}", result.Error.Code);
 
-        string message = ErrorText.For(result.Error);
+        string message = letter is null
+            ? ErrorText.For(result.Error)
+            : ErrorText.Line(letter, result.Error);
 
         if (!_trayIcon.Notify(AppInfo.Current.Name, message))
         {
@@ -432,11 +434,11 @@ internal sealed class TrayIconService
 
         if (_nasConnector.IsLiveFrom(drive))
         {
-            Report(await ScopedHandler.HandleAsync((DisconnectDrive h) => h.Handle(new DisconnectDrive.Request(driveId))));
+            Report(await ScopedHandler.HandleAsync((DisconnectDrive h) => h.Handle(new DisconnectDrive.Request(driveId))), drive.Letter);
             return;
         }
 
-        Report(await ScopedHandler.HandleAsync((ConnectDrive h) => h.Handle(new ConnectDrive.Request(driveId))));
+        Report(await ScopedHandler.HandleAsync((ConnectDrive h) => h.Handle(new ConnectDrive.Request(driveId))), drive.Letter);
     }
 
     private void OnConnectivityChanged(object? sender, IReadOnlyList<DriveConnectivityChange> changes)

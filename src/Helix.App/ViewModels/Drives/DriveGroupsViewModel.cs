@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.DriveGroups;
@@ -60,7 +60,7 @@ internal sealed partial class DriveGroupsViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            Result<List<Drive>> drivesResult = await ScopedHandler.HandleAsync((GetDrives h) => h.Handle());
+            Result<List<Drive>> drivesResult = await Task.Run(() => ScopedHandler.HandleAsync((GetDrives h) => h.Handle()));
             if (drivesResult.IsFailure)
             {
                 await DisplayErrorAsync(drivesResult.Error);
@@ -116,11 +116,14 @@ internal sealed partial class DriveGroupsViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            Result result = Editing is null
-                ? await ScopedHandler.HandleAsync((CreateDriveGroup h) =>
-                    h.Handle(new CreateDriveGroup.Request(Name, selected)))
-                : await ScopedHandler.HandleAsync((UpdateDriveGroup h) =>
-                    h.Handle(new UpdateDriveGroup.Request(Editing.Id, Name, selected)));
+            string name = Name;
+            DriveGroupDisplay? editing = Editing;
+
+            Result result = editing is null
+                ? await Task.Run(() => ScopedHandler.HandleAsync((CreateDriveGroup h) =>
+                    h.Handle(new CreateDriveGroup.Request(name, selected))))
+                : await Task.Run(() => ScopedHandler.HandleAsync((UpdateDriveGroup h) =>
+                    h.Handle(new UpdateDriveGroup.Request(editing.Id, name, selected))));
 
             if (result.IsFailure)
             {
@@ -163,8 +166,8 @@ internal sealed partial class DriveGroupsViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            Result result = await ScopedHandler.HandleAsync((DeleteDriveGroup h) =>
-                h.Handle(new DeleteDriveGroup.Request(group.Id)));
+            Result result = await Task.Run(() => ScopedHandler.HandleAsync((DeleteDriveGroup h) =>
+                h.Handle(new DeleteDriveGroup.Request(group.Id))));
 
             if (result.IsFailure)
             {
@@ -195,7 +198,7 @@ internal sealed partial class DriveGroupsViewModel : BaseViewModel
 
     private async Task ReloadGroupsAsync()
     {
-        Result<List<DriveGroup>> result = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
+        Result<List<DriveGroup>> result = await Task.Run(() => ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle()));
         if (result.IsFailure)
         {
             await DisplayErrorAsync(result.Error);

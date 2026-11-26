@@ -84,7 +84,7 @@ public sealed partial class DriveTemplate : ContentView, IRowKeys
         {
             AppLog.For<DriveTemplate>().LogWarning(ex, "Toggling the drive connection failed.");
 
-            Notifier.Error(ex.Message);
+            Notifier.Error(AppResources.UnexpectedError);
         }
     }
 

@@ -1,4 +1,4 @@
-# Presentation layer
+﻿# Presentation layer
 
 Design rationale moved out of CLAUDE.md. Read before changing this area; update it when the reasoning changes.
 
@@ -41,6 +41,11 @@ can be up before the taskbar is, and the shell refuses the icon; `WindowsTrayIco
 now adds the icon whenever it is missing and the service retries `Show` every ten seconds
 for three minutes, because the earlier "no tray" verdict left an icon with an empty menu
 and a close button that quit.
+
+A message loop that ends signals `_ready` inside the same lock `Show` resets it under. Signalled
+after the lock, a quick Hide-then-Show let the old loop's signal land after the new `Reset`:
+`Show` stopped waiting before the new window existed, skipped `AddIcon` and returned false,
+so the service reported no tray while the new loop put the icon up on its own.
 
 
 ## Helix.App (presentation)
@@ -148,7 +153,10 @@ re-entrant call returns early and the pause from leaving would otherwise stand.
 `System.Timers.Timer` can raise an `Elapsed` that was already queued when `Stop` was called.
 `CountdownService` ignores a tick that arrives while the timer is off: without that, leaving
 the dashboard on the last second paused the countdown and then let it finish anyway, and the
-window minimized from under the settings page — the thing the pause exists to prevent.
+window minimized from under the settings page — the thing the pause exists to prevent. The
+check, the decrement and stopping at zero happen under one lock that `Start`, `Stop`, `Reset`
+and `Resume` share, so a tick already past the check when the user cancels cannot still finish
+the countdown. The events are raised after the lock is released.
 
 ## What the dashboard gives room to
 
@@ -418,6 +426,20 @@ the home-network row, and the read includes an ARP lookup of the gateway that is
 seconds, so it was paid again on most opens and kept Save greyed out for two to three seconds.
 The pinned network itself is set before `BeginLoad` returns, so a save made before the read
 finishes still carries it.
+
+The drive groups and schedules sheets read and save through `Task.Run` for the same reason; none
+of their handlers raises a picker. The Insights range buttons are never refused while the page
+is loading: a tap applies the new range at once, and `LoadHistoryAsync` numbers its runs so only
+the newest one writes the chart. Refusing the tap while `IsBusy` meant the first click on a range
+during the initial load did nothing at all.
+
+Each open of those two sheets takes a load number, and a load that is no longer the latest
+writes nothing, clears no `IsBusy` and closes nothing. `ModalHost` closes a sheet on Escape or a
+scrim tap without asking its viewmodel, so a load that was still reading kept running: "Duplicate"
+on one drive, Escape, then "Add drive" filled the blank sheet with the first drive's host and
+credentials, and a stale edit load cleared `IsBusy` over the next drive's empty form. Both
+sheets also hide the passwords again on every open, like the adopt sheet — "show passwords" left
+on for one drive otherwise showed the next drive's password in clear text.
 
 The vault passphrase is a sheet too (`PassphraseModal` on `HomePage`), not
 `DisplayPromptAsync`, because MAUI's prompt has no masked mode and showed the passphrase that

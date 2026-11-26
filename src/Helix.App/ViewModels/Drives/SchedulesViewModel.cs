@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Helix.App.Messaging.Schedules;
@@ -78,7 +78,7 @@ internal sealed partial class SchedulesViewModel : BaseViewModel
             Actions = [AppResources.ScheduleActionConnect, AppResources.ScheduleActionDisconnect];
             SelectedActionIndex = selectedAction;
 
-            Result<List<DriveGroup>> groups = await ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle());
+            Result<List<DriveGroup>> groups = await Task.Run(() => ScopedHandler.HandleAsync((GetDriveGroups h) => h.Handle()));
             if (groups.IsFailure)
             {
                 await DisplayErrorAsync(groups.Error);
@@ -153,10 +153,10 @@ internal sealed partial class SchedulesViewModel : BaseViewModel
             ScheduleDisplay? editing = Editing;
 
             Result result = editing is null
-                ? await ScopedHandler.HandleAsync((CreateSchedule h) =>
-                    h.Handle(new CreateSchedule.Request(groupId, action, time, days)))
-                : await ScopedHandler.HandleAsync((UpdateSchedule h) =>
-                    h.Handle(new UpdateSchedule.Request(editing.Id, groupId, action, time, days, editing.IsEnabled)));
+                ? await Task.Run(() => ScopedHandler.HandleAsync((CreateSchedule h) =>
+                    h.Handle(new CreateSchedule.Request(groupId, action, time, days))))
+                : await Task.Run(() => ScopedHandler.HandleAsync((UpdateSchedule h) =>
+                    h.Handle(new UpdateSchedule.Request(editing.Id, groupId, action, time, days, editing.IsEnabled))));
 
             if (result.IsFailure)
             {
@@ -197,8 +197,8 @@ internal sealed partial class SchedulesViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            Result result = await ScopedHandler.HandleAsync((DeleteSchedule h) =>
-                h.Handle(new DeleteSchedule.Request(schedule.Id)));
+            Result result = await Task.Run(() => ScopedHandler.HandleAsync((DeleteSchedule h) =>
+                h.Handle(new DeleteSchedule.Request(schedule.Id))));
 
             if (result.IsFailure)
             {
@@ -237,7 +237,7 @@ internal sealed partial class SchedulesViewModel : BaseViewModel
             schedule.Days,
             wanted);
 
-        Result result = await ScopedHandler.HandleAsync((UpdateSchedule h) => h.Handle(request));
+        Result result = await Task.Run(() => ScopedHandler.HandleAsync((UpdateSchedule h) => h.Handle(request)));
         if (result.IsFailure)
         {
             schedule.SetEnabledQuietly(!wanted);
@@ -248,7 +248,7 @@ internal sealed partial class SchedulesViewModel : BaseViewModel
 
     private async Task ReloadSchedulesAsync()
     {
-        Result<List<Schedule>> result = await ScopedHandler.HandleAsync((GetSchedules h) => h.Handle());
+        Result<List<Schedule>> result = await Task.Run(() => ScopedHandler.HandleAsync((GetSchedules h) => h.Handle()));
         if (result.IsFailure)
         {
             await DisplayErrorAsync(result.Error);

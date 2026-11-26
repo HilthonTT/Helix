@@ -1,4 +1,4 @@
-# Recovery key, idle lock, audit log and CSV export
+﻿# Recovery key, idle lock, audit log and CSV export
 
 Design rationale moved out of CLAUDE.md. Read before changing this area; update it when the reasoning changes.
 
@@ -81,6 +81,11 @@ their stored `Message` verbatim.
 `InsertAuditLogsInterceptor` deliberately skips a save whose only modified properties are
 `LastConnectedOnUtc` and `ModifiedOnUtc`: connecting a drive stamps it, and without that
 filter every connect would file a "the drive was changed" entry.
+
+`PruneAuditlogs` deletes nothing when the retention reaches back past `DateTime.MinValue`: the
+cutoff would be out of range and `AddDays` throws. The settings field stops at 3650 days, but
+the handler is the one place every source of the value goes through, so the guard is there
+rather than in a new validation error.
 
 
 ## Exporting the history

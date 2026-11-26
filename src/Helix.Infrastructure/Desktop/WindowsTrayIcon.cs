@@ -1,4 +1,4 @@
-#if WINDOWS
+﻿#if WINDOWS
 using Helix.Application.Abstractions.Desktop;
 using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
@@ -224,22 +224,20 @@ internal sealed class WindowsTrayIcon : ITrayIcon, IDisposable
                     UnregisterWindowClass();
 
                     _thread = null;
+
+                    try
+                    {
+                        _ready.Set();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
                 }
             }
 
             if (!owner)
             {
                 _logger.LogDebug("A newer tray icon loop has taken over; this one leaves its resources to it.");
-            }
-            else
-            {
-                try
-                {
-                    _ready.Set();
-                }
-                catch (ObjectDisposedException)
-                {
-                }
             }
         }
     }

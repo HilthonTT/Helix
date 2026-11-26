@@ -1,4 +1,4 @@
-# Connecting, reconnecting and the watchdog
+﻿# Connecting, reconnecting and the watchdog
 
 Design rationale moved out of CLAUDE.md. Read before changing this area; update it when the reasoning changes.
 
@@ -342,7 +342,10 @@ batch rather than dropping it.
 
 The away address is its own **server name string**, so on Windows it is its own credential
 context and its own per-host gate — the gate is keyed by the address actually used, not
-`Drive.Host`. That is the same property `TryAlternateSpelling` relies on, and it means a drive
+`Drive.Host`. With `ConnectByHostname`, `WithHostGateAsync` resolves the spelling once and hands
+that same string to the mount; resolving it again for the UNC path could pick the other spelling
+(a reverse lookup that timed out for one caller had answered for the next) and mount under a gate
+other drives on that spelling were not queued on. That is the same property `TryAlternateSpelling` relies on, and it means a drive
 coming up over the VPN never collides with a leftover session under the LAN address.
 `ConnectByHostname` applies to the home address only; the away address is used as typed.
 

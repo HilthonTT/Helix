@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Helix.Application.Abstractions.Authentication;
 using Helix.Application.Features.Auditlogs.Commands;
 using Helix.Domain.Auditlogs;
@@ -76,6 +76,21 @@ public sealed class PruneAuditlogsTests
     public async Task Handle_Should_DeleteNothing_WhenRetentionIsZero()
     {
         HaveRetention(0);
+
+        Result<int> result = await _pruneAuditlogs.Handle();
+
+        result.Value.Should().Be(0);
+
+        await _auditlogRepositoryMock.DidNotReceive().DeleteOlderThanAsync(
+            Arg.Any<Guid>(),
+            Arg.Any<DateTime>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_Should_DeleteNothing_WhenRetentionReachesBeforeTheEarliestDate()
+    {
+        HaveRetention(int.MaxValue);
 
         Result<int> result = await _pruneAuditlogs.Handle();
 

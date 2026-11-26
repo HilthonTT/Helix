@@ -137,6 +137,11 @@ public sealed partial class EstateStatus : ObservableObject
 
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
+                if (!_isRunning)
+                {
+                    return;
+                }
+
                 DriveCount = drives.Count;
                 ConnectedCount = connected.Length;
                 StorageSummary = storage ?? StorageSummary;

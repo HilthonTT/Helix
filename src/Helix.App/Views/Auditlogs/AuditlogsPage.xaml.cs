@@ -1,5 +1,7 @@
-﻿using Helix.App.Services;
+﻿using Helix.App.Resources.Languages;
+using Helix.App.Services;
 using Helix.App.ViewModels.Auditlogs;
+using Microsoft.Extensions.Logging;
 
 namespace Helix.App.Views.Auditlogs;
 
@@ -28,7 +30,9 @@ public sealed partial class AuditlogsPage : ContentPage
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex.Message);
+            AppLog.For<AuditlogsPage>().LogError(ex, "Loading the audit log failed.");
+
+            Notifier.Error(AppResources.UnexpectedError);
         }
     }
 }
