@@ -35,7 +35,24 @@ internal sealed partial class NetworkPinModel : ObservableObject
 
     public string? NetworkName => IsPinned ? _pinned?.Name : null;
 
-    public async Task LoadAsync(string? homeNetworkId = null, string? homeNetworkName = null)
+    public void BeginLoad(string? homeNetworkId = null, string? homeNetworkName = null)
+    {
+        _ = LoadQuietlyAsync(homeNetworkId, homeNetworkName);
+    }
+
+    private async Task LoadQuietlyAsync(string? homeNetworkId, string? homeNetworkName)
+    {
+        try
+        {
+            await LoadAsync(homeNetworkId, homeNetworkName);
+        }
+        catch (Exception ex)
+        {
+            AppLog.For<NetworkPinModel>().LogWarning(ex, "Could not read the network for the drive sheet.");
+        }
+    }
+
+    private async Task LoadAsync(string? homeNetworkId, string? homeNetworkName)
     {
         _loading = true;
 

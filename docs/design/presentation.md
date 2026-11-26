@@ -411,6 +411,14 @@ command, so a sheet that must not keep what was typed into it resets on the way 
 — `UpdatePasswordModal.Reset` (and `CreateRecoveryKeyModal.Reset`) clears the viewmodel for
 exactly that.
 
+The add and edit drive sheets keep `IsBusy` — every field and button disabled — only while
+they read the drive and the free letters, and those reads run on the thread pool. The current
+network is read with `NetworkPinModel.BeginLoad`, which does not hold the sheet: it only feeds
+the home-network row, and the read includes an ARP lookup of the gateway that is cached for ten
+seconds, so it was paid again on most opens and kept Save greyed out for two to three seconds.
+The pinned network itself is set before `BeginLoad` returns, so a save made before the read
+finishes still carries it.
+
 The vault passphrase is a sheet too (`PassphraseModal` on `HomePage`), not
 `DisplayPromptAsync`, because MAUI's prompt has no masked mode and showed the passphrase that
 guards every NAS credential in clear text. `IPassphrasePrompt` is called from inside the

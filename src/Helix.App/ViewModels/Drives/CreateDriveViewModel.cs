@@ -437,12 +437,12 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
                 IsBusy = true;
 
                 Drive? template = m.TemplateDriveId is Guid templateId
-                    ? await LoadTemplateAsync(templateId)
+                    ? await Task.Run(() => LoadTemplateAsync(templateId))
                     : null;
 
                 Form = template is null ? new() : CreateDriveModel.CopyOf(template);
 
-                await NetworkPin.LoadAsync(template?.HomeNetworkId, template?.HomeNetworkName);
+                NetworkPin.BeginLoad(template?.HomeNetworkId, template?.HomeNetworkName);
 
                 await LoadAvailableLettersAsync();
             }
@@ -468,8 +468,8 @@ internal sealed partial class CreateDriveViewModel : BaseViewModel
 
     private async Task LoadAvailableLettersAsync()
     {
-        Result<List<string>> result = await ScopedHandler.HandleAsync(
-            (GetAvailableDriveLetters h) => h.Handle());
+        Result<List<string>> result = await Task.Run(() => ScopedHandler.HandleAsync(
+            (GetAvailableDriveLetters h) => h.Handle()));
         if (result.IsFailure)
         {
             return;
